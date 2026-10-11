@@ -508,8 +508,7 @@ def _(definition, mo):
     \begin{aligned}
     (\det A)^2 = \text{area}^2 &= (\text{base} \times \text{height})^2 \\
     &= \lVert \vec{A}_1 \rVert^2\, \lVert \vec{A}_2 \rVert^2 \sin\!\big(\theta(\vec{A}_1, \vec{A}_2)\big)^2 \\
-    &= \lVert \vec{A}_1 \rVert^2\, \lVert \vec{A}_2 \rVert^2 - (\vec{A}_1 \cdot \vec{A}_2)^2 \\
-    &= (ad - bc)^2
+    &= \lVert \vec{A}_1 \rVert^2\, \lVert \vec{A}_2 \rVert^2 - (\vec{A}_1 \cdot \vec{A}_2)^2 = (ad - bc)^2
     \end{aligned}
     $$
 
