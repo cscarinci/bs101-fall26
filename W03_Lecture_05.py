@@ -470,10 +470,8 @@ def _(mo, theorem):
     $$
     \begin{aligned}
     \vec{u} \times \vec{v} &= \det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ u^1 & u^2 & u^3 \\ v^1 & v^2 & v^3 \end{bmatrix} \\
-    &= \vec{e}_1 \det \begin{bmatrix} u^2 & u^3 \\ v^2 & v^3 \end{bmatrix} \\
-    &\quad - \vec{e}_2 \det \begin{bmatrix} u^1 & u^3 \\ v^1 & v^3 \end{bmatrix} + \vec{e}_3 \det \begin{bmatrix} u^1 & u^2 \\ v^1 & v^2 \end{bmatrix} \\
-    &= \vec{e}_1 (u^2 v^3 - u^3 v^2) \\
-    &\quad - \vec{e}_2 (u^1 v^3 - u^3 v^1) + \vec{e}_3 (u^1 v^2 - u^2 v^1) \\
+    &= \vec{e}_1 \det \begin{bmatrix} u^2 & u^3 \\ v^2 & v^3 \end{bmatrix} - \vec{e}_2 \det \begin{bmatrix} u^1 & u^3 \\ v^1 & v^3 \end{bmatrix} + \vec{e}_3 \det \begin{bmatrix} u^1 & u^2 \\ v^1 & v^2 \end{bmatrix} \\
+    &= \vec{e}_1 (u^2 v^3 - u^3 v^2) - \vec{e}_2 (u^1 v^3 - u^3 v^1) + \vec{e}_3 (u^1 v^2 - u^2 v^1) \\
     &= \begin{bmatrix} u^2 v^3 - u^3 v^2 \\ u^3 v^1 - u^1 v^3 \\ u^1 v^2 - u^2 v^1 \end{bmatrix} = \vec{w}
     \end{aligned}
     $$
@@ -488,28 +486,22 @@ def _(mo, theorem):
     $$
     \begin{aligned}
     \vec{u} \cdot \vec{w} &= \cancel{u^1 u^2 v^3} - \bcancel{u^1 u^3 v^2} + \xcancel{u^2 u^3 v^1} \\
-    &\quad - \cancel{u^2 u^1 v^3} + \bcancel{u^3 u^1 v^2} - \xcancel{u^3 u^2 v^1} \\
-    &= 0 \\[4pt]
+    &\quad - \cancel{u^2 u^1 v^3} + \bcancel{u^3 u^1 v^2} - \xcancel{u^3 u^2 v^1} = 0 \\[4pt]
     \vec{v} \cdot \vec{w} &= 0
     \end{aligned}
     $$
 
     $$
     \begin{aligned}
-    \lVert \vec{w} \rVert^2 &= (u^2 v^3 - u^3 v^2)^2 + (u^3 v^1 - u^1 v^3)^2 \\
-    &\quad + (u^1 v^2 - u^2 v^1)^2 \\
-    &= \big( (u^1)^2 + (u^2)^2 + (u^3)^2 \big) \\
-    &\quad \cdot \big( (v^1)^2 + (v^2)^2 + (v^3)^2 \big) \\
+    \lVert \vec{w} \rVert^2 &= (u^2 v^3 - u^3 v^2)^2 + (u^3 v^1 - u^1 v^3)^2 + (u^1 v^2 - u^2 v^1)^2 \\
+    &= \big( (u^1)^2 + (u^2)^2 + (u^3)^2 \big) \cdot \big( (v^1)^2 + (v^2)^2 + (v^3)^2 \big) \\
     &\quad - \big( u^1 v^1 + u^2 v^2 + u^3 v^3 \big)^2 \\
     &= \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2 \quad (\text{check!})
     \end{aligned}
     $$
 
     $$
-    \begin{aligned}
-    &\det \begin{bmatrix} u^1 & v^1 & (u^2 v^3 - u^3 v^2) \\ u^2 & v^2 & (u^3 v^1 - u^1 v^3) \\ u^3 & v^3 & (u^1 v^2 - u^2 v^1) \end{bmatrix} \\
-    &\qquad = \lVert \vec{w} \rVert^2 \geq 0 \qquad (\text{check!})
-    \end{aligned}
+    \det \begin{bmatrix} u^1 & v^1 & (u^2 v^3 - u^3 v^2) \\ u^2 & v^2 & (u^3 v^1 - u^1 v^3) \\ u^3 & v^3 & (u^1 v^2 - u^2 v^1) \end{bmatrix} = \lVert \vec{w} \rVert^2 \geq 0 \qquad (\text{check!})
     $$
 
     This is strictly positive when $\vec{u}, \vec{v}$ are linearly independent; otherwise $\vec{w} = \vec{0}$.
@@ -518,9 +510,8 @@ def _(mo, theorem):
 
     $$
     \begin{aligned}
-    \leadsto \quad \vec{u} \times \vec{v} &= \det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ 1 & 2 & 0 \\ -1 & 3 & 0 \end{bmatrix} \\
-    &= 0\, \vec{e}_1 + 0\, \vec{e}_2 + \big( 1 \cdot 3 - 2 \cdot (-1) \big)\, \vec{e}_3 \\
-    &= 5\, \vec{e}_3 = \begin{bmatrix} 0 \\ 0 \\ 5 \end{bmatrix}
+    &\leadsto \quad \vec{u} \times \vec{v} = \det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ 1 & 2 & 0 \\ -1 & 3 & 0 \end{bmatrix} \\
+    &= 0\, \vec{e}_1 + 0\, \vec{e}_2 + \big( 1 \cdot 3 - 2 \cdot (-1) \big)\, \vec{e}_3 = 5\, \vec{e}_3 = \begin{bmatrix} 0 \\ 0 \\ 5 \end{bmatrix}
     \end{aligned}
     $$
 
@@ -529,16 +520,14 @@ def _(mo, theorem):
     \vec{u} \cdot (\vec{u} \times \vec{v}) &= 1 \cdot 0 + 2 \cdot 0 + 0 \cdot 5 = 0 \\
     \vec{v} \cdot (\vec{u} \times \vec{v}) &= (-1) \cdot 0 + 3 \cdot 0 + 0 \cdot 5 = 0 \\
     \lVert \vec{u} \times \vec{v} \rVert^2 &= \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2 \\
-    &= (1 + 4)(1 + 9) - (-1 + 6)^2 \\
-    &= 50 - 25 = 25
+    &= (1 + 4)(1 + 9) - (-1 + 6)^2 = 50 - 25 = 25
     \end{aligned}
     $$
 
     $$
     \begin{aligned}
     &\det \begin{bmatrix} 1 & -1 & 0 \\ 2 & 3 & 0 \\ 0 & 0 & 5 \end{bmatrix} \\
-    &= 1\, (3 \cdot 5 - 0 \cdot 0) \\
-    &\quad - (-1)\, (2 \cdot 5 - 0 \cdot 0) + 0\, (2 \cdot 0 - 3 \cdot 0) \\
+    &= 1\, (3 \cdot 5 - 0 \cdot 0) - (-1)\, (2 \cdot 5 - 0 \cdot 0) + 0\, (2 \cdot 0 - 3 \cdot 0) \\
     &= 25 > 0 \qquad (= \lVert \vec{u} \times \vec{v} \rVert^2\,!)
     \end{aligned}
     $$
