@@ -13,11 +13,12 @@ def _():
     import numpy as np
     from matplotlib.figure import Figure
     from matplotlib.patches import Arc
+    from mpl_toolkits.mplot3d import proj3d
 
     # Figures use the same Computer Modern typeface as the text
     matplotlib.rcParams.update({"font.size": 14, "font.family": "serif", "font.serif": ["cmr10", "DejaVu Serif"], "mathtext.fontset": "cm", "axes.formatter.use_mathtext": True, "axes.unicode_minus": False})
 
-    return Arc, Figure, math, mo, np
+    return Arc, Figure, math, mo, np, proj3d
 
 
 @app.cell(hide_code=True)
@@ -60,7 +61,7 @@ def _(mo):
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>", "color": color, "lw": 2.2, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -236,7 +237,7 @@ def _(definition, mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN):
+def _(BLUE, Figure, GREEN, proj3d):
     def _axes3d(ax):
         for _d in ((2.2, 0, 0), (0, 2.2, 0), (0, 0, 2.2)):
             ax.quiver(0, 0, 0, *_d, color="black", lw=0.9, arrow_length_ratio=0.06)
@@ -249,8 +250,8 @@ def _(BLUE, Figure, GREEN):
     def spaces_figure(arrows):
         """R^1, R^2, R^3 with a point (arrows=False) or an arrow from the origin (arrows=True)."""
         fig = Figure(figsize=(9.6, 3.2), layout="constrained")
-        kw = {"arrowstyle": "-|>", "color": "black", "lw": 0.9, "shrinkA": 0, "shrinkB": 0}
-        vec = {"arrowstyle": "-|>", "color": GREEN, "lw": 2.2, "shrinkA": 0, "shrinkB": 0}
+        kw = {"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": "black", "lw": 0.9, "shrinkA": 0, "shrinkB": 0}
+        vec = {"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": GREEN, "lw": 1.4, "shrinkA": 0, "shrinkB": 0}
 
         ax = fig.add_subplot(1, 3, 1)
         ax.set_xlim(-0.5, 2.4)
@@ -290,7 +291,7 @@ def _(BLUE, Figure, GREEN):
         _axes3d(ax)
         p = (1.1, 1.2, 1.3)
         if arrows:
-            ax.quiver(0, 0, 0, *p, color=GREEN, lw=2.2, arrow_length_ratio=0.1)
+            ax.quiver(0, 0, 0, *p, color=GREEN, lw=1.4, arrow_length_ratio=0.08)
         else:
             ax.plot([p[0], p[0]], [p[1], p[1]], [0, p[2]], "--", color=GREEN, lw=1.2)
             ax.plot([p[0], p[0]], [0, p[1]], [0, 0], "--", color=GREEN, lw=1.2)
@@ -300,7 +301,8 @@ def _(BLUE, Figure, GREEN):
             ax.text(-0.3, p[1] + 0.12, 0, "$x^2$", color=GREEN)
             ax.text(0, -0.35, p[2], "$x^3$", color=GREEN)
         ax.scatter([0, p[0]], [0, p[1]], [0, p[2]], color=BLUE, s=22, depthshade=False)
-        ax.text2D(0.98, 0.80, r"$(x^1, x^2, x^3)$" if arrows else r"$\vec{x} = (x^1, x^2, x^3)$", transform=ax.transAxes, ha="right", va="bottom", color=BLUE)
+        _px, _py, _ = proj3d.proj_transform(*p, ax.get_proj())
+        ax.annotate(r"$(x^1, x^2, x^3)$" if arrows else r"$\vec{x} = (x^1, x^2, x^3)$", (_px, _py), textcoords="offset points", xytext=(7, 3), ha="left", va="bottom", color=BLUE, annotation_clip=False)
         ax.set_title("$n = 3$" if arrows else "$n = 3$: the real space", y=-0.08)
         return fig
 
@@ -413,16 +415,25 @@ def _(BLUE, Figure, GREEN, RED, alpha, arrow, mo, plane, x1, x2, y1, y2):
     arrow(_left, (0, 0), _s, RED, r"$\vec{x}+\vec{y}$", at_tip=True)
     arrow(_left, (0, 0), _x, GREEN, r"$\vec{x}$", at_tip=True, label_offset=(6, -6), label_va="top")
     arrow(_left, (0, 0), _y, BLUE, r"$\vec{y}$", at_tip=True, label_offset=(-6, 6), label_ha="right")
-    _left.set_title(rf"$\vec{{x}}+\vec{{y}} = ({_s[0]:g},\ {_s[1]:g})$")
 
     plane(_right, 8.5)
     arrow(_right, (0, 0), _ax_, RED, r"$\alpha\vec{x}$", at_tip=True)
     arrow(_right, (0, 0), _x, GREEN, r"$\vec{x}$", at_tip=True, label_offset=(6, -6), label_va="top")
-    _right.set_title(rf"$\alpha\vec{{x}} = ({_ax_[0]:g},\ {_ax_[1]:g})$")
+    for _ax in (_left, _right):
+        _ax.set_xticks(range(-8, 9, 2))
+        _ax.set_yticks(range(-8, 9, 2))
 
     mo.vstack(
         [
             mo.hstack([mo.vstack([x1, x2]), mo.vstack([y1, y2]), alpha], justify="start", gap=3),
+            mo.md(
+                "| | | | |\n|:--|:--|:--|:--|\n"
+                + rf"| $\vec{{x}}$ | $\begin{{bmatrix}} {_x[0]:g} \\ {_x[1]:g} \end{{bmatrix}}$ "
+                + rf"| $\vec{{y}}$ | $\begin{{bmatrix}} {_y[0]:g} \\ {_y[1]:g} \end{{bmatrix}}$ |"
+                + "\n"
+                + rf"| $\vec{{x}} + \vec{{y}}$ | $\begin{{bmatrix}} {_s[0]:g} \\ {_s[1]:g} \end{{bmatrix}}$ "
+                + rf"| $\alpha \vec{{x}}$ | $\begin{{bmatrix}} {_ax_[0]:g} \\ {_ax_[1]:g} \end{{bmatrix}}$ |"
+            ),
             _fig,
         ]
     )
