@@ -23,7 +23,16 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     # ---- Building blocks shared by all lectures -------------------------
-    RED, GREEN, BLUE, GREY = "#b3261e", "#2e7d32", "#1b458f", "#888888"
+    # Palette with fixed roles (figures only; text carries no colour):
+    #   BLUE   the primary object (the particle, the point, the chosen vector)
+    #   RED    the second object it is compared with
+    #   GREEN  a derived quantity (velocity, relative velocity, tangent vector)
+    #   ORANGE a third series, only when three are needed
+    #   GREY   reference geometry (equator, light cone, inertial comparison)
+    #   LIGHT  fills and grids
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    # Figure widths: FULL spans the page, HALF sits beside text or in a pair
+    FULL, HALF = 7.4, 3.6
 
     def header(document, date, running=""):
         """Course header, as on the exercise sheets and exams."""
@@ -51,20 +60,31 @@ def _(mo):
     def theorem(body, title=""):
         return _statement("Theorem", title, body)
 
-    def warning(body):
+    def proposition(body, title=""):
+        return _statement("Proposition", title, body)
+
+    def corollary(body, title=""):
+        return _statement("Corollary", title, body)
+
+    def postulate(body, title=""):
+        return _statement("Postulate", title, body)
+
+    def note(body):
+        """Editorial note of the notebook (not part of the lecture)."""
         return mo.md("**Note.** " + body.strip())
 
-    def arrow(ax, tail, tip, color, label=None, at_tip=False, **kw):
-        """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip."""
+    def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
+        """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
+        One head size and one line weight for every figure, so arrows look alike across lectures."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
-            ax.annotate(label, pos, textcoords="offset points", xytext=(6, 6), color=color, fontsize=18)
+            ax.annotate(label, pos, textcoords="offset points", xytext=(6, 6), color=color, fontsize=13)
 
     def plane(ax, lim):
         """Style a 2D axis as a coordinate plane with range [-lim, lim]."""
@@ -73,8 +93,33 @@ def _(mo):
         ax.set_aspect("equal")
         ax.axhline(0, color="black", lw=0.8)
         ax.axvline(0, color="black", lw=0.8)
-        ax.grid(True, color="#cfe3f5", lw=0.6)
+        ax.grid(True, color=LIGHT, lw=0.6)
         ax.set_axisbelow(True)
+
+    def blank(w, h, xlim, ylim):
+        """A figure with one bare axis (no frame) for sketches."""
+        from matplotlib.figure import Figure as _Figure
+
+        fig = _Figure(figsize=(w, h), layout="constrained")
+        ax = fig.subplots()
+        ax.set_xlim(*xlim)
+        ax.set_ylim(*ylim)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        return fig, ax
+
+    def blob(cx, cy, rx, ry, wobble=0.07, seed=0, n=400):
+        """Closed organic curve around (cx, cy): an ellipse with a few low harmonics."""
+        import numpy as _np
+
+        rng = _np.random.default_rng(seed)
+        t = _np.linspace(0, 2 * _np.pi, n)
+        r = 1 + sum(wobble / k * rng.uniform(0.4, 1.0) * _np.cos(k * t + rng.uniform(0, 2 * _np.pi)) for k in (2, 3, 4, 5))
+        return cx + rx * r * _np.cos(t), cy + ry * r * _np.sin(t)
+
+    def table(rows):
+        """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
+        return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
 
     def check(field, answer):
         """Feedback mark for a numeric answer typed into a text field."""
@@ -86,13 +131,31 @@ def _(mo):
         except ValueError:
             return "⚠️ enter a number"
 
-    return BLUE, GREEN, GREY, RED, arrow, check, definition, header, plane, theorem, warning
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
 def _(header):
     header("Lecture 08", "Week 04", "Lecture 08 · Local properties of scalar functions and maps: limits")
     return
+
+
+@app.cell(hide_code=True)
+def _(arrow, math):
+    def vector(ax, tail, tip, color, label=None, turn=0, r=15, **kw):
+        """Arrow from `tail` to `tip` (a dot when it has zero length), labelled beyond its tip on a white box;
+        `turn` (degrees) rotates the label about the tip so that coinciding vectors keep separate labels."""
+        dx, dy = tip[0] - tail[0], tip[1] - tail[1]
+        if dx == 0 and dy == 0:
+            ax.plot(*tip, "o", color=color, ms=4, zorder=4)
+            d = math.radians(45 + turn)
+        else:
+            arrow(ax, tail, tip, color, **kw)
+            d = math.atan2(dy, dx) + math.radians(turn)
+        if label:
+            ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
+
+    return (vector,)
 
 
 @app.cell(hide_code=True)
@@ -114,30 +177,31 @@ def _(arrow):
 
 
 @app.cell(hide_code=True)
-def _(Figure, GREEN, RED, cross_axes, mo, np):
-    _fig = Figure(figsize=(3.6, 2.8), layout="constrained")
-    _ax = _fig.subplots()
-    cross_axes(_ax, (-2, 2.3), (-0.6, 2.6))
-    _t = np.linspace(-1.55, 1.55, 200)
-    _ax.plot(_t, _t**2, color=RED, lw=1.6)
-    _ax.plot(0, 0, "o", color=GREEN, ms=7, mfc="white", mew=1.6)
-    _ax.plot(0, 1, "o", color=GREEN, ms=6)
-    _ax.plot(-1.2, 1.44, "o", color=RED, ms=5)
-    _ax.text(-1.95, 1.5, r"$\genfrac{[}{]}{0}{0}{t}{t^2}$", color=RED, fontsize=14)
-    _ax.text(0.12, 0.95, r"$\genfrac{[}{]}{0}{0}{0}{1}$", color=GREEN, fontsize=15)
-    _ax.text(1.5, 1.5, r"$\mathrm{Im}(\gamma)$", color=RED, fontsize=13)
-    _ax.text(0.15, -0.5, "not continuous", color=GREEN, fontsize=12)
+def _(BLUE, FULL, Figure, cross_axes, math, mo, np):
+    _fig = Figure(figsize=(FULL, 2.5), layout="constrained")
+    _ax, _ax2 = _fig.subplots(1, 2)
 
-    _fig2 = Figure(figsize=(3.6, 2.8), layout="constrained")
-    _ax2 = _fig2.subplots()
-    cross_axes(_ax2, (-1.6, 2.4), (-1.5, 1.6))
+    cross_axes(_ax, (-2.3, 2.9), (-0.9, 2.6))
+    _t = np.linspace(-1.5, 1.5, 200)
+    _ax.plot(_t, _t**2, color=BLUE, lw=1.4)
+    _ax.plot(0, 0, "o", color="black", ms=6, mfc="white", mew=1.2, zorder=4)
+    _ax.plot(0, 1, "o", color="black", ms=4, zorder=4)
+    _ax.plot(-1.2, 1.44, "o", color=BLUE, ms=4)
+    _ax.text(-1.38, 1.44, r"$\genfrac{[}{]}{0}{0}{t}{t^2}$", color=BLUE, fontsize=13, ha="right", va="center")
+    _ax.text(0.16, 1.0, r"$\genfrac{[}{]}{0}{0}{0}{1}$", fontsize=13, ha="left", va="center")
+    _ax.text(1.62, 2.0, r"$\mathrm{Im}(\gamma)$", color=BLUE, fontsize=12, ha="left", va="center")
+    _ax.text(0.16, -0.5, "not continuous", fontsize=12, ha="left", va="center")
+
+    cross_axes(_ax2, (-2.0, 3.2), (-1.6, 1.9))
     _th = np.linspace(0, 2 * np.pi, 200)
-    _ax2.plot(np.cos(_th), np.sin(_th), color=RED, lw=1.6)
-    _ax2.plot(1, 0, "o", color=GREEN, ms=6)
-    _ax2.text(1.1, -0.3, r"$\lim_{t \to 0} \sigma(t)$", color=GREEN, fontsize=12)
-    _ax2.plot(0, 1, "o", color=GREEN, ms=6)
-    _ax2.text(0.12, 1.1, r"$\genfrac{[}{]}{0}{0}{0}{1}$", color=GREEN, fontsize=15)
-    _ax2.text(0.85, 0.75, r"$\genfrac{[}{]}{0}{0}{\cos(t)}{\sin(t)}$", color=RED, fontsize=15)
+    _ax2.plot(np.cos(_th), np.sin(_th), color=BLUE, lw=1.4)
+    _ax2.plot(1, 0, "o", color="black", ms=6, mfc="white", mew=1.2, zorder=4)
+    _ax2.plot(0, 1, "o", color="black", ms=4, zorder=4)
+    _c, _s = math.cos(0.7), math.sin(0.7)
+    _ax2.plot(_c, _s, "o", color=BLUE, ms=4)
+    _ax2.text(_c + 0.16, _s + 0.1, r"$\genfrac{[}{]}{0}{0}{\cos(t)}{\sin(t)}$", color=BLUE, fontsize=13, ha="left", va="center")
+    _ax2.text(-0.16, 1.32, r"$\genfrac{[}{]}{0}{0}{0}{1}$", fontsize=13, ha="right", va="center")
+    _ax2.text(1.14, -0.42, r"$\lim_{t \to 0} \sigma(t)$", fontsize=12, ha="left", va="center")
 
     mo.vstack(
         [
@@ -145,67 +209,38 @@ def _(Figure, GREEN, RED, cross_axes, mo, np):
                 r"""
     ## Last time
 
-    Local properties of paths
+    - local properties of paths $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^m$, &nbsp; $\gamma(t) = \begin{bmatrix} \gamma^1(t) \\ \vdots \\ \gamma^m(t) \end{bmatrix}$ (components)
+    - $\leadsto$ &nbsp; limits are taken component by component
 
-    $$
-    \gamma : \mathbb{R} \longrightarrow \mathbb{R}^m, \qquad \gamma(t) = \begin{bmatrix} \gamma^1(t) \\ \vdots \\ \gamma^m(t) \end{bmatrix} \quad (\text{components})
-    $$
+        $$
+        \lim_{t \to a} \gamma(t) = \lim_{t \to a} \begin{bmatrix} \gamma^1(t) \\ \vdots \\ \gamma^m(t) \end{bmatrix} = \begin{bmatrix} \lim_{t \to a} \gamma^1(t) \\ \vdots \\ \lim_{t \to a} \gamma^m(t) \end{bmatrix}
+        $$
 
-    $$
-    \lim_{t \to a} \gamma(t) = \lim_{t \to a} \begin{bmatrix} \gamma^1(t) \\ \vdots \\ \gamma^m(t) \end{bmatrix} = \begin{bmatrix} \lim_{t \to a} \gamma^1(t) \\ \vdots \\ \lim_{t \to a} \gamma^m(t) \end{bmatrix}
-    $$
+    - $\leadsto$ &nbsp; $\gamma$ continuous at $t = a$ if $\displaystyle \lim_{t \to a} \gamma(t) = \gamma(a)$ &nbsp; ($\gamma(a)$ is the position of $\gamma$ at $t = a$: $\gamma$ does not jump between positions at $t = a$)
+    - $\leadsto$ &nbsp; $\gamma$ differentiable at $t = a$ if $\displaystyle \lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a}$ exists &nbsp; ($\gamma'(a)$, the velocity of $\gamma$ at $t = a$)
+    - **Example.**
 
-    - $\gamma$ continuous at $t = a$ if $\displaystyle \lim_{t \to a} \gamma(t) = \gamma(a)$ &nbsp; ($\gamma(a)$ is the position of $\gamma$ at $t = a$; $\gamma$ does not jump between positions at $t = a$)
-    - $\gamma$ differentiable at $t = a$ if $\displaystyle \lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a}$ exists &nbsp; ($\gamma'(a)$, the velocity of $\gamma$ at $t = a$)
+        $$
+        \gamma(t) = \begin{cases}
+        \begin{bmatrix} t \\ t^2 \end{bmatrix}, & t \neq 0 \\[12pt]
+        \begin{bmatrix} 0 \\ 1 \end{bmatrix}, & t = 0
+        \end{cases}
+        \qquad \qquad
+        \sigma(t) = \begin{cases}
+        \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix}, & t \neq 0 \\[12pt]
+        \begin{bmatrix} 0 \\ 1 \end{bmatrix}, & t = 0
+        \end{cases}
+        $$
     """
             ),
-            mo.hstack(
-                [
-                    mo.md(
-                        r"""
-    **Example.**
-
-    $$
-    \gamma(t) = \begin{cases}
-    \begin{bmatrix} t \\ t^2 \end{bmatrix}, & t \neq 0 \\[12pt]
-    \begin{bmatrix} 0 \\ 1 \end{bmatrix}, & t = 0
-    \end{cases}
-    $$
-    """
-                    ),
-                    _fig,
-                ],
-                widths=[1, 1],
-                gap=2,
-                align="center",
-            ),
-            mo.hstack(
-                [
-                    mo.md(
-                        r"""
-    $$
-    \sigma(t) = \begin{cases}
-    \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix}, & t \neq 0 \\[12pt]
-    \begin{bmatrix} 0 \\ 1 \end{bmatrix}, & t = 0
-    \end{cases}
-    $$
-    """
-                    ),
-                    _fig2,
-                ],
-                widths=[1, 1],
-                gap=2,
-                align="center",
-            ),
+            _fig,
             mo.md(
                 r"""
-    $$
-    \lim_{t \to 0} \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix} = \begin{bmatrix} 1 \\ 0 \end{bmatrix}
-    = \begin{bmatrix} \cos(2\pi) \\ \sin(2\pi) \end{bmatrix} = \begin{bmatrix} \cos(4\pi) \\ \sin(4\pi) \end{bmatrix} \qquad \text{also in } \mathrm{Im}(\sigma)
-    $$
+    - $\displaystyle \lim_{t \to 0} \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix} = \begin{bmatrix} 1 \\ 0 \end{bmatrix} = \begin{bmatrix} \cos(2\pi) \\ \sin(2\pi) \end{bmatrix} = \begin{bmatrix} \cos(4\pi) \\ \sin(4\pi) \end{bmatrix}$ &nbsp; (also in $\mathrm{Im}(\sigma)$)
+    - $\leadsto$ &nbsp; discontinuity is a “jump” in the parameterization of the image, not necessarily a hole in $\mathrm{Im}(\gamma)$
+    - $\leadsto$ &nbsp; discontinuity is a hole in $\mathrm{graph}(\gamma)$!
 
-    - discontinuity is a “jump” in the parameterization of the image, not necessarily a hole in $\mathrm{Im}(\gamma)$
-    - discontinuity is a hole in $\mathrm{graph}(\gamma)$!
+    **Today:** local properties of scalar functions and maps
     """
             ),
         ]
@@ -214,28 +249,31 @@ def _(Figure, GREEN, RED, cross_axes, mo, np):
 
 
 @app.cell(hide_code=True)
-def _(Figure, GREY, arrow, cross_axes, definition, mo, np):
-    _fig = Figure(figsize=(3.4, 3.0), layout="constrained")
-    _ax = _fig.subplots()
-    cross_axes(_ax, (-0.4, 3.6), (-0.4, 3.2))
-    _a, _d = (1.9, 1.7), 1.1
+def _(BLUE, GREEN, GREY, HALF, LIGHT, arrow, blank, definition, mo, np):
+    _fig, _ax = blank(HALF, 2.9, (-0.4, 3.8), (-0.4, 3.0))
+    arrow(_ax, (-0.3, 0), (3.7, 0), "black", lw=0.9)
+    arrow(_ax, (0, -0.3), (0, 2.9), "black", lw=0.9)
+    _a, _d = (2.1, 1.5), 1.15
     _th = np.linspace(0, 2 * np.pi, 200)
-    _ax.fill(_a[0] + _d * np.cos(_th), _a[1] + _d * np.sin(_th), color=GREY, alpha=0.18, lw=0)
-    _ax.plot(_a[0] + _d * np.cos(_th), _a[1] + _d * np.sin(_th), "--", color=GREY, lw=1.3)
-    _x = (1.2, 2.2)
-    arrow(_ax, (0, 0), _a, "black", r"$\vec{a}$", at_tip=True)
+    _ax.fill(_a[0] + _d * np.cos(_th), _a[1] + _d * np.sin(_th), color=LIGHT, lw=0)
+    _ax.plot(_a[0] + _d * np.cos(_th), _a[1] + _d * np.sin(_th), color=BLUE, lw=1.2, ls=(0, (4, 3)))
+    _x = (1.35, 2.05)
+    _r = (_a[0] + _d * np.cos(-0.5), _a[1] + _d * np.sin(-0.5))
+    _ax.plot([_a[0], _r[0]], [_a[1], _r[1]], color=GREY, lw=1.0, ls=(0, (4, 3)))
+    _ax.text(2.72, 1.36, r"$\delta$", color=GREY, fontsize=13, ha="center", va="bottom")
+    arrow(_ax, (0, 0), _a, "black")
     arrow(_ax, (0, 0), _x, GREY)
-    _ax.text(0.5, 1.6, r"$\vec{x}$", color="#555555", fontsize=16)
-    arrow(_ax, _a, _x, GREY, lw=1.3)
-    _ax.text(1.5, 2.12, r"$\vec{x} - \vec{a}$", color="#555555", fontsize=12)
-    _ax.plot([_a[0], _a[0] + _d * 0.94], [_a[1], _a[1] + _d * 0.34], color=GREY, lw=1)
-    _ax.text(2.4, 1.6, r"$\delta$", color="#555555", fontsize=14)
+    arrow(_ax, _a, _x, GREEN)
+    _ax.text(2.2, 1.56, r"$\vec{a}$", fontsize=13, ha="left", va="bottom")
+    _ax.text(0.5, 1.05, r"$\vec{x}$", color=GREY, fontsize=13, ha="right", va="bottom")
+    _ax.text(1.85, 1.92, r"$\vec{x} - \vec{a}$", color=GREEN, fontsize=12, ha="left", va="bottom")
+    _ax.text(3.0, 2.55, r"$B(\vec{a}, \delta)$", color=BLUE, fontsize=12, ha="left", va="bottom")
 
     mo.vstack(
         [
             mo.md(
                 r"""
-    **Today:** Local properties of scalar functions and maps
+    ## II.3 &nbsp; Local properties of scalar functions and maps: limits
 
     **Remark.** Given $f, g : A \subseteq \mathbb{R}^n \longrightarrow \mathbb{R}^m$, $\lambda : A \subseteq \mathbb{R}^n \longrightarrow \mathbb{R}$, we can define
 
@@ -247,38 +285,28 @@ def _(Figure, GREY, arrow, cross_axes, definition, mo, np):
 
     - $(g \circ f) : A \subseteq \mathbb{R}^n \longrightarrow C \subseteq \mathbb{R}^p$ &nbsp; $\leadsto$ &nbsp; $(g \circ f)(\vec{x}) = g(f(\vec{x}))$
 
-    ## Limits
+    ### Limits
     """
             ),
-            mo.hstack(
-                [
-                    definition(
-                        r"""
+            definition(
+                r"""
     Given $\vec{a} \in \mathbb{R}^n$ and $\delta > 0$
 
     $$
-    B(\vec{a}, \delta) = \left\{\, \vec{x} \in \mathbb{R}^n \;\middle|\; \lVert \vec{x} - \vec{a} \rVert < \delta \,\right\}
+    B(\vec{a}, \delta) = \big\{\, \vec{x} \in \mathbb{R}^n \;\big|\; \lVert \vec{x} - \vec{a} \rVert < \delta \,\big\}
     $$
 
     (the distance of $\vec{x}$ from $\vec{a}$ is smaller than $\delta$) is the **open ball** in $\mathbb{R}^n$ centered at $\vec{a}$ with radius $\delta$.
-    """
-                    ),
-                    _fig,
-                ],
-                widths=[3, 2],
-                gap=2,
-                align="center",
+    """,
+                "Open ball",
             ),
+            _fig,
             mo.md(
                 r"""
     **Remark.** The “boundary” is not included! Only “interior” points are part of $B(\vec{a}, \delta)$.
 
-    $$
-    \begin{aligned}
-    S(\vec{a}, \delta) &= \left\{\, \vec{x} \in \mathbb{R}^n \;\middle|\; \lVert \vec{x} - \vec{a} \rVert = \delta \,\right\} && \text{sphere in } \mathbb{R}^n \text{ centered at } \vec{a} \text{ with radius } \delta \\[4pt]
-    \overline{B(\vec{a}, \delta)} &= B(\vec{a}, \delta) \cup S(\vec{a}, \delta) && \text{closed ball in } \mathbb{R}^n \text{ centered at } \vec{a} \text{ with radius } \delta \quad (\lVert \vec{x} - \vec{a} \rVert \leq \delta)
-    \end{aligned}
-    $$
+    - $\leadsto$ &nbsp; $S(\vec{a}, \delta) = \big\{\, \vec{x} \in \mathbb{R}^n \;\big|\; \lVert \vec{x} - \vec{a} \rVert = \delta \,\big\}$ &nbsp; **sphere** in $\mathbb{R}^n$ centered at $\vec{a}$ with radius $\delta$
+    - $\leadsto$ &nbsp; $\overline{B(\vec{a}, \delta)} = B(\vec{a}, \delta) \cup S(\vec{a}, \delta)$ &nbsp; **closed ball** in $\mathbb{R}^n$ centered at $\vec{a}$ with radius $\delta$ &nbsp; ($\lVert \vec{x} - \vec{a} \rVert \leq \delta$)
     """
             ),
         ]
@@ -287,40 +315,37 @@ def _(Figure, GREY, arrow, cross_axes, definition, mo, np):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREY, arrow, definition, mo, np):
-    _fig = Figure(figsize=(8.8, 2.8), layout="constrained")
-    _ax = _fig.subplots()
-    _ax.set_xlim(-0.3, 11.6)
-    _ax.set_ylim(-0.4, 3.2)
-    _ax.set_aspect("equal")
-    _ax.axis("off")
+def _(BLUE, FULL, LIGHT, RED, arrow, blank, blob, definition, mo, np):
+    _fig, _ax = blank(FULL, 2.75, (-0.5, 10.6), (-0.75, 3.35))
     _th = np.linspace(0, 2 * np.pi, 200)
     # domain
-    arrow(_ax, (-0.2, 0.2), (3.2, 0.2), "black", lw=0.9)
-    arrow(_ax, (0.2, -0.3), (0.2, 3.0), "black", lw=0.9)
-    _ax.text(-0.3, 2.9, r"$\mathbb{R}^n$", fontsize=14)
-    _ax.fill(1.7 + 0.8 * np.cos(_th), 1.7 + 0.8 * np.sin(_th), color=BLUE, alpha=0.18, lw=0)
-    _ax.plot(1.7 + 0.8 * np.cos(_th), 1.7 + 0.8 * np.sin(_th), "--", color=BLUE, lw=1.2)
-    _ax.plot(1.7, 1.7, "o", color="black", ms=4)
-    _ax.text(1.8, 1.75, r"$\vec{a}$", fontsize=14)
-    _ax.text(1.0, 0.45, r"$B(\vec{a}, \delta)$", color=BLUE, fontsize=12)
+    arrow(_ax, (-0.4, 0), (3.4, 0), "black", lw=0.9)
+    arrow(_ax, (0, -0.5), (0, 3.0), "black", lw=0.9)
+    _ax.text(-0.15, 3.05, r"$\mathbb{R}^n$", fontsize=13, ha="right", va="center")
+    _ax.fill(1.5 + 0.85 * np.cos(_th), 1.75 + 0.85 * np.sin(_th), color=LIGHT, lw=0)
+    _ax.plot(1.5 + 0.85 * np.cos(_th), 1.75 + 0.85 * np.sin(_th), color=BLUE, lw=1.2, ls=(0, (4, 3)))
+    _ax.plot(1.5, 1.75, "o", color="black", ms=4)
+    _ax.text(1.62, 1.78, r"$\vec{a}$", fontsize=13, ha="left", va="bottom")
+    _ax.text(1.5, 0.72, r"$B(\vec{a}, \delta)$", color=BLUE, fontsize=12, ha="center", va="top")
     # the map
-    arrow(_ax, (3.6, 2.2), (5.0, 2.2), "black", lw=1.2, connectionstyle="arc3,rad=-0.3")
-    _ax.text(4.2, 2.65, "$f$", fontsize=15)
-    # codomain
-    arrow(_ax, (5.6, 0.2), (9.4, 0.2), "black", lw=0.9)
-    arrow(_ax, (5.9, -0.3), (5.9, 3.0), "black", lw=0.9)
-    _ax.text(5.35, 2.9, r"$\mathbb{R}^m$", fontsize=14)
-    _ax.fill(7.6 + 1.25 * np.cos(_th), 1.7 + 1.25 * np.sin(_th), color=GREY, alpha=0.15, lw=0)
-    _ax.plot(7.6 + 1.25 * np.cos(_th), 1.7 + 1.25 * np.sin(_th), "--", color=GREY, lw=1.2)
-    _bx = 7.35 + 0.55 * np.cos(_th) + 0.12 * np.cos(3 * _th)
-    _by = 2.05 + 0.38 * np.sin(_th) + 0.08 * np.sin(2 * _th)
-    _ax.fill(_bx, _by, color=BLUE, alpha=0.3, lw=0)
-    _ax.plot(7.75, 1.6, "o", color="black", ms=4)
-    _ax.text(7.85, 1.5, r"$\vec{b}$", fontsize=14)
-    _ax.text(8.75, 0.5, r"$B(\vec{b}, \varepsilon)$", color="#555555", fontsize=12)
-    _ax.text(9.0, 2.2, r"$f(B(\vec{a}, \delta) - \{\vec{a}\})$", color=BLUE, fontsize=12)
-    _ax.plot([7.95, 8.95], [2.15, 2.28], color=BLUE, lw=0.8)
+    arrow(_ax, (3.7, 2.2), (5.0, 2.2), "black", connectionstyle="arc3,rad=-0.3")
+    _ax.text(4.35, 2.55, "$f$", fontsize=13, ha="center", va="bottom")
+    # codomain, in the board's oblique projection
+    _o = (6.0, 0.35)
+    arrow(_ax, (_o[0] - 0.4, _o[1]), (_o[0] + 3.6, _o[1]), "black", lw=0.9)
+    arrow(_ax, (_o[0], _o[1] - 0.5), (_o[0], 3.0), "black", lw=0.9)
+    arrow(_ax, (_o[0] + 0.45 * 0.5, _o[1] + 0.4 * 0.5), (_o[0] - 0.45 * 2.2, _o[1] - 0.4 * 2.2), "black", lw=0.9)
+    _ax.text(_o[0] - 0.15, 3.05, r"$\mathbb{R}^m$", fontsize=13, ha="right", va="center")
+    _c, _r = (7.9, 1.9), 1.2
+    _ax.plot(_c[0] + _r * np.cos(_th), _c[1] + _r * np.sin(_th), color=RED, lw=1.2, ls=(0, (4, 3)))
+    _bx, _by = blob(7.45, 2.35, 0.48, 0.3, seed=3)
+    _ax.fill(_bx, _by, color=LIGHT, lw=0)
+    _ax.plot(_bx, _by, color=BLUE, lw=1.2)
+    _ax.plot(8.2, 1.65, "o", color="black", ms=4)
+    _ax.text(8.32, 1.68, r"$\vec{b}$", fontsize=13, ha="left", va="bottom")
+    _ax.text(9.2, 1.2, r"$B(\vec{b}, \varepsilon)$", color=RED, fontsize=12, ha="left", va="center")
+    _ax.text(9.0, 3.0, r"$f(B(\vec{a}, \delta) - \{\vec{a}\})$", color=BLUE, fontsize=12, ha="left", va="center")
+    _ax.plot([7.9, 8.93], [2.5, 2.95], color=BLUE, lw=0.8)
 
     mo.vstack(
         [
@@ -329,15 +354,16 @@ def _(BLUE, Figure, GREY, arrow, definition, mo, np):
     Given $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$, $\vec{a} \in \mathbb{R}^n$, $\vec{b} \in \mathbb{R}^m$, we say
 
     $$
-    \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b} \qquad (\text{the limit of } f(\vec{x}) \text{ as } \vec{x} \text{ approaches } \vec{a} \text{ exists and is equal to } \vec{b})
+    \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b}
     $$
 
-    if for every choice of $\varepsilon > 0$ we can make $f(\vec{x})$ $\varepsilon$-close to $\vec{b}$ by finding $\delta > 0$ and taking $\vec{x}$ $\delta$-close to $\vec{a}$ (different from $\vec{a}$).
-    """
+    (the limit of $f(\vec{x})$ as $\vec{x}$ approaches $\vec{a}$ exists and is equal to $\vec{b}$) if for every choice of $\varepsilon > 0$ we can make $f(\vec{x})$ $\varepsilon$-close to $\vec{b}$ by finding $\delta > 0$ and taking $\vec{x}$ $\delta$-close to $\vec{a}$ (different from $\vec{a}$).
+    """,
+                "Limit",
             ),
             mo.md(
                 r"""
-    For every $\varepsilon > 0$, we can find $\delta > 0$ such that $\vec{x} \in B(\vec{a}, \delta) - \{\vec{a}\}$ guarantees that $f(\vec{x}) \in B(\vec{b}, \varepsilon)$
+    $\leadsto$ &nbsp; for every $\varepsilon > 0$, we can find $\delta > 0$ such that $\vec{x} \in B(\vec{a}, \delta) - \{\vec{a}\}$ guarantees that $f(\vec{x}) \in B(\vec{b}, \varepsilon)$
 
     $$
     \Longleftrightarrow \quad f\big( B(\vec{a}, \delta) - \{\vec{a}\} \big) \subseteq B(\vec{b}, \varepsilon)
@@ -368,10 +394,10 @@ def _(BLUE, Figure, GREY, arrow, definition, mo, np):
     2. look for $\delta > 0$ such that
 
         $$
-        0 < \lVert \vec{x} - \vec{0} \rVert < \delta \quad \Longrightarrow \quad \lvert f(\vec{x}) - 0 \rvert < \varepsilon = 1
+        \underbrace{0 < \lVert \vec{x} - \vec{0} \rVert < \delta}_{\text{whenever } \vec{x} \text{ is } \delta\text{-close to } \vec{a} = \vec{0}} \quad \underbrace{\Longrightarrow}_{\text{we guarantee}} \quad \underbrace{\lvert f(\vec{x}) - 0 \rvert < \varepsilon = 1}_{f(\vec{x}) \text{ is } 1\text{-close to } b = 0}
         $$
 
-        Whenever $\vec{x}$ is $\delta$-close to $\vec{a} = \vec{0}$, we guarantee $f(\vec{x})$ is $1$-close to $b = 0$ (as close as we want it).
+        ($1$-close: as close as we want it)
 
     For $\vec{x} \neq \vec{0}$
 
@@ -385,7 +411,7 @@ def _(BLUE, Figure, GREY, arrow, definition, mo, np):
 
     $\Longrightarrow$ &nbsp; whenever we make $0 < \lVert \vec{x} - \vec{0} \rVert < \tfrac{1}{2} = \delta$ (for $\varepsilon = 1$) we guarantee that $\lvert f(\vec{x}) - 0 \rvert < 1$!
 
-    Now repeat the argument for every $\varepsilon > 0$: &nbsp; $\varepsilon = \tfrac{1}{2} \leadsto \delta = \tfrac{1}{4}$, &nbsp; $\varepsilon = \tfrac{1}{3} \leadsto \delta = \tfrac{1}{6}$, &nbsp; …
+    Now repeat the argument for every $\varepsilon > 0$ &nbsp; ($\varepsilon = \tfrac{1}{2} \leadsto \delta = \tfrac{1}{4}$, &nbsp; $\varepsilon = \tfrac{1}{3} \leadsto \delta = \tfrac{1}{6}$, &nbsp; …)
 
     $\therefore$ &nbsp; if $0 < \lVert \vec{x} - \vec{0} \rVert < \tfrac{\varepsilon}{2} = \delta$
 
@@ -406,39 +432,48 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREY, RED, arrow, cross_axes, eps, mo, np):
+def _(BLUE, FULL, Figure, LIGHT, RED, arrow, cross_axes, eps, mo, np, table):
     _e = eps.value
     _d = _e / 2
-    _fig = Figure(figsize=(8.4, 3.6), layout="constrained")
+    _fig = Figure(figsize=(FULL, 3.3), layout="constrained")
     _left, _right = _fig.subplots(1, 2, width_ratios=[1.3, 1])
 
     cross_axes(_left, (-1.5, 1.6), (-1.3, 1.4), "$x^1$", "$x^2$")
     _th = np.linspace(0, 2 * np.pi, 200)
-    _left.fill(_d * np.cos(_th), _d * np.sin(_th), color=BLUE, alpha=0.2, lw=0)
-    _left.plot(_d * np.cos(_th), _d * np.sin(_th), "--", color=BLUE, lw=1.3)
-    _left.text(0.62, -0.85, r"$B(\vec{0}, \delta)$", color=BLUE, fontsize=12)
+    _left.fill(_d * np.cos(_th), _d * np.sin(_th), color=LIGHT, lw=0, zorder=0)
+    _left.plot(_d * np.cos(_th), _d * np.sin(_th), color=BLUE, lw=1.2, ls=(0, (4, 3)))
+    _left.plot(0, 0, "o", color="black", ms=5, mfc="white", mew=1.1, zorder=4)
+    _left.annotate(r"$B(\vec{0}, \delta) - \{\vec{0}\}$", (_d * 0.707, -_d * 0.707), textcoords="offset points", xytext=(5, -5), color=BLUE, fontsize=12, ha="left", va="top")
 
-    _right.set_xlim(-1.6, 2.2)
-    _right.set_ylim(-2.6, 5.8)
+    _right.set_xlim(-1.3, 3.2)
+    _right.set_ylim(-2.6, 5.9)
     _right.axis("off")
-    arrow(_right, (0, -2.6), (0, 5.7), "black", lw=0.9)
-    _right.text(0.15, 5.55, r"$\mathbb{R}$", fontsize=13)
-    _right.plot([0, 0], [-_e, _e], color=GREY, lw=7, alpha=0.35, solid_capstyle="butt")
-    _right.plot([0, 0], [0, 2 * _d], color=BLUE, lw=3.5, solid_capstyle="butt")
-    for _y, _name in ((_e, r"$\varepsilon$"), (-_e, r"$-\varepsilon$"), (0, "$0$")):
-        _right.plot([-0.08, 0.08], [_y, _y], color="black", lw=1)
-        _right.text(-0.2, _y, _name, ha="right", va="center", fontsize=13)
-    _right.plot(0, 5, "o", color=RED, ms=5)
-    _right.plot([-0.08, 0.08], [5, 5], color="black", lw=1)
-    _right.text(-0.2, 5, "$5$", ha="right", va="center", fontsize=13)
-    _right.text(0.25, 5, r"$f(\vec{0})$", color=RED, fontsize=12, va="center")
-    _right.text(0.25, _e * 0.5, r"$f(B(\vec{0}, \delta) - \{\vec{0}\})$", color=BLUE, fontsize=12, va="center")
-    _right.text(0.25, -_e * 0.6, r"$B(0, \varepsilon)$", color="#555555", fontsize=12, va="center")
+    arrow(_right, (0, -2.6), (0, 5.85), "black", lw=0.9)
+    _right.text(-0.2, 5.75, r"$\mathbb{R}$", fontsize=13, ha="right", va="top")
+    for _y, _ly, _name in ((_e, max(_e, 0.6), r"$\varepsilon$"), (-_e, min(-_e, -0.6), r"$-\varepsilon$"), (0, 0, "$0$"), (5, 5, "$5$")):
+        _right.plot([-0.07, 0.07], [_y, _y], color="black", lw=0.9)
+        _right.text(-0.2, _ly, _name, ha="right", va="center", fontsize=12)
+    # the interval B(0, eps) and the image of the punctured ball, drawn beside the axis
+    _right.plot([0.3, 0.3], [-_e, _e], color=RED, lw=1.4)
+    _right.plot([0.3, 0.3], [-_e, _e], "o", color=RED, ms=5, mfc="white", mew=1.1, zorder=4)
+    _right.plot([0.6, 0.6], [0, _e], color=BLUE, lw=1.4)
+    _right.plot(0.6, 0, "o", color=BLUE, ms=5, zorder=4)
+    _right.plot(0.6, _e, "o", color=BLUE, ms=5, mfc="white", mew=1.1, zorder=4)
+    _right.plot(0, 5, "o", color="black", ms=4, zorder=4)
+    _right.text(0.3, 5, r"$f(\vec{0})$", fontsize=12, ha="left", va="center")
+    _right.text(0.85, max(_e / 2, 0.5), r"$f(B(\vec{0}, \delta) - \{\vec{0}\})$", color=BLUE, fontsize=12, ha="left", va="center")
+    _right.text(0.85, min(-_e / 2, -0.5), r"$B(0, \varepsilon)$", color=RED, fontsize=12, ha="left", va="center")
 
     mo.vstack(
         [
-            mo.hstack([eps], justify="start", gap=3),
-            mo.md("| | |\n|:--|:--|\n" + rf"| $\delta = \varepsilon / 2$ | ${_d:g}$ |"),
+            mo.hstack([eps], justify="start", gap=2, wrap=True),
+            table(
+                [
+                    (r"$\delta = \varepsilon / 2$", rf"${_d:g}$"),
+                    (r"$f\big( B(\vec{0}, \delta) - \{\vec{0}\} \big)$", rf"$\textcolor{{{BLUE}}}{{[0,\, {_e:g})}}$"),
+                    (r"$B(0, \varepsilon)$", rf"$\textcolor{{{RED}}}{{({-_e:g},\, {_e:g})}}$"),
+                ]
+            ),
             _fig,
         ]
     )
@@ -446,33 +481,29 @@ def _(BLUE, Figure, GREY, RED, arrow, cross_axes, eps, mo, np):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREY, arrow, mo, np, theorem):
-    _fig = Figure(figsize=(7.6, 2.4), layout="constrained")
-    _ax = _fig.subplots()
-    _ax.set_xlim(-0.2, 9.2)
-    _ax.set_ylim(0, 2.9)
-    _ax.set_aspect("equal")
-    _ax.axis("off")
+def _(BLUE, FULL, GREY, LIGHT, arrow, blank, blob, mo, np, theorem):
+    _fig, _ax = blank(FULL, 2.3, (-0.3, 9.1), (-0.25, 2.75))
     _th = np.linspace(0, 2 * np.pi, 200)
-    _ax.fill(1.2 + 0.8 * np.cos(_th), 1.4 + 0.8 * np.sin(_th), color=BLUE, alpha=0.18, lw=0)
-    _ax.plot(1.2 + 0.8 * np.cos(_th), 1.4 + 0.8 * np.sin(_th), "--", color=BLUE, lw=1.2)
-    _ax.plot(1.2, 1.4, "o", color="black", ms=5, mfc="white")
-    _ax.text(1.05, 1.0, r"$\vec{a}$", fontsize=14)
-    _ax.plot([1.2, 1.85], [1.4, 1.85], color=BLUE, lw=1)
-    _ax.text(1.4, 1.75, r"$\delta$", color=BLUE, fontsize=12)
-    _ax.text(0.6, 0.2, r"$B(\vec{a}, \delta)$", color=BLUE, fontsize=12)
-    arrow(_ax, (2.5, 1.9), (3.9, 1.9), "black", lw=1.2, connectionstyle="arc3,rad=-0.3")
-    _ax.text(3.1, 2.4, "$f$", fontsize=15)
-    for _c, _name in ((5.3, r"$\vec{b}_1$"), (7.5, r"$\vec{b}_2$")):
-        _ax.plot(_c + 1.1 * np.cos(_th), 1.4 + 1.1 * np.sin(_th), "--", color="black", lw=1.2)
-        _ax.plot(_c, 1.4, "o", color="black", ms=4)
-        _ax.text(_c - 0.15, 0.95, _name, fontsize=14)
-        _ax.plot([_c, _c + 1.1], [1.4, 1.4], color=GREY, lw=1)
-        _ax.text(_c + 0.5, 1.5, r"$\varepsilon$", fontsize=12)
-    _bx = 4.95 + 0.42 * np.cos(_th) + 0.1 * np.cos(3 * _th)
-    _by = 1.95 + 0.28 * np.sin(_th) + 0.06 * np.sin(2 * _th)
-    _ax.fill(_bx, _by, color=BLUE, alpha=0.3, lw=0)
-    _ax.text(3.6, 0.1, r"$f(B(\vec{a}, \delta) \setminus \{\vec{a}\})$", color=BLUE, fontsize=12)
+    _ax.fill(1.2 + 0.8 * np.cos(_th), 1.5 + 0.8 * np.sin(_th), color=LIGHT, lw=0)
+    _ax.plot(1.2 + 0.8 * np.cos(_th), 1.5 + 0.8 * np.sin(_th), color=BLUE, lw=1.2, ls=(0, (4, 3)))
+    _ax.plot([1.2, 1.2 + 0.8 * 0.82], [1.5, 1.5 + 0.8 * 0.57], color=GREY, lw=1.0, ls=(0, (4, 3)))
+    _ax.plot(1.2, 1.5, "o", color="black", ms=5, mfc="white", mew=1.1, zorder=4)
+    _ax.text(1.12, 1.36, r"$\vec{a}$", fontsize=13, ha="center", va="top")
+    _ax.text(1.42, 1.86, r"$\delta$", color=GREY, fontsize=12, ha="right", va="bottom")
+    _ax.text(1.2, 0.58, r"$B(\vec{a}, \delta)$", color=BLUE, fontsize=12, ha="center", va="top")
+    arrow(_ax, (2.5, 2.0), (3.8, 2.0), "black", connectionstyle="arc3,rad=-0.3")
+    _ax.text(3.15, 2.33, "$f$", fontsize=13, ha="center", va="bottom")
+    for _c, _name in ((5.5, r"$\vec{b}_1$"), (7.7, r"$\vec{b}_2$")):
+        _ax.plot(_c + 1.1 * np.cos(_th), 1.5 + 1.1 * np.sin(_th), color="black", lw=1.0, ls=(0, (4, 3)))
+        _ax.plot([_c, _c + 1.1], [1.5, 1.5], color=GREY, lw=1.0, ls=(0, (4, 3)))
+        _ax.plot(_c, 1.5, "o", color="black", ms=4, zorder=4)
+        _ax.text(_c, 1.36, _name, fontsize=13, ha="center", va="top")
+        _ax.text(_c + 0.6, 1.56, r"$\varepsilon$", color=GREY, fontsize=12, ha="center", va="bottom")
+    _bx, _by = blob(5.15, 2.05, 0.4, 0.26, seed=3)
+    _ax.fill(_bx, _by, color=LIGHT, lw=0)
+    _ax.plot(_bx, _by, color=BLUE, lw=1.2)
+    _ax.plot([4.85, 4.3], [1.86, 0.5], color=BLUE, lw=0.8)
+    _ax.text(4.3, 0.42, r"$f(B(\vec{a}, \delta) \setminus \{\vec{a}\})$", color=BLUE, fontsize=12, ha="right", va="top")
 
     mo.vstack(
         [
@@ -481,25 +512,26 @@ def _(BLUE, Figure, GREY, arrow, mo, np, theorem):
     $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ and $\vec{a} \in \mathbb{R}^n$
 
     If $\displaystyle \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b}_1 \in \mathbb{R}^m$ and $\displaystyle \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b}_2 \in \mathbb{R}^m$ then $\vec{b}_1 = \vec{b}_2$.
-
-    Limits are unique! (when they exist)
-    """
+    """,
+                "Uniqueness of limits",
             ),
             mo.md(
                 r"""
+    $\leadsto$ &nbsp; limits are unique! (when they exist)
+
     **Proof.** Given $\vec{b}_1 \neq \vec{b}_2 \in \mathbb{R}^m$ let $\varepsilon = \dfrac{\lVert \vec{b}_2 - \vec{b}_1 \rVert}{2}$
 
     $$
     \Longrightarrow \quad B(\vec{b}_1, \varepsilon) \cap B(\vec{b}_2, \varepsilon) = \emptyset
     $$
 
-    Remember: the sphere is not part of the ball. (To be more precise we need to use the triangle inequality.)
+    (remember: the sphere is not part of the ball; to be more precise we need to use the triangle inequality)
     """
             ),
             _fig,
             mo.md(
                 r"""
-    $\Longrightarrow$ &nbsp; if $\displaystyle \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b}_1$, then there is a $\delta_1 > 0$ s.t.
+    $\Longrightarrow$ &nbsp; if $\displaystyle \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b}_1$, then there is a $\delta_1 > 0$ such that
 
     $$
     f\big( B(\vec{a}, \delta_1) \setminus \{\vec{a}\} \big) \subset B(\vec{b}_1, \varepsilon)
@@ -509,10 +541,7 @@ def _(BLUE, Figure, GREY, arrow, mo, np, theorem):
 
     $$
     f\big( B(\vec{a}, \delta_2) \setminus \{\vec{a}\} \big) \not\subset B(\vec{b}_2, \varepsilon)
-    $$
-
-    $$
-    \Longrightarrow \quad \lim_{\vec{x} \to \vec{a}} f(\vec{x}) \neq \vec{b}_2 \qquad \square
+    \quad \Longrightarrow \quad \lim_{\vec{x} \to \vec{a}} f(\vec{x}) \neq \vec{b}_2 \qquad \square
     $$
 
     **Example.**
@@ -521,7 +550,7 @@ def _(BLUE, Figure, GREY, arrow, mo, np, theorem):
     f(\vec{x}) = \frac{(x^1)^2}{\lVert \vec{x} \rVert^2} = \frac{(x^1)^2}{(x^1)^2 + (x^2)^2}
     $$
 
-    Claim: $\displaystyle \lim_{\vec{x} \to \vec{0}} f(\vec{x})$ does not exist! (it is not well-defined)
+    Claim: $\displaystyle \lim_{\vec{x} \to \vec{0}} f(\vec{x})$ **does not exist**! (it is not well-defined)
 
     **Proof.** Let's consider two different ways $\vec{x}$ can approach $\vec{0}$
 
@@ -537,7 +566,7 @@ def _(BLUE, Figure, GREY, arrow, mo, np, theorem):
         0 < \lVert t\vec{e}_1 - \vec{0} \rVert < \delta \quad \Longrightarrow \quad \lVert f(t\vec{e}_1) - 1 \rVert = 0 < \varepsilon
         $$
 
-        for every $\delta > 0$! since $f(t\vec{e}_1) = 1$ is constant!
+        for every $\delta > 0$! (since $f(t\vec{e}_1) = 1$ is constant)
 
         $$
         \therefore \quad \lim_{\substack{\vec{x} \to \vec{0} \\ \vec{x} = t\vec{e}_1}} f(\vec{x}) = 1
@@ -561,7 +590,7 @@ def _(BLUE, Figure, GREY, arrow, mo, np, theorem):
         \therefore \quad \lim_{\substack{\vec{x} \to \vec{0} \\ \vec{x} = s\vec{e}_2}} f(\vec{x}) = 0
         $$
 
-    Two possible values for the limit &nbsp; $\Longrightarrow$ &nbsp; limit is not well-defined!
+    Two possible values for the limit &nbsp; $\Longrightarrow$ &nbsp; limit is not well-defined! $\square$
     """
             ),
         ]
@@ -576,37 +605,40 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREY, arrow, cross_axes, math, mo, np, theta):
+def _(BLUE, FULL, Figure, GREEN, GREY, arrow, cross_axes, math, mo, np, table, theta):
     _a = math.radians(theta.value)
-    _c, _s = math.cos(_a), math.sin(_a)
+    _c, _s = math.cos(_a) + 0.0, math.sin(_a) + 0.0
+    _c, _s = (0.0 if abs(_c) < 1e-12 else _c), (0.0 if abs(_s) < 1e-12 else _s)
     _val = _c**2
 
-    _fig = Figure(figsize=(8.4, 3.6), layout="constrained")
+    _fig = Figure(figsize=(FULL, 3.3), layout="constrained")
     _left, _right = _fig.subplots(1, 2, width_ratios=[1.3, 1])
     cross_axes(_left, (-1.5, 1.6), (-1.3, 1.4), "$x^1$", "$x^2$")
     _th = np.linspace(0, 2 * np.pi, 200)
-    _left.plot(0.8 * np.cos(_th), 0.8 * np.sin(_th), "--", color=GREY, lw=1.2)
-    _left.text(0.62, -0.85, r"$B(\vec{0}, \delta)$", color="#555555", fontsize=12)
-    _left.plot([-1.2 * _c, 1.2 * _c], [-1.2 * _s, 1.2 * _s], color=BLUE, lw=2.4)
-    _left.plot(0, 0, "o", color=BLUE, ms=6, mfc="white", mew=1.5)
+    _left.plot(0.8 * np.cos(_th), 0.8 * np.sin(_th), color=GREY, lw=1.0, ls=(0, (4, 3)))
+    _left.plot([-1.1 * _c, 1.1 * _c], [-1.1 * _s, 1.1 * _s], color=BLUE, lw=1.4, zorder=3.5)
+    _left.plot(0, 0, "o", color=BLUE, ms=5, mfc="white", mew=1.1, zorder=4)
+    _left.text(0.95, -1.05, r"$B(\vec{0}, \delta)$", color=GREY, fontsize=12, ha="center", va="center", zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    _right.set_xlim(-1.4, 1.8)
+    _right.set_xlim(-1.2, 2.2)
     _right.set_ylim(-0.5, 1.6)
     _right.axis("off")
-    arrow(_right, (0, -0.5), (0, 1.55), "black", lw=0.9)
-    _right.text(0.12, 1.45, r"$\mathbb{R}$", fontsize=13)
+    arrow(_right, (0, -0.5), (0, 1.58), "black", lw=0.9)
+    _right.text(-0.15, 1.55, r"$\mathbb{R}$", fontsize=13, ha="right", va="top")
     for _y in (0, 1):
-        _right.plot([-0.06, 0.06], [_y, _y], color="black", lw=1)
-        _right.text(-0.15, _y, f"${_y}$", ha="right", va="center", fontsize=13)
-    _right.plot(0, _val, "o", color=BLUE, ms=8)
+        _right.plot([-0.05, 0.05], [_y, _y], color="black", lw=0.9)
+        _right.text(-0.15, _y, f"${_y}$", ha="right", va="center", fontsize=12)
+    _right.plot(0, _val, "o", color=GREEN, ms=5, zorder=4)
+    _right.text(0.2, _val, rf"$f(\vec{{x}}) = {_val:.2f}$", color=GREEN, fontsize=12, ha="left", va="center")
 
     mo.vstack(
         [
-            mo.hstack([theta], justify="start", gap=3),
-            mo.md(
-                "| | |\n|:--|:--|\n"
-                + rf"| direction | $\vec{{x}} = t \begin{{bmatrix}} {_c:.2f} \\ {_s:.2f} \end{{bmatrix}}$ |" + "\n"
-                + rf"| $f(\vec{{x}})$ along this line | ${_val:.2f}$ |"
+            mo.hstack([theta], justify="start", gap=2, wrap=True),
+            table(
+                [
+                    (r"direction", rf"$\textcolor{{{BLUE}}}{{\vec{{x}} = t \begin{{bmatrix}} {_c:.2f} \\ {_s:.2f} \end{{bmatrix}}, \ t \neq 0}}$"),
+                    (r"$f(\vec{x})$ along this line", rf"$\textcolor{{{GREEN}}}{{{_val:.2f}}}$"),
+                ]
             ),
             _fig,
         ]
@@ -625,8 +657,25 @@ def _(theorem):
     - $\displaystyle \lim_{\vec{x} \to \vec{a}} (f + g)(\vec{x}) = \vec{b}_1 + \vec{b}_2$
     - $\displaystyle \lim_{\vec{x} \to \vec{a}} (\lambda f)(\vec{x}) = \beta\, \vec{b}_1$
     - $\displaystyle \lim_{\vec{x} \to \vec{a}} (f \cdot g)(\vec{x}) = \vec{b}_1 \cdot \vec{b}_2$
-    """
+    """,
+        "Limits of sums and products",
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Summary
+
+    - the open ball $B(\vec{a}, \delta) = \{\, \vec{x} \in \mathbb{R}^n \mid \lVert \vec{x} - \vec{a} \rVert < \delta \,\}$ does not include its “boundary”, the sphere $S(\vec{a}, \delta)$
+    - $\displaystyle \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b}$ if for every $\varepsilon > 0$ we can find $\delta > 0$ such that $f\big( B(\vec{a}, \delta) - \{\vec{a}\} \big) \subseteq B(\vec{b}, \varepsilon)$
+    - limits are unique (when they exist)
+    - two different ways of approaching $\vec{a}$ with two different values &nbsp; $\Longrightarrow$ &nbsp; the limit does not exist
+    - limits of $f + g$, $\lambda f$ and $f \cdot g$ are the sum, the scalar multiple and the dot product of the limits
+
+    **Next:** differentiability and the derivative
+    """)
     return
 
 
