@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 10", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 · Lecture 10 · Properties and interpretations of differentiable functions", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -60,7 +60,7 @@ def _(mo):
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>", "color": color, "lw": 2.2, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -91,7 +91,7 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 10", "Week 05", "Lecture 10")
+    header("Lecture 10", "Week 05", "Lecture 10 · Properties and interpretations of differentiable functions")
     return
 
 
@@ -429,7 +429,9 @@ def _(BLUE, Figure, GREEN, RED, arrow, cross_axes, ga1, ga2, math, mo, np):
     _ax.plot(_R * np.cos(_th), _R * np.sin(_th), color=RED, lw=1.8)
     if _R > 0:
         _t = (-_a[1] / _R, _a[0] / _R)
-        _ax.plot([_a[0] - 1.6 * _t[0], _a[0] + 1.6 * _t[0]], [_a[1] - 1.6 * _t[1], _a[1] + 1.6 * _t[1]], color=BLUE, lw=1.3)
+        _ax.plot([_a[0] - 1.6 * _t[0], _a[0] + 1.6 * _t[0]], [_a[1] - 1.6 * _t[1], _a[1] + 1.6 * _t[1]], color=BLUE, lw=1.3, label=r"$\big( \nabla f(\vec{a}) \big)^{\perp}$")
+        _ax.plot([], [], color=RED, lw=1.8, label=r"$f^{-1}(R^2)$")
+        _ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.04), ncol=2, frameon=False, fontsize=12)
         arrow(_ax, _a, (_a[0] + _grad[0], _a[1] + _grad[1]), OCHRE, r"$\nabla f(\vec{a})$", at_tip=True)
     arrow(_ax, (0, 0), _a, GREEN)
     _ax.plot(*_a, "o", color=GREEN, ms=5)
@@ -438,25 +440,12 @@ def _(BLUE, Figure, GREEN, RED, arrow, cross_axes, ga1, ga2, math, mo, np):
     mo.vstack(
         [
             mo.hstack([ga1, ga2], justify="start", gap=3),
-            mo.hstack(
-                [
-                    _fig,
-                    mo.md(
-                        rf"$$\nabla f(\vec{{a}}) = 2\vec{{a}} = \begin{{bmatrix}} {_grad[0]:g} \\ {_grad[1]:g} \end{{bmatrix}}$$"
-                        "\n\n"
-                        rf"$$f^{{-1}}(R^2) = \left\{{\, \begin{{bmatrix}} x^1 \\ x^2 \end{{bmatrix}} \;\middle|\; (x^1)^2 + (x^2)^2 = R^2 \,\right\}}, \qquad R^2 = {_R**2:.2f}$$"
-                        "\n\n"
-                        + (
-                            r"The blue line shows the directions $\vec{v} \in \big( \nabla f(\vec{a}) \big)^{\perp}$."
-                            if _R > 0
-                            else r"$Df(\vec{a})(\vec{v}) = 0$ for every $\vec{v}$."
-                        )
-                    ).style({"max-width": "28rem"}),
-                ],
-                widths=[1, 1],
-                gap=2,
-                align="center",
+            mo.md(
+                "| | |\n|:--|:--|\n"
+                + rf"| $\nabla f(\vec{{a}}) = 2\vec{{a}}$ | $\begin{{bmatrix}} {_grad[0]:g} \\ {_grad[1]:g} \end{{bmatrix}}$ |" + "\n"
+                + rf"| $f^{{-1}}(R^2)$ | $(x^1)^2 + (x^2)^2 = R^2 = {_R**2:.2f}$ |"
             ),
+            _fig,
         ]
     )
     return (OCHRE,)
