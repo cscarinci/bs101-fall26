@@ -21,10 +21,18 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(mo, np):
+def _(mo):
     # ---- Building blocks shared by all lectures -------------------------
-    RED, GREEN, BLUE, GREY = "#b3261e", "#2e7d32", "#1b458f", "#888888"
-    OCHRE = "#9a6b1f"
+    # Palette with fixed roles (figures only; text carries no colour):
+    #   BLUE   the primary object (the particle, the point, the chosen vector)
+    #   RED    the second object it is compared with
+    #   GREEN  a derived quantity (velocity, relative velocity, tangent vector)
+    #   ORANGE a third series, only when three are needed
+    #   GREY   reference geometry (equator, light cone, inertial comparison)
+    #   LIGHT  fills and grids
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    # Figure widths: FULL spans the page, HALF sits beside text or in a pair
+    FULL, HALF = 7.4, 3.6
 
     def header(document, date, running=""):
         """Course header, as on the exercise sheets and exams."""
@@ -52,25 +60,31 @@ def _(mo, np):
     def theorem(body, title=""):
         return _statement("Theorem", title, body)
 
-    def warning(body):
+    def proposition(body, title=""):
+        return _statement("Proposition", title, body)
+
+    def corollary(body, title=""):
+        return _statement("Corollary", title, body)
+
+    def postulate(body, title=""):
+        return _statement("Postulate", title, body)
+
+    def note(body):
+        """Editorial note of the notebook (not part of the lecture)."""
         return mo.md("**Note.** " + body.strip())
 
-    def arrow(ax, tail, tip, color, label=None, at_tip=False, **kw):
-        """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip."""
+    def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
+        """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
+        One head size and one line weight for every figure, so arrows look alike across lectures."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
-            ax.annotate(label, pos, textcoords="offset points", xytext=(6, 6), color=color, fontsize=14)
-
-    def path_projection(t, y1, y2):
-        """Common oblique view: t rightwards, y^1 down-left, y^2 upwards."""
-        t, y1, y2 = (np.asarray(c, dtype=float) for c in (t, y1, y2))
-        return 0.36 * t - 0.6 * y1, y2 - 0.4 * y1 - 0.07 * t
+            ax.annotate(label, pos, textcoords="offset points", xytext=(6, 6), color=color, fontsize=13)
 
     def plane(ax, lim):
         """Style a 2D axis as a coordinate plane with range [-lim, lim]."""
@@ -79,8 +93,33 @@ def _(mo, np):
         ax.set_aspect("equal")
         ax.axhline(0, color="black", lw=0.8)
         ax.axvline(0, color="black", lw=0.8)
-        ax.grid(True, color="#cfe3f5", lw=0.6)
+        ax.grid(True, color=LIGHT, lw=0.6)
         ax.set_axisbelow(True)
+
+    def blank(w, h, xlim, ylim):
+        """A figure with one bare axis (no frame) for sketches."""
+        from matplotlib.figure import Figure as _Figure
+
+        fig = _Figure(figsize=(w, h), layout="constrained")
+        ax = fig.subplots()
+        ax.set_xlim(*xlim)
+        ax.set_ylim(*ylim)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        return fig, ax
+
+    def blob(cx, cy, rx, ry, wobble=0.07, seed=0, n=400):
+        """Closed organic curve around (cx, cy): an ellipse with a few low harmonics."""
+        import numpy as _np
+
+        rng = _np.random.default_rng(seed)
+        t = _np.linspace(0, 2 * _np.pi, n)
+        r = 1 + sum(wobble / k * rng.uniform(0.4, 1.0) * _np.cos(k * t + rng.uniform(0, 2 * _np.pi)) for k in (2, 3, 4, 5))
+        return cx + rx * r * _np.cos(t), cy + ry * r * _np.sin(t)
+
+    def table(rows):
+        """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
+        return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
 
     def check(field, answer):
         """Feedback mark for a numeric answer typed into a text field."""
@@ -92,7 +131,7 @@ def _(mo, np):
         except ValueError:
             return "⚠️ enter a number"
 
-    return BLUE, GREEN, GREY, OCHRE, RED, arrow, check, definition, header, path_projection, plane, theorem, warning
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
@@ -102,16 +141,79 @@ def _(header):
 
 
 @app.cell(hide_code=True)
+def _(arrow, math):
+    def vector(ax, tail, tip, color, label=None, turn=0, r=15, **kw):
+        """Arrow from `tail` to `tip` (a dot when it has zero length), labelled beyond its tip on a white box;
+        `turn` (degrees) rotates the label about the tip so that coinciding vectors keep separate labels."""
+        dx, dy = tip[0] - tail[0], tip[1] - tail[1]
+        if dx == 0 and dy == 0:
+            ax.plot(*tip, "o", color=color, ms=4, zorder=4)
+            d = math.radians(45 + turn)
+        else:
+            arrow(ax, tail, tip, color, **kw)
+            d = math.atan2(dy, dx) + math.radians(turn)
+        if label:
+            ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
+
+    return (vector,)
+
+
+@app.cell(hide_code=True)
+def _(arrow, np):
+    def path_projection(t, y1, y2):
+        """Oblique view of R x R^2 for graphs of paths, as on the board: t to the right (compressed),
+        y^2 up, y^1 towards the viewer."""
+        t, y1, y2 = (np.asarray(c, dtype=float) for c in (t, y1, y2))
+        return 0.36 * t - 0.45 * y1, y2 - 0.4 * y1
+
+    def path_axes(ax, t0, t1):
+        """The three coordinate axes of R x R^2 in the oblique view, with their names."""
+        for tail, tip in (((t0, 0, 0), (t1, 0, 0)), ((0, -1.5, 0), (0, 2.3, 0)), ((0, 0, -1.5), (0, 0, 1.75))):
+            p, q = path_projection(*tail), path_projection(*tip)
+            arrow(ax, (float(p[0]), float(p[1])), (float(q[0]), float(q[1])), "black", lw=0.9)
+        e = path_projection(t1, 0, 0)
+        ax.text(float(e[0]) + 0.08, float(e[1]), "$t$", fontsize=13, ha="left", va="center")
+        e = path_projection(0, 2.3, 0)
+        ax.text(float(e[0]) - 0.06, float(e[1]) - 0.04, "$y^1$", fontsize=13, ha="right", va="top")
+        ax.text(0.1, 1.72, "$y^2$", fontsize=13, ha="left", va="center")
+
+    def helix(ax, t0, t1, color, gaps=()):
+        """graph of t -> (cos t, sin t) for t in [t0, t1]: the half behind the (t, y^2)-plane is dashed."""
+        s = np.linspace(t0, t1, 1600)
+        for g in gaps:
+            s = s[np.abs(s - g) > 0.07]
+        x, y = path_projection(s, np.cos(s), np.sin(s))
+        back = np.cos(s) < 0
+        cut = np.zeros_like(back)
+        cut[1:] = np.diff(s) > 0.05
+        ax.plot(np.where(back | cut, np.nan, x), np.where(back | cut, np.nan, y), color=color, lw=1.5)
+        ax.plot(np.where(~back | cut, np.nan, x), np.where(~back | cut, np.nan, y), color=color, lw=1.0, ls=(0, (4, 3)))
+
+    return helix, path_axes, path_projection
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Last time
+
+    - multivariable functions $f : A \subseteq \mathbb{R}^n \longrightarrow B \subseteq \mathbb{R}^m$
+    - $\leadsto$ &nbsp; global properties (image, graph, level sets)
+
+    **Today:** local properties of paths $\gamma : A \subseteq \mathbb{R} \longrightarrow \mathbb{R}^m$ (MT 2.4): how a function behaves at a point (limits, continuity, differentiability)
+    """)
+    return
+
+
+@app.cell(hide_code=True)
 def _(definition, mo):
     mo.vstack(
         [
             mo.md(
                 r"""
-    ## Last time
+    ## II.2 &nbsp; Local properties of paths
 
-    Multivariable functions $f : A \subseteq \mathbb{R}^n \longrightarrow B \subseteq \mathbb{R}^m$ &nbsp; $\leadsto$ &nbsp; global properties (image, graph, level sets)
-
-    **Today:** Local properties of paths $\gamma : A \subseteq \mathbb{R} \longrightarrow \mathbb{R}^m$ (MT 2.4) — how a function behaves at a point (limits, continuity, differentiability)
+    ### Paths
     """
             ),
             definition(
@@ -124,7 +226,8 @@ def _(definition, mo):
     t &\longmapsto \gamma(t) = \begin{bmatrix} \gamma^1(t) \\ \gamma^2(t) \\ \vdots \\ \gamma^m(t) \end{bmatrix}
     \end{aligned}
     $$
-    """
+    """,
+                "Path",
             ),
             mo.md(
                 r"""
@@ -136,13 +239,9 @@ def _(definition, mo):
 
     $$
     \gamma(t) = \vec{x} + t\vec{v} = \begin{bmatrix} x^1 + t v^1 \\ x^2 + t v^2 \end{bmatrix} = \begin{bmatrix} \gamma^1(t) \\ \gamma^2(t) \end{bmatrix}
+    \quad \leadsto \quad
+    \underbrace{\gamma^1(t) = x^1 + t v^1, \quad \gamma^2(t) = x^2 + t v^2}_{\text{pair of affine single variable functions}}
     $$
-
-    $$
-    \gamma^1(t) = x^1 + t v^1, \qquad \gamma^2(t) = x^2 + t v^2
-    $$
-
-    A pair of affine single variable functions.
 
     **Example.**
 
@@ -153,20 +252,23 @@ def _(definition, mo):
     \end{aligned}
     $$
 
-    - $\gamma^1 : \mathbb{R} \longrightarrow \mathbb{R}$, $t \longmapsto \cos(t)$ is the cosine function
-    - $\gamma^2 : \mathbb{R} \longrightarrow \mathbb{R}$, $t \longmapsto \sin(t)$ is the sine function
+    $\leadsto$ &nbsp; $\gamma^1 : \mathbb{R} \longrightarrow \mathbb{R}$, $t \longmapsto \cos(t)$ is the cosine function
+
+    $\leadsto$ &nbsp; $\gamma^2 : \mathbb{R} \longrightarrow \mathbb{R}$, $t \longmapsto \sin(t)$ is the sine function
 
     $$
-    \mathrm{Im}(\gamma) = \left\{\, \begin{bmatrix} y^1 \\ y^2 \end{bmatrix} \in \mathbb{R}^2 \;\middle|\; \exists\, t \in \mathbb{R},\ y^1 = \gamma^1(t),\ y^2 = \gamma^2(t) \,\right\} = \left\{\, \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix} \in \mathbb{R}^2 \;\middle|\; t \in \mathbb{R} \,\right\}
+    \begin{aligned}
+    \mathrm{Im}(\gamma) &= \left\{\, \begin{bmatrix} y^1 \\ y^2 \end{bmatrix} \in \mathbb{R}^2 \;\middle|\; \exists\, t \in \mathbb{R},\ y^1 = \gamma^1(t),\ y^2 = \gamma^2(t) \,\right\} \\
+    &= \underbrace{\left\{\, \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix} \in \mathbb{R}^2 \;\middle|\; t \in \mathbb{R} \,\right\}}_{\text{unit circle } (y^1)^2 + (y^2)^2 = 1}
+    \end{aligned}
     $$
 
-    This is the unit circle $(y^1)^2 + (y^2)^2 = 1$.
-
     $$
-    \mathrm{graph}(\gamma) = \left\{\, \begin{bmatrix} t \\ y^1 \\ y^2 \end{bmatrix} \in \mathbb{R} \times \mathbb{R}^2 \;\middle|\; t \in \mathbb{R},\ y^1 = \gamma^1(t),\ y^2 = \gamma^2(t) \,\right\} = \left\{\, \begin{bmatrix} t \\ \cos(t) \\ \sin(t) \end{bmatrix} \in \mathbb{R}^3 \;\middle|\; t \in \mathbb{R} \,\right\}
+    \begin{aligned}
+    \mathrm{graph}(\gamma) &= \left\{\, \begin{bmatrix} t \\ y^1 \\ y^2 \end{bmatrix} \in \mathbb{R} \times \mathbb{R}^2 = \mathbb{R}^3 \;\middle|\; t \in \mathbb{R},\ y^1 = \gamma^1(t),\ y^2 = \gamma^2(t) \,\right\} \\
+    &= \underbrace{\left\{\, \begin{bmatrix} t \\ \cos(t) \\ \sin(t) \end{bmatrix} \in \mathbb{R}^3 \;\middle|\; t \in \mathbb{R} \,\right\}}_{\text{helix}}
+    \end{aligned}
     $$
-
-    This is a helix in $\mathbb{R} \times \mathbb{R}^2 = \mathbb{R}^3$.
     """
             ),
         ]
@@ -181,67 +283,92 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(Arc, BLUE, Figure, GREY, OCHRE, arrow, math, mo, np, path_projection, t_circle):
+def _(Arc, BLUE, FULL, GREY, HALF, arrow, blank, helix, math, mo, np, path_axes, path_projection, t_circle, table, vector):
     _t = t_circle.value
-    _fig = Figure(figsize=(4.4, 3.8), layout="constrained")
-    _left = _fig.subplots()
+    _p = (math.cos(_t), math.sin(_t))
+    _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
 
     # Im(gamma): the unit circle
-    _left.set_xlim(-1.5, 1.9)
-    _left.set_ylim(-1.5, 1.8)
-    _left.set_aspect("equal")
-    _left.axis("off")
-    arrow(_left, (-1.5, 0), (1.8, 0), "black", lw=0.9)
-    arrow(_left, (0, -1.5), (0, 1.6), "black", lw=0.9)
-    _left.text(1.65, -0.28, "$y^1$")
-    _left.text(-0.35, 1.5, "$y^2$")
+    _fig, _ax = blank(HALF, 3.3, (-1.7, 2.0), (-1.6, 1.8))
+    arrow(_ax, (-1.5, 0), (1.75, 0), "black", lw=0.9)
+    arrow(_ax, (0, -1.5), (0, 1.6), "black", lw=0.9)
+    _ax.text(1.8, -0.06, "$y^1$", fontsize=13, ha="center", va="top")
+    _ax.text(-0.1, 1.62, "$y^2$", fontsize=13, ha="right", va="center")
     _th = np.linspace(0, 2 * np.pi, 361)
-    _left.plot(np.cos(_th), np.sin(_th), color=OCHRE, lw=1.5)
-    _p = (math.cos(_t), math.sin(_t))
-    arrow(_left, (0, 0), _p, BLUE)
-    _left.plot(*_p, "o", color=BLUE, ms=4.5)
-    _left.add_patch(Arc((0, 0), 0.5, 0.5, theta1=0, theta2=math.degrees(_t % (2 * math.pi)), color=BLUE, lw=1))
-    _left.set_title(r"$\mathrm{Im}(\gamma)$", color=OCHRE)
+    _ax.plot(np.cos(_th), np.sin(_th), color=BLUE, lw=1.5)
+    _angle = _t % (2 * math.pi)
+    _ax.add_patch(Arc((0, 0), 0.6, 0.6, theta1=0, theta2=math.degrees(_angle), color=GREY, lw=1.0))
+    if _angle >= 0.5:
+        _ax.text(0.5 * math.cos(_angle / 2), 0.5 * math.sin(_angle / 2), "$t$", color=GREY, fontsize=12, ha="center", va="center", bbox=_box)
+    vector(_ax, (0, 0), _p, BLUE, r"$\gamma(t)$", -35, r=19)
+    _ax.plot(*_p, "o", color="black", ms=4, zorder=4)
+    _ax.text(-1.65, 1.6, r"$\mathrm{Im}(\gamma)$", fontsize=13, ha="left", va="center")
 
-    # graph(gamma): graph points have three coordinates, (t, gamma(t)).
-    _fig3 = Figure(figsize=(6.2, 3.8), layout="constrained")
-    _right = _fig3.subplots()
-    _right.set_xlim(-1.8, 5.9)
-    _right.set_ylim(-2.3, 1.9)
-    _right.set_aspect("equal")
-    _right.axis("off")
-    arrow(_right, path_projection(-4, 0, 0), path_projection(15, 0, 0), "black", lw=0.9)
-    arrow(_right, path_projection(0, -1.5, 0), path_projection(0, 2.3, 0), "black", lw=0.9)
-    arrow(_right, path_projection(0, 0, -1.5), path_projection(0, 0, 1.7), "black", lw=0.9)
-    _right.text(5.55, -1.2, "$t$")
-    _right.text(-1.65, -1.2, "$y^1$")
-    _right.text(0.12, 1.6, "$y^2$")
-    _s = np.linspace(-4, 14.2, 900)
-    _hx, _hy = path_projection(_s, np.cos(_s), np.sin(_s))
-    _phase = np.mod(_s, 2 * np.pi)
-    _front = ~((_phase > 2.9) & (_phase < 1.5 * np.pi))
-    _right.plot(np.where(_front, np.nan, _hx), np.where(_front, np.nan, _hy), color=OCHRE, lw=1, alpha=0.6)
-    _right.plot(np.where(_front, _hx, np.nan), np.where(_front, _hy, np.nan), color=OCHRE, lw=1.5)
-    for _m in (-3.4, 1.3, 7.6, 13.85):
-        _p0 = path_projection(_m - 0.12, math.cos(_m - 0.12), math.sin(_m - 0.12))
-        _p1 = path_projection(_m + 0.12, math.cos(_m + 0.12), math.sin(_m + 0.12))
-        _right.annotate("", xy=_p1, xytext=_p0, arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": OCHRE, "lw": 0.8, "mutation_scale": 9, "shrinkA": 0, "shrinkB": 0})
+    # graph(gamma): the helix; its points have three coordinates (t, gamma(t))
+    _fig3, _ax3 = blank(FULL, 3.55, (-2.4, 5.6), (-1.95, 1.9))
+    path_axes(_ax3, -5.2, 14.2)
+    helix(_ax3, -4.4, 13.6, BLUE)
+    for _m in (-5.2, 1.0, 7.3):
+        _p0 = path_projection(_m - 0.1, math.cos(_m - 0.1), math.sin(_m - 0.1))
+        _p1 = path_projection(_m + 0.1, math.cos(_m + 0.1), math.sin(_m + 0.1))
+        if _m > -4.4:
+            arrow(_ax3, (float(_p0[0]), float(_p0[1])), (float(_p1[0]), float(_p1[1])), BLUE)
     for _n, _name in enumerate(("$t=0$", r"$t=\pi$", r"$t=2\pi$", r"$t=3\pi$", r"$t=4\pi$")):
         _q = path_projection(_n * math.pi, math.cos(_n * math.pi), math.sin(_n * math.pi))
-        _right.plot(*_q, "o", color=GREY, ms=3)
-        _right.annotate(_name, _q, textcoords="offset points", xytext=(-8, 8) if _n % 2 == 0 else (7, 7), ha="right" if _n % 2 == 0 else "left", color="#555555", fontsize=12)
-    _right.plot(*path_projection(_t, math.cos(_t), math.sin(_t)), "o", color=BLUE, ms=4.5, label=r"$(t,\gamma(t))$")
-    _right.set_title(r"$\mathrm{graph}(\gamma)$: helix", color=OCHRE)
-    _right.legend(loc="lower center", bbox_to_anchor=(0.5, -0.17), frameon=False, fontsize=13)
+        _ax3.plot(*_q, "o", color=GREY, ms=3.5, zorder=4)
+        _ax3.annotate(_name, (float(_q[0]), float(_q[1])), textcoords="offset points", xytext=(5, -9) if _n % 2 == 0 else (-5, 9), ha="left" if _n % 2 == 0 else "right", va="top" if _n % 2 == 0 else "bottom", color=GREY, fontsize=12, bbox=_box, zorder=3)
+    _g = path_projection(_t, _p[0], _p[1])
+    _out = (-0.45 * _p[0], _p[1] - 0.4 * _p[0])  # direction from the t-axis to the point, in the picture
+    _norm = math.hypot(*_out)
+    _dx, _dy = 11 * _out[0] / _norm, 11 * _out[1] / _norm
+    _ax3.plot(*_g, "o", color="black", ms=4.5, zorder=6)
+    _ax3.annotate(r"$(t, \gamma(t))$", (float(_g[0]), float(_g[1])), textcoords="offset points", xytext=(_dx, _dy), ha="left" if _dx > 0 else "right", va="bottom" if _dy > 0 else "top", fontsize=12, bbox=_box, zorder=5)
+    _ax3.text(-2.35, 1.7, r"$\mathrm{graph}(\gamma)$", fontsize=13, ha="left", va="center")
+
+    def _f(v):
+        return f"{round(v, 2) + 0.0:.2f}"
 
     mo.vstack(
         [
-            mo.hstack([t_circle], justify="start", gap=3),
-            mo.md("| | |\n|:--|:--|\n" + rf"| $\gamma(t)$ | $\begin{{bmatrix}} {math.cos(_t):.2f} \\ {math.sin(_t):.2f} \end{{bmatrix}}$ |"),
-            mo.center(_fig),
-            mo.center(_fig3),
+            mo.hstack([t_circle], justify="start", gap=2, wrap=True),
+            table(
+                [
+                    (r"$\gamma(t)$", rf"$\textcolor{{{BLUE}}}{{\begin{{bmatrix}} {_f(_p[0])} \\ {_f(_p[1])} \end{{bmatrix}}}}$"),
+                    (r"$(t, \gamma(t))$", rf"$\begin{{bmatrix}} {_t:.1f} \\ {_f(_p[0])} \\ {_f(_p[1])} \end{{bmatrix}}$"),
+                ]
+            ),
+            _fig,
+            _fig3,
         ]
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **Remark.** We can extend vector operations to paths. Given $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^m$, $\sigma : \mathbb{R} \longrightarrow \mathbb{R}^m$, and $\lambda : \mathbb{R} \longrightarrow \mathbb{R}$
+
+    $$
+    \begin{aligned}
+    \underbrace{(\gamma + \sigma)(t)}_{\text{addition of paths}} &= \underbrace{\gamma(t) + \sigma(t)}_{\text{addition of vectors}} && \leadsto \quad \gamma + \sigma : \mathbb{R} \longrightarrow \mathbb{R}^m \\[26pt]
+    \underbrace{(\lambda \gamma)(t)}_{\substack{\text{multiplication of scalar} \\ \text{function and a path}}} &= \underbrace{\lambda(t)\, \gamma(t)}_{\substack{\text{multiplication of} \\ \text{scalar and vector}}} && \leadsto \quad \lambda \gamma : \mathbb{R} \longrightarrow \mathbb{R}^m \\[26pt]
+    \underbrace{(\gamma \cdot \sigma)(t)}_{\text{dot product of paths}} &= \underbrace{\gamma(t) \cdot \sigma(t)}_{\text{dot product of vectors}} && \leadsto \quad \gamma \cdot \sigma : \mathbb{R} \longrightarrow \mathbb{R} \\[26pt]
+    \underbrace{(\gamma \times \sigma)(t)}_{\text{cross-product of paths in } \mathbb{R}^3} &= \underbrace{\gamma(t) \times \sigma(t)}_{\text{cross-product of vectors in } \mathbb{R}^3} && \leadsto \quad \gamma \times \sigma : \mathbb{R} \longrightarrow \mathbb{R}^3 \quad (\text{if } m = 3) \\[10pt]
+    \end{aligned}
+    $$
+
+    **Example.** &nbsp; $\gamma(t) = \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix}, \quad \sigma(t) = \begin{bmatrix} at + b \\ ct + d \end{bmatrix}, \quad \lambda(t) = \cos(t)$
+
+    $$
+    \begin{aligned}
+    &\leadsto \quad (\gamma + \sigma)(t) = \begin{bmatrix} \cos(t) + at + b \\ \sin(t) + ct + d \end{bmatrix} \\[4pt]
+    &\leadsto \quad (\gamma \cdot \sigma)(t) = \cos(t)(at + b) + \sin(t)(ct + d) \\[4pt]
+    &\leadsto \quad \lVert \gamma \rVert^2(t) = (\gamma \cdot \gamma)(t) = \cos(t)^2 + \sin(t)^2 = 1 \\[4pt]
+    &\leadsto \quad (\lambda \gamma)(t) = \begin{bmatrix} \cos(t)^2 \\ \cos(t) \sin(t) \end{bmatrix}
+    \end{aligned}
+    $$
+    """)
     return
 
 
@@ -251,29 +378,7 @@ def _(definition, mo, theorem):
         [
             mo.md(
                 r"""
-    **Remark.** We can extend vector operations to paths. Given $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^m$, $\sigma : \mathbb{R} \longrightarrow \mathbb{R}^m$, and $\lambda : \mathbb{R} \longrightarrow \mathbb{R}$
-
-    $$
-    \begin{aligned}
-    \underbrace{(\gamma + \sigma)(t)}_{\text{addition of paths}} &= \underbrace{\gamma(t) + \sigma(t)}_{\text{addition of vectors}} &\qquad \gamma + \sigma &: \mathbb{R} \longrightarrow \mathbb{R}^m \\[10pt]
-    \underbrace{(\lambda \gamma)(t)}_{\substack{\text{multiplication of scalar} \\ \text{function and a path}}} &= \underbrace{\lambda(t)\, \gamma(t)}_{\substack{\text{multiplication of} \\ \text{scalar and vector}}} &\qquad \lambda \gamma &: \mathbb{R} \longrightarrow \mathbb{R}^m \\[10pt]
-    \underbrace{(\gamma \cdot \sigma)(t)}_{\text{dot product of paths}} &= \underbrace{\gamma(t) \cdot \sigma(t)}_{\text{dot product of vectors}} &\qquad \gamma \cdot \sigma &: \mathbb{R} \longrightarrow \mathbb{R} \\[10pt]
-    \underbrace{(\gamma \times \sigma)(t)}_{\substack{\text{cross-product of} \\ \text{paths in } \mathbb{R}^3}} &= \underbrace{\gamma(t) \times \sigma(t)}_{\substack{\text{cross-product of} \\ \text{vectors in } \mathbb{R}^3}} &\qquad \gamma \times \sigma &: \mathbb{R} \longrightarrow \mathbb{R}^3 \quad (m = 3)
-    \end{aligned}
-    $$
-
-    **Example.** &nbsp; $\gamma(t) = \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix}, \quad \sigma(t) = \begin{bmatrix} at + b \\ ct + d \end{bmatrix}, \quad \lambda(t) = \cos(t)$
-
-    $$
-    \begin{aligned}
-    (\gamma + \sigma)(t) &= \begin{bmatrix} \cos(t) + at + b \\ \sin(t) + ct + d \end{bmatrix} \\[4pt]
-    (\gamma \cdot \sigma)(t) &= \cos(t)(at + b) + \sin(t)(ct + d) \\[4pt]
-    \lVert \gamma \rVert^2(t) &= (\gamma \cdot \gamma)(t) = \cos(t)^2 + \sin(t)^2 = 1 \\[4pt]
-    (\lambda \gamma)(t) &= \begin{bmatrix} \cos(t)^2 \\ \cos(t) \sin(t) \end{bmatrix}
-    \end{aligned}
-    $$
-
-    ## Limits
+    ### Limits
 
     (how does a path behave as we “approach” a certain input?)
     """
@@ -283,13 +388,12 @@ def _(definition, mo, theorem):
     Given $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^m$, $a \in \mathbb{R}$ and $\vec{b} \in \mathbb{R}^m$ we say
 
     $$
-    \lim_{t \to a} \gamma(t) = \vec{b}
+    \lim_{t \to a} \gamma(t) = \vec{b} \qquad (\text{the limit of } \gamma \text{ as } t \text{ approaches } a \text{ is equal to } \vec{b})
     $$
 
-    (the limit of $\gamma$ as $t$ approaches $a$ is equal to $\vec{b}$)
-
     if we can make $\gamma(t)$ **arbitrarily** close to $\vec{b}$ (as close as we want) by taking $t$ **sufficiently** close to $a$ (as close as we need), but different from $a$ (we don't even need $\gamma$ to be defined at $t = a$ to talk about limits).
-    """
+    """,
+                "Limit of a path",
             ),
             mo.md(
                 r"""
@@ -309,19 +413,17 @@ def _(definition, mo, theorem):
     Limit of paths can be calculated componentwise
 
     $$
-    \begin{gathered}
-    \lim_{t \to a} \gamma(t) = \vec{b} \quad \Longleftrightarrow \quad \lim_{t \to a} \gamma^i(t) = b^i \\
-    \forall\, i = 1, 2, \dots, m
-    \end{gathered}
+    \lim_{t \to a} \gamma(t) = \vec{b} \quad \Longleftrightarrow \quad \lim_{t \to a} \gamma^i(t) = b^i \quad \forall\, i = 1, 2, \dots, m
     $$
-    """
+    """,
+                "Limits componentwise",
             ),
             mo.md(
                 r"""
     **Example.** &nbsp; $\gamma(t) = \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix}$
 
     $$
-    \lim_{t \to \pi/2} \gamma(t) = \begin{bmatrix} \lim_{t \to \pi/2} \cos(t) \\ \lim_{t \to \pi/2} \sin(t) \end{bmatrix} = \begin{bmatrix} 0 \\ 1 \end{bmatrix}
+    \lim_{t \to \pi/2} \gamma(t) = \begin{bmatrix} \displaystyle \lim_{t \to \pi/2} \cos(t) \\[8pt] \displaystyle \lim_{t \to \pi/2} \sin(t) \end{bmatrix} = \begin{bmatrix} 0 \\ 1 \end{bmatrix}
     $$
 
     **Remark.** Limits are unique, provided they exist!
@@ -333,32 +435,22 @@ def _(definition, mo, theorem):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, OCHRE, arrow, definition, mo, np, path_projection, theorem):
-    _fig = Figure(figsize=(5.6, 4.2), layout="constrained")
-    _ax = _fig.subplots()
-    _ax.set_xlim(-1.8, 2.9)
-    _ax.set_ylim(-1.8, 1.9)
-    _ax.set_aspect("equal")
-    _ax.axis("off")
-    arrow(_ax, path_projection(-3.8, 0, 0), path_projection(7, 0, 0), "black", lw=0.9)
-    arrow(_ax, path_projection(0, -1.4, 0), path_projection(0, 2.3, 0), "black", lw=0.9)
-    arrow(_ax, path_projection(0, 0, -1.5), path_projection(0, 0, 1.7), "black", lw=0.9)
-    _ax.text(2.6, -0.7, "$t$")
-    _ax.text(-1.65, -1.2, "$y^1$")
-    _ax.text(0.12, 1.6, "$y^2$")
-    for _s in (np.linspace(-2.8, -0.001, 250), np.linspace(0.001, 6.2, 600)):
-        _ax.plot(*path_projection(_s, np.cos(_s), np.sin(_s)), color=OCHRE, lw=1.5)
-    _limit = path_projection(0, 1, 0)
-    _value = path_projection(0, 0, 1)
-    _ax.plot(*_limit, "o", color=BLUE, ms=6, mfc="white", mew=1.2)
-    _ax.plot(*_value, "o", color=BLUE, ms=4.5)
-    _ax.annotate(r"$(0,\lim_{t\to0}\gamma(t))$", _limit, xytext=(-5, -66), textcoords="offset points", ha="center", color=BLUE, fontsize=13)
-    _ax.annotate(r"$(0,\gamma(0))$", _value, xytext=(-8, 8), textcoords="offset points", ha="right", color=BLUE, fontsize=13)
-    _ax.set_title(r"$\mathrm{graph}(\gamma)$", color=OCHRE)
+def _(BLUE, FULL, blank, definition, helix, mo, path_axes, path_projection, theorem):
+    _fig, _ax = blank(FULL, 3.55, (-3.3, 4.7), (-1.95, 1.9))
+    path_axes(_ax, -6.6, 11.2)
+    helix(_ax, -5.9, 10.6, BLUE, gaps=(0,))
+    _limit = tuple(float(c) for c in path_projection(0, 1, 0))
+    _value = tuple(float(c) for c in path_projection(0, 0, 1))
+    _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
+    _ax.plot(*_limit, "o", color="black", ms=6, mfc="white", mew=1.2, zorder=5)
+    _ax.plot(*_value, "o", color="black", ms=4.5, zorder=5)
+    _ax.annotate(r"$(0, \lim_{t \to 0} \gamma(t))$", _limit, xytext=(8, -12), textcoords="offset points", ha="left", va="top", fontsize=12, bbox=_box, zorder=4)
+    _ax.annotate(r"$(0, \gamma(0))$", _value, xytext=(-9, 2), textcoords="offset points", ha="right", va="center", fontsize=12, bbox=_box, zorder=4)
+    _ax.text(-3.25, 1.7, r"$\mathrm{graph}(\gamma)$", fontsize=13, ha="left", va="center")
 
     mo.vstack(
         [
-            mo.md(r"## Continuity"),
+            mo.md(r"""### Continuity"""),
             definition(
                 r"""
     A path $\gamma$ is **continuous** at $t = a$ if
@@ -368,24 +460,21 @@ def _(BLUE, Figure, OCHRE, arrow, definition, mo, np, path_projection, theorem):
     $$
 
     $\gamma$ is continuous in $(a_1, a_2) \subset \mathbb{R}$ if it is continuous at every $t \in (a_1, a_2)$.
-    """
+    """,
+                "Continuity of a path",
             ),
             theorem(
                 r"""
-    A path is continuous iff all of its components are continuous
+    A path is continuous if and only if all of its components are continuous
 
     $$
-    \begin{gathered}
-    \lim_{t \to a} \gamma(t) = \gamma(a) \quad \Longleftrightarrow \quad \lim_{t \to a} \gamma^i(t) = \gamma^i(a) \\
-    \forall\, i = 1, 2, \dots, m
-    \end{gathered}
+    \lim_{t \to a} \gamma(t) = \gamma(a) \quad \Longleftrightarrow \quad \lim_{t \to a} \gamma^i(t) = \gamma^i(a) \quad \forall\, i = 1, 2, \dots, m
     $$
-    """
+    """,
+                "Continuity componentwise",
             ),
-            mo.vstack(
-                [
-                    mo.md(
-                        r"""
+            mo.md(
+                r"""
     **Example.**
 
     $$
@@ -395,11 +484,8 @@ def _(BLUE, Figure, OCHRE, arrow, definition, mo, np, path_projection, theorem):
     \end{cases}
     $$
     """
-                    ),
-                    mo.center(_fig),
-                ],
-                gap=2,
             ),
+            _fig,
         ]
     )
     return
@@ -409,7 +495,7 @@ def _(BLUE, Figure, OCHRE, arrow, definition, mo, np, path_projection, theorem):
 def _(definition, mo):
     mo.vstack(
         [
-            mo.md(r"## Differentiability"),
+            mo.md(r"""### Differentiability"""),
             definition(
                 r"""
     A path $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^m$ is **differentiable** at $t = a$ if
@@ -418,19 +504,21 @@ def _(definition, mo):
     \lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a} \quad \text{exists.}
     $$
 
-    If it exists we call it the **derivative** of $\gamma$ at $t = a$ and denote it $\gamma'(a)$.
-    """
+    $\leadsto$ &nbsp; if it exists we call it the **derivative** of $\gamma$ at $t = a$ and denote it $\gamma'(a)$
+    """,
+                "Derivative of a path",
             ),
             mo.md(
                 r"""
-    We also call $\gamma'(a)$ the **velocity** of the path $\gamma$ at $t = a$; &nbsp; $\gamma(a)$ is the **position** of $\gamma$ at $t = a$.
+    $\leadsto$ &nbsp; we also call $\gamma'(a)$ the **velocity** of the path $\gamma$ at $t = a$ &nbsp; ($\gamma(a)$ is the **position** of $\gamma$ at $t = a$)
 
     **Example.** &nbsp; $\gamma(t) = \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix}$
 
     $$
     \begin{aligned}
-    \gamma'(a) &= \lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a} = \lim_{t \to a} \begin{bmatrix} \dfrac{\gamma^1(t) - \gamma^1(a)}{t - a} \\[10pt] \dfrac{\gamma^2(t) - \gamma^2(a)}{t - a} \end{bmatrix} \\[6pt]
-    &= \begin{bmatrix} \displaystyle \lim_{t \to a} \dfrac{\gamma^1(t) - \gamma^1(a)}{t - a} \\[10pt] \displaystyle \lim_{t \to a} \dfrac{\gamma^2(t) - \gamma^2(a)}{t - a} \end{bmatrix} = \begin{bmatrix} \dfrac{d}{dt} \cos(t) \Big|_{t = a} \\[10pt] \dfrac{d}{dt} \sin(t) \Big|_{t = a} \end{bmatrix} = \begin{bmatrix} -\sin(a) \\ \cos(a) \end{bmatrix}
+    \gamma'(a) &= \lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a} = \lim_{t \to a} \begin{bmatrix} \dfrac{\gamma^1(t) - \gamma^1(a)}{t - a} \\[10pt] \dfrac{\gamma^2(t) - \gamma^2(a)}{t - a} \end{bmatrix}
+    = \begin{bmatrix} \displaystyle \lim_{t \to a} \dfrac{\gamma^1(t) - \gamma^1(a)}{t - a} \\[10pt] \displaystyle \lim_{t \to a} \dfrac{\gamma^2(t) - \gamma^2(a)}{t - a} \end{bmatrix} \\[6pt]
+    &= \begin{bmatrix} \dfrac{d}{dt} \cos(t) \Big|_{t = a} \\[10pt] \dfrac{d}{dt} \sin(t) \Big|_{t = a} \end{bmatrix} = \begin{bmatrix} -\sin(a) \\ \cos(a) \end{bmatrix}
     \end{aligned}
     $$
     """
@@ -447,38 +535,40 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(Arc, BLUE, Figure, GREEN, OCHRE, a_circle, arrow, math, mo, np):
+def _(Arc, BLUE, GREEN, GREY, HALF, a_circle, arrow, blank, math, mo, np, table, vector):
     _a = a_circle.value
     _p = (math.cos(_a), math.sin(_a))
     _v = (-math.sin(_a), math.cos(_a))
     _tip = (_p[0] + _v[0], _p[1] + _v[1])
+    _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
 
-    _fig = Figure(figsize=(4.8, 4.2), layout="constrained")
-    _ax = _fig.subplots()
-    _ax.set_xlim(-2.2, 2.2)
-    _ax.set_ylim(-2, 2)
-    _ax.set_aspect("equal")
-    _ax.axis("off")
-    arrow(_ax, (-1.8, 0), (1.8, 0), "black", lw=0.9)
-    arrow(_ax, (0, -1.8), (0, 1.8), "black", lw=0.9)
+    _fig, _ax = blank(HALF, 3.4, (-2.25, 2.25), (-2.1, 2.15))
+    arrow(_ax, (-1.9, 0), (1.95, 0), "black", lw=0.9)
+    arrow(_ax, (0, -1.9), (0, 1.95), "black", lw=0.9)
+    _ax.text(2.0, -0.08, "$y^1$", fontsize=13, ha="center", va="top")
+    _ax.text(0.1, 1.98, "$y^2$", fontsize=13, ha="left", va="center")
     _th = np.linspace(0, 2 * np.pi, 361)
-    _ax.plot(np.cos(_th), np.sin(_th), color=OCHRE, lw=1.5)
-    arrow(_ax, (0, 0), _p, BLUE)
-    arrow(_ax, _p, _tip, GREEN)
-    _ax.plot(*_p, "o", color=BLUE, ms=4.5)
-    _ax.annotate(r"$\gamma(a)$", _p, textcoords="offset points", xytext=(8 * _p[0], 8 * _p[1]), ha="left" if _p[0] >= 0 else "right", va="bottom" if _p[1] >= 0 else "top", color=BLUE, fontsize=13)
-    _ax.annotate(r"$\gamma'(a)$", _tip, textcoords="offset points", xytext=(6 * _tip[0], 6 * _tip[1]), ha="left" if _tip[0] >= 0 else "right", va="bottom" if _tip[1] >= 0 else "top", color=GREEN, fontsize=13)
-    _ax.add_patch(Arc((0, 0), 0.6, 0.6, theta1=0, theta2=math.degrees(_a), color=BLUE, lw=1))
+    _ax.plot(np.cos(_th), np.sin(_th), color=BLUE, lw=1.5)
+    _ax.add_patch(Arc((0, 0), 0.6, 0.6, theta1=0, theta2=math.degrees(_a), color=GREY, lw=1.0))
+    if _a >= 0.5:
+        _ax.text(0.5 * math.cos(_a / 2), 0.5 * math.sin(_a / 2), "$a$", color=GREY, fontsize=12, ha="center", va="center", bbox=_box)
+    vector(_ax, (0, 0), _p, BLUE, r"$\gamma(a)$", -40, r=20)
+    vector(_ax, _p, _tip, GREEN, r"$\gamma'(a)$", 0, r=19)
+    _ax.plot(*_p, "o", color="black", ms=4, zorder=4)
+
+    def _f(v):
+        return f"{round(v, 2) + 0.0:.2f}"
 
     mo.vstack(
         [
-            mo.hstack([a_circle], justify="start", gap=3),
-            mo.md(
-                "| | |\n|:--|:--|\n"
-                + rf"| $\gamma(a)$ | $\begin{{bmatrix}} {_p[0]:.2f} \\ {_p[1]:.2f} \end{{bmatrix}}$ |" + "\n"
-                + rf"| $\gamma'(a)$ | $\begin{{bmatrix}} {_v[0]:.2f} \\ {_v[1]:.2f} \end{{bmatrix}}$ |"
+            mo.hstack([a_circle], justify="start", gap=2, wrap=True),
+            table(
+                [
+                    (r"position $\gamma(a)$", rf"$\textcolor{{{BLUE}}}{{\begin{{bmatrix}} {_f(_p[0])} \\ {_f(_p[1])} \end{{bmatrix}}}}$"),
+                    (r"velocity $\gamma'(a)$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_f(_v[0])} \\ {_f(_v[1])} \end{{bmatrix}}}}$"),
+                ]
             ),
-            mo.center(_fig),
+            _fig,
         ]
     )
     return
@@ -493,12 +583,10 @@ def _(definition, mo, theorem):
     Derivatives of paths can be computed componentwise
 
     $$
-    \begin{gathered}
-    \gamma'(a) = \vec{v} \quad \Longleftrightarrow \quad \frac{d}{dt} \gamma^i(t) \Big|_{t = a} = v^i \\
-    \forall\, i = 1, 2, \dots, m
-    \end{gathered}
+    \gamma'(a) = \vec{v} \quad \Longleftrightarrow \quad \frac{d}{dt} \gamma^i(t) \Big|_{t = a} = v^i \quad \forall\, i = 1, 2, \dots, m
     $$
-    """
+    """,
+                "Derivatives componentwise",
             ),
             definition(
                 r"""
@@ -507,7 +595,8 @@ def _(definition, mo, theorem):
     $$
     T_a \gamma = \left\{\, \vec{y} = \gamma(a) + s\, \gamma'(a) \;\middle|\; s \in \mathbb{R} \,\right\}
     $$
-    """
+    """,
+                "Tangent line",
             ),
             mo.md(
                 r"""
@@ -530,35 +619,45 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, GREY, OCHRE, a_parabola, arrow, mo, np):
+def _(BLUE, FULL, GREEN, ORANGE, a_parabola, arrow, blank, math, mo, np, table, vector):
     _a = a_parabola.value
     _p, _v = (_a**2, _a), (2 * _a, 1.0)
     _tip = (_p[0] + _v[0], _p[1] + _v[1])
+    _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
 
-    _fig = Figure(figsize=(5.8, 4.3), layout="constrained")
-    _ax = _fig.subplots()
-    _ax.set_xlim(-1.8, 6.2)
-    _ax.set_ylim(-2.5, 3.1)
-    _ax.set_aspect("equal")
-    _ax.axis("off")
-    arrow(_ax, (-1.7, 0), (6, 0), "black", lw=0.9)
-    arrow(_ax, (0, -2.4), (0, 2.9), "black", lw=0.9)
-    _ax.text(5.8, -0.4, "$y^1$")
-    _ax.text(-0.5, 2.7, "$y^2$")
+    _fig, _ax = blank(FULL, 4.2, (-3.6, 6.4), (-2.7, 3.0))
+    arrow(_ax, (-3.4, 0), (6.1, 0), "black", lw=0.9)
+    arrow(_ax, (0, -2.6), (0, 2.8), "black", lw=0.9)
+    _ax.text(6.15, -0.1, "$y^1$", fontsize=13, ha="center", va="top")
+    _ax.text(-0.12, 2.8, "$y^2$", fontsize=13, ha="right", va="center")
     _t = np.linspace(-2.45, 2.45, 300)
-    _ax.plot(_t**2, _t, color=OCHRE, lw=1.5)
-    _s = np.array([-8.0, 8.0])
-    _ax.plot(_p[0] + _s * _v[0], _p[1] + _s * _v[1], color=GREY, lw=1)
-    arrow(_ax, _p, _tip, GREEN)
-    _ax.annotate(r"$\gamma'(a)$", _tip, textcoords="offset points", xytext=(-6, 7) if _a >= 0 else (6, 7), ha="right" if _a >= 0 else "left", va="bottom", color=GREEN, fontsize=13)
-    _ax.plot(*_p, "o", color=BLUE, ms=4.5)
-    _ax.annotate(r"$\gamma(a)$", _p, textcoords="offset points", xytext=(18, -14) if _a >= 0 else (18, 8), va="top" if _a >= 0 else "bottom", color=BLUE, fontsize=13)
+    _ax.plot(_t**2, _t, color=BLUE, lw=1.5)
+    _ax.text(5.0, -1.75, r"$\mathrm{Im}(\gamma)$", color=BLUE, fontsize=13, ha="center", va="center")
+    _s = np.array([-12.0, 12.0])
+    _ax.plot(_p[0] + _s * _v[0], _p[1] + _s * _v[1], color=ORANGE, lw=1.0)
+    # the names sit off the line: T_a gamma on the outer side of the parabola, gamma(a) on the inner side
+    _n = math.hypot(*_v)
+    _out = (-_v[1] / _n, _v[0] / _n)
+    _q = (_p[0] - 1.4 * _v[0] / _n, _p[1] - 1.4 * _v[1] / _n)
+    _ax.annotate(r"$T_a\gamma$", _q, textcoords="offset points", xytext=(15 * _out[0], 15 * _out[1]), ha="center", va="center", color=ORANGE, fontsize=13, bbox=_box, zorder=3)
+    vector(_ax, _p, _tip, GREEN, r"$\gamma'(a)$", 0, r=20)
+    _ax.plot(*_p, "o", color="black", ms=4, zorder=4)
+    _ax.annotate(r"$\gamma(a)$", _p, textcoords="offset points", xytext=(-19 * _out[0], -19 * _out[1]), ha="center", va="center", fontsize=13, bbox=_box, zorder=3)
 
     mo.vstack(
         [
-            mo.hstack([a_parabola], justify="start", gap=3),
-            mo.md("| | |\n|:--|:--|\n" + rf"| $T_a \gamma$ | $\left\{{\, \vec{{y}} = \begin{{bmatrix}} {_p[0]:.2f} \\ {_p[1]:g} \end{{bmatrix}} + s \begin{{bmatrix}} {_v[0]:g} \\ 1 \end{{bmatrix}} \;\middle\vert\; s \in \mathbb{{R}} \,\right\}}$ |"),
-            mo.center(_fig),
+            mo.hstack([a_parabola], justify="start", gap=2, wrap=True),
+            table(
+                [
+                    (r"position $\gamma(a)$", rf"$\begin{{bmatrix}} {_p[0] + 0.0:.2f} \\ {_p[1] + 0.0:g} \end{{bmatrix}}$"),
+                    (r"velocity $\gamma'(a)$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_v[0] + 0.0:g} \\ 1 \end{{bmatrix}}}}$"),
+                    (
+                        r"tangent line $T_a \gamma$",
+                        rf"$\textcolor{{{ORANGE}}}{{\left\{{\, \vec{{y}} = \begin{{bmatrix}} {_p[0] + 0.0:.2f} \\ {_p[1] + 0.0:g} \end{{bmatrix}} + s \begin{{bmatrix}} {_v[0] + 0.0:g} \\ 1 \end{{bmatrix}} \;\middle\vert\; s \in \mathbb{{R}} \,\right\}}}}$",
+                    ),
+                ]
+            ),
+            _fig,
         ]
     )
     return
@@ -617,6 +716,22 @@ def _(check, mo, q1_a, q1_b):
             ),
         ]
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Summary
+
+    - a path $\gamma : A \subseteq \mathbb{R} \longrightarrow \mathbb{R}^m$ is an ordered list of single variable functions $\gamma^1, \dots, \gamma^m$; vector operations extend to paths
+    - $\displaystyle \lim_{t \to a} \gamma(t) = \vec{b}$: we can make $\gamma(t)$ arbitrarily close to $\vec{b}$ by taking $t$ sufficiently close to $a$ (but different from $a$); $\gamma$ is continuous at $t = a$ if $\displaystyle \lim_{t \to a} \gamma(t) = \gamma(a)$
+    - the derivative (velocity) $\gamma'(a) = \displaystyle \lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a}$; $\gamma(a)$ is the position
+    - limits, continuity and derivatives of paths can be computed componentwise
+    - if $\gamma'(a) \neq \vec{0}$, the tangent line to $\gamma$ at $t = a$ is $T_a \gamma = \{\, \vec{y} = \gamma(a) + s\, \gamma'(a) \mid s \in \mathbb{R} \,\}$
+
+    **Next:** local properties of scalar functions and maps: limits
+    """)
     return
 
 
