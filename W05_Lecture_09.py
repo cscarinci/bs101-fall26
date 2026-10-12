@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 09", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 · Lecture 09 · Differentiability and the derivative", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -60,7 +60,7 @@ def _(mo):
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>", "color": color, "lw": 2.2, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -91,7 +91,7 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 09", "Week 05", "Lecture 09")
+    header("Lecture 09", "Week 05", "Lecture 09 · Differentiability and the derivative")
     return
 
 
@@ -376,32 +376,29 @@ def _(BLUE, Figure, GREEN, RED, angle, arrow, math, mo, np):
     _left.set_aspect("equal")
     _left.set_xlabel("$x^1$")
     _left.set_ylabel("$x^2$", rotation=0)
-    _left.set_title("level sets of $f$", fontsize=13)
+    _left.plot([], [], color="#888888", lw=0.8, label="level sets of $f$")
+    _left.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), frameon=False, fontsize=12)
 
     _t = np.linspace(-1, 1, 200)
-    _right.plot(_t, _f(_a[0] + _t * _v[0], _a[1] + _t * _v[1]), color=GREEN, lw=2)
-    _right.plot(_t, 1 + _D * _t, color=BLUE, lw=1.3)
+    _right.plot(_t, _f(_a[0] + _t * _v[0], _a[1] + _t * _v[1]), color=GREEN, lw=2, label=r"$f(\vec{a} + t\vec{v})$")
+    _right.plot(_t, 1 + _D * _t, color=BLUE, lw=1.3, label=r"$f(\vec{a}) + t\, Df(\vec{a})(\vec{v})$")
     _right.plot(0, 1, "o", color=RED, ms=6)
     _right.axhline(0, color="black", lw=0.8)
     _right.axvline(0, color="black", lw=0.8)
     _right.set_xlim(-1, 1)
     _right.set_ylim(-3, 8)
     _right.set_xlabel("$t$")
-    _right.set_title(r"$t \mapsto f(\vec{a} + t\vec{v})$", fontsize=13)
+    _right.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, frameon=False, fontsize=12)
 
     mo.vstack(
         [
-            mo.md(r"For $f(\vec{x}) = (x^1)^2 (x^2)^3$ at $\vec{a} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$:"),
-            mo.hstack(
-                [
-                    angle,
-                    mo.md(
-                        rf"$\vec{{v}} = \begin{{bmatrix}} {_v[0]:.2f} \\ {_v[1]:.2f} \end{{bmatrix}}, \qquad Df(\vec{{a}})(\vec{{v}}) = {_D:.2f}$"
-                    ),
-                ],
-                justify="start",
-                gap=3,
-                align="center",
+            mo.hstack([angle], justify="start", gap=3),
+            mo.md(
+                "| | |\n|:--|:--|\n"
+                + r"| $f(\vec{x})$ | $(x^1)^2 (x^2)^3$ |" + "\n"
+                + r"| $\vec{a}$ | $\begin{bmatrix} 1 \\ 1 \end{bmatrix}$ |" + "\n"
+                + rf"| $\vec{{v}}$ | $\begin{{bmatrix}} {_v[0]:.2f} \\ {_v[1]:.2f} \end{{bmatrix}}$ |" + "\n"
+                + rf"| $Df(\vec{{a}})(\vec{{v}})$ | ${_D:.2f}$ |"
             ),
             _fig,
         ]
