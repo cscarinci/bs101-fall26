@@ -183,7 +183,7 @@ def _(BLUE, GREEN, GREY, HALF, RED, arrow, blank, mo):
     """
             ),
             _fig,
-            mo.md(r"""**Today:** the standard basis as preferred orthogonal frame, matrices, linear transformations and determinants"""),
+            mo.md(r"""**In this lecture:** the standard basis as preferred orthogonal frame, matrices, linear transformations and determinants"""),
         ]
     )
     return

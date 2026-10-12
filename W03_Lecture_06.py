@@ -224,7 +224,7 @@ def _(mo):
     - $\leadsto$ &nbsp; vectors, lines, planes
     - $\leadsto$ &nbsp; dot products and cross-products (in $\mathbb{R}^3$): lengths, angles, areas, volumes
 
-    **Today:** multivariable functions &nbsp; $\leadsto$ &nbsp; objects of interest in Multivariable Calculus
+    **In this lecture:** multivariable functions &nbsp; $\leadsto$ &nbsp; objects of interest in Multivariable Calculus
     """)
     return
 

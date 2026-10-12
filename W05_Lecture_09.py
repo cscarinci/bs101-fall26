@@ -209,7 +209,7 @@ def _(BLUE, FULL, GREEN, RED, arrow, blank, mo, np, vector):
     """
             ),
             _fig,
-            mo.md(r"""**Today:** differentiability and the derivative, for $n = 2$, $m = 1$ &nbsp; $\leadsto$ &nbsp; scalar functions on $\mathbb{R}^2$"""),
+            mo.md(r"""**In this lecture:** differentiability and the derivative, for $n = 2$, $m = 1$ &nbsp; $\leadsto$ &nbsp; scalar functions on $\mathbb{R}^2$"""),
         ]
     )
     return

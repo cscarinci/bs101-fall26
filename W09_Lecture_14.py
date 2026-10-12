@@ -185,7 +185,7 @@ def _(mo):
     - the Hessian matrix $Hf(\vec{a}) = D(\vec{\nabla} f)(\vec{a}) \in \mathrm{Mat}(n \times n)$ generalizes $f''(a)$
     - quadratic approximation: $f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) + \frac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})$, with error going to zero faster than $\lVert \vec{x} - \vec{a} \rVert^2$
 
-    **Today:** local maxima and minima of scalar valued functions
+    **In this lecture:** local maxima and minima of scalar valued functions
     """)
     return
 

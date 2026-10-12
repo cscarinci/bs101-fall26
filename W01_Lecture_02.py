@@ -167,7 +167,7 @@ def _(mo):
     - vector addition ${+} : \mathbb{R}^n \times \mathbb{R}^n \longrightarrow \mathbb{R}^n$ and scalar–vector multiplication $\cdot : \mathbb{R} \times \mathbb{R}^n \longrightarrow \mathbb{R}^n$, both componentwise
     - $\leadsto$ &nbsp; allow us to do calculations with vectors the same way as with real numbers!
 
-    **Today:** extra structure on $\mathbb{R}^n$ (needed for “measurements”)
+    **In this lecture:** extra structure on $\mathbb{R}^n$ (needed for “measurements”)
     """)
     return
 
