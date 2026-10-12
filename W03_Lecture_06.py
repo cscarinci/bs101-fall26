@@ -551,7 +551,7 @@ def _(BLUE, GREEN, HALF, RED, arrow, blank, mo, np, ortho, quadric):
     f^{-1}(b) = \left\{\, \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \;\middle|\; (x^1)^2 - (x^2)^2 = b \,\right\}
     $$
 
-    - $f^{-1}(0) \iff \lvert x^1 \rvert = \lvert x^2 \rvert$ &nbsp; a cone
+    - $f^{-1}(0) \iff \lvert x^1 \rvert = \lvert x^2 \rvert$ &nbsp; two intersecting lines (a cone)
     - $f^{-1}(1) \iff (x^1)^2 - (x^2)^2 = 1$ &nbsp; a hyperbola
     - $f^{-1}(-4) \iff (x^1)^2 - (x^2)^2 = -4$ &nbsp; also a hyperbola
     """
@@ -611,7 +611,7 @@ def _(BLUE, FULL, Figure, arrow, b_level, mo, np, ortho, plane, quadric, table):
         arrow(_right, ortho(-1.2 * _d), ortho(_len * _d), "black", lw=0.9)
     quadric(_right, _b, 3.0, BLUE, wire=True)
 
-    _flat = "a cone" if _b == 0 else "a hyperbola"
+    _flat = "two intersecting lines (a cone)" if _b == 0 else "a hyperbola"
     _solid = "cone" if _b == 0 else "hyperboloid of one sheet" if _b > 0 else "hyperboloid of two sheets"
 
     mo.vstack(
