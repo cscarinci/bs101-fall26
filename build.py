@@ -36,6 +36,8 @@ TITLES = {  # lecture number -> title shown on the index
     14: "Local maxima and minima of scalar valued functions",
 }
 
+DRAFTS = {14}  # lectures kept in the repo but not published
+
 PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -89,7 +91,8 @@ def main():
     notebooks = {}
     for path in sorted(HERE.glob("W*_Lecture_*.py")):
         number = int(re.search(r"Lecture_(\d+)", path.stem).group(1))
-        notebooks[number] = path
+        if number not in DRAFTS:
+            notebooks[number] = path
 
     for number, path in notebooks.items():
         print(f"exporting {path.name}")
