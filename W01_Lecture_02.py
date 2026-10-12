@@ -60,7 +60,7 @@ def _(mo):
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>", "color": color, "lw": 2.2, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -309,7 +309,7 @@ def _(Arc, Figure, GREEN, RED, arrow, controls, dot, math, mo, nonzero, nx, ny, 
     arrow(_ax, (0, 0), tuple(x), RED)
     arrow(_ax, (0, 0), tuple(y), GREEN)
     for _color, _label in ((RED, r"$\vec{x}$"), (GREEN, r"$\vec{y}$")):
-        _ax.plot([], [], color=_color, lw=2.2, label=_label)
+        _ax.plot([], [], color=_color, lw=1.4, label=_label)
     _ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=12)
 
     if nonzero:
@@ -340,15 +340,9 @@ def _(Arc, Figure, GREEN, RED, arrow, controls, dot, math, mo, nonzero, nx, ny, 
 
     mo.vstack(
         [
-            mo.md(
-                r"""
-    ### Try it yourself
-
-    Move the components of $\vec{x}$ and $\vec{y}$. When is the dot product positive, zero, negative?
-    """
-            ),
             controls,
-            mo.hstack([_fig, _values], widths=[1, 1], gap=2, align="center"),
+            _values,
+            _fig,
         ]
     )
     return
@@ -385,7 +379,7 @@ def _(mo, theorem):
     1. Positive definite implies
 
         $$
-        \lVert t\vec{x} + \vec{y} \rVert^2 \geq 0, \quad \text{with ``$=$'' iff } t\vec{x} + \vec{y} = \vec{0}
+        \lVert t\vec{x} + \vec{y} \rVert^2 \geq 0, \quad \text{with ``$=$'' iff } t\vec{x} + \vec{y} = \vec{0} \quad (\vec{x}, \vec{y} \text{ proportional})
         $$
 
     2. Bilinearity and symmetry give a quadratic polynomial in $t$:
@@ -428,42 +422,24 @@ def _(BLUE, Figure, controls, dot, mo, np, nx, ny):
     _upper = max(30.0, 1.25 * float(_p.min()) + 2)
     _ax.set_ylim(-0.05 * _upper, _upper)
     _ax.set_xlabel("$t$")
-    _ax.set_title(r"$p(t) = \|t\vec{x} + \vec{y}\|^2$", fontsize=12)
+    _ax.set_ylabel(r"$\|t\vec{x} + \vec{y}\|^2$")
 
-    if nx == 0:
-        _verdict = r"$\vec{x} = \vec{0}$: $p$ is constant, not a quadratic."
-    elif abs(_disc) < 1e-9:
-        _verdict = r"Discriminant $= 0$: the parabola **touches** the $t$-axis, so $\vec{x}, \vec{y}$ are proportional."
-    else:
-        _verdict = r"Discriminant $< 0$: the parabola stays **strictly above** the $t$-axis, so $\vec{x}, \vec{y}$ are not proportional."
+    _verdict = "yes" if abs(_disc) < 1e-9 else "no"
 
     mo.vstack(
         [
-            mo.md(
-                r"""
-    ### See the proof
-
-    The same $\vec{x}, \vec{y}$ as above. Try to make the parabola touch the $t$-axis.
-    """
-            ),
             controls,
-            mo.hstack(
-                [
-                    _fig,
-                    mo.md(
-                        "| | |\n|:--|:--|\n"
-                        rf"| $(\vec{{x}}\cdot\vec{{y}})^2$ | ${dot**2:g}$ |"
-                        "\n"
-                        rf"| $\lVert\vec{{x}}\rVert^2\lVert\vec{{y}}\rVert^2$ | ${nx**2 * ny**2:g}$ |"
-                        "\n"
-                        rf"| discriminant | ${_disc:g}$ |"
-                        "\n\n" + _verdict
-                    ).style({"max-width": "26rem"}),
-                ],
-                widths=[1, 1],
-                gap=2,
-                align="center",
+            mo.md(
+                "| | |\n|:--|:--|\n"
+                rf"| $(\vec{{x}}\cdot\vec{{y}})^2$ | ${dot**2:g}$ |"
+                "\n"
+                rf"| $\lVert\vec{{x}}\rVert^2\lVert\vec{{y}}\rVert^2$ | ${nx**2 * ny**2:g}$ |"
+                "\n"
+                rf"| discriminant | ${_disc:g}$ |"
+                "\n"
+                rf"| $\vec{{x}}, \vec{{y}}$ proportional | {_verdict} |"
             ),
+            _fig,
         ]
     )
     return
@@ -477,12 +453,14 @@ def _(BLUE, Figure, GREEN, RED, arrow, controls, mo, np, nx, ny, plane, theorem,
     _fig = Figure(figsize=(4.2, 4.2), layout="constrained")
     _ax = _fig.subplots()
     plane(_ax, 8.5)
+    _ax.set_xticks(range(-8, 9, 2))
+    _ax.set_yticks(range(-8, 9, 2))
     arrow(_ax, (0, 0), tuple(x), RED)
     arrow(_ax, (0, 0), tuple(y), "#1a237e")
     arrow(_ax, tuple(x), tuple(_s), BLUE)
     arrow(_ax, (0, 0), tuple(_s), GREEN)
     for _color, _label in ((RED, r"$\vec{x}$"), (BLUE, r"$\vec{y}$ translated"), ("#1a237e", r"$\vec{y}$"), (GREEN, r"$\vec{x}+\vec{y}$")):
-        _ax.plot([], [], color=_color, lw=2.2, label=_label)
+        _ax.plot([], [], color=_color, lw=1.4, label=_label)
     _ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=12)
 
     mo.vstack(
@@ -499,22 +477,13 @@ def _(BLUE, Figure, GREEN, RED, arrow, controls, mo, np, nx, ny, plane, theorem,
             ),
             mo.md(r"**Proof.** A direct consequence of the Cauchy–Schwarz inequality! Exercise."),
             controls,
-            mo.hstack(
-                [
-                    _fig,
-                    mo.md(
-                        "| | |\n|:--|:--|\n"
-                        rf"| $\lVert\vec{{x}}+\vec{{y}}\rVert$ | ${_ns:.3f}$ |"
-                        "\n"
-                        rf"| $\lVert\vec{{x}}\rVert+\lVert\vec{{y}}\rVert$ | ${nx:.3f} + {ny:.3f} = {nx + ny:.3f}$ |"
-                        "\n\n"
-                        "When are the two sides equal?"
-                    ).style({"max-width": "26rem"}),
-                ],
-                widths=[1, 1],
-                gap=2,
-                align="center",
+            mo.md(
+                "| | |\n|:--|:--|\n"
+                rf"| $\lVert\vec{{x}}+\vec{{y}}\rVert$ | ${_ns:.3f}$ |"
+                "\n"
+                rf"| $\lVert\vec{{x}}\rVert+\lVert\vec{{y}}\rVert$ | ${nx:.3f} + {ny:.3f} = {nx + ny:.3f}$ |"
             ),
+            _fig,
         ]
     )
     return
@@ -546,7 +515,7 @@ def _(definition, mo, theorem):
             ),
             mo.md(
                 r"""
-    **Illustration (standard basis).**
+    **Proof.**
 
     $$
     \vec{e}_1 = \begin{bmatrix} 1 \\ 0 \\ \vdots \\ 0 \end{bmatrix}, \quad
@@ -573,7 +542,7 @@ def _(definition, mo, theorem):
 
     If $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n, \vec{x}$ were pairwise orthogonal, then $\vec{x}$ would have to be the zero vector $\vec{0}$. This contradicts our assumption that $\vec{x} \neq \vec{0}$.
 
-    This illustrates the standard-basis case; the general proof is omitted here.
+    Here we used the specific vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$; the argument extends to any set of $n$ non-zero pairwise orthogonal vectors (exercise, after Lecture 03). $\square$
     """
             ),
         ]
@@ -644,7 +613,7 @@ def _(Figure, RED, arrow, mo):
         ((0, 1, 0), r"$\vec{e}_2$", (6, 8), "left", "bottom"),
         ((0, 0, 1), r"$\vec{e}_3$", (8, 0), "left", "center"),
     ):
-        _ax3.quiver(0, 0, 0, *_d, color=RED, lw=2.4, arrow_length_ratio=0.15)
+        _ax3.quiver(0, 0, 0, *_d, color=RED, lw=1.6, arrow_length_ratio=0.12)
         _px, _py, _pz = _proj3d.proj_transform(*_d, _ax3.get_proj())
         _ax3.annotate(_name, (_px, _py), xytext=_offset, textcoords="offset points", ha=_ha, va=_va, color=RED, fontsize=17)
 
@@ -747,8 +716,6 @@ def _(check, mo, p1_dot, p1_nx, p2_a, p3_a, p3_b, p3_c):
             mo.md(
                 r"""
     ## Practice
-
-    Some parts have an answer box: type your result to check it.
 
     ### Question 1
 
