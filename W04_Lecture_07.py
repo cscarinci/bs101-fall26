@@ -61,7 +61,7 @@ def _(mo, np):
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>", "color": color, "lw": 1.3, "mutation_scale": 9, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -157,13 +157,13 @@ def _(definition, mo):
     - $\gamma^2 : \mathbb{R} \longrightarrow \mathbb{R}$, $t \longmapsto \sin(t)$ is the sine function
 
     $$
-    \mathrm{Im}(\gamma) = \left\{\, \gamma(t) \;\middle|\; t \in \mathbb{R} \,\right\} = \left\{\, \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix} \;\middle|\; t \in \mathbb{R} \,\right\}
+    \mathrm{Im}(\gamma) = \left\{\, \begin{bmatrix} y^1 \\ y^2 \end{bmatrix} \in \mathbb{R}^2 \;\middle|\; \exists\, t \in \mathbb{R},\ y^1 = \gamma^1(t),\ y^2 = \gamma^2(t) \,\right\} = \left\{\, \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix} \in \mathbb{R}^2 \;\middle|\; t \in \mathbb{R} \,\right\}
     $$
 
     This is the unit circle $(y^1)^2 + (y^2)^2 = 1$.
 
     $$
-    \mathrm{graph}(\gamma) = \left\{\, (t,\gamma(t)) \;\middle|\; t \in \mathbb{R} \,\right\} = \left\{\, \begin{bmatrix} t \\ \cos(t) \\ \sin(t) \end{bmatrix} \;\middle|\; t \in \mathbb{R} \,\right\}
+    \mathrm{graph}(\gamma) = \left\{\, \begin{bmatrix} t \\ y^1 \\ y^2 \end{bmatrix} \in \mathbb{R} \times \mathbb{R}^2 \;\middle|\; t \in \mathbb{R},\ y^1 = \gamma^1(t),\ y^2 = \gamma^2(t) \,\right\} = \left\{\, \begin{bmatrix} t \\ \cos(t) \\ \sin(t) \end{bmatrix} \in \mathbb{R}^3 \;\middle|\; t \in \mathbb{R} \,\right\}
     $$
 
     This is a helix in $\mathbb{R} \times \mathbb{R}^2 = \mathbb{R}^3$.
@@ -225,7 +225,7 @@ def _(Arc, BLUE, Figure, GREY, OCHRE, arrow, math, mo, np, path_projection, t_ci
     for _m in (-3.4, 1.3, 7.6, 13.85):
         _p0 = path_projection(_m - 0.12, math.cos(_m - 0.12), math.sin(_m - 0.12))
         _p1 = path_projection(_m + 0.12, math.cos(_m + 0.12), math.sin(_m + 0.12))
-        _right.annotate("", xy=_p1, xytext=_p0, arrowprops={"arrowstyle": "-|>", "color": OCHRE, "lw": 0.8, "mutation_scale": 9, "shrinkA": 0, "shrinkB": 0})
+        _right.annotate("", xy=_p1, xytext=_p0, arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": OCHRE, "lw": 0.8, "mutation_scale": 9, "shrinkA": 0, "shrinkB": 0})
     for _n, _name in enumerate(("$t=0$", r"$t=\pi$", r"$t=2\pi$", r"$t=3\pi$", r"$t=4\pi$")):
         _q = path_projection(_n * math.pi, math.cos(_n * math.pi), math.sin(_n * math.pi))
         _right.plot(*_q, "o", color=GREY, ms=3)
@@ -236,10 +236,8 @@ def _(Arc, BLUE, Figure, GREY, OCHRE, arrow, math, mo, np, path_projection, t_ci
 
     mo.vstack(
         [
-            mo.hstack(
-                [t_circle, mo.md(rf"$\gamma({_t:g}) = \begin{{bmatrix}} {math.cos(_t):.2f} \\ {math.sin(_t):.2f} \end{{bmatrix}}$")],
-                justify="start", gap=3, align="center",
-            ),
+            mo.hstack([t_circle], justify="start", gap=3),
+            mo.md("| | |\n|:--|:--|\n" + rf"| $\gamma(t)$ | $\begin{{bmatrix}} {math.cos(_t):.2f} \\ {math.sin(_t):.2f} \end{{bmatrix}}$ |"),
             mo.center(_fig),
             mo.center(_fig3),
         ]
@@ -276,6 +274,8 @@ def _(definition, mo, theorem):
     $$
 
     ## Limits
+
+    (how does a path behave as we “approach” a certain input?)
     """
             ),
             definition(
@@ -286,15 +286,22 @@ def _(definition, mo, theorem):
     \lim_{t \to a} \gamma(t) = \vec{b}
     $$
 
-    if we can make $\gamma(t)$ *arbitrarily* close to $\vec{b}$ by taking $t$ *sufficiently* close to, but different from, $a$.
+    (the limit of $\gamma$ as $t$ approaches $a$ is equal to $\vec{b}$)
 
-    Precisely, for every $\varepsilon > 0$ there exists $\delta > 0$ such that
+    if we can make $\gamma(t)$ **arbitrarily** close to $\vec{b}$ (as close as we want) by taking $t$ **sufficiently** close to $a$ (as close as we need), but different from $a$ (we don't even need $\gamma$ to be defined at $t = a$ to talk about limits).
+    """
+            ),
+            mo.md(
+                r"""
+    Choose how close to $\vec{b}$ you would like &nbsp; $\leadsto$ &nbsp; want $\lVert \gamma(t) - \vec{b} \rVert < \varepsilon$, for $\varepsilon > 0$.
+
+    Can we achieve this, by taking $t$ close enough to $a$? &nbsp; $\leadsto$ &nbsp; can we find $\delta > 0$ such that
 
     $$
-    0 < \lvert t - a \rvert < \delta \quad \Longrightarrow \quad \lVert \gamma(t) - \vec{b} \rVert < \varepsilon.
+    0 < \lvert t - a \rvert < \delta \quad \Longrightarrow \quad \lVert \gamma(t) - \vec{b} \rVert < \varepsilon \ ?
     $$
 
-    The value at $t = a$ is irrelevant; $\gamma$ need not be defined there.
+    Can we do this for every $\varepsilon > 0$? If yes, then $\displaystyle \lim_{t \to a} \gamma(t) = \vec{b}$!
     """
             ),
             theorem(
@@ -465,9 +472,13 @@ def _(Arc, BLUE, Figure, GREEN, OCHRE, a_circle, arrow, math, mo, np):
 
     mo.vstack(
         [
-            a_circle,
+            mo.hstack([a_circle], justify="start", gap=3),
+            mo.md(
+                "| | |\n|:--|:--|\n"
+                + rf"| $\gamma(a)$ | $\begin{{bmatrix}} {_p[0]:.2f} \\ {_p[1]:.2f} \end{{bmatrix}}$ |" + "\n"
+                + rf"| $\gamma'(a)$ | $\begin{{bmatrix}} {_v[0]:.2f} \\ {_v[1]:.2f} \end{{bmatrix}}$ |"
+            ),
             mo.center(_fig),
-            mo.md(rf"$$\gamma({_a:g}) = \begin{{bmatrix}} {_p[0]:.2f} \\ {_p[1]:.2f} \end{{bmatrix}}, \qquad \gamma'({_a:g}) = \begin{{bmatrix}} {_v[0]:.2f} \\ {_v[1]:.2f} \end{{bmatrix}}$$"),
         ]
     )
     return
@@ -545,9 +556,9 @@ def _(BLUE, Figure, GREEN, GREY, OCHRE, a_parabola, arrow, mo, np):
 
     mo.vstack(
         [
-            a_parabola,
+            mo.hstack([a_parabola], justify="start", gap=3),
+            mo.md("| | |\n|:--|:--|\n" + rf"| $T_a \gamma$ | $\left\{{\, \vec{{y}} = \begin{{bmatrix}} {_p[0]:.2f} \\ {_p[1]:g} \end{{bmatrix}} + s \begin{{bmatrix}} {_v[0]:g} \\ 1 \end{{bmatrix}} \;\middle\vert\; s \in \mathbb{{R}} \,\right\}}$ |"),
             mo.center(_fig),
-            mo.md(rf"$$T_a \gamma = \left\{{\, \vec{{y}} = \begin{{bmatrix}} {_p[0]:.2f} \\ {_p[1]:g} \end{{bmatrix}} + s \begin{{bmatrix}} {_v[0]:g} \\ 1 \end{{bmatrix}} \;\middle|\; s \in \mathbb{{R}} \,\right\}}$$"),
         ]
     )
     return
