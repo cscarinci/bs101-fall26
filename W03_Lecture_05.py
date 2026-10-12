@@ -23,7 +23,16 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     # ---- Building blocks shared by all lectures -------------------------
-    RED, GREEN, BLUE, GREY = "#b3261e", "#2e7d32", "#1b458f", "#888888"
+    # Palette with fixed roles (figures only; text carries no colour):
+    #   BLUE   the primary object (the particle, the point, the chosen vector)
+    #   RED    the second object it is compared with
+    #   GREEN  a derived quantity (velocity, relative velocity, tangent vector)
+    #   ORANGE a third series, only when three are needed
+    #   GREY   reference geometry (equator, light cone, inertial comparison)
+    #   LIGHT  fills and grids
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    # Figure widths: FULL spans the page, HALF sits beside text or in a pair
+    FULL, HALF = 7.4, 3.6
 
     def header(document, date, running=""):
         """Course header, as on the exercise sheets and exams."""
@@ -51,20 +60,31 @@ def _(mo):
     def theorem(body, title=""):
         return _statement("Theorem", title, body)
 
-    def warning(body):
+    def proposition(body, title=""):
+        return _statement("Proposition", title, body)
+
+    def corollary(body, title=""):
+        return _statement("Corollary", title, body)
+
+    def postulate(body, title=""):
+        return _statement("Postulate", title, body)
+
+    def note(body):
+        """Editorial note of the notebook (not part of the lecture)."""
         return mo.md("**Note.** " + body.strip())
 
-    def arrow(ax, tail, tip, color, label=None, at_tip=False, **kw):
-        """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip."""
+    def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
+        """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
+        One head size and one line weight for every figure, so arrows look alike across lectures."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
-            ax.annotate(label, pos, textcoords="offset points", xytext=(6, 6), color=color, fontsize=18)
+            ax.annotate(label, pos, textcoords="offset points", xytext=(6, 6), color=color, fontsize=13)
 
     def plane(ax, lim):
         """Style a 2D axis as a coordinate plane with range [-lim, lim]."""
@@ -73,8 +93,33 @@ def _(mo):
         ax.set_aspect("equal")
         ax.axhline(0, color="black", lw=0.8)
         ax.axvline(0, color="black", lw=0.8)
-        ax.grid(True, color="#cfe3f5", lw=0.6)
+        ax.grid(True, color=LIGHT, lw=0.6)
         ax.set_axisbelow(True)
+
+    def blank(w, h, xlim, ylim):
+        """A figure with one bare axis (no frame) for sketches."""
+        from matplotlib.figure import Figure as _Figure
+
+        fig = _Figure(figsize=(w, h), layout="constrained")
+        ax = fig.subplots()
+        ax.set_xlim(*xlim)
+        ax.set_ylim(*ylim)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        return fig, ax
+
+    def blob(cx, cy, rx, ry, wobble=0.07, seed=0, n=400):
+        """Closed organic curve around (cx, cy): an ellipse with a few low harmonics."""
+        import numpy as _np
+
+        rng = _np.random.default_rng(seed)
+        t = _np.linspace(0, 2 * _np.pi, n)
+        r = 1 + sum(wobble / k * rng.uniform(0.4, 1.0) * _np.cos(k * t + rng.uniform(0, 2 * _np.pi)) for k in (2, 3, 4, 5))
+        return cx + rx * r * _np.cos(t), cy + ry * r * _np.sin(t)
+
+    def table(rows):
+        """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
+        return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
 
     def check(field, answer):
         """Feedback mark for a numeric answer typed into a text field."""
@@ -86,7 +131,7 @@ def _(mo):
         except ValueError:
             return "⚠️ enter a number"
 
-    return BLUE, GREEN, GREY, RED, arrow, check, definition, header, plane, theorem, warning
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
@@ -96,74 +141,41 @@ def _(header):
 
 
 @app.cell(hide_code=True)
-def _(Figure, GREEN, RED, math):
-    from matplotlib.patches import Polygon
-
-    # One orthographic view for every 3D diagram; no per-figure camera rotation.
-    _az, _el = math.radians(28), math.radians(22)
-    _ca, _sa = math.cos(_az), math.sin(_az)
-    _ce, _se = math.cos(_el), math.sin(_el)
-
-    def project3(v):
-        x, y, z = v
-        return (-_sa * x + _ca * y, -_se * _ca * x - _se * _sa * y + _ce * z)
-
-    def depth3(v):
-        return _ce * _ca * v[0] + _ce * _sa * v[1] + _se * v[2]
-
-    def space(figsize, xlim, ylim, axis_limits=()):
-        fig = Figure(figsize=figsize)
-        ax = fig.subplots()
-        fig.subplots_adjust(left=0.02, right=0.98, bottom=0.03, top=0.97)
-        ax.set_aspect("equal")
-        ax.set_xlim(*xlim)
-        ax.set_ylim(*ylim)
-        ax.axis("off")
-        for d, (lo, hi) in enumerate(axis_limits):
-            start, end = [0, 0, 0], [0, 0, 0]
-            start[d], end[d] = lo, hi
-            ax.annotate("", xy=project3(end), xytext=project3(start),
-                        arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": "#555b63", "lw": 0.85,
-                                    "mutation_scale": 8, "shrinkA": 0, "shrinkB": 0}, zorder=1)
-        return fig, ax
-
-    def label3(ax, point, text, color, offset=(6, 6), ha="left", va="bottom", size=14):
-        ax.annotate(text, project3(point), xytext=offset, textcoords="offset points",
-                    color=color, fontsize=size, ha=ha, va=va, zorder=8)
-
-    def vec3(ax, v, color, label=None, origin=(0, 0, 0), lw=1.3,
-             label_offset=(6, 6), label_ha="left", label_va="bottom", zorder=5):
-        tip = tuple(o + c for o, c in zip(origin, v))
-        if any(v):
-            ax.annotate("", xy=project3(tip), xytext=project3(origin),
-                        arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": lw,
-                                    "mutation_scale": 10, "shrinkA": 0, "shrinkB": 0}, zorder=zorder)
+def _(arrow, math):
+    def vector(ax, tail, tip, color, label=None, turn=0, r=15, **kw):
+        """Arrow from `tail` to `tip` (a dot when it has zero length), labelled beyond its tip on a white box;
+        `turn` (degrees) rotates the label about the tip so that coinciding vectors keep separate labels."""
+        dx, dy = tip[0] - tail[0], tip[1] - tail[1]
+        if dx == 0 and dy == 0:
+            ax.plot(*tip, "o", color=color, ms=4, zorder=4)
+            d = math.radians(45 + turn)
+        else:
+            arrow(ax, tail, tip, color, **kw)
+            d = math.atan2(dy, dx) + math.radians(turn)
         if label:
-            label3(ax, tip, label, color, label_offset, label_ha, label_va)
+            ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    def patch3(ax, origin, u, v):
-        p1 = tuple(a + b for a, b in zip(origin, u))
-        p2 = tuple(a + b for a, b in zip(p1, v))
-        p3 = tuple(a + b for a, b in zip(origin, v))
-        ax.add_patch(Polygon([project3(p) for p in (origin, p1, p2, p3)], closed=True,
-                             facecolor="#edf1f5", edgecolor="#8997a5", lw=0.9, alpha=0.3, zorder=2))
+    return (vector,)
 
-    def plane_schematic():
-        # A generic tilted plane, independent of the numerical examples.
-        x, u, v = (0, 1, 1), (1, 2, 0.10), (-1, 3, 0.025)
-        fig, ax = space((5.2, 3.2), (-1.65, 5.55), (-1.45, 2.55),
-                        ((0, 2.7), (0, 5.6), (0, 2)))
-        patch3(ax, (-1.45, 0.25, 0.90875), (3.25, 0, 0.1625), (0, 4.8, 0.12))
-        vec3(ax, x, RED, zorder=1)
-        label3(ax, (0, 0.15, 0.15), r"$\vec{x}$", RED, (-18, -8), ha="right", va="center")
-        vec3(ax, u, GREEN, r"$\vec{u}$", origin=x,
-             label_offset=(-3, -12), label_ha="center", label_va="center")
-        vec3(ax, v, GREEN, r"$\vec{v}$", origin=x,
-             label_offset=(-4, 9), label_ha="right", label_va="center")
-        ax.plot(*project3(x), "o", color=RED, ms=2.5, zorder=6)
-        return fig, ax, x, u, v
 
-    return depth3, label3, patch3, plane_schematic, project3, space, vec3
+@app.cell(hide_code=True)
+def _(arrow):
+    def oblique(p):
+        """Oblique projection of R^3, as on the board: x^2 to the right, x^3 up, x^1 towards the viewer."""
+        return p[1] - 0.45 * p[0], p[2] - 0.4 * p[0]
+
+    def frame3(ax, a1, a2, a3, back=0.5, beside=False):
+        """The three coordinate axes of R^3 (lengths a1, a2, a3) in the oblique projection,
+        named beyond their ends, or beside them when vectors along the axes need that room."""
+        ends = ((a1, 0, 0), (0, a2, 0), (0, 0, a3))
+        offsets = ((10, 2), (-2, -7), (-7, -10)) if beside else ((-5, -5), (6, 0), (0, 5))
+        aligns = (("left", "top"), ("right", "top"), ("right", "top")) if beside else (("right", "top"), ("left", "center"), ("center", "bottom"))
+        for i, (end, off, (ha, va)) in enumerate(zip(ends, offsets, aligns)):
+            start = tuple(-back * c / max(end) for c in end)
+            arrow(ax, oblique(start), oblique(end), "black", lw=0.9)
+            ax.annotate(f"$x^{i + 1}$", oblique(end), textcoords="offset points", xytext=off, fontsize=12, ha=ha, va=va)
+
+    return frame3, oblique
 
 
 @app.cell(hide_code=True)
@@ -171,45 +183,53 @@ def _(mo):
     mo.md(r"""
     ## Last time
 
-    Determinants
+    - determinants
 
-    $$
-    A = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \quad \Longrightarrow \quad
-    \det A = ad - bc = \text{signed area of parallelogram spanned by } \vec{A}_1 = \begin{bmatrix} a \\ c \end{bmatrix},\ \vec{A}_2 = \begin{bmatrix} b \\ d \end{bmatrix}
-    $$
+        $$
+        A = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \quad \Longrightarrow \quad
+        \det A = ad - bc = \text{signed area of parallelogram spanned by } \vec{A}_1 = \begin{bmatrix} a \\ c \end{bmatrix},\ \vec{A}_2 = \begin{bmatrix} b \\ d \end{bmatrix}
+        $$
 
-    $$
-    A = \begin{bmatrix} a & b & c \\ d & e & f \\ g & h & i \end{bmatrix} \quad \Longrightarrow \quad
-    \det A = a(ei - fh) - b(di - fg) + c(dh - eg) = \text{signed volume}
-    $$
+        $$
+        A = \begin{bmatrix} a & b & c \\ d & e & f \\ g & h & i \end{bmatrix} \quad \Longrightarrow \quad
+        \det A = a(ei - fh) - b(di - fg) + c(dh - eg) = \text{signed volume}
+        $$
 
-    - need to interpret sign
-    - need to understand angle between vectors and planes
+    - $\leadsto$ &nbsp; need to interpret sign
+    - $\leadsto$ &nbsp; need to understand angle between vectors and planes
+
+    **Today:** lines and planes in $\mathbb{R}^3$, and the cross-product
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, RED, arrow, definition, mo):
-    _fig = Figure(figsize=(4.2, 2.4), layout="constrained")
-    _ax = _fig.subplots()
+def _(BLUE, GREEN, HALF, RED, arrow, blank, definition, mo):
+    _fig, _ax = blank(HALF, 1.75, (-0.6, 4.7), (-0.5, 1.95))
     _x, _v, _t = (0.4, 1.4), (1.6, 0.0), 1.7
-    _ax.plot([-0.6, 4.2], [1.4, 1.4], color="black", lw=1.2)
-    arrow(_ax, (0, 0), _x, RED, r"$\vec{x}$")
-    arrow(_ax, (0, 0), _v, GREEN, r"$\vec{v}$", at_tip=True)
-    arrow(_ax, _x, (_x[0] + _t * _v[0], _x[1]), GREEN, r"$t\vec{v}$")
-    arrow(_ax, (0, 0), (_x[0] + _t * _v[0], _x[1]), BLUE)
-    _ax.text(1.9, 0.65, r"$\vec{x} + t\vec{v}$", color=BLUE, fontsize=15)
-    _ax.text(4.25, 1.3, "$L$", fontsize=15)
-    _ax.text(-0.35, -0.15, r"$\vec{0}$", fontsize=15)
-    _ax.set_xlim(-0.7, 4.6)
-    _ax.set_ylim(-0.3, 2.1)
-    _ax.set_aspect("equal")
-    _ax.axis("off")
+    _g = (_x[0] + _t * _v[0], _x[1])
+    _ax.plot([-0.5, 4.2], [1.4, 1.4], color="black", lw=1.0)
+    arrow(_ax, (0, 0), _g, BLUE)
+    arrow(_ax, (0, 0), _x, RED)
+    arrow(_ax, (0, 0), _v, GREEN)
+    arrow(_ax, _x, _g, GREEN)
+    _ax.plot(0, 0, "o", color="black", ms=3, zorder=4)
+    _ax.text(0.08, 0.78, r"$\vec{x}$", color=RED, fontsize=13, ha="right", va="center")
+    _ax.text(0.8, -0.1, r"$\vec{v}$", color=GREEN, fontsize=13, ha="center", va="top")
+    _ax.text((_x[0] + _g[0]) / 2, 1.52, r"$t\vec{v}$", color=GREEN, fontsize=13, ha="center", va="bottom")
+    _ax.text(1.95, 0.62, r"$\vec{x} + t\vec{v}$", color=BLUE, fontsize=13, ha="left", va="top")
+    _ax.text(4.32, 1.4, "$L$", fontsize=13, ha="left", va="center")
+    _ax.text(-0.12, -0.05, r"$\vec{0}$", fontsize=13, ha="right", va="top")
 
     mo.vstack(
         [
-            mo.md(r"## 5 &nbsp; Lines and Planes and the cross-product in $\mathbb{R}^3$ (MT 1.3)"),
+            mo.md(
+                r"""
+    ## I.5 &nbsp; Lines and Planes and the cross-product in $\mathbb{R}^3$ (MT 1.3)
+
+    ### Lines
+    """
+            ),
             definition(
                 r"""
     Given vectors $\vec{x}$ and $\vec{v}$ in $\mathbb{R}^3$, with $\vec{v}$ non-zero, the **line** through $\vec{x}$ in the direction of $\vec{v}$ is the set
@@ -228,7 +248,8 @@ def _(BLUE, Figure, GREEN, RED, arrow, definition, mo):
     $$
 
     an **affine parameterization** of the line $L$ (just a name for “linear plus constant”).
-    """
+    """,
+                "Line and affine parameterization",
             ),
             _fig,
             mo.md(
@@ -254,26 +275,37 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, GREEN, RED, mo, patch3, project3, space, t_line, vec3):
+def _(BLUE, FULL, GREEN, GREY, RED, blank, frame3, mo, oblique, t_line, table, vector):
     _t = t_line.value
     _g = (_t + 0.0, 1 + 2 * _t + 0.0, 1)
-    _fig, _ax = space((5.4, 3.0), (-3.2, 5.4), (-1.35, 2.05), ((0, 2.7), (0, 5.6), (0, 2)))
-    patch3(_ax, (-1.6, -2.2, 1), (3.6, 0, 0), (0, 6.6, 0))
-    _a, _b = project3((-1.5, -2, 1)), project3((1.5, 4, 1))
-    _ax.plot([_a[0], _b[0]], [_a[1], _b[1]], color="#777777", lw=0.9, zorder=4)
-    vec3(_ax, (1, 2, 0), GREEN, zorder=1)
-    vec3(_ax, (0, 1, 1), RED, zorder=1)
-    vec3(_ax, _g, BLUE, zorder=1)
-    _ax.plot(*project3(_g), "o", color=BLUE, ms=4.3, zorder=6)
-    for _color, _label in ((GREEN, r"$\vec{v}$"), (RED, r"$\vec{x}$"), (BLUE, r"$\gamma(t)$")):
-        _ax.plot([], [], color=_color, lw=1.3, label=_label)
-    _fig.subplots_adjust(bottom=0.16)
-    _fig.legend(loc="lower center", bbox_to_anchor=(0.5, 0.01), ncol=3, frameon=False, fontsize=12)
+
+    _fig, _ax = blank(FULL, 3.0, (-3.5, 5.7), (-1.25, 2.5))
+    frame3(_ax, 2.4, 4.9, 2.15)
+    # the plane x^3 = 1 (outline only) and the line L inside it
+    _corners = [oblique(p) for p in ((-1.8, -2.4, 1), (-1.8, 4.6, 1), (1.8, 4.6, 1), (1.8, -2.4, 1))]
+    _ax.plot(*zip(*(_corners + _corners[:1])), color=GREY, lw=0.9)
+    _ax.text(4.35, 1.5, "$x^3 = 1$", color=GREY, fontsize=12, ha="center", va="center")
+    _a, _b = oblique((-1.7, -2.4, 1)), oblique((1.8, 4.6, 1))
+    _ax.plot([_a[0], _b[0]], [_a[1], _b[1]], color="black", lw=1.0)
+    _ax.text(_b[0] + 0.1, _b[1] - 0.04, "$L$", fontsize=13, ha="left", va="top")
+    # labels above the line, on opposite sides of the tip of x, so that they stay apart when gamma(t) passes x
+    _side = 1 if _t >= 0 else -1
+    vector(_ax, (0, 0), oblique((1, 2, 0)), GREEN, r"$\vec{v}$", -75)
+    vector(_ax, (0, 0), oblique((0, 1, 1)), RED, r"$\vec{x}$", 45 + 37 * _side, r=18)
+    vector(_ax, (0, 0), oblique(_g), BLUE)
+    _tip = oblique(_g)
+    _ax.plot(*_tip, "o", color=BLUE, ms=4, zorder=4)
+    _ax.annotate(r"$\gamma(t)$", _tip, textcoords="offset points", xytext=(11 * _side, 15), ha="center", va="center", color=BLUE, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
     mo.vstack(
         [
-            mo.hstack([t_line], justify="start", gap=3),
-            mo.md("| | |\n|:--|:--|\n" + rf"| $\gamma(t)$ | $\begin{{bmatrix}} {_g[0]:g} \\ {_g[1]:g} \\ {_g[2]:g} \end{{bmatrix}}$ |"),
+            mo.hstack([t_line], justify="start", gap=2, wrap=True),
+            table(
+                [
+                    (r"$t$", rf"${_t:g}$"),
+                    (r"$\gamma(t) = \vec{x} + t\vec{v}$", rf"$\textcolor{{{RED}}}{{\begin{{bmatrix}} 0 \\ 1 \\ 1 \end{{bmatrix}}}} + ({_t:g}) \textcolor{{{GREEN}}}{{\begin{{bmatrix}} 1 \\ 2 \\ 0 \end{{bmatrix}}}} = \textcolor{{{BLUE}}}{{\begin{{bmatrix}} {_g[0]:g} \\ {_g[1]:g} \\ {_g[2]:g} \end{{bmatrix}}}}$"),
+                ]
+            ),
             _fig,
         ]
     )
@@ -281,13 +313,7 @@ def _(BLUE, GREEN, RED, mo, patch3, project3, space, t_line, vec3):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, definition, label3, mo, plane_schematic, project3):
-    _fig, _ax, _x, _u, _v = plane_schematic()
-    _point = tuple(x + u + v / 2 for x, u, v in zip(_x, _u, _v))
-    _ax.plot(*project3(_point), "o", color=BLUE, ms=4.3, zorder=6)
-    label3(_ax, _point, r"$\varphi(s,t)$", BLUE, (-6, 8), ha="right")
-    label3(_ax, (-1.45, 2.8, 0.9725), "$P$", "#455566", (0, 9), ha="center", va="center", size=13)
-
+def _(definition, mo):
     mo.vstack(
         [
             definition(
@@ -299,77 +325,24 @@ def _(BLUE, definition, label3, mo, plane_schematic, project3):
     $$
 
     we call $\vec{x}$ the **starting point** and $\vec{v}$ the **velocity** of $L$ with respect to the parameterization $\gamma$.
-    """
+    """,
+                "Starting point and velocity",
             ),
             mo.md(
                 r"""
-    **Remark.** There exists a unique line through $\vec{x}, \vec{y} \in \mathbb{R}^3$ iff $\vec{y} - \vec{x}$ is non-zero.
+    **Remark.** There exists a unique line through $\vec{x}, \vec{y} \in \mathbb{R}^3$ if and only if $\vec{y} - \vec{x}$ is non-zero.
 
     However, parameterizations are not unique!
 
     $$
     \begin{aligned}
-    L &= \left\{\, \gamma(t) = \vec{x} + t(\vec{y} - \vec{x}) \;\middle|\; t \in \mathbb{R} \,\right\} \\
-    &= \left\{\, \tilde{\gamma}(t) = \vec{y} + 2t(\vec{x} - \vec{y}) \;\middle|\; t \in \mathbb{R} \,\right\} \\
+    \leadsto \quad L &= \left\{\, \gamma(t) = \vec{x} + t(\vec{y} - \vec{x}) \;\middle|\; t \in \mathbb{R} \,\right\}
+    = \left\{\, \tilde{\gamma}(t) = \vec{y} + 2t(\vec{x} - \vec{y}) \;\middle|\; t \in \mathbb{R} \,\right\} \\
     &= \left\{\, \hat{\gamma}(t) = \tfrac{1}{2}(\vec{x} + \vec{y}) + t(\vec{x} - \vec{y}) \;\middle|\; t \in \mathbb{R} \,\right\}
     \end{aligned}
     $$
 
     **Remark.** For any pair of affine parameterizations $\gamma, \tilde{\gamma}$ of a line $L$, the velocity vectors are proportional!
-    """
-            ),
-            definition(
-                r"""
-    Given $\vec{x}, \vec{u}, \vec{v} \in \mathbb{R}^3$, with $\vec{u}, \vec{v}$ not proportional, the **plane** through $\vec{x}$ in the directions of $\vec{u}$ and $\vec{v}$ is the set
-
-    $$
-    P = \left\{\, \varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v} \;\middle|\; s, t \in \mathbb{R} \,\right\}
-    $$
-
-    $\varphi : \mathbb{R}^2 \longrightarrow \mathbb{R}^3$ is an affine parameterization of the plane.
-    """
-            ),
-            mo.center(_fig),
-            mo.vstack(
-                [
-                    mo.md(
-                        r"""
-    **Example.**
-
-    $$
-    \vec{x} = \begin{bmatrix} 0 \\ 1 \\ 1 \end{bmatrix}, \quad
-    \vec{u} = \begin{bmatrix} 1 \\ 2 \\ 0 \end{bmatrix}, \quad
-    \vec{v} = \begin{bmatrix} -1 \\ 3 \\ 0 \end{bmatrix}
-    $$
-
-    $$
-    \leadsto \quad \varphi(s, t) = \begin{bmatrix} s - t \\ 1 + 2s + 3t \\ 1 \end{bmatrix}
-    $$
-    """
-                    ),
-                ],
-                gap=2,
-            ),
-            mo.md(
-                r"""
-    **Remark.** There exists a unique plane through $\vec{x}, \vec{y}, \vec{z} \in \mathbb{R}^3$ iff $\vec{y} - \vec{x}$, $\vec{z} - \vec{x}$ are not proportional.
-
-    $$
-    P = \left\{\, \varphi(s, t) = \vec{x} + s(\vec{y} - \vec{x}) + t(\vec{z} - \vec{x}) \;\middle|\; s, t \in \mathbb{R} \,\right\}
-    $$
-
-    Different parameterizations are also possible, with different starting points and directions.
-    """
-            ),
-            definition(
-                r"""
-    Given a plane $P = \left\{\, \vec{x} + s\vec{u} + t\vec{v} \;\middle|\; s, t \in \mathbb{R} \,\right\}$, a vector $\vec{n} \in \mathbb{R}^3$ is called **normal** to $P$ if
-
-    $$
-    \vec{n} \cdot \vec{u} = \vec{n} \cdot \vec{v} = 0
-    $$
-
-    ($\vec{n}$ is orthogonal to both directions in $P$).
     """
             ),
         ]
@@ -378,23 +351,126 @@ def _(BLUE, definition, label3, mo, plane_schematic, project3):
 
 
 @app.cell(hide_code=True)
-def _(GREEN, definition, mo, np, patch3, plane_schematic, space, vec3):
-    _u, _v = (1.25, 0.3, -0.1), (0.35, 1.25, 0.15)
-    _w = np.cross(_u, _v)
-    _fig, _ax = space((2.8, 3.1), (-1.25, 1.65), (-1.8, 1.95))
-    patch3(_ax, (0, 0, 0), _u, _v)
-    vec3(_ax, _u, GREEN, r"$\vec{u}$", label_offset=(-6, -4), label_ha="right", label_va="top")
-    vec3(_ax, _v, GREEN, r"$\vec{v}$", label_offset=(6, -4), label_va="top")
-    vec3(_ax, _w, "black", r"$\vec{w}$")
-    vec3(_ax, -_w, "black", r"$-\vec{w}$", label_offset=(6, -4), label_va="top", zorder=1)
+def _(BLUE, FULL, GREEN, GREY, RED, arrow, blank, definition, frame3, mo, oblique):
+    _x, _u, _v = (0, 1, 1), (1, 2, 0), (-1, 3, 0)
+    _pu = tuple(a + b for a, b in zip(_x, _u))
+    _pv = tuple(a + b for a, b in zip(_x, _v))
+    _puv = tuple(a + b for a, b in zip(_pu, _v))
+    _X, _U, _V, _S = oblique(_x), oblique(_pu), oblique(_pv), oblique(_puv)
 
-    _fig2, _ax2, _x, _u, _v = plane_schematic()
-    _normal = np.cross(_u, _v)
-    _normal = 1.4 * _normal / np.linalg.norm(_normal)
-    vec3(_ax2, _normal, "black", r"$\vec{n} = \alpha\, \vec{u} \times \vec{v}$", origin=_x, label_offset=(6, 5))
+    _fig, _ax = blank(FULL, 2.75, (-1.75, 8.75), (-1.2, 2.5))
+    frame3(_ax, 2.4, 3.2, 2.15)
+    _corners = [oblique(p) for p in ((-1.6, -0.6, 1), (-1.6, 7.7, 1), (1.6, 7.7, 1), (1.6, -0.6, 1))]
+    _ax.plot(*zip(*(_corners + _corners[:1])), color=GREY, lw=0.9)
+    _ax.text(7.75, 1.42, "$P$", color=GREY, fontsize=13, ha="center", va="center")
+    # x = (0, 1, 1): unit marks on the axes and drop lines to them
+    _ax.plot([1, 1], [0, 1], color=GREY, lw=1.0, ls=(0, (4, 3)))
+    _ax.plot([0, 1], [1, 1], color=GREY, lw=1.0, ls=(0, (4, 3)))
+    _ax.plot([1, 1], [-0.05, 0.05], color="black", lw=0.9)
+    _ax.plot([-0.05, 0.05], [1, 1], color="black", lw=0.9)
+    _ax.text(1, -0.12, "$1$", fontsize=12, ha="center", va="top")
+    _ax.text(-0.12, 1.02, "$1$", fontsize=12, ha="right", va="bottom")
+    # phi(1, 1) = x + u + v completes the parallelogram
+    _ax.plot([_U[0], _S[0], _V[0]], [_U[1], _S[1], _V[1]], color=GREY, lw=1.0, ls=(0, (4, 3)))
+    arrow(_ax, (0, 0), _X, RED)
+    arrow(_ax, _X, _U, GREEN)
+    arrow(_ax, _X, _V, GREEN)
+    _ax.plot(*_S, "o", color=BLUE, ms=4, zorder=4)
+    _ax.text(0.42, 0.62, r"$\vec{x}$", color=RED, fontsize=13, ha="right", va="bottom")
+    _ax.text((_X[0] + _U[0]) / 2, (_X[1] + _U[1]) / 2 - 0.12, r"$\vec{u}$", color=GREEN, fontsize=13, ha="right", va="top")
+    _ax.text((_X[0] + _V[0]) / 2, (_X[1] + _V[1]) / 2 + 0.1, r"$\vec{v}$", color=GREEN, fontsize=13, ha="right", va="bottom")
+    _ax.text(_S[0] + 0.14, _S[1], r"$\varphi(s,t)$", color=BLUE, fontsize=13, ha="left", va="center")
 
     mo.vstack(
         [
+            mo.md(r"""### Planes"""),
+            definition(
+                r"""
+    Given $\vec{x}, \vec{u}, \vec{v} \in \mathbb{R}^3$, with $\vec{u}, \vec{v}$ not proportional, the **plane** through $\vec{x}$ in the directions of $\vec{u}$ and $\vec{v}$ is the set
+
+    $$
+    P = \left\{\, \varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v} \;\middle|\; s, t \in \mathbb{R} \,\right\}
+    $$
+
+    ($\varphi : \mathbb{R}^2 \longrightarrow \mathbb{R}^3$ is an **affine parameterization** of the plane).
+    """,
+                "Plane and affine parameterization",
+            ),
+            mo.md(
+                r"""
+    **Example.**
+
+    $$
+    \vec{x} = \begin{bmatrix} 0 \\ 1 \\ 1 \end{bmatrix}, \quad
+    \vec{u} = \begin{bmatrix} 1 \\ 2 \\ 0 \end{bmatrix}, \quad
+    \vec{v} = \begin{bmatrix} -1 \\ 3 \\ 0 \end{bmatrix}
+    \qquad \leadsto \qquad
+    \varphi(s, t) = \begin{bmatrix} s - t \\ 1 + 2s + 3t \\ 1 \end{bmatrix}
+    $$
+    """
+            ),
+            _fig,
+            mo.md(
+                r"""
+    **Remark.** There exists a unique plane through $\vec{x}, \vec{y}, \vec{z} \in \mathbb{R}^3$ if and only if $\vec{y} - \vec{x}$, $\vec{z} - \vec{x}$ are not proportional.
+
+    $$
+    P = \left\{\, \varphi(s, t) = \vec{x} + s(\vec{y} - \vec{x}) + t(\vec{z} - \vec{x}) \;\middle|\; s, t \in \mathbb{R} \,\right\}
+    $$
+
+    $\leadsto$ &nbsp; different parameterizations are also possible, with different starting points and directions
+    """
+            ),
+            definition(
+                r"""
+    Given a plane $P = \left\{\, \vec{x} + s\vec{u} + t\vec{v} \;\middle|\; s, t \in \mathbb{R} \,\right\}$, a vector $\vec{n} \in \mathbb{R}^3$ is called **normal** to $P$ if
+
+    $$
+    \vec{n} \cdot \vec{u} = \vec{n} \cdot \vec{v} = 0 \qquad (\vec{n} \text{ is orthogonal to both directions in } P)
+    $$
+    """,
+                "Normal vector",
+            ),
+        ]
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _(BLUE, GREEN, GREY, HALF, RED, arrow, blank, definition, mo):
+    # u, v, w = u x v and -w, with the rotation from u to v
+    _fig, _ax = blank(HALF, 2.75, (-1.9, 2.6), (-1.55, 1.9))
+    _u, _v = (1.7, -0.55), (1.55, 0.75)
+    arrow(_ax, (0, 0), (0, -1.15), GREY, linestyle=(0, (4, 3)))
+    arrow(_ax, (0, 0), (0, 1.5), GREEN)
+    arrow(_ax, (0, 0), _u, BLUE)
+    arrow(_ax, (0, 0), _v, RED)
+    arrow(_ax, (0.76, -0.25), (0.72, 0.35), "black", lw=0.9, connectionstyle="arc3,rad=0.3")
+    _ax.text(0.98, 0.07, r"$\theta$", fontsize=13, ha="left", va="center")
+    _ax.text(_u[0] + 0.1, _u[1] - 0.04, r"$\vec{u}$", color=BLUE, fontsize=13, ha="left", va="center")
+    _ax.text(_v[0] + 0.1, _v[1] + 0.04, r"$\vec{v}$", color=RED, fontsize=13, ha="left", va="center")
+    _ax.text(0, 1.58, r"$\vec{w}$", color=GREEN, fontsize=13, ha="center", va="bottom")
+    _ax.text(0, -1.22, r"$-\vec{w}$", color=GREY, fontsize=13, ha="center", va="top")
+
+    # a plane through x with directions u, v and a normal vector
+    _fig2, _ax2 = blank(HALF, 2.6, (-0.3, 5.3), (-1.3, 2.75))
+    _ax2.plot([0, 3.7, 4.6, 0.9, 0], [0, 0, 1.4, 1.4, 0], color=GREY, lw=0.9)
+    _p = (1.8, 0.55)
+    arrow(_ax2, (1.2, -1.0), _p, "black")
+    arrow(_ax2, _p, (3.3, 0.3), BLUE)
+    arrow(_ax2, _p, (2.95, 1.1), RED)
+    arrow(_ax2, _p, (1.8, 2.15), GREEN)
+    _ax2.plot(1.2, -1.0, "o", color="black", ms=3, zorder=4)
+    _ax2.text(1.08, -1.0, r"$\vec{0}$", fontsize=13, ha="right", va="center")
+    _ax2.text(1.62, -0.55, r"$\vec{x}$", fontsize=13, ha="left", va="center")
+    _ax2.text(3.4, 0.28, r"$\vec{u}$", color=BLUE, fontsize=13, ha="left", va="center")
+    _ax2.text(3.05, 1.12, r"$\vec{v}$", color=RED, fontsize=13, ha="left", va="center")
+    _ax2.text(1.95, 2.2, r"$\vec{n} = \alpha\, \vec{u} \times \vec{v}$", color=GREEN, fontsize=13, ha="left", va="center")
+    _ax2.text(0.55, 0.2, "$P$", color=GREY, fontsize=13, ha="center", va="center")
+
+    mo.vstack(
+        [
+            mo.md(r"""### The cross-product"""),
             definition(
                 r"""
     Given two vectors $\vec{u} = \begin{bmatrix} u^1 \\ u^2 \\ u^3 \end{bmatrix}, \ \vec{v} = \begin{bmatrix} v^1 \\ v^2 \\ v^3 \end{bmatrix} \in \mathbb{R}^3$, the **cross-product** of $\vec{u}$ and $\vec{v}$ is the unique vector $\vec{w} = \vec{u} \times \vec{v} \in \mathbb{R}^3$ such that
@@ -409,31 +485,23 @@ def _(GREEN, definition, mo, np, patch3, plane_schematic, space, vec3):
     $$
 
     (if $\vec{u}, \vec{v}$ are proportional this forces $\vec{w} = \vec{0}$) and $\vec{u}, \vec{v}, \vec{w}$ is **right-handed** (positively oriented).
+    """,
+                "Cross-product",
+            ),
+            mo.md(
+                r"""
+    $\leadsto$ &nbsp; with your right hand: rotating your fingers from $\vec{u}$ to $\vec{v}$ points your thumb towards $\vec{w}$
     """
             ),
-            mo.hstack(
-                [
-                    _fig,
-                    mo.md(
-                        r"""
-    With your right hand: rotating your fingers from $\vec{u}$ to $\vec{v}$ points your thumb towards $\vec{w}$.
-
+            _fig,
+            mo.md(
+                r"""
     Algebraically: $\vec{u}, \vec{v}, \vec{w}$ is right-handed if
 
     $$
     \det \begin{bmatrix} \vec{u} & \vec{v} & \vec{w} \end{bmatrix} > 0
     $$
-    """
-                    ),
-                ],
-                widths=[1, 1],
-                gap=2,
-                align="center",
-            ),
-            mo.vstack(
-                [
-                    mo.md(
-                        r"""
+
     **Remark.** Given a parameterization
 
     $$
@@ -442,11 +510,8 @@ def _(GREEN, definition, mo, np, patch3, plane_schematic, space, vec3):
 
     of a plane $P$, every normal vector to $P$ is proportional to the cross-product $\vec{u} \times \vec{v}$.
     """
-                    ),
-                    mo.center(_fig2),
-                ],
-                gap=2,
             ),
+            _fig2,
         ]
     )
     return
@@ -456,40 +521,35 @@ def _(GREEN, definition, mo, np, patch3, plane_schematic, space, vec3):
 def _(mo, theorem):
     mo.vstack(
         [
+            mo.md(r"""### Computing the cross-product"""),
             theorem(
                 r"""
     Given $\vec{u} = \begin{bmatrix} u^1 \\ u^2 \\ u^3 \end{bmatrix}$ and $\vec{v} = \begin{bmatrix} v^1 \\ v^2 \\ v^3 \end{bmatrix}$ in $\mathbb{R}^3$
 
     $$
     \begin{aligned}
-    \vec{u} \times \vec{v} &= \det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ u^1 & u^2 & u^3 \\ v^1 & v^2 & v^3 \end{bmatrix} \\
-    &= \vec{e}_1 \det \begin{bmatrix} u^2 & u^3 \\ v^2 & v^3 \end{bmatrix} - \vec{e}_2 \det \begin{bmatrix} u^1 & u^3 \\ v^1 & v^3 \end{bmatrix} + \vec{e}_3 \det \begin{bmatrix} u^1 & u^2 \\ v^1 & v^2 \end{bmatrix} \\
-    &= \vec{e}_1 (u^2 v^3 - u^3 v^2) - \vec{e}_2 (u^1 v^3 - u^3 v^1) + \vec{e}_3 (u^1 v^2 - u^2 v^1) \\
-    &= \begin{bmatrix} u^2 v^3 - u^3 v^2 \\ u^3 v^1 - u^1 v^3 \\ u^1 v^2 - u^2 v^1 \end{bmatrix} = \vec{w}
+    \vec{u} \times \vec{v} &= \underbrace{\det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ u^1 & u^2 & u^3 \\ v^1 & v^2 & v^3 \end{bmatrix}}_{\substack{\text{not an honest determinant!} \\ \text{1st row is made of vectors…}}}
+    = \vec{e}_1 \det \begin{bmatrix} u^2 & u^3 \\ v^2 & v^3 \end{bmatrix} - \vec{e}_2 \det \begin{bmatrix} u^1 & u^3 \\ v^1 & v^3 \end{bmatrix} + \vec{e}_3 \det \begin{bmatrix} u^1 & u^2 \\ v^1 & v^2 \end{bmatrix} \\
+    &= \vec{e}_1 (u^2 v^3 - u^3 v^2) - \vec{e}_2 (u^1 v^3 - u^3 v^1) + \vec{e}_3 (u^1 v^2 - u^2 v^1)
+    = \begin{bmatrix} u^2 v^3 - u^3 v^2 \\ u^3 v^1 - u^1 v^3 \\ u^1 v^2 - u^2 v^1 \end{bmatrix} = \vec{w}
     \end{aligned}
     $$
-    """
+    """,
+                "Cross-product formula",
             ),
             mo.md(
                 r"""
-    Not an honest determinant! The 1st row is made of vectors…
-
     **Proof.**
 
     $$
-    \begin{aligned}
-    \vec{u} \cdot \vec{w} &= \cancel{u^1 u^2 v^3} - \bcancel{u^1 u^3 v^2} + \xcancel{u^2 u^3 v^1} \\
-    &\quad - \cancel{u^2 u^1 v^3} + \bcancel{u^3 u^1 v^2} - \xcancel{u^3 u^2 v^1} = 0 \\[4pt]
-    \vec{v} \cdot \vec{w} &= 0
-    \end{aligned}
+    \vec{u} \cdot \vec{w} = u^1 (\cancel{u^2 v^3} - \bcancel{u^3 v^2}) + u^2 (\xcancel{u^3 v^1} - \cancel{u^1 v^3}) + u^3 (\bcancel{u^1 v^2} - \xcancel{u^2 v^1}) = 0, \qquad \vec{v} \cdot \vec{w} = 0
     $$
 
     $$
     \begin{aligned}
     \lVert \vec{w} \rVert^2 &= (u^2 v^3 - u^3 v^2)^2 + (u^3 v^1 - u^1 v^3)^2 + (u^1 v^2 - u^2 v^1)^2 \\
-    &= \big( (u^1)^2 + (u^2)^2 + (u^3)^2 \big) \cdot \big( (v^1)^2 + (v^2)^2 + (v^3)^2 \big) \\
-    &\quad - \big( u^1 v^1 + u^2 v^2 + u^3 v^3 \big)^2 \\
-    &= \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2 \quad (\text{check!})
+    &= \big( (u^1)^2 + (u^2)^2 + (u^3)^2 \big) \big( (v^1)^2 + (v^2)^2 + (v^3)^2 \big) - \big( u^1 v^1 + u^2 v^2 + u^3 v^3 \big)^2 \qquad (\text{check!}) \\
+    &= \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2
     \end{aligned}
     $$
 
@@ -497,32 +557,27 @@ def _(mo, theorem):
     \det \begin{bmatrix} u^1 & v^1 & (u^2 v^3 - u^3 v^2) \\ u^2 & v^2 & (u^3 v^1 - u^1 v^3) \\ u^3 & v^3 & (u^1 v^2 - u^2 v^1) \end{bmatrix} = \lVert \vec{w} \rVert^2 \geq 0 \qquad (\text{check!})
     $$
 
-    This is strictly positive when $\vec{u}, \vec{v}$ are not proportional; otherwise $\vec{w} = \vec{0}$.
+    This is strictly positive when $\vec{u}, \vec{v}$ are not proportional; otherwise $\vec{w} = \vec{0}$. $\square$
 
     **Example.** &nbsp; $\vec{u} = \begin{bmatrix} 1 \\ 2 \\ 0 \end{bmatrix}, \quad \vec{v} = \begin{bmatrix} -1 \\ 3 \\ 0 \end{bmatrix}$
 
     $$
-    \begin{aligned}
-    &\leadsto \quad \vec{u} \times \vec{v} = \det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ 1 & 2 & 0 \\ -1 & 3 & 0 \end{bmatrix} \\
-    &= 0\, \vec{e}_1 + 0\, \vec{e}_2 + \big( 1 \cdot 3 - 2 \cdot (-1) \big)\, \vec{e}_3 = 5\, \vec{e}_3 = \begin{bmatrix} 0 \\ 0 \\ 5 \end{bmatrix}
-    \end{aligned}
+    \leadsto \quad \vec{u} \times \vec{v} = \det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ 1 & 2 & 0 \\ -1 & 3 & 0 \end{bmatrix}
+    = 0\, \vec{e}_1 + 0\, \vec{e}_2 + \big( 1 \cdot 3 - 2 \cdot (-1) \big)\, \vec{e}_3 = 5\, \vec{e}_3 = \begin{bmatrix} 0 \\ 0 \\ 5 \end{bmatrix}
     $$
 
     $$
-    \begin{aligned}
-    \vec{u} \cdot (\vec{u} \times \vec{v}) &= 1 \cdot 0 + 2 \cdot 0 + 0 \cdot 5 = 0 \\
-    \vec{v} \cdot (\vec{u} \times \vec{v}) &= (-1) \cdot 0 + 3 \cdot 0 + 0 \cdot 5 = 0 \\
-    \lVert \vec{u} \times \vec{v} \rVert^2 &= \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2 \\
-    &= (1 + 4)(1 + 9) - (-1 + 6)^2 = 50 - 25 = 25
-    \end{aligned}
+    \vec{u} \cdot (\vec{u} \times \vec{v}) = 1 \cdot 0 + 2 \cdot 0 + 0 \cdot 5 = 0, \qquad
+    \vec{v} \cdot (\vec{u} \times \vec{v}) = (-1) \cdot 0 + 3 \cdot 0 + 0 \cdot 5 = 0
     $$
 
     $$
-    \begin{aligned}
-    &\det \begin{bmatrix} 1 & -1 & 0 \\ 2 & 3 & 0 \\ 0 & 0 & 5 \end{bmatrix} \\
-    &= 1\, (3 \cdot 5 - 0 \cdot 0) - (-1)\, (2 \cdot 5 - 0 \cdot 0) + 0\, (2 \cdot 0 - 3 \cdot 0) \\
-    &= 25 > 0 \qquad (= \lVert \vec{u} \times \vec{v} \rVert^2\,!)
-    \end{aligned}
+    \lVert \vec{u} \times \vec{v} \rVert^2 = 25 = \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2 = (1 + 4)(1 + 9) - (-1 + 6)^2 = 50 - 25
+    $$
+
+    $$
+    \det \begin{bmatrix} 1 & -1 & 0 \\ 2 & 3 & 0 \\ 0 & 0 & 5 \end{bmatrix}
+    = 1\, (3 \cdot 5 - 0 \cdot 0) - (-1)\, (2 \cdot 5 - 0 \cdot 0) + 0\, (2 \cdot 0 - 3 \cdot 0) = \underbrace{25}_{\lVert \vec{u} \times \vec{v} \rVert^2\,!} > 0
     $$
     """
             ),
@@ -542,38 +597,54 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(GREEN, depth3, math, mo, patch3, project3, space, u1, u2, u3, v1, v2, v3, vec3):
+def _(BLUE, FULL, GREEN, GREY, LIGHT, RED, blank, frame3, math, mo, oblique, table, u1, u2, u3, v1, v2, v3, vector):
     _u = (u1.value, u2.value, u3.value)
     _v = (v1.value, v2.value, v3.value)
     _w = (_u[1] * _v[2] - _u[2] * _v[1], _u[2] * _v[0] - _u[0] * _v[2], _u[0] * _v[1] - _u[1] * _v[0])
     _w = tuple(c + 0.0 for c in _w)
     _norm = math.sqrt(sum(c * c for c in _w))
-    _sum = tuple(a + b for a, b in zip(_u, _v))
-    _lim = max(3.5, 1.15 * max(abs(c) for point in (_u, _v, _w, _sum) for c in project3(point)))
-    _axis_len = max(1.5, max(abs(c) for c in (*_u, *_v)))
+    _U, _V, _W = oblique(_u), oblique(_v), oblique(_w)
+    _S = (_U[0] + _V[0], _U[1] + _V[1])
 
-    _fig, _ax = space((5.2, 4.2), (-_lim, _lim), (-_lim, _lim), ((-0.25 * _axis_len, _axis_len),) * 3)
-    patch3(_ax, (0, 0, 0), _u, _v)
-    vec3(_ax, _u, GREEN, r"$\vec{u}$" if any(_u) else None,
-         label_offset=(-6, -8), label_ha="right", label_va="top")
-    vec3(_ax, _v, GREEN, r"$\vec{v}$" if any(_v) else None)
-    if _norm > 0:
-        vec3(_ax, _w, "black", zorder=5 if depth3(_w) >= 0 else 1)
-    for _color, _label in ((GREEN, r"$\vec{u},\,\vec{v}$"), ("black", r"$\vec{u} \times \vec{v}$")):
-        _ax.plot([], [], color=_color, lw=1.3, label=_label)
-    _fig.subplots_adjust(bottom=0.13)
-    _fig.legend(loc="lower center", bbox_to_anchor=(0.5, 0.01), ncol=2, frameon=False, fontsize=12)
+    # the frame follows the vectors: nothing is clipped
+    _lim = max([3.2] + [1.3 * abs(p[1]) for p in (_U, _V, _W, _S)] + [1.3 * abs(p[0]) / 1.6 for p in (_U, _V, _W, _S)])
+    _step = 1 if _lim <= 5 else 2 if _lim <= 10 else 5
+    _len = 0.88 * _lim
+    _low = _lim if min(p[1] for p in (_U, _V, _W, _S)) < -0.3 * _lim else 0.5 * _lim  # room below only when a vector points there
+    _fig, _ax = blank(FULL, FULL * (_lim + _low) / (3.2 * _lim), (-1.6 * _lim, 1.6 * _lim), (-_low, _lim))
+    _ax.fill([0, _U[0], _S[0], _V[0]], [0, _U[1], _S[1], _V[1]], color=LIGHT, lw=0, zorder=0)
+    _ax.plot([_U[0], _S[0], _V[0]], [_U[1], _S[1], _V[1]], color=GREY, lw=1.0, ls=(0, (4, 3)))
+    frame3(_ax, _len, 1.6 * _len, _len, back=0.3 * _len, beside=True)
+    _d = 0.012 * _lim
+    for _k in range(_step, int(0.95 * _len) + 1, _step):  # axis marks every `_step` units
+        for _i, (_dx, _dy) in enumerate(((_d, -_d), (0, _d), (_d, 0))):
+            _m = oblique(tuple(_k if _j == _i else 0 for _j in range(3)))
+            _ax.plot([_m[0] - _dx, _m[0] + _dx], [_m[1] - _dy, _m[1] + _dy], color="black", lw=0.8)
+    _ax.annotate(f"${_step}$", (_step, 0), textcoords="offset points", xytext=(0, -6), fontsize=11, ha="center", va="top", bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
+    _side = -1 if _U[0] * _V[1] - _U[1] * _V[0] < 0 else 1  # labels go on the outer side of each arrow
+    vector(_ax, (0, 0), _W, GREEN, r"$\vec{u} \times \vec{v}$", 0, r=22)
+    vector(_ax, (0, 0), _U, BLUE, r"$\vec{u}$", -75 * _side)
+    vector(_ax, (0, 0), _V, RED, r"$\vec{v}$", 75 * _side)
+
+    def _col(vec, color):
+        return rf"$\textcolor{{{color}}}{{\begin{{bmatrix}} {vec[0]:g} \\ {vec[1]:g} \\ {vec[2]:g} \end{{bmatrix}}}}$"
 
     mo.vstack(
         [
-            mo.hstack([mo.vstack([u1, u2, u3]), mo.vstack([v1, v2, v3])], justify="start", gap=3),
-            mo.md(
-                "| | |\n|:--|:--|\n"
-                rf"| $\vec{{u}} \times \vec{{v}}$ | $\begin{{bmatrix}} {_w[0]:g} \\ {_w[1]:g} \\ {_w[2]:g} \end{{bmatrix}}$ |"
-                "\n"
-                rf"| $\lVert \vec{{u}} \times \vec{{v}} \rVert$ = area of the parallelogram | ${_norm:.3f}$ |"
+            mo.vstack(
+                [
+                    mo.hstack([u1, u2, u3], justify="start", gap=2, wrap=True),
+                    mo.hstack([v1, v2, v3], justify="start", gap=2, wrap=True),
+                ]
             ),
-            mo.center(_fig),
+            table(
+                [
+                    (r"$\vec{u}, \ \vec{v}$", _col(_u, BLUE) + r", &nbsp; " + _col(_v, RED)),
+                    (r"$\vec{u} \times \vec{v}$", _col(_w, GREEN)),
+                    (r"$\lVert \vec{u} \times \vec{v} \rVert$ = area of the parallelogram", rf"${_norm:.3f}$"),
+                ]
+            ),
+            _fig,
         ]
     )
     return
@@ -593,15 +664,18 @@ def _(mo, theorem):
 
     another extension of multiplication of vectors, now taking values in vectors!
 
-    This **cannot** be extended to other $\mathbb{R}^n$ with $n \neq 3, 7$.
+    $\leadsto$ &nbsp; this **cannot** be extended to other $\mathbb{R}^n$ with $n \neq 3, 7$
+
+    ### Properties of the cross-product
     """
             ),
             theorem(
                 r"""
     Given $\vec{u}, \vec{v}, \vec{w} \in \mathbb{R}^3$, $\alpha, \beta \in \mathbb{R}$
 
-    - $\vec{u} \times \vec{v} = -\vec{v} \times \vec{u}$ &nbsp; (anti-commutativity)
-    - $\vec{u} \times (\alpha \vec{v} + \beta \vec{w}) = \alpha (\vec{u} \times \vec{v}) + \beta (\vec{u} \times \vec{w})$ and $(\alpha \vec{u} + \beta \vec{v}) \times \vec{w} = \alpha (\vec{u} \times \vec{w}) + \beta (\vec{v} \times \vec{w})$ &nbsp; (bilinearity)
+    - $\vec{u} \times \vec{v} = -\vec{v} \times \vec{u}$ &nbsp; (**anti-commutativity**)
+    - $\vec{u} \times (\alpha \vec{v} + \beta \vec{w}) = \alpha (\vec{u} \times \vec{v}) + \beta (\vec{u} \times \vec{w})$ and
+      $(\alpha \vec{u} + \beta \vec{v}) \times \vec{w} = \alpha (\vec{u} \times \vec{w}) + \beta (\vec{v} \times \vec{w})$ &nbsp; (**bilinearity**)
     """,
                 "Properties of the cross-product",
             ),
@@ -669,6 +743,22 @@ def _(check, mo, q2_1, q2_2, q2_3, q3_vol):
             mo.md(r"(c) Is $\vec{A}_1, \vec{A}_2, \vec{A}_3$ right-handed (positively oriented)?"),
         ]
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Summary
+
+    - a line in $\mathbb{R}^3$ is $L = \{\, \gamma(t) = \vec{x} + t\vec{v} \mid t \in \mathbb{R} \,\}$ with $\vec{v}$ non-zero: starting point $\vec{x}$, velocity $\vec{v}$; parameterizations are not unique, but their velocities are proportional
+    - a plane in $\mathbb{R}^3$ is $P = \{\, \varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v} \mid s, t \in \mathbb{R} \,\}$ with $\vec{u}, \vec{v}$ not proportional; $\vec{n}$ is normal to $P$ if $\vec{n} \cdot \vec{u} = \vec{n} \cdot \vec{v} = 0$
+    - the cross-product $\vec{w} = \vec{u} \times \vec{v}$ is orthogonal to both $\vec{u}, \vec{v}$, has $\lVert \vec{w} \rVert$ = area of the parallelogram spanned by $\vec{u}$ and $\vec{v}$, and $\vec{u}, \vec{v}, \vec{w}$ is right-handed: $\det \begin{bmatrix} \vec{u} & \vec{v} & \vec{w} \end{bmatrix} > 0$
+    - $\vec{u} \times \vec{v}$ is computed as a formal $3 \times 3$ determinant with first row $\vec{e}_1, \vec{e}_2, \vec{e}_3$; every normal vector to $P$ is proportional to $\vec{u} \times \vec{v}$
+    - the cross-product is anti-commutative and bilinear
+
+    **Next:** multivariable functions
+    """)
     return
 
 
