@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 05 · Lines, planes, and the cross-product in R³", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 · Lecture 05 · Lines and planes and the cross-product in R³", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -60,7 +60,7 @@ def _(mo):
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>", "color": color, "lw": 1.3, "mutation_scale": 10, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -91,7 +91,7 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 05", "Week 03", "Lecture 05 · Lines, planes, and the cross-product in R³")
+    header("Lecture 05", "Week 03", "Lecture 05 · Lines and planes and the cross-product in R³")
     return
 
 
@@ -123,7 +123,7 @@ def _(Figure, GREEN, RED, math):
             start, end = [0, 0, 0], [0, 0, 0]
             start[d], end[d] = lo, hi
             ax.annotate("", xy=project3(end), xytext=project3(start),
-                        arrowprops={"arrowstyle": "-|>", "color": "#555b63", "lw": 0.85,
+                        arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": "#555b63", "lw": 0.85,
                                     "mutation_scale": 8, "shrinkA": 0, "shrinkB": 0}, zorder=1)
         return fig, ax
 
@@ -136,8 +136,8 @@ def _(Figure, GREEN, RED, math):
         tip = tuple(o + c for o, c in zip(origin, v))
         if any(v):
             ax.annotate("", xy=project3(tip), xytext=project3(origin),
-                        arrowprops={"arrowstyle": "-|>", "color": color, "lw": lw,
-                                    "mutation_scale": 9, "shrinkA": 0, "shrinkB": 0}, zorder=zorder)
+                        arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": lw,
+                                    "mutation_scale": 10, "shrinkA": 0, "shrinkB": 0}, zorder=zorder)
         if label:
             label3(ax, tip, label, color, label_offset, label_ha, label_va)
 
@@ -146,7 +146,7 @@ def _(Figure, GREEN, RED, math):
         p2 = tuple(a + b for a, b in zip(p1, v))
         p3 = tuple(a + b for a, b in zip(origin, v))
         ax.add_patch(Polygon([project3(p) for p in (origin, p1, p2, p3)], closed=True,
-                             facecolor="#edf1f5", edgecolor="#8997a5", lw=0.9, alpha=0.65, zorder=2))
+                             facecolor="#edf1f5", edgecolor="#8997a5", lw=0.9, alpha=0.3, zorder=2))
 
     def plane_schematic():
         # A generic tilted plane, independent of the numerical examples.
@@ -258,8 +258,7 @@ def _(BLUE, GREEN, RED, mo, patch3, project3, space, t_line, vec3):
     _t = t_line.value
     _g = (_t + 0.0, 1 + 2 * _t + 0.0, 1)
     _fig, _ax = space((5.4, 3.0), (-3.2, 5.4), (-1.35, 2.05), ((0, 2.7), (0, 5.6), (0, 2)))
-    # A gently inclined supporting plane containing the whole line.
-    patch3(_ax, (-1.6, -2.2, 1), (3.6, 0, 0.216), (0, 6.6, -0.198))
+    patch3(_ax, (-1.6, -2.2, 1), (3.6, 0, 0), (0, 6.6, 0))
     _a, _b = project3((-1.5, -2, 1)), project3((1.5, 4, 1))
     _ax.plot([_a[0], _b[0]], [_a[1], _b[1]], color="#777777", lw=0.9, zorder=4)
     vec3(_ax, (1, 2, 0), GREEN, zorder=1)
@@ -273,12 +272,8 @@ def _(BLUE, GREEN, RED, mo, patch3, project3, space, t_line, vec3):
 
     mo.vstack(
         [
-            mo.hstack(
-                [t_line, mo.md(rf"$\gamma({_t:g}) = \begin{{bmatrix}} {_g[0]:g} \\ {_g[1]:g} \\ {_g[2]:g} \end{{bmatrix}}$")],
-                justify="start",
-                gap=3,
-                align="center",
-            ),
+            mo.hstack([t_line], justify="start", gap=3),
+            mo.md("| | |\n|:--|:--|\n" + rf"| $\gamma(t)$ | $\begin{{bmatrix}} {_g[0]:g} \\ {_g[1]:g} \\ {_g[2]:g} \end{{bmatrix}}$ |"),
             _fig,
         ]
     )
@@ -402,9 +397,7 @@ def _(GREEN, definition, mo, np, patch3, plane_schematic, space, vec3):
         [
             definition(
                 r"""
-    Given two vectors $\vec{u} = \begin{bmatrix} u^1 \\ u^2 \\ u^3 \end{bmatrix}, \ \vec{v} = \begin{bmatrix} v^1 \\ v^2 \\ v^3 \end{bmatrix} \in \mathbb{R}^3$, define their **cross-product** $\vec{u} \times \vec{v} = \vec{0}$ if they are linearly dependent.
-
-    Otherwise, $\vec{w} = \vec{u} \times \vec{v} \in \mathbb{R}^3$ is the unique vector such that
+    Given two vectors $\vec{u} = \begin{bmatrix} u^1 \\ u^2 \\ u^3 \end{bmatrix}, \ \vec{v} = \begin{bmatrix} v^1 \\ v^2 \\ v^3 \end{bmatrix} \in \mathbb{R}^3$, the **cross-product** of $\vec{u}$ and $\vec{v}$ is the unique vector $\vec{w} = \vec{u} \times \vec{v} \in \mathbb{R}^3$ such that
 
     $$
     \vec{u} \cdot \vec{w} = 0, \quad \vec{v} \cdot \vec{w} = 0 \qquad (\text{orthogonal to both } \vec{u}, \vec{v})
@@ -415,7 +408,7 @@ def _(GREEN, definition, mo, np, patch3, plane_schematic, space, vec3):
     = \Big(\underbrace{\lVert \vec{u} \rVert\, \lVert \vec{v} \rVert \sin\!\big(\theta(\vec{u}, \vec{v})\big)}_{\text{area of parallelogram spanned by } \vec{u} \text{ and } \vec{v}}\Big)^2
     $$
 
-    and $\vec{u}, \vec{v}, \vec{w}$ is **right-handed** (positively oriented).
+    (if $\vec{u}, \vec{v}$ are proportional this forces $\vec{w} = \vec{0}$) and $\vec{u}, \vec{v}, \vec{w}$ is **right-handed** (positively oriented).
     """
             ),
             mo.hstack(
@@ -504,7 +497,7 @@ def _(mo, theorem):
     \det \begin{bmatrix} u^1 & v^1 & (u^2 v^3 - u^3 v^2) \\ u^2 & v^2 & (u^3 v^1 - u^1 v^3) \\ u^3 & v^3 & (u^1 v^2 - u^2 v^1) \end{bmatrix} = \lVert \vec{w} \rVert^2 \geq 0 \qquad (\text{check!})
     $$
 
-    This is strictly positive when $\vec{u}, \vec{v}$ are linearly independent; otherwise $\vec{w} = \vec{0}$.
+    This is strictly positive when $\vec{u}, \vec{v}$ are not proportional; otherwise $\vec{w} = \vec{0}$.
 
     **Example.** &nbsp; $\vec{u} = \begin{bmatrix} 1 \\ 2 \\ 0 \end{bmatrix}, \quad \vec{v} = \begin{bmatrix} -1 \\ 3 \\ 0 \end{bmatrix}$
 
@@ -574,17 +567,13 @@ def _(GREEN, depth3, math, mo, patch3, project3, space, u1, u2, u3, v1, v2, v3, 
     mo.vstack(
         [
             mo.hstack([mo.vstack([u1, u2, u3]), mo.vstack([v1, v2, v3])], justify="start", gap=3),
-            mo.vstack(
-                [
-                    mo.center(_fig),
-                    mo.md(
-                        rf"$$\vec{{u}} \times \vec{{v}} = \begin{{bmatrix}} {_w[0]:g} \\ {_w[1]:g} \\ {_w[2]:g} \end{{bmatrix}}$$"
-                        "\n\n"
-                        rf"$$\lVert \vec{{u}} \times \vec{{v}} \rVert = {_norm:.3f} = \text{{area of the parallelogram}}$$"
-                    ),
-                ],
-                gap=2,
+            mo.md(
+                "| | |\n|:--|:--|\n"
+                rf"| $\vec{{u}} \times \vec{{v}}$ | $\begin{{bmatrix}} {_w[0]:g} \\ {_w[1]:g} \\ {_w[2]:g} \end{{bmatrix}}$ |"
+                "\n"
+                rf"| $\lVert \vec{{u}} \times \vec{{v}} \rVert$ = area of the parallelogram | ${_norm:.3f}$ |"
             ),
+            mo.center(_fig),
         ]
     )
     return
