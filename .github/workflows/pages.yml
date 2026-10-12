@@ -22,8 +22,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install marimo==0.25.1 uv
-      - run: python build.py
+      - run: pip install marimo==0.25.1 uv numpy matplotlib
+      - run: python build.py --snapshot
       - run: find site -name CLAUDE.md -delete
       - uses: actions/upload-pages-artifact@v3
         with:

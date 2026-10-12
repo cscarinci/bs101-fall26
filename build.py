@@ -5,6 +5,7 @@ Preview: python -m http.server --directory site
 """
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -75,6 +76,12 @@ NAV_CSS = """<style>
   .bs-nav a:focus-visible { outline: 2px solid #1b458f; outline-offset: 2px; }
   #root { padding-bottom: 3.5rem; }
   @media print { .bs-nav { display: none; } }
+  @media (max-width: 1000px) {  /* narrow screens: a bottom bar instead of floating buttons */
+    .bs-nav { left: 0; right: 0; bottom: 0; justify-content: center; padding: .35rem; background: #fff;
+               border-top: 1px solid rgba(27,69,143,.25); }
+    .bs-nav a { border: none; background: none; }
+    #root { padding-bottom: 4rem; }
+  }
 </style>"""
 
 
@@ -89,6 +96,11 @@ def nav_html(number, numbers):
     return NAV_CSS + '<nav class="bs-nav">' + "".join(links) + "</nav>"
 
 
+# python build.py --snapshot: run each notebook during the build and embed its outputs, so the page shows
+# the header and figures at once while the browser is still loading Python (needs numpy and matplotlib)
+SNAPSHOT = ["--execute", "--no-sandbox"] if "--snapshot" in sys.argv else []
+
+
 def main():
     notebooks = {}
     for path in sorted(HERE.glob("W*_Lecture_*.py")):
@@ -99,7 +111,7 @@ def main():
     for number, path in notebooks.items():
         print(f"exporting {path.name}")
         subprocess.run(
-            ["marimo", "export", "html-wasm", str(path), "-o", str(SITE / f"Lecture_{number:02d}"), "--mode", "run", "-f"],
+            ["marimo", "export", "html-wasm", str(path), "-o", str(SITE / f"Lecture_{number:02d}"), "--mode", "run", "-f", *SNAPSHOT],
             check=True,
             cwd=HERE,
         )
