@@ -198,7 +198,7 @@ def _(mo):
     - $\leadsto$ &nbsp; need to interpret sign
     - $\leadsto$ &nbsp; need to understand angle between vectors and planes
 
-    **Today:** lines and planes in $\mathbb{R}^3$, and the cross-product
+    **In this lecture:** lines and planes in $\mathbb{R}^3$, and the cross-product
     """)
     return
 

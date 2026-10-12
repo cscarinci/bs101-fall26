@@ -186,7 +186,7 @@ def _(mo):
     - in general, $A \in \mathrm{Mat}(m \times n)$: &nbsp; $A = \begin{bmatrix} \vec{A}_1 & \vec{A}_2 & \cdots & \vec{A}_n \end{bmatrix}$, &nbsp; $\vec{A}_i = A\vec{e}_i \in \mathbb{R}^m$, where $\vec{e}_i \in \mathbb{R}^n$ is the standard basis of $\mathbb{R}^n$ (only one non-zero entry)
     - $\leadsto$ &nbsp; columns of $A$ are the images of the standard basis vectors via $A$!
 
-    **Today:** determinants of square matrices: areas, volumes, inverses and orientation
+    **In this lecture:** determinants of square matrices: areas, volumes, inverses and orientation
     """)
     return
 

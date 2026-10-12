@@ -226,7 +226,7 @@ def _(mo):
         \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0
         $$
 
-    **Today:** properties and interpretations of differentiable functions
+    **In this lecture:** properties and interpretations of differentiable functions
     """)
     return
 
@@ -319,7 +319,7 @@ def _(definition, mo, theorem):
     C^1\text{-smooth} \quad \Longrightarrow \quad \text{differentiable} \quad \Longrightarrow \quad \text{continuous}
     $$
 
-    **Example.** Any function $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ given by linear combination of products, quotients and compositions of elementary functions (powers, roots, exponentials, logarithms, trigonometric functions) of $x^i$'s are $C^1$-smooth where the formula and its derivatives are well-defined!
+    **Example.** Any function $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ given by linear combination of products, quotients and compositions of elementary functions (powers, roots, exponentials, logarithms, trigonometric functions) of $x^i$'s is $C^1$-smooth where the formula and its derivatives are well-defined!
 
     **Example.**
 

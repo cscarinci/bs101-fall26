@@ -223,7 +223,7 @@ def _(mo, theorem):
     """,
                 "Continuous partial derivatives",
             ),
-            mo.md(r"""**Today:** more properties"""),
+            mo.md(r"""**In this lecture:** more properties"""),
         ]
     )
     return
