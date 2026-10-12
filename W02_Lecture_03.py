@@ -23,7 +23,16 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     # ---- Building blocks shared by all lectures -------------------------
-    RED, GREEN, BLUE, GREY = "#b3261e", "#2e7d32", "#1b458f", "#888888"
+    # Palette with fixed roles (figures only; text carries no colour):
+    #   BLUE   the primary object (the particle, the point, the chosen vector)
+    #   RED    the second object it is compared with
+    #   GREEN  a derived quantity (velocity, relative velocity, tangent vector)
+    #   ORANGE a third series, only when three are needed
+    #   GREY   reference geometry (equator, light cone, inertial comparison)
+    #   LIGHT  fills and grids
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    # Figure widths: FULL spans the page, HALF sits beside text or in a pair
+    FULL, HALF = 7.4, 3.6
 
     def header(document, date, running=""):
         """Course header, as on the exercise sheets and exams."""
@@ -51,20 +60,31 @@ def _(mo):
     def theorem(body, title=""):
         return _statement("Theorem", title, body)
 
-    def warning(body):
+    def proposition(body, title=""):
+        return _statement("Proposition", title, body)
+
+    def corollary(body, title=""):
+        return _statement("Corollary", title, body)
+
+    def postulate(body, title=""):
+        return _statement("Postulate", title, body)
+
+    def note(body):
+        """Editorial note of the notebook (not part of the lecture)."""
         return mo.md("**Note.** " + body.strip())
 
-    def arrow(ax, tail, tip, color, label=None, at_tip=False, **kw):
-        """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip."""
+    def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
+        """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
+        One head size and one line weight for every figure, so arrows look alike across lectures."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
-            ax.annotate(label, pos, textcoords="offset points", xytext=(6, 6), color=color, fontsize=18)
+            ax.annotate(label, pos, textcoords="offset points", xytext=(6, 6), color=color, fontsize=13)
 
     def plane(ax, lim):
         """Style a 2D axis as a coordinate plane with range [-lim, lim]."""
@@ -73,8 +93,33 @@ def _(mo):
         ax.set_aspect("equal")
         ax.axhline(0, color="black", lw=0.8)
         ax.axvline(0, color="black", lw=0.8)
-        ax.grid(True, color="#cfe3f5", lw=0.6)
+        ax.grid(True, color=LIGHT, lw=0.6)
         ax.set_axisbelow(True)
+
+    def blank(w, h, xlim, ylim):
+        """A figure with one bare axis (no frame) for sketches."""
+        from matplotlib.figure import Figure as _Figure
+
+        fig = _Figure(figsize=(w, h), layout="constrained")
+        ax = fig.subplots()
+        ax.set_xlim(*xlim)
+        ax.set_ylim(*ylim)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        return fig, ax
+
+    def blob(cx, cy, rx, ry, wobble=0.07, seed=0, n=400):
+        """Closed organic curve around (cx, cy): an ellipse with a few low harmonics."""
+        import numpy as _np
+
+        rng = _np.random.default_rng(seed)
+        t = _np.linspace(0, 2 * _np.pi, n)
+        r = 1 + sum(wobble / k * rng.uniform(0.4, 1.0) * _np.cos(k * t + rng.uniform(0, 2 * _np.pi)) for k in (2, 3, 4, 5))
+        return cx + rx * r * _np.cos(t), cy + ry * r * _np.sin(t)
+
+    def table(rows):
+        """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
+        return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
 
     def check(field, answer):
         """Feedback mark for a numeric answer typed into a text field."""
@@ -86,7 +131,7 @@ def _(mo):
         except ValueError:
             return "⚠️ enter a number"
 
-    return BLUE, GREEN, GREY, RED, arrow, check, definition, header, plane, theorem, warning
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
@@ -96,20 +141,33 @@ def _(header):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, RED, arrow, mo):
-    _fig = Figure(figsize=(3.4, 2.4), layout="constrained")
-    _ax = _fig.subplots()
-    _ax.set_xlim(-0.2, 3.4)
-    _ax.set_ylim(-0.5, 2.3)
-    _ax.set_aspect("equal")
-    _ax.axis("off")
-    _ax.plot([2, 2], [0, 1.8], "--", color=BLUE, lw=1.3)
+def _(arrow, math):
+    def vector(ax, tail, tip, color, label=None, turn=0, r=15, **kw):
+        """Arrow from `tail` to `tip` (a dot when it has zero length), labelled beyond its tip on a white box;
+        `turn` (degrees) rotates the label about the tip so that coinciding vectors keep separate labels."""
+        dx, dy = tip[0] - tail[0], tip[1] - tail[1]
+        if dx == 0 and dy == 0:
+            ax.plot(*tip, "o", color=color, ms=4, zorder=4)
+            d = math.radians(45 + turn)
+        else:
+            arrow(ax, tail, tip, color, **kw)
+            d = math.atan2(dy, dx) + math.radians(turn)
+        if label:
+            ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
+
+    return (vector,)
+
+
+@app.cell(hide_code=True)
+def _(BLUE, GREEN, GREY, HALF, RED, arrow, blank, mo):
+    _fig, _ax = blank(HALF, 2.0, (-0.3, 3.6), (-0.6, 2.2))
+    _ax.plot([2, 2], [0, 1.8], color=GREY, lw=1.0, ls=(0, (4, 3)))
     arrow(_ax, (0, 0), (3, 0), RED)
-    arrow(_ax, (0, 0), (2, 1.8), "black")
-    arrow(_ax, (0, 0), (2, 0), BLUE)
-    _ax.text(2.05, 1.9, r"$\vec{x}$", fontsize=17)
-    _ax.text(3.05, 0.1, r"$\vec{u}$", color=RED, fontsize=17)
-    _ax.text(0.7, -0.42, r"$a\vec{u}$", color=BLUE, fontsize=17)
+    arrow(_ax, (0, 0), (2, 0), GREEN)
+    arrow(_ax, (0, 0), (2, 1.8), BLUE)
+    _ax.text(2.08, 1.88, r"$\vec{x}$", color=BLUE, fontsize=13, ha="left", va="bottom")
+    _ax.text(3.1, 0, r"$\vec{u}$", color=RED, fontsize=13, ha="left", va="center")
+    _ax.text(1.0, -0.14, r"$a\vec{u} = \mathrm{proj}_{\vec{u}}(\vec{x})$", color=GREEN, fontsize=13, ha="center", va="top")
 
     mo.vstack(
         [
@@ -117,93 +175,53 @@ def _(BLUE, Figure, RED, arrow, mo):
                 r"""
     ## Last time
 
-    Dot product in $\mathbb{R}^n$: &nbsp; $\cdot : \mathbb{R}^n \times \mathbb{R}^n \longrightarrow \mathbb{R}$
-
-    $$
-    \vec{x} \cdot \vec{y} = x^1 y^1 + x^2 y^2 + \dots + x^n y^n
-    $$
-
-    The angle is defined only when $\vec{x}, \vec{y} \neq \vec{0}$.
-
-    $$
-    \underbrace{\lVert \vec{x} \rVert = \sqrt{\vec{x} \cdot \vec{x}}}_{\text{norm / length}}
-    \qquad \qquad
-    \underbrace{\theta(\vec{x}, \vec{y}) = \arccos\!\left( \frac{\vec{x} \cdot \vec{y}}{\lVert \vec{x} \rVert\, \lVert \vec{y} \rVert} \right)}_{\text{angle}}
-    $$
-
-    **In-class practice Q3:** Given nonzero, pairwise orthogonal vectors $\vec{u}, \vec{v}, \vec{w} \in \mathbb{R}^3$, we can write $\vec{x} \in \mathbb{R}^3$ as
-
-    $$
-    \vec{x} = a\vec{u} + b\vec{v} + c\vec{w}
-    \qquad \text{where} \qquad
-    a = \frac{\vec{x} \cdot \vec{u}}{\lVert \vec{u} \rVert^2}, \quad
-    b = \frac{\vec{x} \cdot \vec{v}}{\lVert \vec{v} \rVert^2}, \quad
-    c = \frac{\vec{x} \cdot \vec{w}}{\lVert \vec{w} \rVert^2}
-    $$
+    - dot product in $\mathbb{R}^n$: &nbsp; $\cdot : \mathbb{R}^n \times \mathbb{R}^n \longrightarrow \mathbb{R}$, &nbsp; $\vec{x} \cdot \vec{y} = x^1 y^1 + x^2 y^2 + \dots + x^n y^n$
+    - norm / length $\lVert \vec{x} \rVert = \sqrt{\vec{x} \cdot \vec{x}}$ &nbsp; and angle $\theta(\vec{x}, \vec{y}) = \arccos\!\left( \dfrac{\vec{x} \cdot \vec{y}}{\lVert \vec{x} \rVert\, \lVert \vec{y} \rVert} \right)$ &nbsp; (only when $\vec{x}, \vec{y} \neq \vec{0}$)
+    - in-class practice Q3: given $\vec{u}, \vec{v}, \vec{w} \in \mathbb{R}^3$ pairwise orthogonal, all non-zero (**orthogonal frame**), we can write $\vec{x} \in \mathbb{R}^3$ as $\vec{x} = a\vec{u} + b\vec{v} + c\vec{w}$ where $a = \dfrac{\vec{x} \cdot \vec{u}}{\lVert \vec{u} \rVert^2}$, $b = \dfrac{\vec{x} \cdot \vec{v}}{\lVert \vec{v} \rVert^2}$, $c = \dfrac{\vec{x} \cdot \vec{w}}{\lVert \vec{w} \rVert^2}$
+    - $a\vec{u} = \dfrac{\vec{x} \cdot \vec{u}}{\lVert \vec{u} \rVert^2}\, \vec{u} = \mathrm{proj}_{\vec{u}}(\vec{x})$ &nbsp; (orthogonal projection of $\vec{x}$ onto the $\vec{u}$ direction)
+    - $\Longrightarrow$ &nbsp; $\vec{x} = \mathrm{proj}_{\vec{u}}(\vec{x}) + \mathrm{proj}_{\vec{v}}(\vec{x}) + \mathrm{proj}_{\vec{w}}(\vec{x})$: any vector in $\mathbb{R}^3$ decomposes as the sum of orthogonal projections onto an orthogonal frame!
     """
             ),
-            mo.hstack(
-                [
-                    _fig,
-                    mo.md(
-                        r"""
-    $$
-    a\vec{u} = \frac{\vec{x} \cdot \vec{u}}{\lVert \vec{u} \rVert^2}\, \vec{u} = \mathrm{proj}_{\vec{u}}(\vec{x})
-    $$
-
-    orthogonal projection of $\vec{x}$ onto the $\vec{u}$ direction
-    """
-                    ),
-                ],
-                widths=[1, 1],
-                gap=2,
-                align="center",
-            ),
-            mo.md(
-                r"""
-    $\therefore$ &nbsp; $\vec{u}, \vec{v}, \vec{w}$ pairwise orthogonal, all non-zero (orthogonal frame)
-
-    $$
-    \Longrightarrow \quad \vec{x} = \mathrm{proj}_{\vec{u}}(\vec{x}) + \mathrm{proj}_{\vec{v}}(\vec{x}) + \mathrm{proj}_{\vec{w}}(\vec{x})
-    $$
-
-    Any vector in $\mathbb{R}^3$ decomposes as the sum of orthogonal projections onto an orthogonal frame!
-    """
-            ),
+            _fig,
+            mo.md(r"""**Today:** the standard basis as preferred orthogonal frame, matrices, linear transformations and determinants"""),
         ]
     )
     return
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, definition, mo):
-    from mpl_toolkits.mplot3d import proj3d as _proj3d
+def _(BLUE, GREEN, GREY, HALF, RED, arrow, blank, definition, mo):
+    def _pr(x1, x2, x3):
+        """Oblique projection of R^3, as on the board: x^2 to the right, x^3 up, x^1 towards the viewer."""
+        return x2 - 0.45 * x1, x3 - 0.4 * x1
 
-    _fig = Figure(figsize=(3.8, 3.4), layout="constrained")
-    _ax = _fig.add_subplot(projection="3d")
-    for _d in ((2.2, 0, 0), (0, 2.2, 0), (0, 0, 2.2)):
-        _ax.quiver(0, 0, 0, *_d, color="black", lw=0.9, arrow_length_ratio=0.06)
-    _p = (1.0, 1.6, 1.7)
-    _ax.quiver(0, 0, 0, *_p, color=BLUE, lw=1.4, arrow_length_ratio=0.08)
-    _ax.plot([_p[0], 0], [_p[1], 0], [_p[2], _p[2]], "--", color=BLUE, lw=1.2)
-    _ax.text(0, -0.75, _p[2], r"$x^3\vec{e}_3$", color=BLUE, fontsize=15)
-    _ax.text(_p[0], _p[1], _p[2] + 0.15, r"$\vec{x}$", color=BLUE, fontsize=15)
-    _ax.set_xlim(0, 2)
-    _ax.set_ylim(0, 2)
-    _ax.set_zlim(0, 2)
-    _ax.view_init(elev=22, azim=28)
-    _ax.set_axis_off()
-    for _d, _name, _offset, _ha, _va in (
-        ((1, 0, 0), r"$\vec{e}_1$", (-8, 8), "right", "bottom"),
-        ((0, 1, 0), r"$\vec{e}_2$", (6, 8), "left", "bottom"),
-        ((0, 0, 1), r"$\vec{e}_3$", (8, 0), "left", "center"),
-    ):
-        _ax.quiver(0, 0, 0, *_d, color=GREEN, lw=1.6, arrow_length_ratio=0.12)
-        _px, _py, _pz = _proj3d.proj_transform(*_d, _ax.get_proj())
-        _ax.annotate(_name, (_px, _py), xytext=_offset, textcoords="offset points", ha=_ha, va=_va, color=GREEN, fontsize=15)
+    _fig, _ax = blank(HALF, 2.9, (-1.4, 2.9), (-1.1, 2.5))
+    arrow(_ax, _pr(-0.5, 0, 0), _pr(2.2, 0, 0), "black", lw=0.9)
+    arrow(_ax, (-0.6, 0), (2.5, 0), "black", lw=0.9)
+    arrow(_ax, (0, -0.6), (0, 2.4), "black", lw=0.9)
+    _p = (0.6, 2.2, 2.0)
+    _P = _pr(*_p)
+    _ax.plot([_P[0], 0], [_P[1], _p[2]], color=GREY, lw=1.0, ls=(0, (4, 3)))
+    arrow(_ax, (0, 0), (0, _p[2]), GREEN)
+    for _tip in (_pr(1, 0, 0), (1, 0), (0, 1)):
+        arrow(_ax, (0, 0), _tip, RED)
+    arrow(_ax, (0, 0), _P, BLUE)
+    _e1 = _pr(1, 0, 0)
+    _ax.text(_e1[0] - 0.12, _e1[1] + 0.12, r"$\vec{e}_1$", color=RED, fontsize=13, ha="right", va="bottom")
+    _ax.text(0.6, -0.14, r"$\vec{e}_2$", color=RED, fontsize=13, ha="center", va="top")
+    _ax.text(0.14, 0.55, r"$\vec{e}_3$", color=RED, fontsize=13, ha="left", va="center")
+    _ax.text(-0.14, 1.6, r"$x^3\vec{e}_3$", color=GREEN, fontsize=13, ha="right", va="center")
+    _ax.text(_P[0] + 0.1, _P[1] + 0.05, r"$\vec{x}$", color=BLUE, fontsize=13, ha="left", va="bottom")
 
     mo.vstack(
         [
+            mo.md(
+                r"""
+    ## I.3 &nbsp; Matrices, linear transformations, and determinants (MT 1.2, 1.3)
+
+    ### The standard basis
+    """
+            ),
             definition(
                 r"""
     $\mathbb{R}^n$ has a preferred orthogonal frame
@@ -212,15 +230,16 @@ def _(BLUE, Figure, GREEN, definition, mo):
     \vec{e}_1 = \begin{bmatrix} 1 \\ 0 \\ 0 \\ \vdots \\ 0 \\ 0 \end{bmatrix}, \quad
     \vec{e}_2 = \begin{bmatrix} 0 \\ 1 \\ 0 \\ \vdots \\ 0 \\ 0 \end{bmatrix}, \quad \dots, \quad
     \vec{e}_n = \begin{bmatrix} 0 \\ 0 \\ 0 \\ \vdots \\ 0 \\ 1 \end{bmatrix}
-    \qquad \text{standard basis vectors of } \mathbb{R}^n
+    \qquad \text{the \textbf{standard basis vectors} of } \mathbb{R}^n
     $$
-    """
+    """,
+                "Standard basis",
             ),
             mo.md(
                 r"""
-    $\vec{e}_i \cdot \vec{e}_j = 0$ if $i \neq j$
+    $\leadsto$ &nbsp; $\vec{e}_i \cdot \vec{e}_j = 0$ if $i \neq j$
 
-    $\vec{e}_i \cdot \vec{e}_i = 1$ &nbsp; (unit length vectors)
+    $\leadsto$ &nbsp; $\vec{e}_i \cdot \vec{e}_i = 1$ &nbsp; (unit length vectors)
 
     Given
 
@@ -228,8 +247,8 @@ def _(BLUE, Figure, GREEN, definition, mo):
     \begin{aligned}
     \vec{x} = \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix}
     &= x^1 \begin{bmatrix} 1 \\ 0 \\ \vdots \\ 0 \end{bmatrix} + x^2 \begin{bmatrix} 0 \\ 1 \\ \vdots \\ 0 \end{bmatrix} + \dots + x^n \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 1 \end{bmatrix} \\
-    &= \underbrace{x^1 \vec{e}_1}_{\mathrm{proj}_{\vec{e}_1}(\vec{x})} + \underbrace{x^2 \vec{e}_2}_{\mathrm{proj}_{\vec{e}_2}(\vec{x})} + \dots + \underbrace{x^n \vec{e}_n}_{\mathrm{proj}_{\vec{e}_n}(\vec{x})} \\
-    &= (\vec{x} \cdot \vec{e}_1)\, \vec{e}_1 + (\vec{x} \cdot \vec{e}_2)\, \vec{e}_2 + \dots + (\vec{x} \cdot \vec{e}_n)\, \vec{e}_n
+    &= \underbrace{x^1 \vec{e}_1}_{\mathrm{proj}_{\vec{e}_1}(\vec{x})} + \underbrace{x^2 \vec{e}_2}_{\mathrm{proj}_{\vec{e}_2}(\vec{x})} + \dots + \underbrace{x^n \vec{e}_n}_{\mathrm{proj}_{\vec{e}_n}(\vec{x})}
+    = (\vec{x} \cdot \vec{e}_1)\, \vec{e}_1 + (\vec{x} \cdot \vec{e}_2)\, \vec{e}_2 + \dots + (\vec{x} \cdot \vec{e}_n)\, \vec{e}_n
     \end{aligned}
     $$
     """
@@ -237,9 +256,9 @@ def _(BLUE, Figure, GREEN, definition, mo):
             _fig,
             mo.md(
                 r"""
-    Any vector can be written uniquely as a linear combination of the standard basis vectors.
+    $\leadsto$ &nbsp; any vector can be written uniquely as a linear combination of the standard basis vectors
 
-    The component $x^i$ of a vector $\vec{x} = \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix}$ is the signed length of the projection of $\vec{x}$ along $\vec{e}_i$.
+    $\leadsto$ &nbsp; the component $x^i$ of a vector $\vec{x}$ is the signed length of the projection of $\vec{x}$ along $\vec{e}_i$
     """
             ),
         ]
@@ -251,7 +270,7 @@ def _(BLUE, Figure, GREEN, definition, mo):
 def _(definition, mo):
     mo.vstack(
         [
-            mo.md(r"## 3 &nbsp; Matrices, linear transformations, and determinants (MT 1.2, 1.3)"),
+            mo.md(r"""### Matrices"""),
             definition(
                 r"""
     Given $m, n \in \mathbb{Z}_{>0}$, an **$m \times n$ matrix** is an array of real numbers with $m$ rows and $n$ columns
@@ -267,32 +286,35 @@ def _(definition, mo):
     $$
 
     $A^i{}_j$ is the $(i, j)$ component of the matrix $A$: superscript $i$ denotes the row, subscript $j$ denotes the column. In $\mathrm{Mat}(m \times n)$, $m$ counts rows and $n$ counts columns.
-    """
+    """,
+                "Matrix",
             ),
             mo.md(
                 r"""
     Why are we interested in matrices?
 
-    - generalization of vectors ($n \times 1$ matrices) — can also extend addition and multiplication to matrices!
-    - will give the simplest examples of multivariable functions!
+    $\leadsto$ &nbsp; generalization of vectors ($n \times 1$ matrices): can also extend addition and multiplication to matrices!
+
+    $\leadsto$ &nbsp; will give the simplest examples of multivariable functions!
     """
             ),
             definition(
                 r"""
-    Given $A \in \mathrm{Mat}(m \times n)$, $B \in \mathrm{Mat}(m \times n)$, $\alpha \in \mathbb{R}$:
+    Given $A \in \mathrm{Mat}(m \times n)$, $B \in \mathrm{Mat}(m \times n)$, $\alpha \in \mathbb{R}$
 
     $A + B \in \mathrm{Mat}(m \times n)$ has components
 
     $$
-    (A + B)^i{}_j = A^i{}_j + B^i{}_j \qquad \text{componentwise addition}
+    (A + B)^i{}_j = A^i{}_j + B^i{}_j \qquad (\text{componentwise addition})
     $$
 
     $\alpha A \in \mathrm{Mat}(m \times n)$ has components
 
     $$
-    (\alpha A)^i{}_j = \alpha A^i{}_j \qquad \text{componentwise multiplication (by a scalar)}
+    (\alpha A)^i{}_j = \alpha A^i{}_j \qquad (\text{componentwise multiplication by a scalar})
     $$
-    """
+    """,
+                "Matrix addition and scalar multiplication",
             ),
             mo.md(
                 r"""
@@ -305,20 +327,21 @@ def _(definition, mo):
     A + B = \begin{bmatrix} 7 & 6 & 5 \\ 9 & 8 & 7 \end{bmatrix}, \quad
     3A = \begin{bmatrix} 3 & 6 & 9 \\ 12 & 15 & 18 \end{bmatrix}
     $$
+
+    ### Matrix multiplication
     """
             ),
             definition(
                 r"""
-    Given $A \in \mathrm{Mat}(m \times p)$, $B \in \mathrm{Mat}(p \times n)$:
+    Given $A \in \mathrm{Mat}(m \times p)$, $B \in \mathrm{Mat}(p \times n)$
 
     $AB \in \mathrm{Mat}(m \times n)$ has components
 
     $$
-    (AB)^i{}_j = A^i{}_1 B^1{}_j + A^i{}_2 B^2{}_j + \dots + A^i{}_p B^p{}_j
+    (AB)^i{}_j = \underbrace{A^i{}_1 B^1{}_j + A^i{}_2 B^2{}_j + \dots + A^i{}_p B^p{}_j}_{\text{sum of products of corresponding components}}
     $$
-
-    (sum of products of corresponding components).
-    """
+    """,
+                "Matrix multiplication",
             ),
             mo.md(
                 r"""
@@ -329,17 +352,15 @@ def _(definition, mo):
     B = \begin{bmatrix} 1 & 0 \\ 0 & 3 \\ 2 & 0 \end{bmatrix} \in \mathrm{Mat}(3 \times 2)
     $$
 
-    The number of columns of $A$ and the number of rows of $B$ must be the same in order to define $AB$.
+    (the number of columns of $A$ and the number of rows of $B$ must be the same in order to define $AB$)
 
     $$
-    \begin{aligned}
     AB = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{bmatrix} \begin{bmatrix} 1 & 0 \\ 0 & 3 \\ 2 & 0 \end{bmatrix}
-    &= \begin{bmatrix}
-    \textcolor{#b3261e}{1 \times 1 + 2 \times 0 + 3 \times 2} & \textcolor{#2e7d32}{1 \times 0 + 2 \times 3 + 3 \times 0} \\
-    \textcolor{#1b458f}{4 \times 1 + 5 \times 0 + 6 \times 2} & \textcolor{#e65100}{4 \times 0 + 5 \times 3 + 6 \times 0}
-    \end{bmatrix} \\
-    &= \begin{bmatrix} 7 & 6 \\ 16 & 15 \end{bmatrix} \in \mathrm{Mat}(2 \times 2)
-    \end{aligned}
+    = \begin{bmatrix}
+    1 \times 1 + 2 \times 0 + 3 \times 2 & 1 \times 0 + 2 \times 3 + 3 \times 0 \\
+    4 \times 1 + 5 \times 0 + 6 \times 2 & 4 \times 0 + 5 \times 3 + 6 \times 0
+    \end{bmatrix}
+    = \begin{bmatrix} 7 & 6 \\ 16 & 15 \end{bmatrix} \in \mathrm{Mat}(2 \times 2)
     $$
 
     **Remark.** Most times we cannot multiply two matrices: $A \in \mathrm{Mat}(m \times q)$, $B \in \mathrm{Mat}(p \times n)$
@@ -358,7 +379,7 @@ def _(definition, mo):
     AB = \begin{bmatrix} 11 & 1 \\ 3 & 3 \end{bmatrix} \neq BA = \begin{bmatrix} 10 & 5 \\ 2 & 4 \end{bmatrix}
     $$
 
-    Matrix multiplication is non-commutative even for square matrices.
+    (matrix multiplication is non-commutative even for square matrices)
 
     **Remark.** Matrix multiplication can “transform” vectors into other vectors: $A \in \mathrm{Mat}(m \times n)$ and $\vec{x} \in \mathbb{R}^n \approx \mathrm{Mat}(n \times 1)$
 
@@ -375,11 +396,13 @@ def _(definition, mo):
     $$
     A = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{bmatrix} \in \mathrm{Mat}(2 \times 3), \quad
     \vec{x} = \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix} \in \mathbb{R}^3 = \mathrm{Mat}(3 \times 1)
-    \quad \Longrightarrow \quad
-    A\vec{x} = \begin{bmatrix} 1 + 4 + 9 \\ 4 + 10 + 18 \end{bmatrix} = \begin{bmatrix} 14 \\ 32 \end{bmatrix} \in \mathbb{R}^2 = \mathrm{Mat}(2 \times 1)
     $$
 
-    Functions defined by matrix multiplication are always linear! (very special property)
+    $$
+    \Longrightarrow \quad A\vec{x} = \begin{bmatrix} 1 + 4 + 9 \\ 4 + 10 + 18 \end{bmatrix} = \begin{bmatrix} 14 \\ 32 \end{bmatrix} \in \mathbb{R}^2 = \mathrm{Mat}(2 \times 1)
+    $$
+
+    $\leadsto$ &nbsp; functions defined by matrix multiplication are always linear! (very special property)
     """
             ),
         ]
@@ -391,6 +414,7 @@ def _(definition, mo):
 def _(definition, mo, theorem):
     mo.vstack(
         [
+            mo.md(r"""### Linear transformations"""),
             definition(
                 r"""
     A function $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is called **linear** if $\forall\, \vec{x}, \vec{y} \in \mathbb{R}^n$ and $\forall\, \alpha, \beta \in \mathbb{R}$
@@ -398,18 +422,20 @@ def _(definition, mo, theorem):
     $$
     f(\alpha \vec{x} + \beta \vec{y}) = \alpha f(\vec{x}) + \beta f(\vec{y})
     $$
-    """
+    """,
+                "Linear function",
             ),
             theorem(
                 r"""
     Every function defined by an $m \times n$ matrix via matrix multiplication is linear. Conversely, every linear function $\mathbb{R}^n \longrightarrow \mathbb{R}^m$ is defined by an $m \times n$ matrix!
-    """
+    """,
+                "Linear functions and matrices",
             ),
             mo.md(
                 r"""
     **Proof.**
 
-    1. Write $A$ in terms of its column vectors ($n$ $m$-vectors):
+    1. Write $A$ in terms of its column vectors ($n$ $m$-vectors)
 
         $$
         A = \begin{bmatrix}
@@ -420,7 +446,7 @@ def _(definition, mo, theorem):
         = \begin{bmatrix} \vec{A}_1 & \vec{A}_2 & \cdots & \vec{A}_n \end{bmatrix} \in \mathrm{Mat}(m \times n)
         $$
 
-    2. For $\vec{x} = \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix} \in \mathbb{R}^n$:
+    2. For $\vec{x} = \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix} \in \mathbb{R}^n$
 
         $$
         \begin{aligned}
@@ -433,33 +459,30 @@ def _(definition, mo, theorem):
         &= x^1 \begin{bmatrix} A^1{}_1 \\ A^2{}_1 \\ \vdots \\ A^m{}_1 \end{bmatrix} +
         x^2 \begin{bmatrix} A^1{}_2 \\ A^2{}_2 \\ \vdots \\ A^m{}_2 \end{bmatrix} +
         \dots +
-        x^n \begin{bmatrix} A^1{}_n \\ A^2{}_n \\ \vdots \\ A^m{}_n \end{bmatrix} \\
-        &= x^1 \vec{A}_1 + x^2 \vec{A}_2 + \dots + x^n \vec{A}_n
+        x^n \begin{bmatrix} A^1{}_n \\ A^2{}_n \\ \vdots \\ A^m{}_n \end{bmatrix}
+        = x^1 \vec{A}_1 + x^2 \vec{A}_2 + \dots + x^n \vec{A}_n
         \end{aligned}
         $$
 
     3. Then
 
         $$
-        \begin{aligned}
-        A(\alpha \vec{x} + \beta \vec{y}) &= (\alpha x^1 + \beta y^1)\, \vec{A}_1 + \dots + (\alpha x^n + \beta y^n)\, \vec{A}_n \\
-        &= \alpha A\vec{x} + \beta A\vec{y}
-        \end{aligned}
+        A(\alpha \vec{x} + \beta \vec{y}) = (\alpha x^1 + \beta y^1)\, \vec{A}_1 + \dots + (\alpha x^n + \beta y^n)\, \vec{A}_n = \alpha A\vec{x} + \beta A\vec{y}
         $$
 
     For the converse direction: $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ linear
 
     $$
     \begin{aligned}
-    \Longrightarrow \quad f(\vec{x}) &= f(x^1 \vec{e}_1 + x^2 \vec{e}_2 + \dots + x^n \vec{e}_n), \qquad \forall\, \vec{x} \in \mathbb{R}^n \qquad (\vec{e}_i \text{ the std basis of } \mathbb{R}^n) \\
+    \Longrightarrow \quad f(\vec{x}) &= f(x^1 \vec{e}_1 + x^2 \vec{e}_2 + \dots + x^n \vec{e}_n), \qquad \forall\, \vec{x} \in \mathbb{R}^n \qquad (\vec{e}_i \text{ the standard basis of } \mathbb{R}^n) \\
     &= x^1 f(\vec{e}_1) + x^2 f(\vec{e}_2) + \dots + x^n f(\vec{e}_n) \\
     &= A\vec{x} \quad \text{where} \quad A = \begin{bmatrix} f(\vec{e}_1) & f(\vec{e}_2) & \cdots & f(\vec{e}_n) \end{bmatrix} \in \mathrm{Mat}(m \times n), \quad \vec{A}_i = f(\vec{e}_i) \in \mathbb{R}^m \qquad \square
     \end{aligned}
     $$
 
-    Linear functions (or linear transformations) are the simplest non-trivial examples of multivariable functions.
+    $\leadsto$ &nbsp; linear functions (or linear transformations) are the simplest non-trivial examples of multivariable functions
 
-    Later, we will introduce derivatives of more general multivariable functions as their best linear approximations.
+    $\leadsto$ &nbsp; later, we will introduce derivatives of more general multivariable functions as their best linear approximations
 
     **Remark.** Matrix multiplication is the same as composition of linear transformations
 
@@ -471,7 +494,7 @@ def _(definition, mo, theorem):
     \end{aligned}
     $$
 
-    Another way to get convinced about non-commutativity of matrix multiplication!
+    $\leadsto$ &nbsp; another way to get convinced about non-commutativity of matrix multiplication!
     """
             ),
         ]
@@ -483,6 +506,7 @@ def _(definition, mo, theorem):
 def _(definition, mo):
     mo.vstack(
         [
+            mo.md(r"""### Determinants of $2 \times 2$ matrices"""),
             definition(
                 r"""
     For $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \in \mathrm{Mat}(2 \times 2) \ \leftrightsquigarrow \ A : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ define
@@ -490,13 +514,14 @@ def _(definition, mo):
     $$
     \det(A) = ad - bc \in \mathbb{R} \qquad \text{the \textbf{determinant} of } A
     $$
-    """
+    """,
+                "Determinant",
             ),
             mo.md(
                 r"""
-    The determinant is a fundamental property of a square matrix (also for $n > 2$).
+    $\leadsto$ &nbsp; the determinant is a fundamental property of a square matrix (also for $n > 2$)
 
-    It measures the “signed area” of the parallelogram defined by the columns of $A$, $\vec{A}_1 = A\vec{e}_1$ and $\vec{A}_2 = A\vec{e}_2$.
+    $\leadsto$ &nbsp; it measures the “signed area” of the parallelogram defined by the columns of $A$, $\vec{A}_1 = A\vec{e}_1$ and $\vec{A}_2 = A\vec{e}_2$
 
     For nonzero columns, the unsigned area is
 
@@ -506,8 +531,7 @@ def _(definition, mo):
 
     $$
     \begin{aligned}
-    (\det A)^2 = \text{area}^2 &= (\text{base} \times \text{height})^2 \\
-    &= \lVert \vec{A}_1 \rVert^2\, \lVert \vec{A}_2 \rVert^2 \sin\!\big(\theta(\vec{A}_1, \vec{A}_2)\big)^2 \\
+    (\det A)^2 = \text{area}^2 = (\text{base} \times \text{height})^2 &= \lVert \vec{A}_1 \rVert^2\, \lVert \vec{A}_2 \rVert^2 \sin\!\big(\theta(\vec{A}_1, \vec{A}_2)\big)^2 \\
     &= \lVert \vec{A}_1 \rVert^2\, \lVert \vec{A}_2 \rVert^2 - (\vec{A}_1 \cdot \vec{A}_2)^2 = (ad - bc)^2
     \end{aligned}
     $$
@@ -532,34 +556,34 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(Figure, GREEN, RED, arrow, ma, mb, mc, md, mo, plane):
+def _(BLUE, Figure, GREY, HALF, LIGHT, RED, ma, mb, mc, md, mo, plane, table, vector):
     _a, _b, _c, _d = ma.value, mb.value, mc.value, md.value
     _det = _a * _d - _b * _c
 
-    _fig = Figure(figsize=(4.6, 4.6), layout="constrained")
+    _fig = Figure(figsize=(HALF, HALF), layout="constrained")
     _ax = _fig.subplots()
-    plane(_ax, 3.5 if max(abs(_a + _b), abs(_c + _d)) <= 3 else 6.5)
-    _ax.fill([0, 1, 1, 0], [0, 0, 1, 1], color="#888888", alpha=0.25, lw=0, label="unit square")
-    _ax.fill([0, _a, _a + _b, _b], [0, _c, _c + _d, _d], color=GREEN, alpha=0.3, lw=0, label=r"$A$(unit square)")
-    _ax.plot([_a, _a + _b, _b], [_c, _c + _d, _d], color=GREEN, lw=1)
-    arrow(_ax, (0, 0), (_a, _c), RED)
-    arrow(_ax, (0, 0), (_b, _d), "#1a237e")
-    for _color, _label in ((RED, r"$\vec{A}_1$"), ("#1a237e", r"$\vec{A}_2$")):
-        _ax.plot([], [], color=_color, lw=1.4, label=_label)
-    _ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=12)
+    _small = max(abs(_a), abs(_b), abs(_c), abs(_d), abs(_a + _b), abs(_c + _d)) <= 3
+    plane(_ax, 4.4 if _small else 7.6)  # the frame follows the parallelogram: nothing is clipped
+    _ticks = range(-4, 5, 2) if _small else range(-6, 7, 3)
+    _ax.set_xticks(_ticks)
+    _ax.set_yticks(_ticks)
+    _ax.fill([0, _a, _a + _b, _b], [0, _c, _c + _d, _d], color=LIGHT, lw=0)  # A(unit square)
+    _ax.plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], color=GREY, lw=1.0)  # the unit square
+    _ax.plot([_a, _a + _b, _b], [_c, _c + _d, _d], color=GREY, lw=1.0, ls=(0, (4, 3)))
+    _side = -1 if _det < 0 else 1  # labels go on the outer side of each arrow
+    vector(_ax, (0, 0), (_a, _c), BLUE, r"$\vec{A}_1$", -75 * _side)
+    vector(_ax, (0, 0), (_b, _d), RED, r"$\vec{A}_2$", 75 * _side)
 
     mo.vstack(
         [
-            mo.hstack([mo.vstack([ma, mc]), mo.vstack([mb, md])], justify="start", gap=3),
-            mo.md(
-                "| | |\n|:--|:--|\n"
-                rf"| $A$ | $\begin{{bmatrix}} {_a:g} & {_b:g} \\ {_c:g} & {_d:g} \end{{bmatrix}}$ |"
-                "\n"
-                rf"| $\det(A) = ad - bc$ | ${_det:g}$ |"
-                "\n"
-                rf"| area of the parallelogram | ${abs(_det):g}$ |"
-                "\n"
-                rf"| $A$ invertible? | {'yes' if _det != 0 else 'no'} |"
+            mo.hstack([ma, mb, mc, md], justify="start", gap=2, wrap=True),
+            table(
+                [
+                    (r"$A = \begin{bmatrix} \vec{A}_1 & \vec{A}_2 \end{bmatrix}$", rf"$\begin{{bmatrix}} \textcolor{{{BLUE}}}{{{_a:g}}} & \textcolor{{{RED}}}{{{_b:g}}} \\ \textcolor{{{BLUE}}}{{{_c:g}}} & \textcolor{{{RED}}}{{{_d:g}}} \end{{bmatrix}}$"),
+                    (r"$\det(A) = ad - bc$", rf"$({_a:g})({_d:g}) - ({_b:g})({_c:g}) = {_det:g}$"),
+                    (r"area of the parallelogram", rf"${abs(_det):g}$"),
+                    (r"$A$ invertible", "yes" if _det != 0 else "no"),
+                ]
             ),
             _fig,
         ]
@@ -570,14 +594,14 @@ def _(Figure, GREEN, RED, arrow, ma, mb, mc, md, mo, plane):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    It also determines whether or not $A : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ is **invertible**!
+    $\leadsto$ &nbsp; it also determines whether or not $A : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ is **invertible**!
 
     $$
-    \exists\, A^{-1} : \mathbb{R}^2 \longrightarrow \mathbb{R}^2 \ \text{ s.t. } \ A \circ A^{-1}(\vec{x}) = A^{-1} \circ A(\vec{x}) = \vec{x} \quad \forall\, \vec{x} \in \mathbb{R}^2
+    \exists\, A^{-1} : \mathbb{R}^2 \longrightarrow \mathbb{R}^2 \ \text{ such that } \ A \circ A^{-1}(\vec{x}) = A^{-1} \circ A(\vec{x}) = \vec{x} \quad \forall\, \vec{x} \in \mathbb{R}^2
     \qquad \Longleftrightarrow \qquad \det(A) \neq 0
     $$
 
-    In fact, for $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$ the inverse can be calculated explicitly when $\det(A) = ad - bc \neq 0$:
+    $\leadsto$ &nbsp; in fact, for $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$ the inverse can be calculated explicitly when $\det(A) = ad - bc \neq 0$
 
     $$
     A^{-1} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}
@@ -629,7 +653,7 @@ def _(check, mo, q1_1, q1_2, q3_0, q3_2, q3_m2):
 
     Compute $AB$ and $BA$.
 
-    Then find all vectors $\vec{x} \in \mathbb{R}^2$ s.t. $AB\vec{x} = BA\vec{x}$.
+    Then find all vectors $\vec{x} \in \mathbb{R}^2$ such that $AB\vec{x} = BA\vec{x}$.
 
     Conclude that $AB \neq BA$ does not imply $AB\vec{x} \neq BA\vec{x}$ $\;\forall\, \vec{x} \in \mathbb{R}^2$.
 
@@ -653,6 +677,21 @@ def _(check, mo, q1_1, q1_2, q3_0, q3_2, q3_m2):
             _ask(r"area for $t = 2$:", q3_2, 0),
         ]
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Summary
+
+    - the standard basis is the preferred orthogonal frame of $\mathbb{R}^n$: $\vec{x} = (\vec{x} \cdot \vec{e}_1)\, \vec{e}_1 + \dots + (\vec{x} \cdot \vec{e}_n)\, \vec{e}_n$, and $x^i$ is the signed length of the projection of $\vec{x}$ along $\vec{e}_i$
+    - matrices in $\mathrm{Mat}(m \times n)$ are added and multiplied by scalars componentwise; $AB$ is defined only when the number of columns of $A$ equals the number of rows of $B$, and is non-commutative even for square matrices
+    - $A \in \mathrm{Mat}(m \times n)$ $\leftrightsquigarrow$ linear function $A : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ with columns $\vec{A}_i = A\vec{e}_i$; matrix multiplication is composition
+    - for $A \in \mathrm{Mat}(2 \times 2)$, $\det(A) = ad - bc$ is the signed area of the parallelogram defined by the columns, and $A$ is invertible $\Longleftrightarrow$ $\det(A) \neq 0$
+
+    **Next:** determinants, areas and volumes
+    """)
     return
 
 
