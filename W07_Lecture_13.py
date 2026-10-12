@@ -24,11 +24,11 @@ def _():
 def _(mo):
     # ---- Building blocks shared by all lectures -------------------------
     # Palette with fixed roles (figures only; text carries no colour):
-    #   BLUE   the primary object (the particle, the point, the chosen vector)
+    #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (velocity, relative velocity, tangent vector)
+    #   GREEN  a derived quantity (tangent vector, gradient, mean)
     #   ORANGE a third series, only when three are needed
-    #   GREY   reference geometry (equator, light cone, inertial comparison)
+    #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
     BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
@@ -44,7 +44,7 @@ def _(mo):
       <div class="bs-inst">Daegu Gyeongbuk Institute of Science and Technology<br>School of Undergraduate Studies</div>
       <div class="bs-meta">
         <b>Document</b><span>{document}</span><b>Course</b><span>BS101-04/05</span>
-        <b>Date</b><span>{date}</span><b>Instructor</b><span>Professor Scarinci</span>
+        <b>Week</b><span>{date.removeprefix('Week ')}</span><b>Instructor</b><span>Professor Scarinci</span>
       </div>
     </div>
     """
@@ -356,7 +356,7 @@ def _(mo, theorem):
         [
             theorem(
                 r"""
-    The 2nd order Taylor approximation of $f$ at $\vec{a}$ is a good approximation
+    If $f$ is $C^2$-smooth at $\vec{a}$, then its 2nd order Taylor approximation at $\vec{a}$ is a good approximation
 
     $$
     \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a}) - \frac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert^2} = 0
