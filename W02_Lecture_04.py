@@ -60,7 +60,7 @@ def _(mo):
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>", "color": color, "lw": 2.2, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -276,7 +276,7 @@ def _(BLUE, Figure, GREEN, RED, definition, mo, theorem):
             _e = _add(_s, _v)
             _ax.plot([_s[0], _e[0]], [_s[1], _e[1]], [_s[2], _e[2]], color=_col, lw=1.3)
     for _v, _col in ((_A1, RED), (_A2, GREEN), (_A3, BLUE)):
-        _ax.quiver(*_O, *_v, color=_col, lw=2.4, arrow_length_ratio=0.12)
+        _ax.quiver(*_O, *_v, color=_col, lw=1.4, arrow_length_ratio=0.1)
     _ax.plot([_A3[0], _A3[0]], [_A3[1], _A3[1]], [_A3[2], 0], "--", color="black", lw=1.3)
     _ax.plot([0, _A3[0]], [0, _A3[1]], [0, 0], "--", color="black", lw=1)
     _ax.text(0.28, 0.3, 0.32, r"$\varphi$", fontsize=13)
@@ -347,8 +347,6 @@ def _(BLUE, Figure, GREEN, RED, definition, mo, theorem):
     \vec{A}_2 = \begin{bmatrix} b \\ e \\ h \end{bmatrix}, \
     \vec{A}_3 = \begin{bmatrix} c \\ f \\ i \end{bmatrix}
     $$
-
-    If $\vec{A}_1, \vec{A}_2$ are linearly dependent or $\vec{A}_3 = \vec{0}$, both the volume and determinant are zero. Otherwise:
 
     $$
     \begin{aligned}
@@ -461,7 +459,6 @@ def _(BLUE, Figure, GREEN, RED, arrow, ma, math, mb, mc, md, mo, plane):
     arrow(_left, (0, 0), (1, 0), RED)
     arrow(_left, (0, 0), (0, 1), GREEN)
     _turn(_left, (1, 0), (0, 1), True, 0.45)
-    _left.set_title("area $= 1$,  counter-clockwise")
 
     plane(_right, 3.5 if max(abs(_a + _b), abs(_c + _d)) <= 3 else 6.5)
     _right.fill([0, _a, _a + _b, _b], [0, _c, _c + _d, _d], color=BLUE, alpha=0.2, lw=0)
@@ -474,32 +471,29 @@ def _(BLUE, Figure, GREEN, RED, arrow, ma, math, mb, mc, md, mo, plane):
         _direction = "counter-clockwise" if _det > 0 else "clockwise"
     else:
         _direction = "collapsed"
-    _right.set_title(rf"area $= |\det A| = {abs(_det):g}$,  {_direction}")
 
     for _ax, _labels in ((_left, (r"$\vec{e}_1$", r"$\vec{e}_2$")), (_right, (r"$\vec{A}_1$", r"$\vec{A}_2$"))):
         for _color, _label in zip((RED, GREEN), _labels):
-            _ax.plot([], [], color=_color, lw=2.2, label=_label)
+            _ax.plot([], [], color=_color, lw=1.4, label=_label)
         _ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=12)
 
-    det_explorer = mo.vstack(
+    mo.vstack(
         [
-            mo.hstack(
-                [
-                    mo.vstack([ma, mc]),
-                    mo.vstack([mb, md]),
-                    mo.md(
-                        rf"$A = \begin{{bmatrix}} {_a:g} & {_b:g} \\ {_c:g} & {_d:g} \end{{bmatrix}}, \qquad \det A = {_det:g}$"
-                    ),
-                ],
-                justify="start",
-                gap=3,
-                align="center",
+            mo.hstack([mo.vstack([ma, mc]), mo.vstack([mb, md])], justify="start", gap=3),
+            mo.md(
+                "| | |\n|:--|:--|\n"
+                rf"| $A$ | $\begin{{bmatrix}} {_a:g} & {_b:g} \\ {_c:g} & {_d:g} \end{{bmatrix}}$ |"
+                "\n"
+                rf"| $\det A$ | ${_det:g}$ |"
+                "\n"
+                rf"| area of $A$(unit square) $= \lvert \det A \rvert$ | ${abs(_det):g}$ |"
+                "\n"
+                rf"| turn from $\vec{{A}}_1$ to $\vec{{A}}_2$ | {_direction} |"
             ),
             _fig,
         ]
     )
-    det_explorer
-    return (det_explorer,)
+    return
 
 
 @app.cell(hide_code=True)
@@ -542,19 +536,11 @@ def _(mo, theorem):
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    Use the explorer above to compare positive and negative determinants.
-    """)
-    return
-
-
-@app.cell(hide_code=True)
 def _(Figure, mo):
     _fig = Figure(figsize=(3.0, 2.8), layout="constrained")
     _ax = _fig.add_subplot(projection="3d")
     for _d, _name in (((1, 0, 0), r"$\vec{e}_1$"), ((0, 1, 0), r"$\vec{e}_2$"), ((0, 0, 1), r"$\vec{e}_3$")):
-        _ax.quiver(0, 0, 0, *_d, color="black", lw=1.8, arrow_length_ratio=0.15)
+        _ax.quiver(0, 0, 0, *_d, color="black", lw=1.2, arrow_length_ratio=0.12)
         _ax.text(*[1.12 * _c for _c in _d], _name, fontsize=15, ha="center")
     _ax.set_xlim(0, 1.3)
     _ax.set_ylim(0, 1.3)
