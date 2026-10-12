@@ -222,7 +222,7 @@ def _(Arc, BLUE, GREEN, GREY, HALF, LIGHT, RED, arrow, blank, definition, math, 
         [
             mo.md(
                 r"""
-    ## I.4 &nbsp; Determinants, areas and volumes, and the cross-product in $\mathbb{R}^3$
+    ## I.4 &nbsp; Determinants, areas and volumes
 
     Let's focus, for now, on square matrices $A \in \mathrm{Mat}(n \times n)$ &nbsp; $\leadsto$ &nbsp; linear transformations $A : \mathbb{R}^n \longrightarrow \mathbb{R}^n$ &nbsp; (mainly for $n = 2$ and $n = 3$)
 
