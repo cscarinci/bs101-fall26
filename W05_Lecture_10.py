@@ -373,7 +373,7 @@ def _(definition, mo):
     We define the **gradient** of $f$ at $\vec{x} = \vec{a}$ as the vector
 
     $$
-    \nabla f(\vec{a}) = \underbrace{\begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) \\[8pt] \dfrac{\partial f}{\partial x^2}(\vec{a}) \\ \vdots \\ \dfrac{\partial f}{\partial x^n}(\vec{a}) \end{bmatrix}}_{\mathrm{Mat}(n \times 1) \,\neq\, \mathrm{Mat}(1 \times n)} \in \mathbb{R}^n
+    \vec{\nabla} f(\vec{a}) = \underbrace{\begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) \\[8pt] \dfrac{\partial f}{\partial x^2}(\vec{a}) \\ \vdots \\ \dfrac{\partial f}{\partial x^n}(\vec{a}) \end{bmatrix}}_{\mathrm{Mat}(n \times 1) \,\neq\, \mathrm{Mat}(1 \times n)} \in \mathbb{R}^n
     $$
     """,
                 "Gradient",
@@ -394,15 +394,15 @@ def _(definition, mo):
     versus
 
     $$
-    \nabla f(\vec{a}) = \begin{bmatrix} 2 \\ 2 \end{bmatrix} = 2\vec{a} \in \mathbb{R}^2
+    \vec{\nabla} f(\vec{a}) = \begin{bmatrix} 2 \\ 2 \end{bmatrix} = 2\vec{a} \in \mathbb{R}^2
     $$
 
-    **Remark.** $Df(\vec{a})$ and $\nabla f(\vec{a})$ are related via the dot product
+    **Remark.** $Df(\vec{a})$ and $\vec{\nabla} f(\vec{a})$ are related via the dot product
 
     $$
     \begin{aligned}
-    Df(\vec{a})(\vec{v}) &= v^1 \frac{\partial f}{\partial x^1}(\vec{a}) + v^2 \frac{\partial f}{\partial x^2}(\vec{a}) + \dots + v^n \frac{\partial f}{\partial x^n}(\vec{a}) = \big( \nabla f(\vec{a}) \big) \cdot \vec{v} \\
-    &= \lVert \nabla f(\vec{a}) \rVert\, \lVert \vec{v} \rVert \cos\!\big( \theta(\nabla f(\vec{a}), \vec{v}) \big) \qquad (\nabla f(\vec{a}) \neq \vec{0},\ \vec{v} \neq \vec{0})
+    Df(\vec{a})(\vec{v}) &= v^1 \frac{\partial f}{\partial x^1}(\vec{a}) + v^2 \frac{\partial f}{\partial x^2}(\vec{a}) + \dots + v^n \frac{\partial f}{\partial x^n}(\vec{a}) = \big( \vec{\nabla} f(\vec{a}) \big) \cdot \vec{v} \\
+    &= \lVert \vec{\nabla} f(\vec{a}) \rVert\, \lVert \vec{v} \rVert \cos\!\big( \theta(\vec{\nabla} f(\vec{a}), \vec{v}) \big) \qquad (\vec{\nabla} f(\vec{a}) \neq \vec{0},\ \vec{v} \neq \vec{0})
     \end{aligned}
     $$
     """
@@ -425,7 +425,7 @@ def _(BLUE, GREEN, HALF, RED, arrow, blank, cross_axes, math, mo, np, theorem):
     arrow(_ax, (0, 0), _a, BLUE)
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
     _ax.text(1.3, 0.75, r"$\vec{a}$", color=BLUE, fontsize=13, ha="left", va="top", bbox=_box)
-    _ax.text(4.5, 2.1, r"$\nabla f(\vec{a}) = 2\vec{a}$", color=GREEN, fontsize=13, ha="left", va="top")
+    _ax.text(4.5, 2.1, r"$\vec{\nabla} f(\vec{a}) = 2\vec{a}$", color=GREEN, fontsize=13, ha="left", va="top")
     _ax.text(-1.75, 1.9, r"$f^{-1}(R^2)$", color=BLUE, fontsize=12, ha="right", va="bottom")
     _ax.text(-0.95, -1.2, r"$f^{-1}(r^2)$", color=RED, fontsize=12, ha="center", va="center")
 
@@ -434,25 +434,25 @@ def _(BLUE, GREEN, HALF, RED, arrow, blank, cross_axes, math, mo, np, theorem):
             mo.md(r"""### Steepest ascent"""),
             theorem(
                 r"""
-    If $\nabla f(\vec{a}) \neq \vec{0}$, it points in the direction at $\vec{a}$ where $f(\vec{x})$ grows fastest (direction of steepest ascent).
+    If $\vec{\nabla} f(\vec{a}) \neq \vec{0}$, it points in the direction at $\vec{a}$ where $f(\vec{x})$ grows fastest (direction of steepest ascent).
 
-    If $\nabla f(\vec{a}) = \vec{0}$, then $Df(\vec{a})(\vec{v}) = 0$ for every $\vec{v}$.
+    If $\vec{\nabla} f(\vec{a}) = \vec{0}$, then $Df(\vec{a})(\vec{v}) = 0$ for every $\vec{v}$.
     """,
                 "Direction of steepest ascent",
             ),
             mo.md(
                 r"""
-    **Proof.** If we keep $\lVert \vec{v} \rVert = 1$, $Df(\vec{a})(\vec{v})$ is largest when $\theta(\nabla f(\vec{a}), \vec{v}) = 0$
+    **Proof.** If we keep $\lVert \vec{v} \rVert = 1$, $Df(\vec{a})(\vec{v})$ is largest when $\theta(\vec{\nabla} f(\vec{a}), \vec{v}) = 0$
 
-    $\Longrightarrow$ &nbsp; $\nabla f(\vec{a})$ points in the direction of largest growth of $f$ at $\vec{x} = \vec{a}$
+    $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a})$ points in the direction of largest growth of $f$ at $\vec{x} = \vec{a}$
 
-    $\Longrightarrow$ &nbsp; $\nabla f(\vec{a})$ is the direction of steepest ascent of $f$ at $\vec{x} = \vec{a}$! $\square$
+    $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a})$ is the direction of steepest ascent of $f$ at $\vec{x} = \vec{a}$! $\square$
 
     **Example.**
 
     $$
     f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = (x^1)^2 + (x^2)^2, \qquad
-    \nabla f\!\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right) = \begin{bmatrix} 2 a^1 \\ 2 a^2 \end{bmatrix}
+    \vec{\nabla} f\!\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right) = \begin{bmatrix} 2 a^1 \\ 2 a^2 \end{bmatrix}
     $$
 
     with level sets $f^{-1}(r^2)$: &nbsp; $(x^1)^2 + (x^2)^2 = r^2$ &nbsp; and &nbsp; $f^{-1}(R^2)$: &nbsp; $(x^1)^2 + (x^2)^2 = R^2$
@@ -466,21 +466,21 @@ def _(BLUE, GREEN, HALF, RED, arrow, blank, cross_axes, math, mo, np, theorem):
     Direction of **steepest descent** (fastest decrease) of $f$ at $\vec{a}$
 
     $$
-    \leadsto \quad -\nabla f(\vec{a}) = \begin{bmatrix} -2 a^1 \\ -2 a^2 \end{bmatrix}
+    \leadsto \quad -\vec{\nabla} f(\vec{a}) = \begin{bmatrix} -2 a^1 \\ -2 a^2 \end{bmatrix}
     $$
 
     Directions with no ascent / descent
 
     $$
-    \leadsto \quad \vec{v} = \begin{bmatrix} v^1 \\ v^2 \end{bmatrix} \ \text{ such that } \ \nabla f(\vec{a}) \cdot \vec{v} = 0 \quad \Longleftrightarrow \quad Df(\vec{a})(\vec{v}) = 0
+    \leadsto \quad \vec{v} = \begin{bmatrix} v^1 \\ v^2 \end{bmatrix} \ \text{ such that } \ \vec{\nabla} f(\vec{a}) \cdot \vec{v} = 0 \quad \Longleftrightarrow \quad Df(\vec{a})(\vec{v}) = 0
     $$
 
     $$
-    \nabla f(\vec{a}) \cdot \vec{v} = 2 a^1 v^1 + 2 a^2 v^2 = 0 \quad \Longleftrightarrow \quad v^2 = -\frac{a^1}{a^2}\, v^1 \qquad (\text{assuming } a^2 \neq 0)
+    \vec{\nabla} f(\vec{a}) \cdot \vec{v} = 2 a^1 v^1 + 2 a^2 v^2 = 0 \quad \Longleftrightarrow \quad v^2 = -\frac{a^1}{a^2}\, v^1 \qquad (\text{assuming } a^2 \neq 0)
     $$
 
     $$
-    \vec{v} = \begin{bmatrix} v^1 \\ v^2 \end{bmatrix} \in \underbrace{\big( \nabla f(\vec{a}) \big)^{\perp}}_{\text{orthogonal complement of } \nabla f(\vec{a})},
+    \vec{v} = \begin{bmatrix} v^1 \\ v^2 \end{bmatrix} \in \underbrace{\big( \vec{\nabla} f(\vec{a}) \big)^{\perp}}_{\text{orthogonal complement of } \vec{\nabla} f(\vec{a})},
     \qquad
     f^{-1}(R^2) = \left\{\, \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \;\middle|\; (x^1)^2 + (x^2)^2 = R^2 \,\right\}
     $$
@@ -521,7 +521,7 @@ def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, ORANGE, cross_axes, ga1, ga2, math
         _ax.plot(_R * np.cos(_th), _R * np.sin(_th), color=BLUE, lw=1.4)
         _t = (-_a[1] / _R, _a[0] / _R)
         _ax.plot([_a[0] - 2.2 * _t[0], _a[0] + 2.2 * _t[0]], [_a[1] - 2.2 * _t[1], _a[1] + 2.2 * _t[1]], color=GREY, lw=1.0, ls=(0, (4, 3)))
-        vector(_ax, _a, (_a[0] + _grad[0], _a[1] + _grad[1]), GREEN, r"$\nabla f(\vec{a})$", 0, r=22)
+        vector(_ax, _a, (_a[0] + _grad[0], _a[1] + _grad[1]), GREEN, r"$\vec{\nabla} f(\vec{a})$", 0, r=22)
         vector(_ax, _a, (_a[0] + _v[0], _a[1] + _v[1]), ORANGE, r"$\vec{v}$", 45, r=16)
         vector(_ax, (0, 0), _a, BLUE, r"$\vec{a}$", -45, r=16)
         _q = _d - math.radians(135)
@@ -530,7 +530,7 @@ def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, ORANGE, cross_axes, ga1, ga2, math
         _dot = rf"$({_grad[0]:g})({_v[0]:g}) + ({_grad[1]:g})({_v[1]:g}) = 0$"
     else:
         vector(_ax, (0, 0), _a, BLUE, r"$\vec{a}$", 0)
-        _perp = _dot = r"need $\nabla f(\vec{a}) \neq \vec{0}$"
+        _perp = _dot = r"need $\vec{\nabla} f(\vec{a}) \neq \vec{0}$"
 
     mo.vstack(
         [
@@ -539,9 +539,9 @@ def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, ORANGE, cross_axes, ga1, ga2, math
                 [
                     (r"$\vec{a}$", rf"$\textcolor{{{BLUE}}}{{\begin{{bmatrix}} {_a[0]:g} \\ {_a[1]:g} \end{{bmatrix}}}}$"),
                     (r"$f(\vec{a}) = R^2$", rf"$\textcolor{{{BLUE}}}{{{_R**2:.2f}}}$"),
-                    (r"$\nabla f(\vec{a}) = 2\vec{a}$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_grad[0]:g} \\ {_grad[1]:g} \end{{bmatrix}}}}$"),
-                    (r"$\vec{v} = \begin{bmatrix} -a^2 \\ a^1 \end{bmatrix} \in \big( \nabla f(\vec{a}) \big)^{\perp}$", _perp),
-                    (r"$\nabla f(\vec{a}) \cdot \vec{v}$", _dot),
+                    (r"$\vec{\nabla} f(\vec{a}) = 2\vec{a}$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_grad[0]:g} \\ {_grad[1]:g} \end{{bmatrix}}}}$"),
+                    (r"$\vec{v} = \begin{bmatrix} -a^2 \\ a^1 \end{bmatrix} \in \big( \vec{\nabla} f(\vec{a}) \big)^{\perp}$", _perp),
+                    (r"$\vec{\nabla} f(\vec{a}) \cdot \vec{v}$", _dot),
                 ]
             ),
             _fig,
@@ -562,7 +562,7 @@ def _(BLUE, GREEN, GREY, HALF, arrow, blank, definition, mo, np, theorem):
     arrow(_ax, (0, 0), tuple(1.4 * _n), GREEN)
     _ax.plot(0, 0, "o", color="black", ms=4, zorder=4)
     _ax.text(-0.08, -0.14, r"$\vec{a}$", fontsize=13, ha="center", va="top")
-    _ax.text(0.38, 1.4, r"$\nabla f(\vec{a})$", color=GREEN, fontsize=13, ha="left", va="center")
+    _ax.text(0.38, 1.4, r"$\vec{\nabla} f(\vec{a})$", color=GREEN, fontsize=13, ha="left", va="center")
     _ax.text(2.0, -0.55, r"$f^{-1}(b)$", color=BLUE, fontsize=13, ha="left", va="bottom")
 
     mo.vstack(
@@ -570,10 +570,10 @@ def _(BLUE, GREEN, GREY, HALF, arrow, blank, definition, mo, np, theorem):
             mo.md(r"""### The gradient and level sets"""),
             theorem(
                 r"""
-    Given $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ differentiable at $\vec{x} = \vec{a}$ with $f(\vec{a}) = b$ and $\nabla f(\vec{a}) \neq \vec{0}$, then $\nabla f(\vec{a})$ is perpendicular to $f^{-1}(b)$
+    Given $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ differentiable at $\vec{x} = \vec{a}$ with $f(\vec{a}) = b$ and $\vec{\nabla} f(\vec{a}) \neq \vec{0}$, then $\vec{\nabla} f(\vec{a})$ is perpendicular to $f^{-1}(b)$
 
     $$
-    \nabla f(\vec{a}) \perp f^{-1}(b)
+    \vec{\nabla} f(\vec{a}) \perp f^{-1}(b)
     $$
     """,
                 "Gradient is perpendicular to level sets",
@@ -666,7 +666,7 @@ def _(check, mo, q_d1, q_d2):
                 r"""
     (d) Find all $\vec{v} = \begin{bmatrix} v^1 \\ v^2 \end{bmatrix}$ for which $Df(\vec{a})(\vec{v}) = 0$.
 
-    (e) Sketch $f^{-1}(\ln(2))$ and draw $\nabla f(\vec{a})$ at $\vec{a}$.
+    (e) Sketch $f^{-1}(\ln(2))$ and draw $\vec{\nabla} f(\vec{a})$ at $\vec{a}$.
     """
             ),
         ]
@@ -680,9 +680,9 @@ def _(mo):
     ## Summary
 
     - differentiable at $\vec{x} = \vec{a}$ $\Longrightarrow$ continuous at $\vec{x} = \vec{a}$; continuous partials at $\vec{x} = \vec{a}$ ($C^1$-smooth) $\Longrightarrow$ differentiable at $\vec{x} = \vec{a}$ (sufficient, but not necessary)
-    - the derivative $Df(\vec{a}) \in \mathrm{Mat}(1 \times n)$ is the map that calculates directional derivatives; the gradient $\nabla f(\vec{a}) \in \mathbb{R}^n$ is a vector, and $Df(\vec{a})(\vec{v}) = \nabla f(\vec{a}) \cdot \vec{v}$
-    - if $\nabla f(\vec{a}) \neq \vec{0}$: $\nabla f(\vec{a})$ is the direction of steepest ascent, $-\nabla f(\vec{a})$ of steepest descent, and $\big( \nabla f(\vec{a}) \big)^{\perp}$ the directions with no ascent / descent
-    - $\nabla f(\vec{a}) \perp f^{-1}(b)$ for $b = f(\vec{a})$
+    - the derivative $Df(\vec{a}) \in \mathrm{Mat}(1 \times n)$ is the map that calculates directional derivatives; the gradient $\vec{\nabla} f(\vec{a}) \in \mathbb{R}^n$ is a vector, and $Df(\vec{a})(\vec{v}) = \vec{\nabla} f(\vec{a}) \cdot \vec{v}$
+    - if $\vec{\nabla} f(\vec{a}) \neq \vec{0}$: $\vec{\nabla} f(\vec{a})$ is the direction of steepest ascent, $-\vec{\nabla} f(\vec{a})$ of steepest descent, and $\big( \vec{\nabla} f(\vec{a}) \big)^{\perp}$ the directions with no ascent / descent
+    - $\vec{\nabla} f(\vec{a}) \perp f^{-1}(b)$ for $b = f(\vec{a})$
     - the affine approximation $g(\vec{x}) = f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a})$: for $n = 2$, $\mathrm{graph}(g)$ is the tangent plane to $\mathrm{graph}(f)$
 
     **Next:** affine approximations and the derivative of general maps
