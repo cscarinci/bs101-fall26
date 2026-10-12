@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 08", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 · Lecture 08 · Local properties of scalar functions and maps: limits", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -60,7 +60,7 @@ def _(mo):
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>", "color": color, "lw": 2.2, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -91,7 +91,7 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 08", "Week 04", "Lecture 08")
+    header("Lecture 08", "Week 04", "Lecture 08 · Local properties of scalar functions and maps: limits")
     return
 
 
@@ -134,6 +134,7 @@ def _(Figure, GREEN, RED, cross_axes, mo, np):
     _th = np.linspace(0, 2 * np.pi, 200)
     _ax2.plot(np.cos(_th), np.sin(_th), color=RED, lw=1.6)
     _ax2.plot(1, 0, "o", color=GREEN, ms=6)
+    _ax2.text(1.1, -0.3, r"$\lim_{t \to 0} \sigma(t)$", color=GREEN, fontsize=12)
     _ax2.plot(0, 1, "o", color=GREEN, ms=6)
     _ax2.text(0.12, 1.1, r"$\genfrac{[}{]}{0}{0}{0}{1}$", color=GREEN, fontsize=15)
     _ax2.text(0.85, 0.75, r"$\genfrac{[}{]}{0}{0}{\cos(t)}{\sin(t)}$", color=RED, fontsize=15)
@@ -415,23 +416,32 @@ def _(BLUE, Figure, GREY, RED, arrow, cross_axes, eps, mo, np):
     _th = np.linspace(0, 2 * np.pi, 200)
     _left.fill(_d * np.cos(_th), _d * np.sin(_th), color=BLUE, alpha=0.2, lw=0)
     _left.plot(_d * np.cos(_th), _d * np.sin(_th), "--", color=BLUE, lw=1.3)
-    _left.set_title(rf"$B(\vec{{0}}, \delta)$,  $\delta = \varepsilon / 2 = {_d:g}$", color=BLUE, fontsize=13)
+    _left.text(0.62, -0.85, r"$B(\vec{0}, \delta)$", color=BLUE, fontsize=12)
 
     _right.set_xlim(-1.6, 2.2)
-    _right.set_ylim(-2.3, 2.5)
+    _right.set_ylim(-2.6, 5.8)
     _right.axis("off")
-    arrow(_right, (0, -2.3), (0, 2.4), "black", lw=0.9)
-    _right.text(0.15, 2.25, r"$\mathbb{R}$", fontsize=13)
+    arrow(_right, (0, -2.6), (0, 5.7), "black", lw=0.9)
+    _right.text(0.15, 5.55, r"$\mathbb{R}$", fontsize=13)
     _right.plot([0, 0], [-_e, _e], color=GREY, lw=7, alpha=0.35, solid_capstyle="butt")
     _right.plot([0, 0], [0, 2 * _d], color=BLUE, lw=3.5, solid_capstyle="butt")
     for _y, _name in ((_e, r"$\varepsilon$"), (-_e, r"$-\varepsilon$"), (0, "$0$")):
         _right.plot([-0.08, 0.08], [_y, _y], color="black", lw=1)
         _right.text(-0.2, _y, _name, ha="right", va="center", fontsize=13)
-    _right.plot(0, 5, "o", color=RED, ms=5, clip_on=True)
+    _right.plot(0, 5, "o", color=RED, ms=5)
+    _right.plot([-0.08, 0.08], [5, 5], color="black", lw=1)
+    _right.text(-0.2, 5, "$5$", ha="right", va="center", fontsize=13)
+    _right.text(0.25, 5, r"$f(\vec{0})$", color=RED, fontsize=12, va="center")
     _right.text(0.25, _e * 0.5, r"$f(B(\vec{0}, \delta) - \{\vec{0}\})$", color=BLUE, fontsize=12, va="center")
     _right.text(0.25, -_e * 0.6, r"$B(0, \varepsilon)$", color="#555555", fontsize=12, va="center")
 
-    mo.vstack([eps, _fig])
+    mo.vstack(
+        [
+            mo.hstack([eps], justify="start", gap=3),
+            mo.md("| | |\n|:--|:--|\n" + rf"| $\delta = \varepsilon / 2$ | ${_d:g}$ |"),
+            _fig,
+        ]
+    )
     return
 
 
@@ -589,9 +599,18 @@ def _(BLUE, Figure, GREY, arrow, cross_axes, math, mo, np, theta):
         _right.plot([-0.06, 0.06], [_y, _y], color="black", lw=1)
         _right.text(-0.15, _y, f"${_y}$", ha="right", va="center", fontsize=13)
     _right.plot(0, _val, "o", color=BLUE, ms=8)
-    _right.text(0.2, _val, rf"$f = {_val:.2f}$", color=BLUE, fontsize=13, va="center")
 
-    mo.vstack([theta, _fig])
+    mo.vstack(
+        [
+            mo.hstack([theta], justify="start", gap=3),
+            mo.md(
+                "| | |\n|:--|:--|\n"
+                + rf"| direction | $\vec{{x}} = t \begin{{bmatrix}} {_c:.2f} \\ {_s:.2f} \end{{bmatrix}}$ |" + "\n"
+                + rf"| $f(\vec{{x}})$ along this line | ${_val:.2f}$ |"
+            ),
+            _fig,
+        ]
+    )
     return
 
 
