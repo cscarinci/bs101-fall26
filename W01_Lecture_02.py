@@ -23,7 +23,16 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     # ---- Building blocks shared by all lectures -------------------------
-    RED, GREEN, BLUE, GREY = "#b3261e", "#2e7d32", "#1b458f", "#888888"
+    # Palette with fixed roles (figures only; text carries no colour):
+    #   BLUE   the primary object (the particle, the point, the chosen vector)
+    #   RED    the second object it is compared with
+    #   GREEN  a derived quantity (velocity, relative velocity, tangent vector)
+    #   ORANGE a third series, only when three are needed
+    #   GREY   reference geometry (equator, light cone, inertial comparison)
+    #   LIGHT  fills and grids
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    # Figure widths: FULL spans the page, HALF sits beside text or in a pair
+    FULL, HALF = 7.4, 3.6
 
     def header(document, date, running=""):
         """Course header, as on the exercise sheets and exams."""
@@ -51,20 +60,31 @@ def _(mo):
     def theorem(body, title=""):
         return _statement("Theorem", title, body)
 
-    def warning(body):
+    def proposition(body, title=""):
+        return _statement("Proposition", title, body)
+
+    def corollary(body, title=""):
+        return _statement("Corollary", title, body)
+
+    def postulate(body, title=""):
+        return _statement("Postulate", title, body)
+
+    def note(body):
+        """Editorial note of the notebook (not part of the lecture)."""
         return mo.md("**Note.** " + body.strip())
 
-    def arrow(ax, tail, tip, color, label=None, at_tip=False, label_offset=(6, 6), label_ha="left", label_va="bottom", **kw):
-        """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip."""
+    def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
+        """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
+        One head size and one line weight for every figure, so arrows look alike across lectures."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
-            ax.annotate(label, pos, textcoords="offset points", xytext=label_offset, ha=label_ha, va=label_va, color=color, fontsize=18)
+            ax.annotate(label, pos, textcoords="offset points", xytext=(6, 6), color=color, fontsize=13)
 
     def plane(ax, lim):
         """Style a 2D axis as a coordinate plane with range [-lim, lim]."""
@@ -73,8 +93,33 @@ def _(mo):
         ax.set_aspect("equal")
         ax.axhline(0, color="black", lw=0.8)
         ax.axvline(0, color="black", lw=0.8)
-        ax.grid(True, color="#cfe3f5", lw=0.6)
+        ax.grid(True, color=LIGHT, lw=0.6)
         ax.set_axisbelow(True)
+
+    def blank(w, h, xlim, ylim):
+        """A figure with one bare axis (no frame) for sketches."""
+        from matplotlib.figure import Figure as _Figure
+
+        fig = _Figure(figsize=(w, h), layout="constrained")
+        ax = fig.subplots()
+        ax.set_xlim(*xlim)
+        ax.set_ylim(*ylim)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        return fig, ax
+
+    def blob(cx, cy, rx, ry, wobble=0.07, seed=0, n=400):
+        """Closed organic curve around (cx, cy): an ellipse with a few low harmonics."""
+        import numpy as _np
+
+        rng = _np.random.default_rng(seed)
+        t = _np.linspace(0, 2 * _np.pi, n)
+        r = 1 + sum(wobble / k * rng.uniform(0.4, 1.0) * _np.cos(k * t + rng.uniform(0, 2 * _np.pi)) for k in (2, 3, 4, 5))
+        return cx + rx * r * _np.cos(t), cy + ry * r * _np.sin(t)
+
+    def table(rows):
+        """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
+        return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
 
     def check(field, answer):
         """Feedback mark for a numeric answer typed into a text field."""
@@ -86,7 +131,7 @@ def _(mo):
         except ValueError:
             return "⚠️ enter a number"
 
-    return BLUE, GREEN, GREY, RED, arrow, check, definition, header, plane, theorem, warning
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
@@ -96,44 +141,50 @@ def _(header):
 
 
 @app.cell(hide_code=True)
+def _(arrow, math):
+    def vector(ax, tail, tip, color, label=None, turn=0, r=15, **kw):
+        """Arrow from `tail` to `tip` (a dot when it has zero length), labelled beyond its tip on a white box;
+        `turn` (degrees) rotates the label about the tip so that coinciding vectors keep separate labels."""
+        dx, dy = tip[0] - tail[0], tip[1] - tail[1]
+        if dx == 0 and dy == 0:
+            ax.plot(*tip, "o", color=color, ms=4, zorder=4)
+            d = math.radians(45 + turn)
+        else:
+            arrow(ax, tail, tip, color, **kw)
+            d = math.atan2(dy, dx) + math.radians(turn)
+        if label:
+            ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
+
+    return (vector,)
+
+
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     ## Last time
 
-    Points in $n$-space and $n$-vectors (arrows between points):
+    - points in $n$-space $\mathbb{R}^n \ni \vec{x} = (x^1, x^2, \dots, x^n)$ = $n$-vectors (arrows between points); each entry is a real number, $x^2$ is the 2nd component of $\vec{x}$
+    - vector addition ${+} : \mathbb{R}^n \times \mathbb{R}^n \longrightarrow \mathbb{R}^n$ and scalar–vector multiplication $\cdot : \mathbb{R} \times \mathbb{R}^n \longrightarrow \mathbb{R}^n$, both componentwise
+    - $\leadsto$ &nbsp; allow us to do calculations with vectors the same way as with real numbers!
 
-    $$
-    \mathbb{R}^n \ni \vec{x} = (x^1, x^2, \dots, x^n)
-    = \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix}
-    $$
-
-    Each entry is a real number; $x^2$ is the *2nd component* of $\vec{x}$.
-
-    | Vector addition | Scalar–vector multiplication |
-    |:---:|:---:|
-    | $+ : \mathbb{R}^n \times \mathbb{R}^n \longrightarrow \mathbb{R}^n$ | $\cdot : \mathbb{R} \times \mathbb{R}^n \longrightarrow \mathbb{R}^n$ |
-    | $\begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix} + \begin{bmatrix} y^1 \\ y^2 \\ \vdots \\ y^n \end{bmatrix} = \begin{bmatrix} x^1 + y^1 \\ x^2 + y^2 \\ \vdots \\ x^n + y^n \end{bmatrix}$ | $\alpha \cdot \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix} = \begin{bmatrix} \alpha x^1 \\ \alpha x^2 \\ \vdots \\ \alpha x^n \end{bmatrix}$ |
-    | componentwise addition | componentwise multiplication |
-
-    These operations allow us to do calculations with vectors the same way as with real numbers!
-
-    **Today:** extra structure on $\mathbb{R}^n$, needed for “measurements”.
+    **Today:** extra structure on $\mathbb{R}^n$ (needed for “measurements”)
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## 2 &nbsp; The Euclidean inner product (the dot product)
-    """)
-    return
+def _(definition, mo, note, theorem):
+    mo.vstack(
+        [
+            mo.md(
+                r"""
+    ## I.2 &nbsp; The Euclidean inner product (the dot product)
 
-
-@app.cell(hide_code=True)
-def _(definition):
-    definition(
-        r"""
+    ### The dot product
+    """
+            ),
+            definition(
+                r"""
     Given two vectors
 
     $$
@@ -144,29 +195,21 @@ def _(definition):
     we define their **dot product** or **inner product** as the real number
 
     $$
-    \vec{x} \cdot \vec{y} = x^1 y^1 + x^2 y^2 + \dots + x^n y^n \in \mathbb{R}
+    \vec{x} \cdot \vec{y} = \underbrace{x^1 y^1 + x^2 y^2 + \dots + x^n y^n}_{\text{sum of products of components}} \in \mathbb{R}
     $$
-
-    (the sum of products of components).
-    """
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo, warning):
-    mo.vstack(
-        [
+    """,
+                "Dot product",
+            ),
             mo.md(
                 r"""
-    This is another extension of multiplication of real numbers, now to pairs of vectors, and taking scalar values:
+    $\leadsto$ &nbsp; another extension of multiplication of real numbers, now to pairs of vectors, and taking scalar values
 
     $$
     \cdot : \mathbb{R}^n \times \mathbb{R}^n \longrightarrow \mathbb{R}
     $$
     """
             ),
-            warning(
+            note(
                 r"""
     This “$\cdot$” is **not** the same as for scalar–vector multiplication! To avoid confusion, we drop the “$\cdot$” for scalar–vector multiplication and write
 
@@ -175,46 +218,52 @@ def _(mo, warning):
     $$
     """
             ),
-        ]
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo, theorem):
-    mo.vstack(
-        [
             theorem(
                 r"""
-    For all vectors $\vec{x}, \vec{y}, \vec{z} \in \mathbb{R}^n$ and scalars $\alpha, \beta \in \mathbb{R}$:
+    For all vectors $\vec{x}, \vec{y}, \vec{z} \in \mathbb{R}^n$ and scalars $\alpha, \beta \in \mathbb{R}$
 
-    1. $\vec{x} \cdot \vec{y} = \vec{y} \cdot \vec{x}$ &nbsp; — *symmetric*
+    1. $\vec{x} \cdot \vec{y} = \vec{y} \cdot \vec{x}$ &nbsp; (**symmetric**)
     2. $(\alpha \vec{x} + \beta \vec{y}) \cdot \vec{z} = \alpha\, \vec{x} \cdot \vec{z} + \beta\, \vec{y} \cdot \vec{z}$ and
        $\vec{x} \cdot (\alpha \vec{y} + \beta \vec{z}) = \alpha\, \vec{x} \cdot \vec{y} + \beta\, \vec{x} \cdot \vec{z}$
-       &nbsp; — *linear in each of its 2 arguments: bilinear* (this is also a distributivity property)
-    3. $\vec{x} \cdot \vec{x} \geq 0$, with “$=$” iff (if and only if) $\vec{x} = \vec{0}$ &nbsp; — *positive definite*
+       &nbsp; (linear in each of its 2 arguments: **bilinear**; this is also a distributivity property)
+    3. $\vec{x} \cdot \vec{x} \geq 0$, with “$=$” if and only if $\vec{x} = \vec{0}$ &nbsp; (**positive definite**)
     """,
                 "Basic properties",
             ),
-            mo.md(r"**Proof.** Exercise (using definitions and properties of real numbers)."),
+            mo.md(r"**Proof.** Exercise (using definitions and properties of real numbers). $\square$"),
         ]
     )
     return
 
 
 @app.cell(hide_code=True)
-def _(definition, mo):
+def _(Arc, BLUE, GREEN, HALF, RED, arrow, blank, definition, math, mo):
+    _fig, _ax = blank(HALF, 2.5, (-0.6, 4.0), (-0.55, 2.6))
+    arrow(_ax, (-0.4, 0), (3.8, 0), "black", lw=0.9)
+    arrow(_ax, (0, -0.4), (0, 2.45), "black", lw=0.9)
+    for _t in (1, 3):
+        _ax.plot([_t, _t], [-0.05, 0.05], color="black", lw=0.9)
+        _ax.text(_t, -0.14, f"${_t}$", fontsize=12, ha="center", va="top")
+    _ax.plot([-0.05, 0.05], [math.sqrt(3)] * 2, color="black", lw=0.9)
+    _ax.text(-0.14, math.sqrt(3), r"$\sqrt{3}$", fontsize=12, ha="right", va="center")
+    _ax.text(-0.14, -0.14, "$0$", fontsize=12, ha="right", va="top")
+    arrow(_ax, (0, 0), (3, 0), BLUE)
+    arrow(_ax, (0, 0), (1, math.sqrt(3)), RED)
+    _ax.text(2.2, 0.14, r"$\vec{x}$", color=BLUE, fontsize=13, ha="center", va="bottom")
+    _ax.text(0.38, 1.1, r"$\vec{y}$", color=RED, fontsize=13, ha="right", va="center")
+    _ax.add_patch(Arc((0, 0), 1.0, 1.0, theta1=0, theta2=60, color=GREEN, lw=1.4))
+    _ax.text(0.68, 0.34, r"$\theta = \pi/3$", color=GREEN, fontsize=12, ha="left", va="center")
+
     mo.vstack(
         [
+            mo.md(r"""### Norm and angle"""),
             definition(
                 r"""
     The **norm** (length) of a vector $\vec{x}$ is
 
     $$
-    \lVert \vec{x} \rVert := \sqrt{\vec{x} \cdot \vec{x}}
+    \lVert \vec{x} \rVert := \sqrt{\vec{x} \cdot \vec{x}} \qquad (\text{makes sense since } \vec{x} \cdot \vec{x} \geq 0)
     $$
-
-    This makes sense since $\vec{x} \cdot \vec{x} \geq 0$.
 
     The **angle** between two vectors $\vec{x}, \vec{y}$ is
 
@@ -222,58 +271,29 @@ def _(definition, mo):
     \theta(\vec{x}, \vec{y}) = \arccos\!\left( \frac{\vec{x} \cdot \vec{y}}{\lVert \vec{x} \rVert\, \lVert \vec{y} \rVert} \right)
     \qquad (\text{must have } \vec{x}, \vec{y} \neq \vec{0})
     $$
-    """
+    """,
+                "Norm and angle",
             ),
             mo.md(
                 r"""
-    It is not so clear why this makes sense: $\arccos : [-1, 1] \longrightarrow [0, \pi]$, so we need the quotient to lie in $[-1, 1]$. We come back to this below.
+    $\leadsto$ &nbsp; not so clear why this makes sense… &nbsp; ($\arccos : [-1, 1] \longrightarrow [0, \pi]$)
+
+    **Example.** &nbsp; $\vec{x} = \begin{bmatrix} 3 \\ 0 \end{bmatrix}, \quad \vec{y} = \begin{bmatrix} 1 \\ \sqrt{3} \end{bmatrix}$
     """
             ),
-        ]
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(Arc, Figure, GREEN, RED, arrow, math, mo):
-    _fig = Figure(figsize=(3.6, 3.0), layout="constrained")
-    _ax = _fig.subplots()
-    arrow(_ax, (0, 0), (3, 0), RED, r"$\vec{x}$")
-    arrow(_ax, (0, 0), (1, math.sqrt(3)), GREEN, r"$\vec{y}$", label_offset=(-8, 6), label_ha="right")
-    _ax.add_patch(Arc((0, 0), 0.9, 0.9, theta1=0, theta2=60, color="#e65100", lw=1.8))
-    _ax.text(0.55, 0.22, r"$\theta = \pi/3$", color="#e65100", fontsize=15)
-    _ax.set_xlim(-0.3, 3.6)
-    _ax.set_ylim(-0.3, 2.4)
-    _ax.set_aspect("equal")
-    _ax.set_xticks([0, 1, 3])
-    _ax.set_yticks([math.sqrt(3)], [r"$\sqrt{3}$"])
-    for _s in ("top", "right"):
-        _ax.spines[_s].set_visible(False)
-    for _s in ("left", "bottom"):
-        _ax.spines[_s].set_position("zero")
-
-    mo.vstack(
-        [
-            mo.md(r"**Example.** &nbsp; $\vec{x} = \begin{bmatrix} 3 \\ 0 \end{bmatrix}, \quad \vec{y} = \begin{bmatrix} 1 \\ \sqrt{3} \end{bmatrix}$"),
-            mo.hstack(
-                [
-                    _fig,
-                    mo.md(
-                        r"""
+            _fig,
+            mo.md(
+                r"""
     $$
-    \begin{aligned}
-    \lVert \vec{x} \rVert &= \sqrt{(3)^2 + (0)^2} = 3 \\
-    \lVert \vec{y} \rVert &= \sqrt{(1)^2 + (\sqrt{3})^2} = 2 \\
-    \vec{x} \cdot \vec{y} &= 3 \cdot 1 + 0 \cdot \sqrt{3} = 3 \\
-    \frac{\vec{x} \cdot \vec{y}}{\lVert \vec{x} \rVert\, \lVert \vec{y} \rVert} &= \frac{1}{2} = \cos\!\left(\frac{\pi}{3}\right)
-    \end{aligned}
+    \lVert \vec{x} \rVert = \sqrt{(3)^2 + (0)^2} = 3, \qquad
+    \lVert \vec{y} \rVert = \sqrt{(1)^2 + (\sqrt{3})^2} = 2, \qquad
+    \vec{x} \cdot \vec{y} = 3 \cdot 1 + 0 \cdot \sqrt{3} = 3
+    $$
+
+    $$
+    \Longrightarrow \quad \frac{\vec{x} \cdot \vec{y}}{\lVert \vec{x} \rVert\, \lVert \vec{y} \rVert} = \frac{1}{2} = \cos\!\left(\frac{\pi}{3}\right)
     $$
     """
-                    ),
-                ],
-                justify="start",
-                gap=3,
-                align="center",
             ),
         ]
     )
@@ -286,7 +306,7 @@ def _(mo):
     x2 = mo.ui.slider(-4, 4, 0.5, value=0, label="$x^2$", show_value=True)
     y1 = mo.ui.slider(-4, 4, 0.5, value=1, label="$y^1$", show_value=True)
     y2 = mo.ui.slider(-4, 4, 0.5, value=2, label="$y^2$", show_value=True)
-    controls = mo.hstack([mo.vstack([x1, x2]), mo.vstack([y1, y2])], justify="start", gap=3)
+    controls = mo.hstack([x1, x2, y1, y2], justify="start", gap=2, wrap=True)
     return controls, x1, x2, y1, y2
 
 
@@ -302,46 +322,42 @@ def _(np, x1, x2, y1, y2):
 
 
 @app.cell(hide_code=True)
-def _(Arc, Figure, GREEN, RED, arrow, controls, dot, math, mo, nonzero, nx, ny, plane, x, y):
-    _fig = Figure(figsize=(4.2, 4.2), layout="constrained")
+def _(Arc, BLUE, Figure, GREEN, HALF, RED, controls, dot, math, mo, nonzero, nx, ny, plane, table, vector, x, y):
+    _fig = Figure(figsize=(HALF, HALF), layout="constrained")
     _ax = _fig.subplots()
-    plane(_ax, 4.5)
-    arrow(_ax, (0, 0), tuple(x), RED)
-    arrow(_ax, (0, 0), tuple(y), GREEN)
-    for _color, _label in ((RED, r"$\vec{x}$"), (GREEN, r"$\vec{y}$")):
-        _ax.plot([], [], color=_color, lw=1.4, label=_label)
-    _ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=12)
+    plane(_ax, 6)
+    _ax.set_xticks(range(-4, 5, 2))
+    _ax.set_yticks(range(-4, 5, 2))
+    _side = -1 if x[0] * y[1] - x[1] * y[0] < 0 else 1  # labels go on the outer side of each arrow
+    vector(_ax, (0, 0), tuple(x), BLUE, r"$\vec{x}$", -75 * _side)
+    vector(_ax, (0, 0), tuple(y), RED, r"$\vec{y}$", 75 * _side)
 
+    _need = r"need $\vec{x}, \vec{y} \neq \vec{0}$"
     if nonzero:
-        _cos = max(-1.0, min(1.0, dot / (nx * ny)))
+        _cos = max(-1.0, min(1.0, dot / (nx * ny)))  # guards arccos against rounding only
         _theta = math.acos(_cos)
         _a1 = math.degrees(math.atan2(x[1], x[0]))
         _a2 = math.degrees(math.atan2(y[1], y[0]))
         if (_a2 - _a1) % 360 > 180:
             _a1, _a2 = _a2, _a1
-        _ax.add_patch(Arc((0, 0), 1.4, 1.4, theta1=_a1, theta2=_a2, color="#e65100", lw=1.8))
-        _angle = (
-            rf"| $\dfrac{{\vec{{x}}\cdot\vec{{y}}}}{{\lVert\vec{{x}}\rVert\,\lVert\vec{{y}}\rVert}}$ | ${_cos:.3f}$ |"
-            "\n"
-            rf"| $\theta(\vec{{x}},\vec{{y}})$ | ${_theta:.3f}$ rad $= {math.degrees(_theta):.1f}^\circ$ |"
-        )
+        _ax.add_patch(Arc((0, 0), 1.6, 1.6, theta1=_a1, theta2=_a2, color=GREEN, lw=1.4))
+        _quotient = rf"${_cos:.3f}$"
+        _angle = rf"$\textcolor{{{GREEN}}}{{{_theta:.3f} \text{{ rad}} = {math.degrees(_theta):.1f}^\circ}}$"
     else:
-        _angle = r"| $\theta(\vec{x},\vec{y})$ | not defined: one of the vectors is $\vec{0}$ |"
-
-    _values = mo.md(
-        "| | |\n|:--|:--|\n"
-        rf"| $\vec{{x}}\cdot\vec{{y}}$ | $({x[0]:g})({y[0]:g}) + ({x[1]:g})({y[1]:g}) = {dot:g}$ |"
-        "\n"
-        rf"| $\lVert\vec{{x}}\rVert$ | ${nx:.3f}$ |"
-        "\n"
-        rf"| $\lVert\vec{{y}}\rVert$ | ${ny:.3f}$ |"
-        "\n" + _angle
-    )
+        _quotient = _angle = _need
 
     mo.vstack(
         [
             controls,
-            _values,
+            table(
+                [
+                    (r"$\vec{x}\cdot\vec{y}$", rf"$\textcolor{{{BLUE}}}{{({x[0]:g})}}\textcolor{{{RED}}}{{({y[0]:g})}} + \textcolor{{{BLUE}}}{{({x[1]:g})}}\textcolor{{{RED}}}{{({y[1]:g})}} = {dot:g}$"),
+                    (r"$\lVert\vec{x}\rVert$", rf"$\textcolor{{{BLUE}}}{{{nx:.3f}}}$"),
+                    (r"$\lVert\vec{y}\rVert$", rf"$\textcolor{{{RED}}}{{{ny:.3f}}}$"),
+                    (r"$\dfrac{\vec{x}\cdot\vec{y}}{\lVert\vec{x}\rVert\,\lVert\vec{y}\rVert}$", _quotient),
+                    (r"$\theta(\vec{x},\vec{y})$", _angle),
+                ]
+            ),
             _fig,
         ]
     )
@@ -352,6 +368,7 @@ def _(Arc, Figure, GREEN, RED, arrow, controls, dot, math, mo, nonzero, nx, ny, 
 def _(mo, theorem):
     mo.vstack(
         [
+            mo.md(r"""### The Cauchy–Schwarz inequality"""),
             theorem(
                 r"""
     For every $\vec{x}, \vec{y} \in \mathbb{R}^n$
@@ -360,7 +377,7 @@ def _(mo, theorem):
     (\vec{x} \cdot \vec{y})^2 \leq \lVert \vec{x} \rVert^2\, \lVert \vec{y} \rVert^2
     $$
 
-    with “$=$” iff $\vec{x}, \vec{y}$ are proportional.
+    with “$=$” if and only if $\vec{x}, \vec{y}$ are proportional.
     """,
                 "Cauchy–Schwarz inequality",
             ),
@@ -370,35 +387,38 @@ def _(mo, theorem):
     \Longrightarrow \quad \frac{\vec{x} \cdot \vec{y}}{\lVert \vec{x} \rVert\, \lVert \vec{y} \rVert} \in [-1, 1] \qquad \forall\, \vec{x}, \vec{y} \neq \vec{0}
     $$
 
-    Our definition of angles really makes sense!
+    $\leadsto$ &nbsp; our definition of angles really makes sense!
 
-    **Proof.** If $\vec{x} = \vec{0}$ or $\vec{y} = \vec{0}$, then $(\vec{x} \cdot \vec{y})^2 = 0 = \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2$.
+    **Proof.** If $\vec{x} = \vec{0}$ or $\vec{y} = \vec{0}$ &nbsp; $\Longrightarrow$ &nbsp; $(\vec{x} \cdot \vec{y})^2 = 0 = \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2$
 
-    Assume both $\vec{x}, \vec{y} \neq \vec{0}$ and compute $\lVert t\vec{x} + \vec{y} \rVert^2$ for $t \in \mathbb{R}$.
+    Assume both $\vec{x}, \vec{y} \neq \vec{0}$ and compute $\lVert t\vec{x} + \vec{y} \rVert^2$ for $t \in \mathbb{R}$
 
-    1. Positive definite implies
+    1. positive definite implies
 
         $$
-        \lVert t\vec{x} + \vec{y} \rVert^2 \geq 0, \quad \text{with ``$=$'' iff } t\vec{x} + \vec{y} = \vec{0} \quad (\vec{x}, \vec{y} \text{ proportional})
+        \lVert t\vec{x} + \vec{y} \rVert^2 \geq 0, \quad \text{with ``$=$'' if and only if } \underbrace{t\vec{x} + \vec{y} = \vec{0}}_{\vec{x},\, \vec{y} \text{ proportional}}
         $$
 
-    2. Bilinearity and symmetry give a quadratic polynomial in $t$:
+    2. bilinearity and symmetry give
 
         $$
         \begin{aligned}
-        \lVert t\vec{x} + \vec{y} \rVert^2 &= (t\vec{x} + \vec{y}) \cdot (t\vec{x} + \vec{y}) \\
-        &= t^2\, \vec{x} \cdot \vec{x} + t\, \vec{x} \cdot \vec{y} + t\, \vec{y} \cdot \vec{x} + \vec{y} \cdot \vec{y} \\
-        &= t^2 \lVert \vec{x} \rVert^2 + 2t\, \vec{x} \cdot \vec{y} + \lVert \vec{y} \rVert^2
+        \lVert t\vec{x} + \vec{y} \rVert^2 &= (t\vec{x} + \vec{y}) \cdot (t\vec{x} + \vec{y}) = t^2\, \vec{x} \cdot \vec{x} + t\, \vec{x} \cdot \vec{y} + t\, \vec{y} \cdot \vec{x} + \vec{y} \cdot \vec{y} \\
+        &= \underbrace{t^2 \lVert \vec{x} \rVert^2 + 2t\, \vec{x} \cdot \vec{y} + \lVert \vec{y} \rVert^2}_{\text{quadratic polynomial in } t}
         \end{aligned}
         $$
 
     $$
-    \Longrightarrow \quad t^2 \lVert \vec{x} \rVert^2 + 2t\, (\vec{x} \cdot \vec{y}) + \lVert \vec{y} \rVert^2 \geq 0, \quad \text{with equality for some } t \text{ iff } \vec{x}, \vec{y} \text{ are proportional}
+    \Longrightarrow \quad t^2 \lVert \vec{x} \rVert^2 + 2t\, (\vec{x} \cdot \vec{y}) + \lVert \vec{y} \rVert^2 \geq 0
     $$
 
+    with “$=$” for some $t$ if and only if $\vec{x}, \vec{y}$ are proportional
+
     $$
-    \Longrightarrow \quad \text{discriminant:} \quad \big(2 (\vec{x} \cdot \vec{y})\big)^2 - 4 \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2 \leq 0, \quad \text{with ``$=$'' iff } \vec{x}, \vec{y} \text{ are proportional} \qquad \square
+    \Longrightarrow \quad \text{discriminant:} \quad \big(2 (\vec{x} \cdot \vec{y})\big)^2 - 4 \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2 \leq 0
     $$
+
+    with “$=$” if and only if $\vec{x}, \vec{y}$ are proportional. $\square$
     """
             ),
         ]
@@ -407,37 +427,36 @@ def _(mo, theorem):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, controls, dot, mo, np, nx, ny):
+def _(BLUE, Figure, HALF, LIGHT, controls, dot, mo, np, nx, ny, table):
     _disc = (2 * dot) ** 2 - 4 * nx**2 * ny**2
     _vertex = -dot / nx**2 if nx > 0 else 0.0
     _t = np.sort(np.append(np.linspace(min(-4, _vertex - 2), max(4, _vertex + 2), 400), _vertex))
     _p = _t**2 * nx**2 + 2 * _t * dot + ny**2
 
-    _fig = Figure(figsize=(4.6, 3.2), layout="constrained")
+    _fig = Figure(figsize=(HALF, 2.8), layout="constrained")
     _ax = _fig.subplots()
-    _ax.plot(_t, _p, color=BLUE, lw=2.2)
+    _ax.plot(_t, _p, color=BLUE)
+    _ax.plot(_vertex, float(_p.min()), "o", color="black", ms=4, zorder=4)
     _ax.axhline(0, color="black", lw=0.8)
     _ax.axvline(0, color="black", lw=0.8)
-    _ax.grid(True, color="#cfe3f5", lw=0.6)
+    _ax.grid(True, color=LIGHT, lw=0.6)
+    _ax.set_axisbelow(True)
     _upper = max(30.0, 1.25 * float(_p.min()) + 2)
     _ax.set_ylim(-0.05 * _upper, _upper)
     _ax.set_xlabel("$t$")
     _ax.set_ylabel(r"$\|t\vec{x} + \vec{y}\|^2$")
 
-    _verdict = "yes" if abs(_disc) < 1e-9 else "no"
-
     mo.vstack(
         [
             controls,
-            mo.md(
-                "| | |\n|:--|:--|\n"
-                rf"| $(\vec{{x}}\cdot\vec{{y}})^2$ | ${dot**2:g}$ |"
-                "\n"
-                rf"| $\lVert\vec{{x}}\rVert^2\lVert\vec{{y}}\rVert^2$ | ${nx**2 * ny**2:g}$ |"
-                "\n"
-                rf"| discriminant | ${_disc:g}$ |"
-                "\n"
-                rf"| $\vec{{x}}, \vec{{y}}$ proportional | {_verdict} |"
+            table(
+                [
+                    (r"$(\vec{x}\cdot\vec{y})^2$", rf"${dot**2:g}$"),
+                    (r"$\lVert\vec{x}\rVert^2\lVert\vec{y}\rVert^2$", rf"${nx**2 * ny**2:g}$"),
+                    (r"discriminant $\big(2 (\vec{x} \cdot \vec{y})\big)^2 - 4 \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2$", rf"${_disc:g}$"),
+                    (r"minimum of $\lVert t\vec{x} + \vec{y} \rVert^2$", rf"${float(_p.min()) + 0.0:.3f}$"),
+                    (r"$\vec{x}, \vec{y}$ proportional", "yes" if abs(_disc) < 1e-9 else "no"),
+                ]
             ),
             _fig,
         ]
@@ -446,25 +465,24 @@ def _(BLUE, Figure, controls, dot, mo, np, nx, ny):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, RED, arrow, controls, mo, np, nx, ny, plane, theorem, x, y):
+def _(BLUE, Figure, GREEN, HALF, RED, controls, mo, np, nx, ny, plane, table, theorem, vector, x, y):
     _s = x + y
     _ns = float(np.sqrt(_s @ _s))
 
-    _fig = Figure(figsize=(4.2, 4.2), layout="constrained")
+    _fig = Figure(figsize=(HALF, HALF), layout="constrained")
     _ax = _fig.subplots()
-    plane(_ax, 8.5)
-    _ax.set_xticks(range(-8, 9, 2))
-    _ax.set_yticks(range(-8, 9, 2))
-    arrow(_ax, (0, 0), tuple(x), RED)
-    arrow(_ax, (0, 0), tuple(y), "#1a237e")
-    arrow(_ax, tuple(x), tuple(_s), BLUE)
-    arrow(_ax, (0, 0), tuple(_s), GREEN)
-    for _color, _label in ((RED, r"$\vec{x}$"), (BLUE, r"$\vec{y}$ translated"), ("#1a237e", r"$\vec{y}$"), (GREEN, r"$\vec{x}+\vec{y}$")):
-        _ax.plot([], [], color=_color, lw=1.4, label=_label)
-    _ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=12)
+    plane(_ax, 11.5)
+    _ax.set_xticks(range(-8, 9, 4))
+    _ax.set_yticks(range(-8, 9, 4))
+    vector(_ax, tuple(x), tuple(_s), RED, linestyle=(0, (4, 3)))  # y translated to the tip of x
+    vector(_ax, (0, 0), tuple(_s), GREEN, r"$\vec{x}+\vec{y}$", 0, r=24)
+    _side = -1 if x[0] * y[1] - x[1] * y[0] < 0 else 1  # labels go on the outer side of each arrow
+    vector(_ax, (0, 0), tuple(x), BLUE, r"$\vec{x}$", -75 * _side)
+    vector(_ax, (0, 0), tuple(y), RED, r"$\vec{y}$", 75 * _side)
 
     mo.vstack(
         [
+            mo.md(r"""### The triangle inequality"""),
             theorem(
                 r"""
     For every $\vec{x}, \vec{y} \in \mathbb{R}^n$
@@ -475,13 +493,13 @@ def _(BLUE, Figure, GREEN, RED, arrow, controls, mo, np, nx, ny, plane, theorem,
     """,
                 "Triangle inequality",
             ),
-            mo.md(r"**Proof.** A direct consequence of the Cauchy–Schwarz inequality! Exercise."),
+            mo.md(r"**Proof.** Direct consequence of the Cauchy–Schwarz inequality! Exercise. $\square$"),
             controls,
-            mo.md(
-                "| | |\n|:--|:--|\n"
-                rf"| $\lVert\vec{{x}}+\vec{{y}}\rVert$ | ${_ns:.3f}$ |"
-                "\n"
-                rf"| $\lVert\vec{{x}}\rVert+\lVert\vec{{y}}\rVert$ | ${nx:.3f} + {ny:.3f} = {nx + ny:.3f}$ |"
+            table(
+                [
+                    (r"$\lVert\vec{x}+\vec{y}\rVert$", rf"$\textcolor{{{GREEN}}}{{{_ns:.3f}}}$"),
+                    (r"$\lVert\vec{x}\rVert+\lVert\vec{y}\rVert$", rf"$\textcolor{{{BLUE}}}{{{nx:.3f}}} + \textcolor{{{RED}}}{{{ny:.3f}}} = {nx + ny:.3f}$"),
+                ]
             ),
             _fig,
         ]
@@ -493,25 +511,26 @@ def _(BLUE, Figure, GREEN, RED, arrow, controls, mo, np, nx, ny, plane, theorem,
 def _(definition, mo, theorem):
     mo.vstack(
         [
+            mo.md(r"""### Orthogonal vectors"""),
             definition(
                 r"""
     $\vec{x}, \vec{y} \in \mathbb{R}^n$ are called **orthogonal** ($\vec{x} \perp \vec{y}$) when
 
     $$
-    \vec{x} \cdot \vec{y} = 0
+    \vec{x} \cdot \vec{y} = 0 \qquad \Longrightarrow \qquad \theta(\vec{x}, \vec{y}) = \arccos(0) = \frac{\pi}{2} = 90^\circ \quad (\text{for } \vec{x}, \vec{y} \neq \vec{0})
     $$
-
-    For $\vec{x}, \vec{y} \neq \vec{0}$, this is equivalent to $\theta(\vec{x}, \vec{y}) = \arccos(0) = \frac{\pi}{2} = 90^\circ$.
-    """
+    """,
+                "Orthogonal vectors",
             ),
             theorem(
                 r"""
-    In $\mathbb{R}^n$, we can find **at most $n$** non-zero vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$ which are pairwise orthogonal:
+    In $\mathbb{R}^n$, we can find **at most $n$** non-zero vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$ which are pairwise orthogonal
 
     $$
     \vec{e}_i \cdot \vec{e}_j = 0 \qquad \forall\, i \neq j
     $$
-    """
+    """,
+                "Pairwise orthogonal vectors",
             ),
             mo.md(
                 r"""
@@ -524,7 +543,7 @@ def _(definition, mo, theorem):
     \quad \Longrightarrow \quad \text{pairwise orthogonal}
     $$
 
-    This is a specific example of $n$ pairwise orthogonal vectors; many other examples exist!
+    (a specific example of $n$ pairwise orthogonal vectors; many other examples exist!)
 
     Take any other non-zero vector
 
@@ -538,11 +557,11 @@ def _(definition, mo, theorem):
     \vec{x} \cdot \vec{e}_1 = x^1, \quad \vec{x} \cdot \vec{e}_2 = x^2, \quad \dots, \quad \vec{x} \cdot \vec{e}_n = x^n,
     $$
 
-    so $\vec{x} \perp \vec{e}_i$ iff $x^i = 0$.
+    so $\vec{x} \perp \vec{e}_i$ if and only if $x^i = 0$.
 
     If $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n, \vec{x}$ were pairwise orthogonal, then $\vec{x}$ would have to be the zero vector $\vec{0}$. This contradicts our assumption that $\vec{x} \neq \vec{0}$.
 
-    Here we used the specific vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$; the argument extends to any set of $n$ non-zero pairwise orthogonal vectors (exercise, after Lecture 03). $\square$
+    $\leadsto$ &nbsp; here we used the specific vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$, but the argument extends to any set of $n$ non-zero pairwise orthogonal vectors (exercise, after Lecture 03). $\square$
     """
             ),
         ]
@@ -551,9 +570,41 @@ def _(definition, mo, theorem):
 
 
 @app.cell(hide_code=True)
-def _(definition, mo):
+def _(BLUE, FULL, Figure, arrow, definition, mo):
+    def _pr(x1, x2, x3):
+        """Oblique projection of R^3, as on the board: x^2 to the right, x^3 up, x^1 towards the viewer."""
+        return x2 - 0.45 * x1, x3 - 0.4 * x1
+
+    _fig = Figure(figsize=(FULL, 2.3), layout="constrained")
+    _a2, _a3 = _fig.subplots(1, 2)
+    for _ax in (_a2, _a3):
+        _ax.set_xlim(-1.5, 2.3)
+        _ax.set_ylim(-1.0, 2.1)
+        _ax.set_aspect("equal")
+        _ax.axis("off")
+    arrow(_a2, (-0.6, 0), (1.9, 0), "black", lw=0.9)
+    arrow(_a2, (0, -0.6), (0, 1.9), "black", lw=0.9)
+    arrow(_a2, (0, 0), (1, 0), BLUE)
+    arrow(_a2, (0, 0), (0, 1), BLUE)
+    _a2.text(0.55, -0.14, r"$\vec{e}_1$", color=BLUE, fontsize=13, ha="center", va="top")
+    _a2.text(-0.14, 0.55, r"$\vec{e}_2$", color=BLUE, fontsize=13, ha="right", va="center")
+    _a2.text(-1.4, 1.75, r"$\mathbb{R}^2$", fontsize=13)
+
+    arrow(_a3, _pr(-0.5, 0, 0), _pr(1.9, 0, 0), "black", lw=0.9)
+    arrow(_a3, (-0.6, 0), (1.9, 0), "black", lw=0.9)
+    arrow(_a3, (0, -0.6), (0, 1.9), "black", lw=0.9)
+    arrow(_a3, (0, 0), _pr(1, 0, 0), BLUE)
+    arrow(_a3, (0, 0), (1, 0), BLUE)
+    arrow(_a3, (0, 0), (0, 1), BLUE)
+    _e1 = _pr(1, 0, 0)
+    _a3.text(_e1[0] - 0.12, _e1[1] + 0.12, r"$\vec{e}_1$", color=BLUE, fontsize=13, ha="right", va="bottom")
+    _a3.text(0.6, -0.14, r"$\vec{e}_2$", color=BLUE, fontsize=13, ha="center", va="top")
+    _a3.text(0.14, 0.6, r"$\vec{e}_3$", color=BLUE, fontsize=13, ha="left", va="center")
+    _a3.text(-1.4, 1.75, r"$\mathbb{R}^3$", fontsize=13)
+
     mo.vstack(
         [
+            mo.md(r"""### The standard basis"""),
             definition(
                 r"""
     A set of $n$ non-zero pairwise orthogonal vectors is called an **orthogonal basis** of $\mathbb{R}^n$.
@@ -567,60 +618,15 @@ def _(definition, mo):
     $$
 
     used above are called the **standard basis vectors** of $\mathbb{R}^n$.
-    """
+    """,
+                "Orthogonal basis and standard basis",
             ),
             mo.md(
                 r"""
-    They have the additional property of having unit length: they are *unit vectors*.
+    $\leadsto$ &nbsp; they have the additional property of having unit length (**unit vectors**)
 
-    More importantly: $\vec{x} \cdot \vec{e}_i = x^i \quad \forall\, \vec{x} \in \mathbb{R}^n$.
-    """
-            ),
-        ]
-    )
-    return
+    $\leadsto$ &nbsp; more importantly: &nbsp; $\vec{x} \cdot \vec{e}_i = x^i \quad \forall\, \vec{x} \in \mathbb{R}^n$
 
-
-@app.cell(hide_code=True)
-def _(Figure, RED, arrow, mo):
-    from mpl_toolkits.mplot3d import proj3d as _proj3d
-
-    _fig = Figure(figsize=(6.4, 2.9), layout="constrained")
-    _ax = _fig.add_subplot(1, 2, 1)
-    _ax.set_xlim(-0.6, 2)
-    _ax.set_ylim(-0.6, 2)
-    _ax.set_aspect("equal")
-    _ax.axis("off")
-    arrow(_ax, (-0.6, 0), (1.9, 0), "black", lw=0.5)
-    arrow(_ax, (0, -0.6), (0, 1.9), "black", lw=0.5)
-    arrow(_ax, (0, 0), (1, 0), RED)
-    arrow(_ax, (0, 0), (0, 1), RED)
-    _ax.text(0.8, -0.35, r"$\vec{e}_1$", color=RED, fontsize=17)
-    _ax.text(-0.45, 0.8, r"$\vec{e}_2$", color=RED, fontsize=17)
-    _ax.set_title(r"$\mathbb{R}^2$")
-
-    _ax3 = _fig.add_subplot(1, 2, 2, projection="3d")
-    for _d in ((1.8, 0, 0), (0, 1.8, 0), (0, 0, 1.8)):
-        _ax3.quiver(0, 0, 0, *_d, color="black", lw=0.8, arrow_length_ratio=0.06)
-    _ax3.set_xlim(0, 1.6)
-    _ax3.set_ylim(0, 1.6)
-    _ax3.set_zlim(0, 1.6)
-    _ax3.view_init(elev=22, azim=28)
-    _ax3.set_axis_off()
-    _ax3.set_title(r"$\mathbb{R}^3$")
-    for _d, _name, _offset, _ha, _va in (
-        ((1, 0, 0), r"$\vec{e}_1$", (-8, 8), "right", "bottom"),
-        ((0, 1, 0), r"$\vec{e}_2$", (6, 8), "left", "bottom"),
-        ((0, 0, 1), r"$\vec{e}_3$", (8, 0), "left", "center"),
-    ):
-        _ax3.quiver(0, 0, 0, *_d, color=RED, lw=1.6, arrow_length_ratio=0.12)
-        _px, _py, _pz = _proj3d.proj_transform(*_d, _ax3.get_proj())
-        _ax3.annotate(_name, (_px, _py), xytext=_offset, textcoords="offset points", ha=_ha, va=_va, color=RED, fontsize=17)
-
-    mo.vstack(
-        [
-            mo.md(
-                r"""
     **Example.**
 
     $$
@@ -648,9 +654,9 @@ def _(Figure, RED, arrow, mo):
             _fig,
             mo.md(
                 r"""
-    The standard basis vectors define the coordinate axes on $\mathbb{R}^n$!
+    $\leadsto$ &nbsp; the standard basis vectors define the coordinate axes on $\mathbb{R}^n$!
 
-    Coordinates/components of a vector are its dot products with the standard basis vectors!
+    $\leadsto$ &nbsp; coordinates/components of a vector are its dot products with the standard basis vectors!
     """
             ),
         ]
@@ -669,7 +675,8 @@ def _(mo, theorem):
     $$
     x^1 = \vec{x} \cdot \vec{e}_1, \quad x^2 = \vec{x} \cdot \vec{e}_2, \quad \dots, \quad x^n = \vec{x} \cdot \vec{e}_n
     $$
-    """
+    """,
+                "Components in the standard basis",
             ),
             mo.md(
                 r"""
@@ -678,8 +685,8 @@ def _(mo, theorem):
     $$
     \begin{aligned}
     \vec{x} = \begin{bmatrix} x^1 \\ x^2 \\ x^3 \end{bmatrix}
-    &= \begin{bmatrix} x^1 \\ 0 \\ 0 \end{bmatrix} + \begin{bmatrix} 0 \\ x^2 \\ 0 \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ x^3 \end{bmatrix} \\
-    &= x^1 \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix} + x^2 \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix} + x^3 \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} \\
+    &= \begin{bmatrix} x^1 \\ 0 \\ 0 \end{bmatrix} + \begin{bmatrix} 0 \\ x^2 \\ 0 \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ x^3 \end{bmatrix}
+    = x^1 \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix} + x^2 \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix} + x^3 \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} \\
     &= x^1 \vec{e}_1 + x^2 \vec{e}_2 + x^3 \vec{e}_3
     \qquad \text{and} \qquad
     \begin{cases}
@@ -767,6 +774,22 @@ def _(check, mo, p1_dot, p1_nx, p2_a, p3_a, p3_b, p3_c):
             ),
         ]
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Summary
+
+    - the dot product $\vec{x} \cdot \vec{y} = x^1 y^1 + \dots + x^n y^n \in \mathbb{R}$ is symmetric, bilinear and positive definite
+    - it defines the norm $\lVert \vec{x} \rVert = \sqrt{\vec{x} \cdot \vec{x}}$ and the angle $\theta(\vec{x}, \vec{y})$, which makes sense by the Cauchy–Schwarz inequality $(\vec{x} \cdot \vec{y})^2 \leq \lVert \vec{x} \rVert^2\, \lVert \vec{y} \rVert^2$
+    - triangle inequality: $\lVert \vec{x} + \vec{y} \rVert \leq \lVert \vec{x} \rVert + \lVert \vec{y} \rVert$
+    - $\vec{x} \perp \vec{y}$ when $\vec{x} \cdot \vec{y} = 0$; in $\mathbb{R}^n$ there are at most $n$ non-zero pairwise orthogonal vectors
+    - the standard basis vectors $\vec{e}_1, \dots, \vec{e}_n$ give $\vec{x} = x^1 \vec{e}_1 + \dots + x^n \vec{e}_n$ with $x^i = \vec{x} \cdot \vec{e}_i$
+
+    **Next:** matrices, linear transformations, and determinants
+    """)
     return
 
 
