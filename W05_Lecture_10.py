@@ -24,11 +24,11 @@ def _():
 def _(mo):
     # ---- Building blocks shared by all lectures -------------------------
     # Palette with fixed roles (figures only; text carries no colour):
-    #   BLUE   the primary object (the particle, the point, the chosen vector)
+    #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (velocity, relative velocity, tangent vector)
+    #   GREEN  a derived quantity (tangent vector, gradient, mean)
     #   ORANGE a third series, only when three are needed
-    #   GREY   reference geometry (equator, light cone, inertial comparison)
+    #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
     BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
@@ -44,7 +44,7 @@ def _(mo):
       <div class="bs-inst">Daegu Gyeongbuk Institute of Science and Technology<br>School of Undergraduate Studies</div>
       <div class="bs-meta">
         <b>Document</b><span>{document}</span><b>Course</b><span>BS101-04/05</span>
-        <b>Date</b><span>{date}</span><b>Instructor</b><span>Professor Scarinci</span>
+        <b>Week</b><span>{date.removeprefix('Week ')}</span><b>Instructor</b><span>Professor Scarinci</span>
       </div>
     </div>
     """
@@ -307,7 +307,7 @@ def _(definition, mo, theorem):
             ),
             definition(
                 r"""
-    $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ with continuous partials at $\vec{x} = \vec{a}$ is called **$C^1$-smooth** at $\vec{x} = \vec{a}$.
+    $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ whose partial derivatives are well-defined around $\vec{x} = \vec{a}$ and continuous at $\vec{x} = \vec{a}$ is called **$C^1$-smooth** at $\vec{x} = \vec{a}$.
     """,
                 "$C^1$-smooth",
             ),
