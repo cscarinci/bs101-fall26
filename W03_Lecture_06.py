@@ -61,7 +61,7 @@ def _(mo):
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>", "color": color, "lw": 1.3, "mutation_scale": 9, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -241,7 +241,7 @@ def _(definition, mo):
     - the **image** of $f$ is
 
         $$
-        \mathrm{Im}(f) = \left\{\, f(\vec{x}) \;\middle|\; \vec{x} \in A \,\right\} \subseteq B
+        \mathrm{Im}(f) = \left\{\, \vec{y} \in \mathbb{R}^m \;\middle|\; \exists\, \vec{x} \in A,\ f(\vec{x}) = \vec{y} \,\right\} \subseteq B
         $$
 
         Not necessarily equal! $\mathrm{Im}(f) \subseteq \mathrm{Codom}(f)$
@@ -249,7 +249,7 @@ def _(definition, mo):
     - the **graph** of $f$ is
 
         $$
-        \mathrm{graph}(f) = \left\{\, (\vec{x}, f(\vec{x})) \;\middle|\; \vec{x} \in A \,\right\} \subseteq A \times B
+        \mathrm{graph}(f) = \left\{\, (\vec{x}, \vec{y}) \in \mathbb{R}^n \times \mathbb{R}^m \;\middle|\; \vec{x} \in A,\ \vec{y} = f(\vec{x}) \,\right\} \subseteq A \times B
         $$
     """
             ),
@@ -262,13 +262,13 @@ def _(definition, mo):
     $$
 
     $$
-    \mathrm{Im}(\gamma) = \left\{\, \gamma(t) \;\middle|\; t \in \mathbb{R} \,\right\} \subseteq \mathbb{R}^2
+    \mathrm{Im}(\gamma) = \left\{\, \vec{y} \in \mathbb{R}^2 \;\middle|\; \exists\, t \in \mathbb{R},\ \vec{y} = \gamma(t) \,\right\}
     $$
 
     This is the line through $\vec{x}$ in the direction of $\vec{v}$.
 
     $$
-    \mathrm{graph}(\gamma) = \left\{\, (t, \gamma(t)) \;\middle|\; t \in \mathbb{R} \,\right\}
+    \mathrm{graph}(\gamma) = \left\{\, (t, \vec{y}) \in \mathbb{R} \times \mathbb{R}^2 \;\middle|\; t \in \mathbb{R},\ \vec{y} = \gamma(t) \,\right\}
     $$
 
     It lies in $\mathbb{R} \times \mathbb{R}^2 \approx \mathbb{R}^3$.
@@ -346,7 +346,14 @@ def _(BLUE, Figure, GREEN, OCHRE, RED, arrow, mo, t_path):
     _ax3.set_title(r"$\mathrm{graph}(\gamma)$", color=OCHRE)
     _fig3.legend(loc="lower center", bbox_to_anchor=(0.5, 0.02), ncol=2, frameon=False, fontsize=12)
 
-    mo.vstack([t_path, mo.center(_fig), mo.center(_fig3)])
+    mo.vstack(
+        [
+            mo.hstack([t_path], justify="start", gap=3),
+            mo.md("| | |\n|:--|:--|\n" + rf"| $\gamma(t) = \vec{{x}} + t\vec{{v}}$ | $\begin{{bmatrix}} {_g[0]:g} \\ {_g[1]:g} \end{{bmatrix}}$ |"),
+            mo.center(_fig),
+            mo.center(_fig3),
+        ]
+    )
     return
 
 
@@ -400,7 +407,7 @@ def _(Figure, OCHRE, RED, arrow, definition, math, mo, np):
     **Remark.** $\mathrm{Im}(f)$ and $\mathrm{graph}(f)$ help us visualize $f$ as a set of points (very useful in lower dimensions).
 
     - We might have many functions with same image.
-    - The graph determines the domain and rule, but not the codomain (and lives in higher dimensions).
+    - The graph essentially determines the function completely! (but it lives in higher dimensions)
     """
             ),
             definition(
@@ -410,7 +417,7 @@ def _(Figure, OCHRE, RED, arrow, definition, math, mo, np):
     - the **level set** of $f$ with value $\vec{b}$ is
 
         $$
-        f^{-1}(\vec{b}) = \left\{\, \vec{x} \in A \;\middle|\; f(\vec{x}) = \vec{b} \,\right\}
+        f^{-1}(\vec{b}) = \left\{\, \vec{x} \in \mathbb{R}^n \;\middle|\; \vec{x} \in A \text{ and } f(\vec{x}) = \vec{b} \,\right\}
         $$
     """
             ),
@@ -503,23 +510,16 @@ def _(BLUE, Figure, GREEN, OCHRE, RED, b_level, mo, np):
     _ax.set_ylabel("$x^2$", rotation=0)
     for _val, _col in ((0, GREEN), (1, OCHRE), (-4, RED)):
         _ax.contour(_X, _Y, _F, levels=[_val], colors=[_col], linewidths=1.2, alpha=0.55, linestyles="solid")
+        _ax.plot([], [], color=_col, lw=1.2, alpha=0.55, label=rf"$f^{{-1}}({_val})$")
     _ax.contour(_X, _Y, _F, levels=[_b], colors=[BLUE], linewidths=1.6, linestyles="solid")
-    _ax.set_title(rf"$f^{{-1}}({_b:g})$", color=BLUE)
+    _ax.plot([], [], color=BLUE, lw=1.6, label=r"$f^{-1}(b)$")
+    _ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=2, frameon=False, fontsize=12)
 
     mo.vstack(
         [
-            b_level,
-            mo.vstack(
-                [
-                    mo.center(_fig),
-                    mo.md(
-                        rf"$$f^{{-1}}({_b:g}) : \quad (x^1)^2 - (x^2)^2 = {_b:g}$$"
-                        "\n\n"
-                        r"The thin curves are $f^{-1}(0)$, $f^{-1}(1)$ and $f^{-1}(-4)$."
-                    ).style({"max-width": "26rem"}),
-                ],
-                gap=2,
-            ),
+            mo.hstack([b_level], justify="start", gap=3),
+            mo.md("| | |\n|:--|:--|\n" + rf"| $f^{{-1}}(b)$ | $(x^1)^2 - (x^2)^2 = {_b:g}$ |"),
+            mo.center(_fig),
         ]
     )
     return
@@ -566,16 +566,9 @@ def _(BLUE, b_level, mo, np, space):
 
     mo.vstack(
         [
-            b_level,
-            mo.vstack(
-                [
-                    mo.center(_fig),
-                    mo.md(rf"$$g^{{-1}}({_b:g}) : \quad (x^1)^2 + (x^2)^2 - (x^3)^2 = {_b:g}$$" "\n\n" + _name).style(
-                        {"max-width": "26rem"}
-                    ),
-                ],
-                gap=2,
-            ),
+            mo.hstack([b_level], justify="start", gap=3),
+            mo.md("| | |\n|:--|:--|\n" + rf"| $g^{{-1}}(b)$ | $(x^1)^2 + (x^2)^2 - (x^3)^2 = {_b:g}$ |" + "\n" + rf"| shape | {_name} |"),
+            mo.center(_fig),
         ]
     )
     return
