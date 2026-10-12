@@ -60,7 +60,7 @@ def _(mo):
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>", "color": color, "lw": 2.2, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": "->,head_width=0.3,head_length=0.5", "color": color, "lw": 1.4, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -184,7 +184,7 @@ def _(BLUE, Figure, GREEN, definition, mo):
     for _d in ((2.2, 0, 0), (0, 2.2, 0), (0, 0, 2.2)):
         _ax.quiver(0, 0, 0, *_d, color="black", lw=0.9, arrow_length_ratio=0.06)
     _p = (1.0, 1.6, 1.7)
-    _ax.quiver(0, 0, 0, *_p, color=BLUE, lw=2.2, arrow_length_ratio=0.1)
+    _ax.quiver(0, 0, 0, *_p, color=BLUE, lw=1.4, arrow_length_ratio=0.08)
     _ax.plot([_p[0], 0], [_p[1], 0], [_p[2], _p[2]], "--", color=BLUE, lw=1.2)
     _ax.text(0, -0.75, _p[2], r"$x^3\vec{e}_3$", color=BLUE, fontsize=15)
     _ax.text(_p[0], _p[1], _p[2] + 0.15, r"$\vec{x}$", color=BLUE, fontsize=15)
@@ -198,7 +198,7 @@ def _(BLUE, Figure, GREEN, definition, mo):
         ((0, 1, 0), r"$\vec{e}_2$", (6, 8), "left", "bottom"),
         ((0, 0, 1), r"$\vec{e}_3$", (8, 0), "left", "center"),
     ):
-        _ax.quiver(0, 0, 0, *_d, color=GREEN, lw=2.2, arrow_length_ratio=0.15)
+        _ax.quiver(0, 0, 0, *_d, color=GREEN, lw=1.6, arrow_length_ratio=0.12)
         _px, _py, _pz = _proj3d.proj_transform(*_d, _ax.get_proj())
         _ax.annotate(_name, (_px, _py), xytext=_offset, textcoords="offset points", ha=_ha, va=_va, color=GREEN, fontsize=15)
 
@@ -539,37 +539,29 @@ def _(Figure, GREEN, RED, arrow, ma, mb, mc, md, mo, plane):
     _fig = Figure(figsize=(4.6, 4.6), layout="constrained")
     _ax = _fig.subplots()
     plane(_ax, 3.5 if max(abs(_a + _b), abs(_c + _d)) <= 3 else 6.5)
-    _ax.fill([0, 1, 1, 0], [0, 0, 1, 1], color="#888888", alpha=0.25, lw=0)
-    _ax.fill([0, _a, _a + _b, _b], [0, _c, _c + _d, _d], color=GREEN, alpha=0.3, lw=0)
+    _ax.fill([0, 1, 1, 0], [0, 0, 1, 1], color="#888888", alpha=0.25, lw=0, label="unit square")
+    _ax.fill([0, _a, _a + _b, _b], [0, _c, _c + _d, _d], color=GREEN, alpha=0.3, lw=0, label=r"$A$(unit square)")
     _ax.plot([_a, _a + _b, _b], [_c, _c + _d, _d], color=GREEN, lw=1)
     arrow(_ax, (0, 0), (_a, _c), RED)
     arrow(_ax, (0, 0), (_b, _d), "#1a237e")
     for _color, _label in ((RED, r"$\vec{A}_1$"), ("#1a237e", r"$\vec{A}_2$")):
-        _ax.plot([], [], color=_color, lw=2.2, label=_label)
+        _ax.plot([], [], color=_color, lw=1.4, label=_label)
     _ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=12)
 
     mo.vstack(
         [
             mo.hstack([mo.vstack([ma, mc]), mo.vstack([mb, md])], justify="start", gap=3),
-            mo.hstack(
-                [
-                    _fig,
-                    mo.md(
-                        rf"$$A = \begin{{bmatrix}} {_a:g} & {_b:g} \\ {_c:g} & {_d:g} \end{{bmatrix}}$$"
-                        "\n\n| | |\n|:--|:--|\n"
-                        rf"| $\det(A) = ad - bc$ | ${_det:g}$ |"
-                        "\n"
-                        rf"| area of the parallelogram | ${abs(_det):g}$ |"
-                        "\n"
-                        rf"| $A$ invertible? | {'yes' if _det != 0 else 'no'} |"
-                        "\n\n"
-                        r"Grey: the unit square. Green: its image under $A$."
-                    ).style({"max-width": "26rem"}),
-                ],
-                widths=[1, 1],
-                gap=2,
-                align="center",
+            mo.md(
+                "| | |\n|:--|:--|\n"
+                rf"| $A$ | $\begin{{bmatrix}} {_a:g} & {_b:g} \\ {_c:g} & {_d:g} \end{{bmatrix}}$ |"
+                "\n"
+                rf"| $\det(A) = ad - bc$ | ${_det:g}$ |"
+                "\n"
+                rf"| area of the parallelogram | ${abs(_det):g}$ |"
+                "\n"
+                rf"| $A$ invertible? | {'yes' if _det != 0 else 'no'} |"
             ),
+            _fig,
         ]
     )
     return
