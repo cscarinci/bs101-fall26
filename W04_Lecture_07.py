@@ -725,10 +725,24 @@ def _(mo):
     ## Summary
 
     - a path $\gamma : A \subseteq \mathbb{R} \longrightarrow \mathbb{R}^m$ is an ordered list of single variable functions $\gamma^1, \dots, \gamma^m$; vector operations extend to paths
-    - $\displaystyle \lim_{t \to a} \gamma(t) = \vec{b}$: we can make $\gamma(t)$ arbitrarily close to $\vec{b}$ by taking $t$ sufficiently close to $a$ (but different from $a$); $\gamma$ is continuous at $t = a$ if $\displaystyle \lim_{t \to a} \gamma(t) = \gamma(a)$
-    - the derivative (velocity) $\gamma'(a) = \displaystyle \lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a}$; $\gamma(a)$ is the position
+    - $\lim_{t \to a} \gamma(t) = \vec{b}$: we can make $\gamma(t)$ arbitrarily close to $\vec{b}$ by taking $t$ sufficiently close to $a$ (but different from $a$); $\gamma$ is continuous at $t = a$ if
+
+        $$
+        \lim_{t \to a} \gamma(t) = \gamma(a)
+        $$
+    - the derivative (velocity)
+
+        $$
+        \gamma'(a) = \lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a}
+        $$
+
+        $\gamma(a)$ is the position
     - limits, continuity and derivatives of paths can be computed componentwise
-    - if $\gamma'(a) \neq \vec{0}$, the tangent line to $\gamma$ at $t = a$ is $T_a \gamma = \{\, \vec{y} = \gamma(a) + s\, \gamma'(a) \mid s \in \mathbb{R} \,\}$
+    - if $\gamma'(a) \neq \vec{0}$, the tangent line to $\gamma$ at $t = a$ is
+
+        $$
+        T_a \gamma = \{\, \vec{y} = \gamma(a) + s\, \gamma'(a) \mid s \in \mathbb{R} \,\}
+        $$
 
     **Next:** local properties of scalar functions and maps: limits
     """)

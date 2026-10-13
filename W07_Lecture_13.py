@@ -438,7 +438,13 @@ def _(mo):
 
     - $f$ is $C^2$-smooth at $\vec{a}$ when its second order partial derivatives are well-defined around $\vec{a}$ and continuous at $\vec{a}$; then their order does not matter
     - the Hessian matrix $Hf(\vec{a}) = D(\vec{\nabla} f)(\vec{a}) \in \mathrm{Mat}(n \times n)$ generalizes $f''(a)$
-    - quadratic approximation: $f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) + \frac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})$, with error going to zero faster than $\lVert \vec{x} - \vec{a} \rVert^2$
+    - quadratic approximation:
+
+        $$
+        f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) + \frac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})
+        $$
+
+        with error going to zero faster than $\lVert \vec{x} - \vec{a} \rVert^2$
 
     **Next:** local maxima and minima of scalar valued functions
     """)

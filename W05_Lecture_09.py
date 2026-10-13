@@ -543,8 +543,16 @@ def _(mo):
 
     - dividing by $\vec{x} - \vec{a}$ makes no sense, and dividing by $\lVert \vec{x} - \vec{a} \rVert$ is too restrictive: already $f(\vec{x}) = x^1$ would not be differentiable
     - partial derivatives $\dfrac{\partial f}{\partial x^i}(\vec{a})$: the usual single variable derivative with respect to $x^i$, with $x^j$ held constant ($j \neq i$)
-    - directional derivative $Df(\vec{a})(\vec{v}) = \dfrac{d}{dt} f(\vec{a} + t\vec{v}) \Big|_{t = 0}$, and $\dfrac{\partial f}{\partial x^i}(\vec{a}) = Df(\vec{a})(\vec{e}_i)$
-    - $f$ is differentiable at $\vec{a}$ if $Df(\vec{a})(\vec{v})$ exists and is linear in $\vec{v}$, and $\displaystyle \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0$
+    - directional derivative
+
+        $$
+        Df(\vec{a})(\vec{v}) = \frac{d}{dt} f(\vec{a} + t\vec{v}) \Big|_{t = 0} \qquad \text{and} \qquad \frac{\partial f}{\partial x^i}(\vec{a}) = Df(\vec{a})(\vec{e}_i)
+        $$
+    - $f$ is differentiable at $\vec{a}$ if $Df(\vec{a})(\vec{v})$ exists and is linear in $\vec{v}$, and
+
+        $$
+        \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0
+        $$
 
     **Next:** properties and interpretations of differentiable functions
     """)
