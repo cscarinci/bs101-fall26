@@ -730,10 +730,28 @@ def _(mo):
     mo.md(r"""
     ## Summary
 
-    - the affine approximation of $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ at $\vec{a}$ is $g(\vec{x}) = f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a})$ (linear plus constant)
-    - $n = 1$: $\mathrm{graph}(g)$ is the tangent line to the graph of $f$; &nbsp; $n = 2$: $\mathrm{graph}(g)$ is the tangent plane to $\mathrm{graph}(f)$, through $(a^1, a^2, f(\vec{a}))$ with normal vector $\vec{n} = \big( {-\frac{\partial f}{\partial x^1}(\vec{a})},\, {-\frac{\partial f}{\partial x^2}(\vec{a})},\, 1 \big)$
+    - the affine approximation of $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ at $\vec{a}$ is
+
+        $$
+        g(\vec{x}) = f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a})
+        $$
+
+        (linear plus constant)
+    - $n = 1$: $\mathrm{graph}(g)$ is the tangent line to the graph of $f$
+
+        $n = 2$: $\mathrm{graph}(g)$ is the tangent plane to $\mathrm{graph}(f)$, through $(a^1, a^2, f(\vec{a}))$ with normal vector
+
+        $$
+        \vec{n} = \Big( {-\frac{\partial f}{\partial x^1}(\vec{a})},\ {-\frac{\partial f}{\partial x^2}(\vec{a})},\ 1 \Big)
+        $$
     - $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is differentiable at $\vec{a}$ if each component $f^j$ is; the rows of the Jacobian matrix $Df(\vec{a}) \in \mathrm{Mat}(m \times n)$ are the derivatives $Df^j(\vec{a})$
-    - $f$ is differentiable at $\vec{a}$ if and only if $\lVert f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a}) \rVert / \lVert \vec{x} - \vec{a} \rVert \to 0$ as $\vec{x} \to \vec{a}$; &nbsp; $C^1$-smooth at $\vec{a}$ $\Longrightarrow$ differentiable at $\vec{a}$
+    - $f$ is differentiable at $\vec{a}$ if and only if
+
+        $$
+        \frac{\lVert f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a}) \rVert}{\lVert \vec{x} - \vec{a} \rVert} \longrightarrow 0 \quad \text{as } \vec{x} \to \vec{a}
+        $$
+
+        $C^1$-smooth at $\vec{a}$ $\Longrightarrow$ differentiable at $\vec{a}$
     - a linear map $f(\vec{x}) = A\vec{x}$ has $Df(\vec{a}) = A$ at every $\vec{a}$
 
     **Next:** the chain rule

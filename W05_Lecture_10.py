@@ -679,11 +679,23 @@ def _(mo):
     mo.md(r"""
     ## Summary
 
-    - differentiable at $\vec{x} = \vec{a}$ $\Longrightarrow$ continuous at $\vec{x} = \vec{a}$; continuous partials at $\vec{x} = \vec{a}$ ($C^1$-smooth) $\Longrightarrow$ differentiable at $\vec{x} = \vec{a}$ (sufficient, but not necessary)
-    - the derivative $Df(\vec{a}) \in \mathrm{Mat}(1 \times n)$ is the map that calculates directional derivatives; the gradient $\vec{\nabla} f(\vec{a}) \in \mathbb{R}^n$ is a vector, and $Df(\vec{a})(\vec{v}) = \vec{\nabla} f(\vec{a}) \cdot \vec{v}$
+    - differentiable at $\vec{x} = \vec{a}$ $\Longrightarrow$ continuous at $\vec{x} = \vec{a}$
+
+        continuous partials at $\vec{x} = \vec{a}$ ($C^1$-smooth) $\Longrightarrow$ differentiable at $\vec{x} = \vec{a}$ (sufficient, but not necessary)
+    - the derivative $Df(\vec{a}) \in \mathrm{Mat}(1 \times n)$ is the map that calculates directional derivatives; the gradient $\vec{\nabla} f(\vec{a}) \in \mathbb{R}^n$ is a vector, and
+
+        $$
+        Df(\vec{a})(\vec{v}) = \vec{\nabla} f(\vec{a}) \cdot \vec{v}
+        $$
     - if $\vec{\nabla} f(\vec{a}) \neq \vec{0}$: $\vec{\nabla} f(\vec{a})$ is the direction of steepest ascent, $-\vec{\nabla} f(\vec{a})$ of steepest descent, and $\big( \vec{\nabla} f(\vec{a}) \big)^{\perp}$ the directions with no ascent / descent
     - $\vec{\nabla} f(\vec{a}) \perp f^{-1}(b)$ for $b = f(\vec{a})$
-    - the affine approximation $g(\vec{x}) = f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a})$: for $n = 2$, $\mathrm{graph}(g)$ is the tangent plane to $\mathrm{graph}(f)$
+    - the affine approximation
+
+        $$
+        g(\vec{x}) = f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a})
+        $$
+
+        for $n = 2$, $\mathrm{graph}(g)$ is the tangent plane to $\mathrm{graph}(f)$
 
     **Next:** affine approximations and the derivative of general maps
     """)
