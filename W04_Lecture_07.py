@@ -299,7 +299,7 @@ def _(Arc, BLUE, FULL, GREY, HALF, arrow, blank, helix, math, mo, np, path_axes,
     _angle = _t % (2 * math.pi)
     _ax.add_patch(Arc((0, 0), 0.6, 0.6, theta1=0, theta2=math.degrees(_angle), color=GREY, lw=1.0))
     if _angle >= 0.5:
-        _ax.text(0.5 * math.cos(_angle / 2), 0.5 * math.sin(_angle / 2), "$t$", color=GREY, fontsize=12, ha="center", va="center", bbox=_box)
+        _ax.text(0.5 * math.cos(_angle / 2), 0.5 * math.sin(_angle / 2), "$t$" if _t < 2 * math.pi else r"$t \ \mathrm{mod}\ 2\pi$", color=GREY, fontsize=12, ha="center", va="center", bbox=_box)
     vector(_ax, (0, 0), _p, BLUE, r"$\gamma(t)$", -35, r=19)
     _ax.plot(*_p, "o", color="black", ms=4, zorder=4)
     _ax.text(-1.65, 1.6, r"$\mathrm{Im}(\gamma)$", fontsize=13, ha="left", va="center")
@@ -634,7 +634,7 @@ def _(BLUE, FULL, GREEN, ORANGE, a_parabola, arrow, blank, math, mo, np, table, 
     _ax.plot(_t**2, _t, color=BLUE, lw=1.5)
     _ax.text(5.0, -1.75, r"$\mathrm{Im}(\gamma)$", color=BLUE, fontsize=13, ha="center", va="center")
     _s = np.array([-12.0, 12.0])
-    _ax.plot(_p[0] + _s * _v[0], _p[1] + _s * _v[1], color=ORANGE, lw=1.0)
+    _ax.plot(_p[0] + _s * _v[0], _p[1] + _s * _v[1], color=ORANGE, lw=1.0 if _a != 0 else 2.0, zorder=2 if _a != 0 else 3)  # at a = 0 it lies on the y^2-axis: drawn wider, over it
     # the names sit off the line: T_a gamma on the outer side of the parabola, gamma(a) on the inner side
     _n = math.hypot(*_v)
     _out = (-_v[1] / _n, _v[0] / _n)

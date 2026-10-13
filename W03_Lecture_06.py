@@ -403,6 +403,7 @@ def _(BLUE, FULL, GREEN, GREY, RED, arrow, blank, mo, t_path, table, vector):
         arrow(_ax2, _pr(_s, -0.5, 0), _pr(_s, 4.2 - _cut, 0), _col, lw=0.9)
         arrow(_ax2, _pr(_s, 0, -0.5), _pr(_s, 0, 3.0 - _cut), _col, lw=0.9)
     arrow(_ax2, _pr(-1.4, 0, 0), _pr(3.6, 0, 0), "black", lw=0.9)
+    _ax2.annotate("$t$", _pr(3.6, 0, 0), textcoords="offset points", xytext=(0, 5), ha="right", va="bottom", fontsize=13)
     _e1, _e2 = _pr(0, 4.2, 0), _pr(0, 0, 3.0)
     _ax2.text(_e1[0] + 0.12, _e1[1] - 0.05, "$y^1$", fontsize=13, ha="left", va="top")
     _ax2.text(_e2[0] - 0.12, _e2[1], "$y^2$", fontsize=13, ha="right", va="top")
@@ -449,7 +450,7 @@ def _(BLUE, HALF, RED, arrow, blank, definition, mo, np, ortho, ring):
     ring(_ax, 2.0, 0.0, BLUE)
     for _d, _off, _ha, _va in zip(np.eye(3), ((-5, 4), (0, -7), (-6, -3)), ("right", "center", "right"), ("bottom", "top", "top")):
         _ax.plot(*ortho(2 * _d), "o", color="black", ms=3.5, zorder=4)
-        _ax.annotate("$2$", ortho(2 * _d), textcoords="offset points", xytext=_off, ha=_ha, va=_va, fontsize=12)
+        _ax.annotate("$2$", ortho(2 * _d), textcoords="offset points", xytext=_off, ha=_ha, va=_va, fontsize=12, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
     # two points of the level set
     for _q, _name, _off in (((0.3, 1.0, 1.7), r"$\vec{x}$", (5, 5)), ((0.2, 1.3, 1.5), r"$\vec{y}$", (7, 0))):
         _q = 2 * np.array(_q) / np.linalg.norm(_q)
@@ -607,8 +608,10 @@ def _(BLUE, FULL, Figure, arrow, b_level, mo, np, ortho, plane, quadric, table):
     _right.set_ylim(-4.6, 4.6)
     _right.set_aspect("equal")
     _right.axis("off")
-    for _d, _len in zip(np.eye(3), (6.0, 4.4, 4.7)):
+    for _i, (_d, _len) in enumerate(zip(np.eye(3), (6.0, 4.4, 4.7))):
         arrow(_right, ortho(-1.2 * _d), ortho(_len * _d), "black", lw=0.9)
+        _off, _ha, _va = (((-4, -4), "right", "top"), ((0, -5), "center", "top"), ((6, -2), "left", "top"))[_i]
+        _right.annotate(f"$x^{_i + 1}$", ortho(_len * _d), textcoords="offset points", xytext=_off, ha=_ha, va=_va, fontsize=12, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
     quadric(_right, _b, 3.0, BLUE, wire=True)
 
     _flat = "two intersecting lines (a cone)" if _b == 0 else "a hyperbola"

@@ -394,8 +394,9 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, math, mo, np, t0, table, vect
     _ax.plot(*_p, "o", color="black", ms=4, zorder=6)
     _dv = math.atan2(_v[1], _v[0]) - _side * math.pi / 2 if _t != 0 else math.radians(225)
     _dg = math.atan2(_g[1], _g[0]) + _side * math.pi / 2 if _t != 0 else math.radians(135)
-    _label(_tips[0], _dv, r"$\gamma'(t_0)$", GREEN, 40, 16)
-    _label(_tips[1], _dg, r"$\vec{\nabla} f(\gamma(t_0))$", RED, 74, 20)
+    if _t != 0:  # for t_0 = 0 both vectors are zero: nothing to label
+        _label(_tips[0], _dv, r"$\gamma'(t_0)$", GREEN, 40, 16)
+        _label(_tips[1], _dg, r"$\vec{\nabla} f(\gamma(t_0))$", RED, 74, 20)
 
     _ax.set_xlim(*_xlim)
     _ax.set_ylim(*_ylim)

@@ -203,7 +203,8 @@ def _(BLUE, FULL, GREEN, arrow, blank, cross_axes, math, mo, np, num, phi, table
     cross_axes(_ax, (-4.5, 4.9), (-3.4, 3.6), "$x^1$", "$x^2$")
     _th = np.linspace(0, 2 * np.pi, 200)
     _ax.plot(3 * np.cos(_th), 2 * np.sin(_th), color=BLUE, lw=1.4)
-    _ax.text(3.5, -3.0, "$f^{-1}(r^2)$", color=BLUE, fontsize=13, ha="left", va="center")
+    _q = _p + math.pi + 0.6  # the name of the level set sits on the ellipse, away from a and its gradient
+    tip_label(_ax, (3 * math.cos(_q), 2 * math.sin(_q)), math.degrees(math.atan2(math.sin(_q) / 2, math.cos(_q) / 3)), "$f^{-1}(r^2)$", BLUE)
     arrow(_ax, (0, 0), _a, "black")
     tip_label(_ax, (_a[0] / 2, _a[1] / 2), math.degrees(_p) + 90, r"$\vec{a}$", "black")
     arrow(_ax, _a, _tip, GREEN)
