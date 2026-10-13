@@ -235,7 +235,7 @@ def _(BLUE, FULL, Figure, GREEN, GREY, a_ext, cross_axes, math, mo, np, signed, 
     _ax.text(5.83, float(_f(5.75)), "$y = f(x)$", color=BLUE, fontsize=13, ha="left", va="center")
     # horizontal tangent lines at the local maxima and minima
     _c = math.acos(-0.12 / 1.9)
-    for _u in (_c, 2 * math.pi - _c, 2 * math.pi + _c):
+    for _u in (-_c, _c, 2 * math.pi - _c, 2 * math.pi + _c):
         _xc = (_u + 0.4) / 1.9
         _ax.plot([_xc - 0.6, _xc + 0.6], [float(_f(_xc))] * 2, color=GREY, lw=1.0, ls=(0, (4, 3)))
     # the tangent line at a: a segment of fixed length

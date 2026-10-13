@@ -523,9 +523,11 @@ def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, ORANGE, cross_axes, ga1, ga2, math
         _ax.plot([_a[0] - 2.2 * _t[0], _a[0] + 2.2 * _t[0]], [_a[1] - 2.2 * _t[1], _a[1] + 2.2 * _t[1]], color=GREY, lw=1.0, ls=(0, (4, 3)))
         vector(_ax, _a, (_a[0] + _grad[0], _a[1] + _grad[1]), GREEN, r"$\vec{\nabla} f(\vec{a})$", 0, r=22)
         vector(_ax, _a, (_a[0] + _v[0], _a[1] + _v[1]), ORANGE, r"$\vec{v}$", 45, r=16)
-        vector(_ax, (0, 0), _a, BLUE, r"$\vec{a}$", -45, r=16)
+        _crowded = _R < 0.5  # near the origin the labels of a and of the level set would pile up on the others
+        vector(_ax, (0, 0), _a, BLUE, None if _crowded else r"$\vec{a}$", -45, r=16)
         _q = _d - math.radians(135)
-        _ax.annotate(r"$f^{-1}(R^2)$", (_R * math.cos(_q), _R * math.sin(_q)), textcoords="offset points", xytext=(30 * math.cos(_q), 16 * math.sin(_q)), ha="center", va="center", color=BLUE, fontsize=12, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
+        if not _crowded:
+            _ax.annotate(r"$f^{-1}(R^2)$", (_R * math.cos(_q), _R * math.sin(_q)), textcoords="offset points", xytext=(30 * math.cos(_q), 16 * math.sin(_q)), ha="center", va="center", color=BLUE, fontsize=12, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
         _perp = rf"$\textcolor{{{ORANGE}}}{{\begin{{bmatrix}} {_v[0]:g} \\ {_v[1]:g} \end{{bmatrix}}}}$"
         _dot = rf"$({_grad[0]:g})({_v[0]:g}) + ({_grad[1]:g})({_v[1]:g}) = 0$"
     else:
