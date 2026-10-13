@@ -169,8 +169,10 @@ def _(mo, theorem):
     - $f : \mathbb{R} \longrightarrow \mathbb{R}$ (single variable, scalar valued) is differentiable at $x = a$ if
 
         $$
-        f'(a) = \lim_{x \to a} \frac{f(x) - f(a)}{x - a} \in \mathbb{R} \quad \text{is well-defined}
-        \qquad \Big( \text{slope of tangent line to } \mathrm{graph}(f) \text{ at } \begin{bmatrix} a \\ f(a) \end{bmatrix} \Big)
+        \begin{gathered}
+        f'(a) = \lim_{x \to a} \frac{f(x) - f(a)}{x - a} \in \mathbb{R} \quad \text{is well-defined} \\[6pt]
+        \Big( \text{slope of tangent line to } \mathrm{graph}(f) \text{ at } \begin{bmatrix} a \\ f(a) \end{bmatrix} \Big)
+        \end{gathered}
         $$
 
     - $f : \mathbb{R} \longrightarrow \mathbb{R}^m$ (single variable, vector valued: path) &nbsp; $\leadsto$ &nbsp; $f(x) = \begin{bmatrix} f^1(x) \\ \vdots \\ f^m(x) \end{bmatrix}$, &nbsp; $f^i : \mathbb{R} \longrightarrow \mathbb{R}$
