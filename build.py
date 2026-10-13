@@ -100,6 +100,14 @@ def nav_html(number, numbers):
 # the header and figures at once while the browser is still loading Python (needs numpy and matplotlib)
 SNAPSHOT = ["--execute", "--no-sandbox"] if "--snapshot" in sys.argv else []
 
+# page-view counting with GoatCounter (goatcounter.com): the site code chosen at sign-up; "" turns it off
+GOATCOUNTER = "cscarinci"
+COUNTER = (
+    f'<script data-goatcounter="https://{GOATCOUNTER}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'
+    if GOATCOUNTER
+    else ""
+)
+
 
 def main():
     notebooks = {}
@@ -120,6 +128,7 @@ def main():
         page = SITE / f"Lecture_{number:02d}" / "index.html"
         html = re.sub(r'<nav class="bs-nav">.*?</nav>', "", page.read_text(encoding="utf-8"), flags=re.S)
         html = html.replace("</body>", nav_html(number, notebooks) + "</body>", 1)
+        html = re.sub(r"<script data-goatcounter=.*?</script>", "", html, flags=re.S).replace("</head>", COUNTER + "</head>", 1)
         page.write_text(html, encoding="utf-8")
 
     covered = {n for _, first, last in PARTS for n in range(first, last + 1)}
@@ -137,7 +146,7 @@ def main():
         sections.append(f"<h2>{name}</h2>{body}")
 
     SITE.mkdir(exist_ok=True)
-    (SITE / "index.html").write_text(PAGE.format(count=len(notebooks), parts="\n".join(sections)), encoding="utf-8")
+    (SITE / "index.html").write_text(PAGE.format(count=len(notebooks), parts="\n".join(sections)).replace("</head>", COUNTER + "</head>", 1), encoding="utf-8")
     (SITE / ".nojekyll").write_text("")
     print(f"wrote {SITE / 'index.html'}")
 
