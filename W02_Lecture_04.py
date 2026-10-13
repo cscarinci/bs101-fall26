@@ -446,7 +446,7 @@ def _(mo, theorem):
     $$
 
     $$
-    \Longleftrightarrow \quad ad - bc \neq 0 \quad \text{and} \quad e = \frac{d}{ad - bc}, \quad f = -\frac{b}{ad - bc}, \quad g = -\frac{c}{ad - bc}, \quad h = \frac{a}{ad - bc}
+    \Longleftrightarrow \qquad ad - bc \neq 0 \quad \text{and} \quad e = \frac{d}{ad - bc}, \quad f = -\frac{b}{ad - bc}, \quad g = -\frac{c}{ad - bc}, \quad h = \frac{a}{ad - bc}
     $$
 
     $\therefore$ &nbsp; $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$ admits inverse if and only if $\det A = ad - bc \neq 0$ &nbsp; $\leadsto$ &nbsp; the inverse is
@@ -458,7 +458,7 @@ def _(mo, theorem):
     $\leadsto$ &nbsp; key intuition:
 
     $$
-    A = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \quad \Longrightarrow \quad
+    A = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \qquad \Longrightarrow \qquad
     \vec{A}_1 = \begin{bmatrix} a \\ c \end{bmatrix} = A\vec{e}_1, \quad
     \vec{A}_2 = \begin{bmatrix} b \\ d \end{bmatrix} = A\vec{e}_2
     $$

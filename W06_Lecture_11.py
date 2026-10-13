@@ -288,7 +288,7 @@ def _(definition, mo):
     is the affine function whose graph is the tangent line to the graph of $f$ at $\begin{bmatrix} a \\ f(a) \end{bmatrix}$
 
     $$
-    y = f(a) + f'(a)(x - a) \quad \leadsto \quad \begin{bmatrix} a \\ f(a) \end{bmatrix} + (x - a) \underbrace{\begin{bmatrix} 1 \\ f'(a) \end{bmatrix}}_{\substack{\text{velocity vector of} \\ \text{the tangent line}}}
+    y = f(a) + f'(a)(x - a) \qquad \leadsto \qquad \begin{bmatrix} a \\ f(a) \end{bmatrix} + (x - a) \underbrace{\begin{bmatrix} 1 \\ f'(a) \end{bmatrix}}_{\substack{\text{velocity vector of} \\ \text{the tangent line}}}
     \qquad \qquad
     \underbrace{\vec{n} = \begin{bmatrix} -f'(a) \\ 1 \end{bmatrix}}_{\substack{\text{normal to the} \\ \text{tangent line}}}
     $$
@@ -374,16 +374,18 @@ def _(mo, theorem):
 
     $$
     \begin{aligned}
-    \mathrm{graph}(g) &= \left\{\, \begin{bmatrix} x^1 \\ x^2 \\ f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) \end{bmatrix} \;\middle|\; \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \in \mathbb{R}^2 \,\right\}
-    = \left\{\, \begin{bmatrix} a^1 \\ a^2 \\ f(\vec{a}) \end{bmatrix} + \begin{bmatrix} x^1 - a^1 \\ x^2 - a^2 \\ Df(\vec{a})(\vec{x} - \vec{a}) \end{bmatrix} \;\middle|\; \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \in \mathbb{R}^2 \,\right\} \\[6pt]
+    \mathrm{graph}(g) &= \left\{\, \begin{bmatrix} x^1 \\ x^2 \\ f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) \end{bmatrix} \;\middle|\; \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \in \mathbb{R}^2 \,\right\} \\[6pt]
+    &= \left\{\, \begin{bmatrix} a^1 \\ a^2 \\ f(\vec{a}) \end{bmatrix} + \begin{bmatrix} x^1 - a^1 \\ x^2 - a^2 \\ Df(\vec{a})(\vec{x} - \vec{a}) \end{bmatrix} \;\middle|\; \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \in \mathbb{R}^2 \,\right\} \\[6pt]
     &= \Bigg\{\, \begin{bmatrix} a^1 \\ a^2 \\ f(\vec{a}) \end{bmatrix} + \underbrace{(x^1 - a^1)}_{t} \underbrace{\begin{bmatrix} 1 \\ 0 \\ \frac{\partial f}{\partial x^1}(\vec{a}) \end{bmatrix}}_{\text{velocity vector}} + \underbrace{(x^2 - a^2)}_{s} \underbrace{\begin{bmatrix} 0 \\ 1 \\ \frac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix}}_{\text{velocity vector}} \;\Bigg|\; \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \in \mathbb{R}^2 \,\Bigg\}
     \end{aligned}
     $$
 
     $$
+    \begin{gathered}
     \vec{n} = \begin{bmatrix} n^1 \\ n^2 \\ n^3 \end{bmatrix} \ \text{ such that } \
-    \vec{n} \cdot \underbrace{\begin{bmatrix} 1 \\ 0 \\ \frac{\partial f}{\partial x^1}(\vec{a}) \end{bmatrix}}_{\vec{u}} = 0 = \vec{n} \cdot \underbrace{\begin{bmatrix} 0 \\ 1 \\ \frac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix}}_{\vec{v}}
-    \quad \leadsto \quad \vec{n} = \vec{u} \times \vec{v} = \det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ 1 & 0 & \frac{\partial f}{\partial x^1}(\vec{a}) \\ 0 & 1 & \frac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix} \qquad \square
+    \vec{n} \cdot \underbrace{\begin{bmatrix} 1 \\ 0 \\ \frac{\partial f}{\partial x^1}(\vec{a}) \end{bmatrix}}_{\vec{u}} = 0 = \vec{n} \cdot \underbrace{\begin{bmatrix} 0 \\ 1 \\ \frac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix}}_{\vec{v}} \\[8pt]
+    \leadsto \qquad \vec{n} = \vec{u} \times \vec{v} = \det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ 1 & 0 & \frac{\partial f}{\partial x^1}(\vec{a}) \\ 0 & 1 & \frac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix} \qquad \square
+    \end{gathered}
     $$
     """
             ),
@@ -451,35 +453,35 @@ def _(BLUE, FULL, GREEN, GREY, LIGHT, ORANGE, arrow, blank, math, mo, np, tip_la
             mo.md(
                 r"""
     $$
-    y = f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) \quad \leadsto \quad
+    y = f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) \qquad \leadsto \qquad
     \begin{bmatrix} a^1 \\ a^2 \\ f(\vec{a}) \end{bmatrix} + (x^1 - a^1) \begin{bmatrix} 1 \\ 0 \\ \frac{\partial f}{\partial x^1}(\vec{a}) \end{bmatrix} + (x^2 - a^2) \begin{bmatrix} 0 \\ 1 \\ \frac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix}
     $$
 
     **Example.** &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = x^1 e^{x^2}, \quad \vec{a} = \begin{bmatrix} 1 \\ 0 \end{bmatrix}$ &nbsp; $\leadsto$ &nbsp; tangent plane to $\mathrm{graph}(f)$ at $\begin{bmatrix} a^1 \\ a^2 \\ f(\vec{a}) \end{bmatrix} = \begin{bmatrix} 1 \\ 0 \\ 1 \end{bmatrix}$
 
     $$
-    \leadsto \quad \vec{\nabla} f(\vec{a}) = \begin{bmatrix} \frac{\partial f}{\partial x^1}(\vec{a}) \\[4pt] \frac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix} = \begin{bmatrix} e^{a^2} \\ a^1 e^{a^2} \end{bmatrix} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}
-    \quad \leadsto \quad \vec{n} = \begin{bmatrix} -\frac{\partial f}{\partial x^1}(\vec{a}) \\[4pt] -\frac{\partial f}{\partial x^2}(\vec{a}) \\[4pt] 1 \end{bmatrix} = \begin{bmatrix} -1 \\ -1 \\ 1 \end{bmatrix}
+    \leadsto \qquad \vec{\nabla} f(\vec{a}) = \begin{bmatrix} \frac{\partial f}{\partial x^1}(\vec{a}) \\[4pt] \frac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix} = \begin{bmatrix} e^{a^2} \\ a^1 e^{a^2} \end{bmatrix} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}
+    \qquad \leadsto \qquad \vec{n} = \begin{bmatrix} -\frac{\partial f}{\partial x^1}(\vec{a}) \\[4pt] -\frac{\partial f}{\partial x^2}(\vec{a}) \\[4pt] 1 \end{bmatrix} = \begin{bmatrix} -1 \\ -1 \\ 1 \end{bmatrix}
     $$
 
     $$
     \begin{aligned}
-    \leadsto \quad \text{plane through } \begin{bmatrix} 1 \\ 0 \\ 1 \end{bmatrix} \text{ normal to } \begin{bmatrix} -1 \\ -1 \\ 1 \end{bmatrix}
-    &= \left\{\, \begin{bmatrix} y^1 \\ y^2 \\ y^3 \end{bmatrix} \;\middle|\; -1 \cdot (y^1 - 1) - 1 \cdot (y^2 - 0) + 1 \cdot (y^3 - 1) = 0 \,\right\} \\
-    &= \left\{\, \begin{bmatrix} y^1 \\ y^2 \\ y^3 \end{bmatrix} \;\middle|\; y^3 = y^1 + y^2 \,\right\} = \mathrm{graph}(g)
+    & \leadsto \qquad \text{plane through } \begin{bmatrix} 1 \\ 0 \\ 1 \end{bmatrix} \text{ normal to } \begin{bmatrix} -1 \\ -1 \\ 1 \end{bmatrix} \\
+    & \phantom{\leadsto \qquad \text{plane }} = \left\{\, \begin{bmatrix} y^1 \\ y^2 \\ y^3 \end{bmatrix} \;\middle|\; -1 \cdot (y^1 - 1) - 1 \cdot (y^2 - 0) + 1 \cdot (y^3 - 1) = 0 \,\right\} \\
+    & \phantom{\leadsto \qquad \text{plane }} = \left\{\, \begin{bmatrix} y^1 \\ y^2 \\ y^3 \end{bmatrix} \;\middle|\; y^3 = y^1 + y^2 \,\right\} = \mathrm{graph}(g)
     \end{aligned}
     $$
 
     $$
-    \leadsto \quad \text{affine approximation} \quad g(\vec{x}) = 1 + \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} x^1 - 1 \\ x^2 \end{bmatrix} = 1 + (x^1 - 1) + x^2
+    \leadsto \qquad \text{affine approximation} \quad g(\vec{x}) = 1 + \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} x^1 - 1 \\ x^2 \end{bmatrix} = 1 + (x^1 - 1) + x^2
     $$
 
     **Remark.**
 
     $$
-    \vec{x} = \begin{bmatrix} 1.1 \\ -0.1 \end{bmatrix} \quad \Longrightarrow \quad
+    \vec{x} = \begin{bmatrix} 1.1 \\ -0.1 \end{bmatrix} \qquad \Longrightarrow \qquad
     \begin{aligned} f(\vec{x}) &= 1.1\, e^{-0.1} \approx 0.995 \\ g(\vec{x}) &= 1.1 - 0.1 = 1 \end{aligned}
-    \quad \Longrightarrow \quad f(\vec{x}) - g(\vec{x}) \approx -0.005
+    \qquad \Longrightarrow \qquad f(\vec{x}) - g(\vec{x}) \approx -0.005
     $$
     """
             ),
@@ -530,7 +532,7 @@ def _(definition, mo, theorem):
     $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is **differentiable** at $\vec{x} = \vec{a} = \begin{bmatrix} a^1 \\ \vdots \\ a^n \end{bmatrix}$ if each component $f^j : \mathbb{R}^n \longrightarrow \mathbb{R}$ is differentiable at $\vec{a}$
 
     $$
-    \Longrightarrow \quad Df(\vec{a}) = \begin{bmatrix} Df^1(\vec{a}) \\ \vdots \\ Df^m(\vec{a}) \end{bmatrix}
+    \Longrightarrow \qquad Df(\vec{a}) = \begin{bmatrix} Df^1(\vec{a}) \\ \vdots \\ Df^m(\vec{a}) \end{bmatrix}
     = \begin{bmatrix} \dfrac{\partial f^1}{\partial x^1}(\vec{a}) & \cdots & \dfrac{\partial f^1}{\partial x^n}(\vec{a}) \\ \vdots & \ddots & \vdots \\ \dfrac{\partial f^m}{\partial x^1}(\vec{a}) & \cdots & \dfrac{\partial f^m}{\partial x^n}(\vec{a}) \end{bmatrix} \in \mathrm{Mat}(m \times n)
     $$
 
@@ -573,13 +575,13 @@ def _(definition, mo, theorem):
     $f^1(\vec{x})$, $f^2(\vec{x})$ are $C^1$-smooth everywhere in $\mathbb{R}^2$ (linear combination of elementary functions) &nbsp; $\Longrightarrow$ &nbsp; $f$ is differentiable at any $\vec{a} \in \mathbb{R}^2$
 
     $$
-    \Longrightarrow \quad Df(\vec{a}) = \begin{bmatrix} \dfrac{\partial f^1}{\partial x^1}(\vec{a}) & \dfrac{\partial f^1}{\partial x^2}(\vec{a}) \\[8pt] \dfrac{\partial f^2}{\partial x^1}(\vec{a}) & \dfrac{\partial f^2}{\partial x^2}(\vec{a}) \end{bmatrix} = \begin{bmatrix} a & b \\ c & d \end{bmatrix} = A\,!
+    \Longrightarrow \qquad Df(\vec{a}) = \begin{bmatrix} \dfrac{\partial f^1}{\partial x^1}(\vec{a}) & \dfrac{\partial f^1}{\partial x^2}(\vec{a}) \\[8pt] \dfrac{\partial f^2}{\partial x^1}(\vec{a}) & \dfrac{\partial f^2}{\partial x^2}(\vec{a}) \end{bmatrix} = \begin{bmatrix} a & b \\ c & d \end{bmatrix} = A\,!
     $$
 
     **Example.** &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = \begin{bmatrix} x^1 \cos(x^2) \\ x^1 \sin(x^2) \end{bmatrix}, \quad \vec{a} = \begin{bmatrix} 2 \\ \pi/3 \end{bmatrix}$
 
     $$
-    \Longrightarrow \quad Df(\vec{a}) = \begin{bmatrix} \cos(a^2) & -a^1 \sin(a^2) \\ \sin(a^2) & a^1 \cos(a^2) \end{bmatrix} = \begin{bmatrix} \frac{\sqrt{1}}{2} & -\sqrt{3} \\[4pt] \frac{\sqrt{3}}{2} & \sqrt{1} \end{bmatrix}
+    \Longrightarrow \qquad Df(\vec{a}) = \begin{bmatrix} \cos(a^2) & -a^1 \sin(a^2) \\ \sin(a^2) & a^1 \cos(a^2) \end{bmatrix} = \begin{bmatrix} \frac{\sqrt{1}}{2} & -\sqrt{3} \\[4pt] \frac{\sqrt{3}}{2} & \sqrt{1} \end{bmatrix}
     $$
 
     $$
@@ -684,7 +686,9 @@ def _(check, mo, q1_d1, q1_d2, q1_est):
 
     ### Question 1
 
-    $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = (x^1)^2 x^2, \quad \vec{a} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$
+    $$
+    f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = (x^1)^2 x^2, \qquad \vec{a} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}
+    $$
 
     (a) Write the derivative and the gradient of $f$ at $\vec{a}$.
     """
@@ -703,7 +707,9 @@ def _(check, mo, q1_d1, q1_d2, q1_est):
                 r"""
     ### Question 2
 
-    $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = \begin{bmatrix} x^1 x^2 \\ x^1 + x^2 \\ (x^2)^2 \end{bmatrix}$
+    $$
+    f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = \begin{bmatrix} x^1 x^2 \\ x^1 + x^2 \\ (x^2)^2 \end{bmatrix}
+    $$
 
     (a) Compute the derivative of $f$ at $\vec{x} = \begin{bmatrix} x^1 \\ x^2 \end{bmatrix}$.
 

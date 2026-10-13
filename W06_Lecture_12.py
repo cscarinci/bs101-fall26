@@ -178,7 +178,7 @@ def _(mo, theorem):
         is differentiable at $x = a$ if each component $f^i : \mathbb{R} \longrightarrow \mathbb{R}$ is differentiable at $x = a$ (as a single variable scalar function)
 
         $$
-        \Longleftrightarrow \quad \lim_{x \to a} \frac{f(x) - f(a)}{x - a} = \underbrace{f'(a)}_{\text{derivative of } f \text{ at } x = a} = \begin{bmatrix} (f^1)'(a) \\ \vdots \\ (f^m)'(a) \end{bmatrix} \in \mathbb{R}^m
+        \Longleftrightarrow \qquad \lim_{x \to a} \frac{f(x) - f(a)}{x - a} = \underbrace{f'(a)}_{\text{derivative of } f \text{ at } x = a} = \begin{bmatrix} (f^1)'(a) \\ \vdots \\ (f^m)'(a) \end{bmatrix} \in \mathbb{R}^m
         \qquad (\text{velocity vector of } f \text{ at } x = a)
         $$
 
@@ -199,7 +199,7 @@ def _(mo, theorem):
         is differentiable at $\vec{x} = \vec{a}$ if each component $f^i : \mathbb{R}^n \longrightarrow \mathbb{R}$ is differentiable at $\vec{x} = \vec{a}$ (as a multivariable scalar valued function)
 
         $$
-        \Longleftrightarrow \quad \lim_{\vec{x} \to \vec{a}} \frac{\lVert f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a}) \rVert}{\lVert \vec{x} - \vec{a} \rVert} = 0
+        \Longleftrightarrow \qquad \lim_{\vec{x} \to \vec{a}} \frac{\lVert f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a}) \rVert}{\lVert \vec{x} - \vec{a} \rVert} = 0
         $$
 
         where the derivative of $f$ at $\vec{a}$ (Jacobian matrix of $f$ at $\vec{a}$) is
@@ -280,7 +280,7 @@ def _(mo, theorem):
 
     $$
     \begin{aligned}
-    \Longrightarrow \quad \lim_{t \to t_0} \frac{g(t) - g(t_0)}{t - t_0} &= 0 + Df(\gamma(t_0))(\gamma'(t_0))
+    \Longrightarrow \qquad \lim_{t \to t_0} \frac{g(t) - g(t_0)}{t - t_0} &= 0 + Df(\gamma(t_0))(\gamma'(t_0))
     = \begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\gamma(t_0)) & \cdots & \dfrac{\partial f}{\partial x^n}(\gamma(t_0)) \end{bmatrix} \begin{bmatrix} (\gamma^1)'(t_0) \\ \vdots \\ (\gamma^n)'(t_0) \end{bmatrix} \\[4pt]
     &= \frac{\partial f}{\partial x^1}(\gamma(t_0))\, (\gamma^1)'(t_0) + \dots + \frac{\partial f}{\partial x^n}(\gamma(t_0))\, (\gamma^n)'(t_0)
     \end{aligned}
@@ -298,11 +298,11 @@ def _(mo, theorem):
 
     $$
     \gamma'(t_0) = \begin{bmatrix} 2 t_0 \\ 3 t_0^2 \end{bmatrix}, \qquad
-    Df(\vec{a}) = \begin{bmatrix} a^2 & a^1 \end{bmatrix} \quad \leadsto \quad Df(\underbrace{\gamma(t_0)}_{\vec{a}}) = \begin{bmatrix} t_0^3 & t_0^2 \end{bmatrix}
+    Df(\vec{a}) = \begin{bmatrix} a^2 & a^1 \end{bmatrix} \qquad \leadsto \qquad Df(\underbrace{\gamma(t_0)}_{\vec{a}}) = \begin{bmatrix} t_0^3 & t_0^2 \end{bmatrix}
     $$
 
     $$
-    \Longrightarrow \quad g(t) = f \circ \gamma(t) = f\!\left( \begin{bmatrix} t^2 \\ t^3 \end{bmatrix} \right) = t^2 \cdot t^3 = t^5
+    \Longrightarrow \qquad g(t) = f \circ \gamma(t) = f\!\left( \begin{bmatrix} t^2 \\ t^3 \end{bmatrix} \right) = t^2 \cdot t^3 = t^5
     $$
 
     also differentiable at $t = t_0$ with
@@ -434,7 +434,7 @@ def _(corollary, mo):
     **Example.** &nbsp; $\gamma(t) = \begin{bmatrix} t \\ \cos(t) \\ \sin(t) \end{bmatrix}, \qquad f\!\left( \begin{bmatrix} x^1 \\ x^2 \\ x^3 \end{bmatrix} \right) = (x^2)^2 + (x^3)^2$
 
     $$
-    \Longrightarrow \quad f \circ \gamma(t) = 1 \quad \Longrightarrow \quad (f \circ \gamma)'(t) = 0
+    \Longrightarrow \qquad f \circ \gamma(t) = 1 \qquad \Longrightarrow \qquad (f \circ \gamma)'(t) = 0
     $$
 
     $$
@@ -443,7 +443,7 @@ def _(corollary, mo):
 
     $$
     \begin{aligned}
-    \Longrightarrow \quad Df(\gamma(t))(\gamma'(t)) &= \begin{bmatrix} 0 & 2 \cos(t) & 2 \sin(t) \end{bmatrix} \begin{bmatrix} 1 \\ -\sin(t) \\ \cos(t) \end{bmatrix} \\
+    \Longrightarrow \qquad Df(\gamma(t))(\gamma'(t)) &= \begin{bmatrix} 0 & 2 \cos(t) & 2 \sin(t) \end{bmatrix} \begin{bmatrix} 1 \\ -\sin(t) \\ \cos(t) \end{bmatrix} \\
     &= 0 \cdot 1 + 2 \cos(t)(-\sin(t)) + 2 \sin(t) \cos(t) = 0
     \end{aligned}
     $$
@@ -462,7 +462,7 @@ def _(corollary, mo):
     $\leadsto$ &nbsp; suppose $f(\vec{a}) = b$ and suppose $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^n$ is differentiable at $t_0$ with $\gamma(t_0) = \vec{a}$ and $\mathrm{Im}(\gamma) \subset f^{-1}(b)$ &nbsp; (that is, ${f \circ \gamma(t) = b \ \ \forall\, t}$)
 
     $$
-    \Longrightarrow \quad \vec{\nabla} f(\vec{a}) \cdot \gamma'(t_0) = Df(\vec{a})(\gamma'(t_0)) = (f \circ \gamma)'(t_0) = 0
+    \Longrightarrow \qquad \vec{\nabla} f(\vec{a}) \cdot \gamma'(t_0) = Df(\vec{a})(\gamma'(t_0)) = (f \circ \gamma)'(t_0) = 0
     $$
     """
             ),
@@ -508,7 +508,7 @@ def _(mo, theorem):
     **Example.** &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = \begin{bmatrix} x^1 x^2 \\ x^1 + x^2 \end{bmatrix}, \qquad g\!\left( \begin{bmatrix} y^1 \\ y^2 \end{bmatrix} \right) = (y^1)^2 - y^2$
 
     $$
-    \Longrightarrow \quad g \circ f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = g\!\left( \begin{bmatrix} x^1 x^2 \\ x^1 + x^2 \end{bmatrix} \right) = (x^1 x^2)^2 - (x^1 + x^2)
+    \Longrightarrow \qquad g \circ f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = g\!\left( \begin{bmatrix} x^1 x^2 \\ x^1 + x^2 \end{bmatrix} \right) = (x^1 x^2)^2 - (x^1 + x^2)
     $$
 
     $$
@@ -516,7 +516,7 @@ def _(mo, theorem):
     $$
 
     $$
-    \Longrightarrow \quad Dg(f(\vec{x}))\, Df(\vec{x}) = \begin{bmatrix} 2 x^1 x^2 & -1 \end{bmatrix} \begin{bmatrix} x^2 & x^1 \\ 1 & 1 \end{bmatrix}
+    \Longrightarrow \qquad Dg(f(\vec{x}))\, Df(\vec{x}) = \begin{bmatrix} 2 x^1 x^2 & -1 \end{bmatrix} \begin{bmatrix} x^2 & x^1 \\ 1 & 1 \end{bmatrix}
     = \begin{bmatrix} 2 x^1 (x^2)^2 - 1 & 2 (x^1)^2 x^2 - 1 \end{bmatrix}
     $$
 

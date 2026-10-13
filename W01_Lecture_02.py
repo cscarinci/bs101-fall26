@@ -291,7 +291,7 @@ def _(Arc, BLUE, GREEN, HALF, RED, arrow, blank, definition, math, mo):
     $$
 
     $$
-    \Longrightarrow \quad \frac{\vec{x} \cdot \vec{y}}{\lVert \vec{x} \rVert\, \lVert \vec{y} \rVert} = \frac{1}{2} = \cos\!\left(\frac{\pi}{3}\right)
+    \Longrightarrow \qquad \frac{\vec{x} \cdot \vec{y}}{\lVert \vec{x} \rVert\, \lVert \vec{y} \rVert} = \frac{1}{2} = \cos\!\left(\frac{\pi}{3}\right)
     $$
     """
             ),
@@ -384,7 +384,7 @@ def _(mo, theorem):
             mo.md(
                 r"""
     $$
-    \Longrightarrow \quad \frac{\vec{x} \cdot \vec{y}}{\lVert \vec{x} \rVert\, \lVert \vec{y} \rVert} \in [-1, 1] \qquad \forall\, \vec{x}, \vec{y} \neq \vec{0}
+    \Longrightarrow \qquad \frac{\vec{x} \cdot \vec{y}}{\lVert \vec{x} \rVert\, \lVert \vec{y} \rVert} \in [-1, 1] \qquad \forall\, \vec{x}, \vec{y} \neq \vec{0}
     $$
 
     $\leadsto$ &nbsp; our definition of angles really makes sense!
@@ -409,13 +409,13 @@ def _(mo, theorem):
         $$
 
     $$
-    \Longrightarrow \quad t^2 \lVert \vec{x} \rVert^2 + 2t\, (\vec{x} \cdot \vec{y}) + \lVert \vec{y} \rVert^2 \geq 0
+    \Longrightarrow \qquad t^2 \lVert \vec{x} \rVert^2 + 2t\, (\vec{x} \cdot \vec{y}) + \lVert \vec{y} \rVert^2 \geq 0
     $$
 
     with “$=$” for some $t$ if and only if $\vec{x}, \vec{y}$ are proportional
 
     $$
-    \Longrightarrow \quad \text{discriminant:} \quad \big(2 (\vec{x} \cdot \vec{y})\big)^2 - 4 \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2 \leq 0
+    \Longrightarrow \qquad \text{discriminant:} \quad \big(2 (\vec{x} \cdot \vec{y})\big)^2 - 4 \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2 \leq 0
     $$
 
     with “$=$” if and only if $\vec{x}, \vec{y}$ are proportional. $\square$
@@ -540,7 +540,7 @@ def _(definition, mo, theorem):
     \vec{e}_1 = \begin{bmatrix} 1 \\ 0 \\ \vdots \\ 0 \end{bmatrix}, \quad
     \vec{e}_2 = \begin{bmatrix} 0 \\ 1 \\ \vdots \\ 0 \end{bmatrix}, \quad \dots, \quad
     \vec{e}_n = \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 1 \end{bmatrix}
-    \quad \Longrightarrow \quad \text{pairwise orthogonal}
+    \qquad \Longrightarrow \qquad \text{pairwise orthogonal}
     $$
 
     (a specific example of $n$ pairwise orthogonal vectors; many other examples exist!)

@@ -186,8 +186,11 @@ def _(mo):
     - determinants
 
         $$
-        A = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \quad \Longrightarrow \quad
-        \det A = ad - bc = \text{signed area of parallelogram spanned by } \vec{A}_1 = \begin{bmatrix} a \\ c \end{bmatrix},\ \vec{A}_2 = \begin{bmatrix} b \\ d \end{bmatrix}
+        \begin{aligned}
+        A = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \qquad \Longrightarrow \qquad
+        \det A &= ad - bc \\[4pt]
+        &= \text{signed area of parallelogram spanned by } \vec{A}_1 = \begin{bmatrix} a \\ c \end{bmatrix},\ \vec{A}_2 = \begin{bmatrix} b \\ d \end{bmatrix}
+        \end{aligned}
         $$
 
         $$
@@ -336,7 +339,7 @@ def _(definition, mo):
 
     $$
     \begin{aligned}
-    \leadsto \quad L &= \left\{\, \gamma(t) = \vec{x} + t(\vec{y} - \vec{x}) \;\middle|\; t \in \mathbb{R} \,\right\}
+    \leadsto \qquad L &= \left\{\, \gamma(t) = \vec{x} + t(\vec{y} - \vec{x}) \;\middle|\; t \in \mathbb{R} \,\right\}
     = \left\{\, \tilde{\gamma}(t) = \vec{y} + 2t(\vec{x} - \vec{y}) \;\middle|\; t \in \mathbb{R} \,\right\} \\
     &= \left\{\, \hat{\gamma}(t) = \tfrac{1}{2}(\vec{x} + \vec{y}) + t(\vec{x} - \vec{y}) \;\middle|\; t \in \mathbb{R} \,\right\}
     \end{aligned}
@@ -562,7 +565,7 @@ def _(mo, theorem):
     **Example.** &nbsp; $\vec{u} = \begin{bmatrix} 1 \\ 2 \\ 0 \end{bmatrix}, \quad \vec{v} = \begin{bmatrix} -1 \\ 3 \\ 0 \end{bmatrix}$
 
     $$
-    \leadsto \quad \vec{u} \times \vec{v} = \det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ 1 & 2 & 0 \\ -1 & 3 & 0 \end{bmatrix}
+    \leadsto \qquad \vec{u} \times \vec{v} = \det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ 1 & 2 & 0 \\ -1 & 3 & 0 \end{bmatrix}
     = 0\, \vec{e}_1 + 0\, \vec{e}_2 + \big( 1 \cdot 3 - 2 \cdot (-1) \big)\, \vec{e}_3 = 5\, \vec{e}_3 = \begin{bmatrix} 0 \\ 0 \\ 5 \end{bmatrix}
     $$
 

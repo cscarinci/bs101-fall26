@@ -375,7 +375,7 @@ def _(definition, mo):
     $$
     A = \begin{bmatrix} 2 & 1 \\ 0 & 3 \end{bmatrix}, \quad
     B = \begin{bmatrix} 5 & 0 \\ 1 & 1 \end{bmatrix} \in \mathrm{Mat}(2 \times 2)
-    \quad \Longrightarrow \quad
+    \qquad \Longrightarrow \qquad
     AB = \begin{bmatrix} 11 & 1 \\ 3 & 3 \end{bmatrix} \neq BA = \begin{bmatrix} 10 & 5 \\ 2 & 4 \end{bmatrix}
     $$
 
@@ -384,11 +384,11 @@ def _(definition, mo):
     **Remark.** Matrix multiplication can “transform” vectors into other vectors: $A \in \mathrm{Mat}(m \times n)$ and $\vec{x} \in \mathbb{R}^n \approx \mathrm{Mat}(n \times 1)$
 
     $$
-    \Longrightarrow \quad A\vec{x} \in \mathrm{Mat}(m \times 1) \approx \mathbb{R}^m
+    \Longrightarrow \qquad A\vec{x} \in \mathrm{Mat}(m \times 1) \approx \mathbb{R}^m
     $$
 
     $$
-    \Longrightarrow \quad A : \mathbb{R}^n \longrightarrow \mathbb{R}^m \ \text{ is a function on } \mathbb{R}^n \text{ valued in } \mathbb{R}^m \quad (\text{a multivariable function!})
+    \Longrightarrow \qquad A : \mathbb{R}^n \longrightarrow \mathbb{R}^m \ \text{ is a function on } \mathbb{R}^n \text{ valued in } \mathbb{R}^m \quad (\text{a multivariable function!})
     $$
 
     **Example.**
@@ -399,7 +399,7 @@ def _(definition, mo):
     $$
 
     $$
-    \Longrightarrow \quad A\vec{x} = \begin{bmatrix} 1 + 4 + 9 \\ 4 + 10 + 18 \end{bmatrix} = \begin{bmatrix} 14 \\ 32 \end{bmatrix} \in \mathbb{R}^2 = \mathrm{Mat}(2 \times 1)
+    \Longrightarrow \qquad A\vec{x} = \begin{bmatrix} 1 + 4 + 9 \\ 4 + 10 + 18 \end{bmatrix} = \begin{bmatrix} 14 \\ 32 \end{bmatrix} \in \mathbb{R}^2 = \mathrm{Mat}(2 \times 1)
     $$
 
     $\leadsto$ &nbsp; functions defined by matrix multiplication are always linear! (very special property)

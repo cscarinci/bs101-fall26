@@ -204,7 +204,7 @@ def _(BLUE, FULL, GREEN, RED, arrow, blank, mo, np, vector):
         $$
 
         $$
-        \leadsto \quad \gamma'(a) = \underbrace{\lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a}}_{\text{displacement per unit of time}} = \begin{bmatrix} (\gamma^1)'(a) \\ (\gamma^2)'(a) \end{bmatrix} \qquad (\text{velocity of } \gamma \text{ at time } t = a)
+        \leadsto \qquad \gamma'(a) = \underbrace{\lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a}}_{\text{displacement per unit of time}} = \begin{bmatrix} (\gamma^1)'(a) \\ (\gamma^2)'(a) \end{bmatrix} \qquad (\text{velocity of } \gamma \text{ at time } t = a)
         $$
     """
             ),
@@ -239,13 +239,13 @@ def _(mo):
     This makes sense! But if this limit exists (say equal $m \in \mathbb{R}$)
 
     $$
-    \Longrightarrow \quad f(\vec{x}) \approx f(\vec{a}) + m \lVert \vec{x} - \vec{a} \rVert \quad \text{for } \vec{x} \approx \vec{a} \qquad (\text{too restrictive!})
+    \Longrightarrow \qquad f(\vec{x}) \approx f(\vec{a}) + m \lVert \vec{x} - \vec{a} \rVert \quad \text{for } \vec{x} \approx \vec{a} \qquad (\text{too restrictive!})
     $$
 
     **Example.**
 
     $$
-    f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = x^1 \quad \Longrightarrow \quad
+    f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = x^1 \qquad \Longrightarrow \qquad
     \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a})}{\lVert \vec{x} - \vec{a} \rVert}
     = \lim_{\vec{x} \to \vec{a}} \frac{x^1 - a^1}{\lVert \vec{x} - \vec{a} \rVert} \ \text{ does not exist}
     $$
@@ -303,8 +303,8 @@ def _(BLUE, FULL, RED, arrow, blank, definition, mo):
     provided that the limit exists.
 
     $$
-    \leadsto \quad \frac{\partial f}{\partial x^1}(\vec{a}) = \underbrace{\frac{d}{dt} f(\vec{a} + t\vec{e}_1) \Big|_{t = 0}}_{\text{real single variable differentiation at } t = 0}
-    \qquad \leadsto \quad \underbrace{t \longmapsto f(\vec{a} + t\vec{e}_1)}_{\text{real single variable real valued function!}}
+    \leadsto \qquad \frac{\partial f}{\partial x^1}(\vec{a}) = \underbrace{\frac{d}{dt} f(\vec{a} + t\vec{e}_1) \Big|_{t = 0}}_{\text{real single variable differentiation at } t = 0}
+    \qquad \leadsto \qquad \underbrace{t \longmapsto f(\vec{a} + t\vec{e}_1)}_{\text{real single variable real valued function!}}
     $$
 
     Similarly, the partial derivative of $f$ at $\vec{x} = \vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix}$ in the direction of $\vec{e}_2 = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$ is
@@ -316,7 +316,7 @@ def _(BLUE, FULL, RED, arrow, blank, definition, mo):
     provided that the limit exists.
 
     $$
-    \leadsto \quad \frac{\partial f}{\partial x^2}(\vec{a}) = \frac{d}{ds} f(\vec{a} + s\vec{e}_2) \Big|_{s = 0}
+    \leadsto \qquad \frac{\partial f}{\partial x^2}(\vec{a}) = \frac{d}{ds} f(\vec{a} + s\vec{e}_2) \Big|_{s = 0}
     $$
     """,
                 "Partial derivatives",
@@ -328,7 +328,7 @@ def _(BLUE, FULL, RED, arrow, blank, definition, mo):
 
     $$
     \begin{aligned}
-    \Longrightarrow \quad \frac{\partial}{\partial x^1} f\!\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right)
+    \Longrightarrow \qquad \frac{\partial}{\partial x^1} f\!\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right)
     &= \lim_{t \to 0} \frac{f\!\left( \begin{bmatrix} a^1 + t \\ a^2 + 0 \end{bmatrix} \right) - f\!\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right)}{t}
     = \lim_{t \to 0} \frac{\sin(a^1 + t) - \sin(a^1)}{t} \\[4pt]
     &= \frac{d}{dt} \sin(a^1 + t) \Big|_{t = 0} = \cos(a^1) \\[8pt]
@@ -342,7 +342,7 @@ def _(BLUE, FULL, RED, arrow, blank, definition, mo):
 
     $$
     \begin{aligned}
-    \Longrightarrow \quad \frac{\partial}{\partial x^1} f\!\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right)
+    \Longrightarrow \qquad \frac{\partial}{\partial x^1} f\!\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right)
     &= \lim_{t \to 0} \frac{(a^1 + t)^2 (a^2)^3 - (a^1)^2 (a^2)^3}{t}
     = \lim_{t \to 0} \frac{(a^1 + t)^2 - (a^1)^2}{t}\, (a^2)^3 \\[4pt]
     &= \frac{d}{dt} (a^1 + t)^2 \Big|_{t = 0} \cdot (a^2)^3 = 2 (a^1) \cdot (a^2)^3 \\[8pt]
@@ -501,20 +501,20 @@ def _(definition, mo):
     $\leadsto$ &nbsp; now NOT a limit over real numbers! (Stronger than just existence + linearity of directional derivatives.)
 
     $$
-    \Longrightarrow \quad f(\vec{x}) \approx f(\vec{a}) + \underbrace{Df(\vec{a})(\vec{x} - \vec{a})}_{\text{more flexible than } m \lVert \vec{x} - \vec{a} \rVert} \quad \text{for } \vec{x} \approx \vec{a}
+    \Longrightarrow \qquad f(\vec{x}) \approx f(\vec{a}) + \underbrace{Df(\vec{a})(\vec{x} - \vec{a})}_{\text{more flexible than } m \lVert \vec{x} - \vec{a} \rVert} \quad \text{for } \vec{x} \approx \vec{a}
     $$
 
     **Example.** &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = x^1$
 
     $$
     \begin{aligned}
-    \Longrightarrow \quad Df(\vec{a})(\vec{v}) &= \frac{d}{dt} f(\vec{a} + t\vec{v}) \Big|_{t = 0} = \frac{d}{dt} (a^1 + t v^1) \Big|_{t = 0} = v^1 \\
+    \Longrightarrow \qquad Df(\vec{a})(\vec{v}) &= \frac{d}{dt} f(\vec{a} + t\vec{v}) \Big|_{t = 0} = \frac{d}{dt} (a^1 + t v^1) \Big|_{t = 0} = v^1 \\
     &= v^1 \underbrace{\frac{\partial f}{\partial x^1}(\vec{a})}_{= 1} + v^2 \underbrace{\frac{\partial f}{\partial x^2}(\vec{a})}_{= 0} \qquad \forall\, \vec{v}
     \end{aligned}
     $$
 
     $$
-    \Longrightarrow \quad Df(\vec{a}) = \begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) & \dfrac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix} = \begin{bmatrix} 1 & 0 \end{bmatrix} : \mathbb{R}^2 \longrightarrow \mathbb{R}, \quad \begin{bmatrix} v^1 \\ v^2 \end{bmatrix} \longmapsto v^1 \quad (\text{linear in } \vec{v})
+    \Longrightarrow \qquad Df(\vec{a}) = \begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) & \dfrac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix} = \begin{bmatrix} 1 & 0 \end{bmatrix} : \mathbb{R}^2 \longrightarrow \mathbb{R}, \quad \begin{bmatrix} v^1 \\ v^2 \end{bmatrix} \longmapsto v^1 \quad (\text{linear in } \vec{v})
     $$
 
     For the final limit:
@@ -525,7 +525,7 @@ def _(definition, mo):
     $$
 
     $$
-    \Longrightarrow \quad \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0
+    \Longrightarrow \qquad \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0
     $$
 
     $\Longrightarrow$ &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = x^1$ is differentiable at $\vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \in \mathbb{R}^2$!
