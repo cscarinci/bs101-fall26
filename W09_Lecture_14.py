@@ -198,7 +198,7 @@ def _(mo):
     **Recall:** if $f : \mathbb{R} \longrightarrow \mathbb{R}$ is differentiable and has a local maximum at $x = a$ (or local minimum)
 
     $$
-    \Longrightarrow \quad f'(a) = 0 \qquad \left( \text{tangent line to } \mathrm{graph}(f) \text{ is horizontal at } \begin{bmatrix} a \\ f(a) \end{bmatrix} \right)
+    \Longrightarrow \qquad f'(a) = 0 \qquad \left( \text{tangent line to } \mathrm{graph}(f) \text{ is horizontal at } \begin{bmatrix} a \\ f(a) \end{bmatrix} \right)
     $$
     """)
     return

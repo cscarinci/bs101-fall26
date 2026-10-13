@@ -196,7 +196,7 @@ def _(mo):
     - (3) the map $Df(\vec{a}) : \mathbb{R}^2 \longrightarrow \mathbb{R}$, $\vec{v} \longmapsto Df(\vec{a})(\vec{v})$ is linear
 
         $$
-        \Longrightarrow \quad Df(\vec{a})(\vec{v}) = v^1 \frac{\partial f}{\partial x^1}(\vec{a}) + v^2 \frac{\partial f}{\partial x^2}(\vec{a})
+        \Longrightarrow \qquad Df(\vec{a})(\vec{v}) = v^1 \frac{\partial f}{\partial x^1}(\vec{a}) + v^2 \frac{\partial f}{\partial x^2}(\vec{a})
         = \underbrace{\begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) & \dfrac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix}}_{\text{matrix of partial derivatives}} \begin{bmatrix} v^1 \\ v^2 \end{bmatrix}
         $$
 
@@ -264,7 +264,7 @@ def _(definition, mo, theorem):
 
     $$
     \begin{aligned}
-    \Longrightarrow \quad \lim_{\vec{x} \to \vec{a}} \big( f(\vec{x}) - f(\vec{a}) \big)
+    \Longrightarrow \qquad \lim_{\vec{x} \to \vec{a}} \big( f(\vec{x}) - f(\vec{a}) \big)
     &= \underbrace{\lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert}\, \lVert \vec{x} - \vec{a} \rVert}_{= \,0 \cdot 0}
     {} + \underbrace{\lim_{\vec{x} \to \vec{a}} Df(\vec{a})(\vec{x} - \vec{a})}_{= \,0 \ (\text{linear maps are continuous})} \\
     &= 0 \qquad \square
@@ -316,7 +316,7 @@ def _(definition, mo, theorem):
     $\leadsto$ &nbsp; the previous two theorems give
 
     $$
-    C^1\text{-smooth} \quad \Longrightarrow \quad \text{differentiable} \quad \Longrightarrow \quad \text{continuous}
+    C^1\text{-smooth} \qquad \Longrightarrow \qquad \text{differentiable} \qquad \Longrightarrow \qquad \text{continuous}
     $$
 
     **Example.** Any function $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ given by linear combination of products, quotients and compositions of elementary functions (powers, roots, exponentials, logarithms, trigonometric functions) of $x^i$'s is $C^1$-smooth where the formula and its derivatives are well-defined!
@@ -387,7 +387,7 @@ def _(definition, mo):
     **Example.** &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = \lVert \vec{x} \rVert^2 = (x^1)^2 + (x^2)^2, \quad \vec{a} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$
 
     $$
-    \Longrightarrow \quad Df(\vec{a}) = \begin{bmatrix} 2 & 2 \end{bmatrix} : \mathbb{R}^2 \longrightarrow \mathbb{R}, \qquad
+    \Longrightarrow \qquad Df(\vec{a}) = \begin{bmatrix} 2 & 2 \end{bmatrix} : \mathbb{R}^2 \longrightarrow \mathbb{R}, \qquad
     \begin{bmatrix} v^1 \\ v^2 \end{bmatrix} \longmapsto \begin{bmatrix} 2 & 2 \end{bmatrix} \begin{bmatrix} v^1 \\ v^2 \end{bmatrix} = 2 v^1 + 2 v^2
     $$
 
@@ -466,17 +466,17 @@ def _(BLUE, GREEN, HALF, RED, arrow, blank, cross_axes, math, mo, np, theorem):
     Direction of **steepest descent** (fastest decrease) of $f$ at $\vec{a}$
 
     $$
-    \leadsto \quad -\vec{\nabla} f(\vec{a}) = \begin{bmatrix} -2 a^1 \\ -2 a^2 \end{bmatrix}
+    \leadsto \qquad -\vec{\nabla} f(\vec{a}) = \begin{bmatrix} -2 a^1 \\ -2 a^2 \end{bmatrix}
     $$
 
     Directions with no ascent / descent
 
     $$
-    \leadsto \quad \vec{v} = \begin{bmatrix} v^1 \\ v^2 \end{bmatrix} \ \text{ such that } \ \vec{\nabla} f(\vec{a}) \cdot \vec{v} = 0 \quad \Longleftrightarrow \quad Df(\vec{a})(\vec{v}) = 0
+    \leadsto \qquad \vec{v} = \begin{bmatrix} v^1 \\ v^2 \end{bmatrix} \ \text{ such that } \ \vec{\nabla} f(\vec{a}) \cdot \vec{v} = 0 \qquad \Longleftrightarrow \qquad Df(\vec{a})(\vec{v}) = 0
     $$
 
     $$
-    \vec{\nabla} f(\vec{a}) \cdot \vec{v} = 2 a^1 v^1 + 2 a^2 v^2 = 0 \quad \Longleftrightarrow \quad v^2 = -\frac{a^1}{a^2}\, v^1 \qquad (\text{assuming } a^2 \neq 0)
+    \vec{\nabla} f(\vec{a}) \cdot \vec{v} = 2 a^1 v^1 + 2 a^2 v^2 = 0 \qquad \Longleftrightarrow \qquad v^2 = -\frac{a^1}{a^2}\, v^1 \qquad (\text{assuming } a^2 \neq 0)
     $$
 
     $$
@@ -619,7 +619,7 @@ def _(BLUE, GREEN, GREY, HALF, arrow, blank, definition, mo, np, theorem):
     (the **tangent plane** to $\mathrm{graph}(f)$ at $\begin{bmatrix} a^1 \\ a^2 \\ f(\vec{a}) \end{bmatrix}$)
 
     $$
-    \leadsto \quad \frac{\partial f}{\partial x^1}(\vec{a})\, (x^1 - a^1) + \frac{\partial f}{\partial x^2}(\vec{a})\, (x^2 - a^2) - \big( y - f(\vec{a}) \big) = 0
+    \leadsto \qquad \frac{\partial f}{\partial x^1}(\vec{a})\, (x^1 - a^1) + \frac{\partial f}{\partial x^2}(\vec{a})\, (x^2 - a^2) - \big( y - f(\vec{a}) \big) = 0
     $$
     """,
                 "Tangent plane",

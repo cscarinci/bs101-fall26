@@ -366,7 +366,7 @@ def _(BLUE, FULL, LIGHT, RED, arrow, blank, blob, definition, mo, np):
     $\leadsto$ &nbsp; for every $\varepsilon > 0$, we can find $\delta > 0$ such that $\vec{x} \in B(\vec{a}, \delta) - \{\vec{a}\}$ guarantees that $f(\vec{x}) \in B(\vec{b}, \varepsilon)$
 
     $$
-    \Longleftrightarrow \quad f\big( B(\vec{a}, \delta) - \{\vec{a}\} \big) \subseteq B(\vec{b}, \varepsilon)
+    \Longleftrightarrow \qquad f\big( B(\vec{a}, \delta) - \{\vec{a}\} \big) \subseteq B(\vec{b}, \varepsilon)
     $$
     """
             ),
@@ -394,7 +394,7 @@ def _(BLUE, FULL, LIGHT, RED, arrow, blank, blob, definition, mo, np):
     2. look for $\delta > 0$ such that
 
         $$
-        \underbrace{0 < \lVert \vec{x} - \vec{0} \rVert < \delta}_{\text{whenever } \vec{x} \text{ is } \delta\text{-close to } \vec{a} = \vec{0}} \quad \underbrace{\Longrightarrow}_{\text{we guarantee}} \quad \underbrace{\lvert f(\vec{x}) - 0 \rvert < \varepsilon = 1}_{f(\vec{x}) \text{ is } 1\text{-close to } b = 0}
+        \underbrace{0 < \lVert \vec{x} - \vec{0} \rVert < \delta}_{\text{whenever } \vec{x} \text{ is } \delta\text{-close to } \vec{a} = \vec{0}} \qquad \underbrace{\Longrightarrow}_{\text{we guarantee}} \qquad \underbrace{\lvert f(\vec{x}) - 0 \rvert < \varepsilon = 1}_{f(\vec{x}) \text{ is } 1\text{-close to } b = 0}
         $$
 
         ($1$-close: as close as we want it)
@@ -406,7 +406,7 @@ def _(BLUE, FULL, LIGHT, RED, arrow, blank, blob, definition, mo, np):
     $$
 
     $$
-    \Longrightarrow \quad \lvert f(\vec{x}) - 0 \rvert \leq 2 \lVert \vec{x} \rVert = 2 \lVert \vec{x} - \vec{0} \rVert
+    \Longrightarrow \qquad \lvert f(\vec{x}) - 0 \rvert \leq 2 \lVert \vec{x} \rVert = 2 \lVert \vec{x} - \vec{0} \rVert
     $$
 
     $\Longrightarrow$ &nbsp; whenever we make $0 < \lVert \vec{x} - \vec{0} \rVert < \tfrac{1}{2} = \delta$ (for $\varepsilon = 1$) we guarantee that $\lvert f(\vec{x}) - 0 \rvert < 1$!
@@ -416,7 +416,7 @@ def _(BLUE, FULL, LIGHT, RED, arrow, blank, blob, definition, mo, np):
     $\therefore$ &nbsp; if $0 < \lVert \vec{x} - \vec{0} \rVert < \tfrac{\varepsilon}{2} = \delta$
 
     $$
-    \Longrightarrow \quad \lvert f(\vec{x}) - 0 \rvert \leq 2 \lVert \vec{x} \rVert < 2 \cdot \tfrac{\varepsilon}{2} = \varepsilon \qquad \square
+    \Longrightarrow \qquad \lvert f(\vec{x}) - 0 \rvert \leq 2 \lVert \vec{x} \rVert < 2 \cdot \tfrac{\varepsilon}{2} = \varepsilon \qquad \square
     $$
     """
             ),
@@ -522,7 +522,7 @@ def _(BLUE, FULL, GREY, LIGHT, arrow, blank, blob, mo, np, theorem):
     **Proof.** Given $\vec{b}_1 \neq \vec{b}_2 \in \mathbb{R}^m$ let $\varepsilon = \dfrac{\lVert \vec{b}_2 - \vec{b}_1 \rVert}{2}$
 
     $$
-    \Longrightarrow \quad B(\vec{b}_1, \varepsilon) \cap B(\vec{b}_2, \varepsilon) = \emptyset
+    \Longrightarrow \qquad B(\vec{b}_1, \varepsilon) \cap B(\vec{b}_2, \varepsilon) = \emptyset
     $$
 
     (remember: the sphere is not part of the ball; to be more precise we need to use the triangle inequality)
@@ -541,7 +541,7 @@ def _(BLUE, FULL, GREY, LIGHT, arrow, blank, blob, mo, np, theorem):
 
     $$
     f\big( B(\vec{a}, \delta_2) \setminus \{\vec{a}\} \big) \not\subset B(\vec{b}_2, \varepsilon)
-    \quad \Longrightarrow \quad \lim_{\vec{x} \to \vec{a}} f(\vec{x}) \neq \vec{b}_2 \qquad \square
+    \qquad \Longrightarrow \qquad \lim_{\vec{x} \to \vec{a}} f(\vec{x}) \neq \vec{b}_2 \qquad \square
     $$
 
     **Example.**
@@ -563,7 +563,7 @@ def _(BLUE, FULL, GREY, LIGHT, arrow, blank, blob, mo, np, theorem):
         For any chosen $\varepsilon > 0$
 
         $$
-        0 < \lVert t\vec{e}_1 - \vec{0} \rVert < \delta \quad \Longrightarrow \quad \lVert f(t\vec{e}_1) - 1 \rVert = 0 < \varepsilon
+        0 < \lVert t\vec{e}_1 - \vec{0} \rVert < \delta \qquad \Longrightarrow \qquad \lVert f(t\vec{e}_1) - 1 \rVert = 0 < \varepsilon
         $$
 
         for every $\delta > 0$! (since $f(t\vec{e}_1) = 1$ is constant)
@@ -581,7 +581,7 @@ def _(BLUE, FULL, GREY, LIGHT, arrow, blank, blob, mo, np, theorem):
         For any $\varepsilon > 0$
 
         $$
-        0 < \lVert s\vec{e}_2 - \vec{0} \rVert < \delta \quad \Longrightarrow \quad \lVert f(s\vec{e}_2) - 0 \rVert = 0 < \varepsilon
+        0 < \lVert s\vec{e}_2 - \vec{0} \rVert < \delta \qquad \Longrightarrow \qquad \lVert f(s\vec{e}_2) - 0 \rVert = 0 < \varepsilon
         $$
 
         for every $\delta > 0$!

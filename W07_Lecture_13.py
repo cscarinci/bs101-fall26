@@ -242,7 +242,7 @@ def _(definition, mo, theorem):
     **Remark.** $f$ $C^2$-smooth at $\vec{x} = \vec{a}$ &nbsp; $\Longrightarrow$ &nbsp; $\vec{\nabla} f$ $C^1$-smooth at $\vec{x} = \vec{a}$
 
     $$
-    \leadsto \quad Hf(\vec{a}) = D(\vec{\nabla} f)(\vec{a}) \qquad (\text{Hessian is the derivative of the gradient!})
+    \leadsto \qquad Hf(\vec{a}) = D(\vec{\nabla} f)(\vec{a}) \qquad (\text{Hessian is the derivative of the gradient!})
     $$
     """
             ),
@@ -251,7 +251,7 @@ def _(definition, mo, theorem):
     $f$ $C^2$-smooth at $\vec{x} = \vec{a}$
 
     $$
-    \Longrightarrow \quad \frac{\partial^2 f}{\partial x^j \partial x^i}(\vec{a}) = \frac{\partial^2 f}{\partial x^i \partial x^j}(\vec{a}) \qquad \forall\, i, j = 1, \dots, n
+    \Longrightarrow \qquad \frac{\partial^2 f}{\partial x^j \partial x^i}(\vec{a}) = \frac{\partial^2 f}{\partial x^i \partial x^j}(\vec{a}) \qquad \forall\, i, j = 1, \dots, n
     $$
 
     (order of partial derivative does not matter!)
@@ -265,7 +265,7 @@ def _(definition, mo, theorem):
     $$
     \frac{\partial f}{\partial x^1}(\vec{x}) = e^{x^2}, \qquad \frac{\partial f}{\partial x^2}(\vec{x}) = x^1 e^{x^2}
     \qquad \leadsto \qquad \vec{\nabla} f(\vec{x}) = \begin{bmatrix} e^{x^2} \\ x^1 e^{x^2} \end{bmatrix} \in \mathbb{R}^2
-    \qquad \Longrightarrow \quad \vec{\nabla} f : \mathbb{R}^2 \longrightarrow \mathbb{R}^2
+    \qquad \Longrightarrow \qquad \vec{\nabla} f : \mathbb{R}^2 \longrightarrow \mathbb{R}^2
     $$
 
     $$
@@ -288,7 +288,7 @@ def _(definition, mo, theorem):
     **Recall:** $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ differentiable at $\vec{x} = \vec{a}$
 
     $$
-    \Longrightarrow \quad f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) \qquad \text{affine approximation of } f \text{ at } \vec{a} \quad (\text{1st order Taylor approximation})
+    \Longrightarrow \qquad f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) \qquad \text{affine approximation of } f \text{ at } \vec{a} \quad (\text{1st order Taylor approximation})
     $$
     """
             ),
@@ -371,12 +371,12 @@ def _(mo, theorem):
     **Example.** &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = x^1 e^{x^2}$ at $\vec{a} = \begin{bmatrix} 1 \\ 0 \end{bmatrix}$
 
     $$
-    \leadsto \quad f(\vec{a}) = 1, \qquad Df(\vec{a}) = \begin{bmatrix} 1 & 1 \end{bmatrix}, \qquad Hf(\vec{a}) = \begin{bmatrix} 0 & 1 \\ 1 & 1 \end{bmatrix}
+    \leadsto \qquad f(\vec{a}) = 1, \qquad Df(\vec{a}) = \begin{bmatrix} 1 & 1 \end{bmatrix}, \qquad Hf(\vec{a}) = \begin{bmatrix} 0 & 1 \\ 1 & 1 \end{bmatrix}
     $$
 
     $$
     \begin{aligned}
-    \Longrightarrow \quad g(\vec{x}) &= 1 + \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} x^1 - 1 \\ x^2 - 0 \end{bmatrix} + \frac{1}{2} \begin{bmatrix} x^1 - 1 \\ x^2 - 0 \end{bmatrix} \cdot \begin{bmatrix} 0 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} x^1 - 1 \\ x^2 - 0 \end{bmatrix} \\[4pt]
+    \Longrightarrow \qquad g(\vec{x}) &= 1 + \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} x^1 - 1 \\ x^2 - 0 \end{bmatrix} + \frac{1}{2} \begin{bmatrix} x^1 - 1 \\ x^2 - 0 \end{bmatrix} \cdot \begin{bmatrix} 0 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} x^1 - 1 \\ x^2 - 0 \end{bmatrix} \\[4pt]
     &= 1 + (x^1 - 1) + x^2 + \frac{1}{2} (x^1 - 1) x^2 + \frac{1}{2} x^2 (x^1 - 1 + x^2)
     = 0 + x^1 + x^1 x^2 + \frac{1}{2} (x^2)^2
     \end{aligned}

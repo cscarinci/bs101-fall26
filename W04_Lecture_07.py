@@ -239,7 +239,7 @@ def _(definition, mo):
 
     $$
     \gamma(t) = \vec{x} + t\vec{v} = \begin{bmatrix} x^1 + t v^1 \\ x^2 + t v^2 \end{bmatrix} = \begin{bmatrix} \gamma^1(t) \\ \gamma^2(t) \end{bmatrix}
-    \quad \leadsto \quad
+    \qquad \leadsto \qquad
     \underbrace{\gamma^1(t) = x^1 + t v^1, \quad \gamma^2(t) = x^2 + t v^2}_{\text{pair of affine single variable functions}}
     $$
 
@@ -351,10 +351,10 @@ def _(mo):
 
     $$
     \begin{aligned}
-    \underbrace{(\gamma + \sigma)(t)}_{\text{addition of paths}} &= \underbrace{\gamma(t) + \sigma(t)}_{\text{addition of vectors}} && \leadsto \quad \gamma + \sigma : \mathbb{R} \longrightarrow \mathbb{R}^m \\[26pt]
-    \underbrace{(\lambda \gamma)(t)}_{\substack{\text{multiplication of scalar} \\ \text{function and a path}}} &= \underbrace{\lambda(t)\, \gamma(t)}_{\substack{\text{multiplication of} \\ \text{scalar and vector}}} && \leadsto \quad \lambda \gamma : \mathbb{R} \longrightarrow \mathbb{R}^m \\[26pt]
-    \underbrace{(\gamma \cdot \sigma)(t)}_{\text{dot product of paths}} &= \underbrace{\gamma(t) \cdot \sigma(t)}_{\text{dot product of vectors}} && \leadsto \quad \gamma \cdot \sigma : \mathbb{R} \longrightarrow \mathbb{R} \\[26pt]
-    \underbrace{(\gamma \times \sigma)(t)}_{\text{cross-product of paths in } \mathbb{R}^3} &= \underbrace{\gamma(t) \times \sigma(t)}_{\text{cross-product of vectors in } \mathbb{R}^3} && \leadsto \quad \gamma \times \sigma : \mathbb{R} \longrightarrow \mathbb{R}^3 \quad (\text{if } m = 3) \\[10pt]
+    \underbrace{(\gamma + \sigma)(t)}_{\text{addition of paths}} &= \underbrace{\gamma(t) + \sigma(t)}_{\text{addition of vectors}} && \leadsto \qquad \gamma + \sigma : \mathbb{R} \longrightarrow \mathbb{R}^m \\[26pt]
+    \underbrace{(\lambda \gamma)(t)}_{\substack{\text{multiplication of scalar} \\ \text{function and a path}}} &= \underbrace{\lambda(t)\, \gamma(t)}_{\substack{\text{multiplication of} \\ \text{scalar and vector}}} && \leadsto \qquad \lambda \gamma : \mathbb{R} \longrightarrow \mathbb{R}^m \\[26pt]
+    \underbrace{(\gamma \cdot \sigma)(t)}_{\text{dot product of paths}} &= \underbrace{\gamma(t) \cdot \sigma(t)}_{\text{dot product of vectors}} && \leadsto \qquad \gamma \cdot \sigma : \mathbb{R} \longrightarrow \mathbb{R} \\[26pt]
+    \underbrace{(\gamma \times \sigma)(t)}_{\text{cross-product of paths in } \mathbb{R}^3} &= \underbrace{\gamma(t) \times \sigma(t)}_{\text{cross-product of vectors in } \mathbb{R}^3} && \leadsto \qquad \gamma \times \sigma : \mathbb{R} \longrightarrow \mathbb{R}^3 \quad (\text{if } m = 3) \\[10pt]
     \end{aligned}
     $$
 
@@ -362,10 +362,10 @@ def _(mo):
 
     $$
     \begin{aligned}
-    &\leadsto \quad (\gamma + \sigma)(t) = \begin{bmatrix} \cos(t) + at + b \\ \sin(t) + ct + d \end{bmatrix} \\[4pt]
-    &\leadsto \quad (\gamma \cdot \sigma)(t) = \cos(t)(at + b) + \sin(t)(ct + d) \\[4pt]
-    &\leadsto \quad \lVert \gamma \rVert^2(t) = (\gamma \cdot \gamma)(t) = \cos(t)^2 + \sin(t)^2 = 1 \\[4pt]
-    &\leadsto \quad (\lambda \gamma)(t) = \begin{bmatrix} \cos(t)^2 \\ \cos(t) \sin(t) \end{bmatrix}
+    &\leadsto \qquad (\gamma + \sigma)(t) = \begin{bmatrix} \cos(t) + at + b \\ \sin(t) + ct + d \end{bmatrix} \\[4pt]
+    &\leadsto \qquad (\gamma \cdot \sigma)(t) = \cos(t)(at + b) + \sin(t)(ct + d) \\[4pt]
+    &\leadsto \qquad \lVert \gamma \rVert^2(t) = (\gamma \cdot \gamma)(t) = \cos(t)^2 + \sin(t)^2 = 1 \\[4pt]
+    &\leadsto \qquad (\lambda \gamma)(t) = \begin{bmatrix} \cos(t)^2 \\ \cos(t) \sin(t) \end{bmatrix}
     \end{aligned}
     $$
     """)
@@ -402,7 +402,7 @@ def _(definition, mo, theorem):
     Can we achieve this, by taking $t$ close enough to $a$? &nbsp; $\leadsto$ &nbsp; can we find $\delta > 0$ such that
 
     $$
-    0 < \lvert t - a \rvert < \delta \quad \Longrightarrow \quad \lVert \gamma(t) - \vec{b} \rVert < \varepsilon \ ?
+    0 < \lvert t - a \rvert < \delta \qquad \Longrightarrow \qquad \lVert \gamma(t) - \vec{b} \rVert < \varepsilon \ ?
     $$
 
     Can we do this for every $\varepsilon > 0$? If yes, then $\displaystyle \lim_{t \to a} \gamma(t) = \vec{b}$!
@@ -413,7 +413,7 @@ def _(definition, mo, theorem):
     Limit of paths can be calculated componentwise
 
     $$
-    \lim_{t \to a} \gamma(t) = \vec{b} \quad \Longleftrightarrow \quad \lim_{t \to a} \gamma^i(t) = b^i \quad \forall\, i = 1, 2, \dots, m
+    \lim_{t \to a} \gamma(t) = \vec{b} \qquad \Longleftrightarrow \qquad \lim_{t \to a} \gamma^i(t) = b^i \quad \forall\, i = 1, 2, \dots, m
     $$
     """,
                 "Limits componentwise",
@@ -468,7 +468,7 @@ def _(BLUE, FULL, blank, definition, helix, mo, path_axes, path_projection, theo
     A path is continuous if and only if all of its components are continuous
 
     $$
-    \lim_{t \to a} \gamma(t) = \gamma(a) \quad \Longleftrightarrow \quad \lim_{t \to a} \gamma^i(t) = \gamma^i(a) \quad \forall\, i = 1, 2, \dots, m
+    \lim_{t \to a} \gamma(t) = \gamma(a) \qquad \Longleftrightarrow \qquad \lim_{t \to a} \gamma^i(t) = \gamma^i(a) \quad \forall\, i = 1, 2, \dots, m
     $$
     """,
                 "Continuity componentwise",
@@ -583,7 +583,7 @@ def _(definition, mo, theorem):
     Derivatives of paths can be computed componentwise
 
     $$
-    \gamma'(a) = \vec{v} \quad \Longleftrightarrow \quad \frac{d}{dt} \gamma^i(t) \Big|_{t = a} = v^i \quad \forall\, i = 1, 2, \dots, m
+    \gamma'(a) = \vec{v} \qquad \Longleftrightarrow \qquad \frac{d}{dt} \gamma^i(t) \Big|_{t = a} = v^i \quad \forall\, i = 1, 2, \dots, m
     $$
     """,
                 "Derivatives componentwise",

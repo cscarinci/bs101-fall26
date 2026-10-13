@@ -332,11 +332,11 @@ def _(definition, mo):
     **Example.** &nbsp; $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^2$ affine parameterization, &nbsp; $\gamma(t) = \vec{x} + t\vec{v}$ &nbsp; (with $\vec{v} \neq \vec{0}$)
 
     $$
-    \leadsto \quad \mathrm{Im}(\gamma) = \left\{\, \vec{y} \in \mathbb{R}^2 \;\middle|\; \exists\, t \in \mathbb{R},\ \vec{y} = \gamma(t) \,\right\} \qquad \text{line in } \mathbb{R}^2 \text{ through } \vec{x} \text{ in the direction of } \vec{v}
+    \leadsto \qquad \mathrm{Im}(\gamma) = \left\{\, \vec{y} \in \mathbb{R}^2 \;\middle|\; \exists\, t \in \mathbb{R},\ \vec{y} = \gamma(t) \,\right\} \qquad \text{line in } \mathbb{R}^2 \text{ through } \vec{x} \text{ in the direction of } \vec{v}
     $$
 
     $$
-    \leadsto \quad \mathrm{graph}(\gamma) = \left\{\, (t, \vec{y}) \in \mathbb{R} \times \mathbb{R}^2 \;\middle|\; t \in \mathbb{R},\ \vec{y} = \gamma(t) \,\right\} \qquad \text{subset of } \mathbb{R} \times \mathbb{R}^2 \approx \mathbb{R}^3
+    \leadsto \qquad \mathrm{graph}(\gamma) = \left\{\, (t, \vec{y}) \in \mathbb{R} \times \mathbb{R}^2 \;\middle|\; t \in \mathbb{R},\ \vec{y} = \gamma(t) \,\right\} \qquad \text{subset of } \mathbb{R} \times \mathbb{R}^2 \approx \mathbb{R}^3
     $$
 
     $$
@@ -486,7 +486,7 @@ def _(BLUE, HALF, RED, arrow, blank, definition, mo, np, ortho, ring):
     **Example.** &nbsp; $f : \mathbb{R}^3 \longrightarrow \mathbb{R}, \quad \vec{x} \longmapsto \lVert \vec{x} \rVert$
 
     $$
-    \text{fix } r = 2 \quad \Longrightarrow \quad f^{-1}(2) = \left\{\, \vec{x} \in \mathbb{R}^3 \;\middle|\; \lVert \vec{x} \rVert = 2 \,\right\} = \text{sphere centered at } \vec{0} \text{ with radius } r = 2
+    \text{fix } r = 2 \qquad \Longrightarrow \qquad f^{-1}(2) = \left\{\, \vec{x} \in \mathbb{R}^3 \;\middle|\; \lVert \vec{x} \rVert = 2 \,\right\} = \text{sphere centered at } \vec{0} \text{ with radius } r = 2
     $$
     """
             ),
@@ -644,7 +644,7 @@ def _(definition, mo):
     $p^{-1}(r)$ is a plane in $\mathbb{R}^3$ (if $(a, b, c) \neq (0, 0, 0)$)
 
     $$
-    \leadsto \quad \text{starting point } \begin{bmatrix} (r - d)/a \\ 0 \\ 0 \end{bmatrix} \ (\text{if } a \neq 0), \qquad \text{normal vector } \begin{bmatrix} a \\ b \\ c \end{bmatrix}
+    \leadsto \qquad \text{starting point } \begin{bmatrix} (r - d)/a \\ 0 \\ 0 \end{bmatrix} \ (\text{if } a \neq 0), \qquad \text{normal vector } \begin{bmatrix} a \\ b \\ c \end{bmatrix}
     $$
 
     (if $a = b = c = 0$, then $p^{-1}(r) = \mathbb{R}^3$ when $r = d$, and $\varnothing$ otherwise)
