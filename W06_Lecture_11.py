@@ -249,6 +249,8 @@ def _(BLUE, FULL, GREEN, arrow, blank, cross_axes, math, mo, np, num, phi, table
             mo.md(
                 r"""
     **In this lecture:** affine approximations and their graphs; derivative for general maps $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$
+
+    **References:** MT 2.3
     """
             ),
         ]

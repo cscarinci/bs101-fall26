@@ -241,6 +241,8 @@ def _(BLUE, FULL, Figure, cross_axes, math, mo, np):
     - $\leadsto$ &nbsp; discontinuity is a hole in $\mathrm{graph}(\gamma)$!
 
     **In this lecture:** local properties of scalar functions and maps
+
+    **References:** MT 2.2
     """
             ),
         ]

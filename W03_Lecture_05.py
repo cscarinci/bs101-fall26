@@ -202,6 +202,8 @@ def _(mo):
     - $\leadsto$ &nbsp; need to understand angle between vectors and planes
 
     **In this lecture:** lines and planes in $\mathbb{R}^3$, and the cross-product
+
+    **References:** MT 1.1, 1.3
     """)
     return
 
@@ -228,7 +230,7 @@ def _(BLUE, GREEN, HALF, RED, arrow, blank, definition, mo):
         [
             mo.md(
                 r"""
-    ## I.5 &nbsp; Lines and planes and the cross-product in $\mathbb{R}^3$ (MT 1.3)
+    ## I.5 &nbsp; Lines and planes and the cross-product in $\mathbb{R}^3$
 
     ### Lines
     """

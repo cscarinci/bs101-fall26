@@ -168,6 +168,8 @@ def _(mo):
     - $\leadsto$ &nbsp; allow us to do calculations with vectors the same way as with real numbers!
 
     **In this lecture:** extra structure on $\mathbb{R}^n$ (needed for “measurements”)
+
+    **References:** MT 1.2, 1.5
     """)
     return
 

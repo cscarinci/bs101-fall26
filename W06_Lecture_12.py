@@ -225,7 +225,9 @@ def _(mo, theorem):
     """,
                 "Continuous partial derivatives",
             ),
-            mo.md(r"""**In this lecture:** the chain rule"""),
+            mo.md(r"""**In this lecture:** the chain rule
+
+            **References:** MT 2.5, 2.6""").style({"display": "block"}),
         ]
     )
     return

@@ -227,6 +227,8 @@ def _(mo):
         $$
 
     **In this lecture:** properties and interpretations of differentiable functions
+
+    **References:** MT 2.3, 2.6
     """)
     return
 

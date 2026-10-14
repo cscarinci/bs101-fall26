@@ -190,6 +190,8 @@ def _(mo):
     - $\leadsto$ &nbsp; assuming $f$ differentiable at $\vec{x} \in \mathbb{R}^n$, $g$ differentiable at $\vec{y} = f(\vec{x}) \in \mathbb{R}^m$
 
     **In this lecture:** higher order derivatives
+
+    **References:** MT 3.1, 3.2
     """)
     return
 

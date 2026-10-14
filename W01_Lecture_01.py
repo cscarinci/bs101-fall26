@@ -242,6 +242,8 @@ def _(definition, mo):
                 r"""
     ## I.1 &nbsp; The Cartesian $n$-space
 
+    **References:** MT 1.1, 1.5
+
     ### Points in $n$-space
 
     **Recall:** $\mathbb{R}$ (the line of real numbers) has two algebraic operations
