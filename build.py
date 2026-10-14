@@ -57,12 +57,14 @@ PAGE = """<!doctype html>
   li {{ padding: .15rem 0; }}
   a {{ color: #1b458f; }}
   .none {{ opacity: .55; font-style: italic; }}
+  .license {{ margin-top: 3rem; font-size: .9rem; opacity: .7; }}
 </style></head><body>
 <div class="title">Multivariable Calculus</div>
 <div class="inst">Daegu Gyeongbuk Institute of Science and Technology<br>School of Undergraduate Studies</div>
 <div class="meta"><b>Document</b><span>Lecture notes</span><b>Course</b><span>BS101-04/05</span>
 <b>Lectures</b><span>{count} available</span><b>Instructor</b><span>Professor Scarinci</span></div>
 {parts}
+<p class="license">&copy; 2026 Carlos Scarinci &middot; <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a></p>
 </body></html>
 """
 
