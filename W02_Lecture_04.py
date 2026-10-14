@@ -187,6 +187,8 @@ def _(mo):
     - $\leadsto$ &nbsp; columns of $A$ are the images of the standard basis vectors via $A$!
 
     **In this lecture:** determinants of square matrices: areas, volumes, inverses and orientation
+
+    **References:** MT 1.3, 1.5
     """)
     return
 

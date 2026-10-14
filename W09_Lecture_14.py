@@ -192,6 +192,8 @@ def _(mo):
         with error going to zero faster than $\lVert \vec{x} - \vec{a} \rVert^2$
 
     **In this lecture:** local maxima and minima of scalar valued functions
+
+    **References:** MT 3.3
     """)
     return
 

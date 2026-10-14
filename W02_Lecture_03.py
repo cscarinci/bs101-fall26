@@ -183,7 +183,9 @@ def _(BLUE, GREEN, GREY, HALF, RED, arrow, blank, mo):
     """
             ),
             _fig,
-            mo.md(r"""**In this lecture:** the standard basis as preferred orthogonal frame, matrices, linear transformations and determinants"""),
+            mo.md(r"""**In this lecture:** the standard basis as preferred orthogonal frame, matrices, linear transformations and determinants
+
+            **References:** MT 1.3, 1.5""").style({"display": "block"}),
         ]
     )
     return
@@ -217,7 +219,7 @@ def _(BLUE, GREEN, GREY, HALF, RED, arrow, blank, definition, mo):
         [
             mo.md(
                 r"""
-    ## I.3 &nbsp; Matrices, linear transformations, and determinants (MT 1.2, 1.3)
+    ## I.3 &nbsp; Matrices, linear transformations, and determinants
 
     ### The standard basis
     """

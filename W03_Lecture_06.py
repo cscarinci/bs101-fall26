@@ -225,6 +225,8 @@ def _(mo):
     - $\leadsto$ &nbsp; dot products and cross-products (in $\mathbb{R}^3$): lengths, angles, areas, volumes
 
     **In this lecture:** multivariable functions &nbsp; $\leadsto$ &nbsp; objects of interest in Multivariable Calculus
+
+    **References:** MT 2.1
     """)
     return
 

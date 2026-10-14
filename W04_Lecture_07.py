@@ -200,7 +200,9 @@ def _(mo):
     - multivariable functions $f : A \subseteq \mathbb{R}^n \longrightarrow B \subseteq \mathbb{R}^m$
     - $\leadsto$ &nbsp; global properties (image, graph, level sets)
 
-    **In this lecture:** local properties of paths $\gamma : A \subseteq \mathbb{R} \longrightarrow \mathbb{R}^m$ (MT 2.4): how a function behaves at a point (limits, continuity, differentiability)
+    **In this lecture:** local properties of paths $\gamma : A \subseteq \mathbb{R} \longrightarrow \mathbb{R}^m$: how a function behaves at a point (limits, continuity, differentiability)
+
+    **References:** MT 2.2, 2.4
     """)
     return
 
