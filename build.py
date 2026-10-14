@@ -64,7 +64,7 @@ PAGE = """<!doctype html>
 <div class="meta"><b>Document</b><span>Lecture notes</span><b>Course</b><span>BS101-04/05</span>
 <b>Lectures</b><span>{count} available</span><b>Instructor</b><span>Professor Scarinci</span></div>
 {parts}
-<p class="license">&copy; 2026 Carlos Scarinci &middot; <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a></p>
+<p class="license">&copy; 2026 Carlos Scarinci &middot; <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> &middot; <a href="https://github.com/cscarinci/bs101-fall26">Source</a></p>
 </body></html>
 """
 
