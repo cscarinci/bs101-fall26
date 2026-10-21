@@ -448,7 +448,7 @@ def _(mo):
 
         with error going to zero faster than $\lVert \vec{x} - \vec{a} \rVert^2$
 
-    **Next:** local maxima and minima of scalar valued functions
+    **Next:** local extrema and the second derivative test
     """)
     return
 
