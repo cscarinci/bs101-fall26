@@ -14,8 +14,8 @@ SITE = HERE / "site"
 PARTS = [  # (name, first lecture, last lecture)
     ("I. Euclidean Geometry", 1, 5),
     ("II. Differentiation", 6, 13),
-    ("III. Applications to Optimization", 14, 14),
-    ("IV. Integration of scalar functions", 15, 19),
+    ("III. Applications to Optimization", 14, 15),
+    ("IV. Integration of scalar functions", 16, 19),
     ("V. Vector fields and surfaces", 20, 22),
     ("VI. Integration of vector fields", 23, 28),
 ]
@@ -34,10 +34,11 @@ TITLES = {  # lecture number -> title shown on the index
     11: "Affine approximations and the derivative of general maps",
     12: "The chain rule",
     13: "Higher order derivatives",
-    14: "Local maxima and minima of scalar valued functions",
+    14: "Local extrema and the second derivative test",
+    15: "Global extrema on closed and bounded domains",
 }
 
-DRAFTS = {14}  # lectures kept in the repo but not published
+DRAFTS = set()  # lectures kept in the repo but not published
 
 PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
