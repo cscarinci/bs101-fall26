@@ -164,139 +164,394 @@ def _(arrow, math):
         """Fixed-point number for the readout tables (never prints a negative zero)."""
         return f"{round(v, digits) + 0.0:.{digits}f}"
 
-    return cross_axes, num, tip_label
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return cross_axes, legend_box, num, tip_label
 
 
 @app.cell(hide_code=True)
-def _(math, np):
-    # ---- Drawing helpers of this lecture: graphs of functions on R^2 -----
-    # Orthographic views of R^3 = R^2 x R, with x^1 pointing towards the viewer, x^2 to the right and y up.
-    # A graph is drawn as an opaque surface, back to front; curves keep only the parts that no surface hides.
-    from matplotlib.collections import PolyCollection
+def _(mo, np):
+    # ---- Interactive 3D figures ------------------------------------------
+    # Drawn in the browser on canvases, in the style of the static figures: orthographic views of
+    # R^3 = R^2 x R (x^1 towards the viewer, x^2 to the right, y up), surfaces drawn back to front.
+    # Dragging turns the view at a fixed scale (all panels of a figure together) and a double click restores
+    # it; a figure redrawn by a slider keeps its view. A legend box explains points, curves and surfaces, so
+    # that no label covers the drawing; only the axes carry labels. Typesetting is done by KaTeX.
+    import html as _html
+    import json as _json
 
-    class View:
-        """The view from azimuth `az` and elevation `el` (degrees), with heights y drawn at the scale `ys`."""
+    _PAGE = r"""<!doctype html><html><head><meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="window.typeset && typeset()"></script>
+    <style>
+      html, body { margin: 0; padding: 0; background: transparent; overflow: hidden;
+                   font-family: KaTeX_Main, "Latin Modern Roman", Georgia, serif; }
+      #o { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 16px; }
+      #g { position: relative; flex: 1 1 300px; min-width: 240px; max-width: __MAXW__px; display: grid;
+           grid-template-columns: repeat(__COLS__, minmax(0, 1fr)); gap: 6px 14px; touch-action: none; cursor: grab;
+           user-select: none; -webkit-user-select: none; }
+      @media (max-width: 520px) { #g { grid-template-columns: minmax(0, 1fr); } }
+      #g.drag { cursor: grabbing; }
+      .p { position: relative; }
+      .p canvas { display: block; width: 100%; }
+      .cap { text-align: center; font-size: 14px; }
+      .lab { position: absolute; left: 0; top: 0; white-space: nowrap; line-height: 1.1; pointer-events: none; font-size: 15px; }
+      .katex { font-size: 1em; }
+      #lg { flex: 0 0 auto; border: 1px solid #c8c8c8; border-radius: 4px; padding: 4px 10px; background: #fff; font-size: 14px; }
+      #lg:empty { display: none; }
+      .it { display: flex; align-items: center; gap: 8px; margin: 4px 0; white-space: nowrap; }
+      .it svg { flex: 0 0 24px; }
+      #hint { position: absolute; right: 0; bottom: 0; color: #888; opacity: 0.7; font: 15px Georgia, serif; }
+    </style></head><body>
+    <div id="o"><div id="g" role="img" aria-label="__ALT__"><div id="hint" title="drag to turn the view, double click to restore it">&#10227;</div></div><div id="lg"></div></div>
+    <script>
+    (function () {
+      const S = __SCENE__;
+      const RAD = Math.PI / 180, L = [0.3, -0.4, 0.87];
+      const lit = [247, 251, 255], dark = [201, 223, 244], lit2 = [219, 235, 251], dark2 = [163, 194, 230];
+      const rgb = (a, b, k) => "rgb(" + [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * k)).join(",") + ")";
+      const texs = [];
+      const tex = (el, t) => { el.dataset.tex = t; el.textContent = t.replace(/\\[a-z]+\{?|[{}$^_]/gi, ""); texs.push(el); };
+      const dot3 = (u, p) => u[0] * p[0] + u[1] * p[1] + u[2] * p[2];
 
-        def __init__(self, az=28, el=24, ys=1.0):
-            a, e = math.radians(az), math.radians(el)
-            s = np.array([1.0, 1.0, ys])
-            self.right = np.array([-math.sin(a), math.cos(a), 0.0]) * s
-            self.up = np.array([-math.sin(e) * math.cos(a), -math.sin(e) * math.sin(a), math.cos(e)]) * s
-            self.eye = np.array([math.cos(e) * math.cos(a), math.cos(e) * math.sin(a), math.sin(e)]) * s  # depth of p: p @ eye
-            self.sight = np.array([math.cos(e) * math.cos(a), math.cos(e) * math.sin(a), math.sin(e) / ys])  # towards the viewer
+      class Scene {
+        constructor(spec, host) {
+          const ys = (this.ys = spec.ys);
+          this.box = document.createElement("div");
+          this.box.className = "p";
+          this.cv = document.createElement("canvas");
+          this.box.appendChild(this.cv);
+          this.g = this.cv.getContext("2d");
+          host.appendChild(this.box);
+          if (spec.caption) {
+            const c = document.createElement("div");
+            c.className = "cap";
+            tex(c, spec.caption);
+            this.box.appendChild(c);
+          }
+          const pts = (this.pts = []), quads = (this.quads = []), segs = (this.segs = []);
+          this.dots = []; this.heads = []; this.labs = [];
+          const add = (x, y, z) => (pts.push(x, y, z), pts.length / 3 - 1);
+          for (const s of spec.surfaces) {
+            const base = pts.length / 3, n = s.n, m = s.m, id = (i, j) => base + i * m + j;
+            for (const v of s.v) pts.push(v);
+            const P = (k) => [pts[3 * k], pts[3 * k + 1], pts[3 * k + 2]];
+            const inTint = (x1, x2) => s.tint && x1 > s.tint[0] && x1 <= s.tint[1] && x2 > s.tint[2] && x2 <= s.tint[3];
+            for (let i = 0; i < n - 1; i++) for (let j = 0; j < m - 1; j++) {
+              const q = [id(i, j), id(i + 1, j), id(i + 1, j + 1), id(i, j + 1)];
+              const v = q.map(P);
+              if (v.some((p) => p.some(isNaN))) continue;
+              const deep = inTint((v[0][0] + v[2][0]) / 2, (v[0][1] + v[2][1]) / 2);
+              let col = s.flat;
+              if (!col) {
+                const a = [0, 1, 2].map((t) => v[2][t] - v[0][t]), b = [0, 1, 2].map((t) => v[3][t] - v[1][t]);
+                const nn = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+                const len = Math.hypot(...nn) || 1;
+                const k = Math.min(1, Math.abs((nn[0] * L[0] + nn[1] * L[1] + nn[2] * L[2]) / len) / 1.0034);
+                col = deep ? rgb(dark2, lit2, k) : rgb(dark, lit, k);
+              }
+              quads.push([q, col, deep ? 1 : s.alpha]);
+            }
+            for (const [axis, every, c, lw] of s.wire || []) {
+              const rows = axis === 0 ? n : m, cols = axis === 0 ? m : n;
+              for (let r = 0; r < rows; r++) {
+                if (r % every !== 0 && r !== rows - 1) continue;
+                for (let t = 0; t < cols - 1; t++) {
+                  const a = axis === 0 ? id(r, t) : id(t, r), b = axis === 0 ? id(r, t + 1) : id(t + 1, r);
+                  const pa = P(a), pb = P(b);
+                  if (pa.concat(pb).some(isNaN)) continue;
+                  if (s.clear && inTint((pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2)) continue;
+                  segs.push({ a, b, c, lw, line: null });
+                }
+              }
+            }
+          }
+          this.lines = spec.lines.map((ln) => {
+            const idx = [];
+            for (let k = 0; k < ln.p.length; k += 3) idx.push(add(ln.p[k], ln.p[k + 1], ln.p[k + 2]));
+            const line = { idx, dash: ln.d, cum: new Float64Array(idx.length) };
+            for (let k = 0; k < idx.length - 1; k++)
+              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0 });
+            return line;
+          });
+          for (const d of spec.points) this.dots.push({ i: add(...d.p), c: d.c, r: d.r, h: d.h });
+          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c });
+          // the centre of the scene and the radius of a ball holding it, heights at their drawing scale
+          let src = pts;
+          if (spec.box) {
+            src = [];
+            for (const p of [0, 1]) for (const q of [0, 1]) for (const t of [0, 1]) src.push(spec.box[0][p], spec.box[1][q], spec.box[2][t]);
+          }
+          const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+          for (let k = 0; k < src.length; k++) {
+            const t = k % 3, v = src[k] * (t === 2 ? ys : 1);
+            if (!isNaN(v)) { lo[t] = Math.min(lo[t], v); hi[t] = Math.max(hi[t], v); }
+          }
+          const C = [0, 1, 2].map((t) => (lo[t] + hi[t]) / 2);
+          let R = 0;
+          for (let k = 0; k < src.length; k += 3) {
+            const d = Math.hypot(src[k] - C[0], src[k + 1] - C[1], src[k + 2] * ys - C[2]);
+            if (!isNaN(d)) R = Math.max(R, d);
+          }
+          C[2] /= ys;
+          this.C = C;
+          this.R = R;
+          for (const l of spec.labels) {
+            const el = document.createElement("div");
+            el.className = "lab";
+            el.style.color = l.c;
+            tex(el, l.t);
+            this.box.appendChild(el);
+            this.labs.push({ el, i: add(...l.p), a: l.a * RAD, r: l.r });
+          }
+          const M = pts.length / 3;
+          this.X = new Float64Array(M); this.Y = new Float64Array(M); this.Z = new Float64Array(M);
+        }
 
-        def __call__(self, x1, x2, y):
-            """Picture coordinates of the point(s) (x^1, x^2, y)."""
-            p = np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in (x1, x2, y))), -1)
-            return p @ self.right, p @ self.up
+        size(W, H, R) {
+          this.W = W; this.H = H;
+          this.sc = 0.94 * Math.min(W, H) / (2 * R);
+          const dpr = window.devicePixelRatio || 1;
+          this.cv.width = Math.round(W * dpr);
+          this.cv.height = Math.round(H * dpr);
+          this.cv.style.height = H + "px";
+          this.g.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
 
-    class Graph:
-        """The graph y = f(x^1, x^2) over the part of the plane where inside(x^1, x^2) holds."""
+        draw(az, el) {
+          const { g, pts, X, Y, Z, W, H, sc, ys } = this;
+          if (!W) return;
+          const a = az * RAD, e = el * RAD;
+          const r = [-Math.sin(a), Math.cos(a), 0];
+          const u = [-Math.sin(e) * Math.cos(a), -Math.sin(e) * Math.sin(a), Math.cos(e) * ys];
+          const d = [Math.cos(e) * Math.cos(a), Math.cos(e) * Math.sin(a), Math.sin(e) * ys];
+          const tx = W / 2 - dot3(r, this.C) * sc, ty = H / 2 + dot3(u, this.C) * sc;
+          for (let k = 0; k < X.length; k++) {
+            const x = pts[3 * k], y = pts[3 * k + 1], z = pts[3 * k + 2];
+            X[k] = (x * r[0] + y * r[1] + z * r[2]) * sc + tx;
+            Y[k] = ty - (x * u[0] + y * u[1] + z * u[2]) * sc;
+            Z[k] = x * d[0] + y * d[1] + z * d[2];
+          }
+          for (const ln of this.lines) {  // screen length along each line, so that dashes run on across segments
+            ln.cum[0] = 0;
+            for (let k = 1; k < ln.idx.length; k++) {
+              const p = ln.idx[k - 1], q = ln.idx[k];
+              ln.cum[k] = ln.cum[k - 1] + (isNaN(X[p] + X[q]) ? 0 : Math.hypot(X[q] - X[p], Y[q] - Y[p]));
+            }
+          }
+          const items = [], bias = S.bias;
+          for (const q of this.quads) items.push([(Z[q[0][0]] + Z[q[0][1]] + Z[q[0][2]] + Z[q[0][3]]) / 4, 0, q]);
+          for (const s of this.segs) items.push([(Z[s.a] + Z[s.b]) / 2 + bias + (s.e || 0), 1, s]);
+          for (const h of this.heads) items.push([Z[h.i] + bias, 2, h]);
+          for (const p of this.dots) items.push([Z[p.i] + 2 * bias, 3, p]);
+          items.sort((p, q) => p[0] - q[0]);
+          g.clearRect(0, 0, W, H);
+          g.lineJoin = "round";
+          for (const [, kind, o] of items) {
+            if (kind === 0) {
+              const q = o[0];
+              g.beginPath();
+              g.moveTo(X[q[0]], Y[q[0]]);
+              for (let t = 1; t < 4; t++) g.lineTo(X[q[t]], Y[q[t]]);
+              g.closePath();
+              g.fillStyle = g.strokeStyle = o[1];
+              g.globalAlpha = o[2];
+              g.fill();
+              if (o[2] === 1) { g.lineWidth = 0.6; g.setLineDash([]); g.stroke(); }
+              g.globalAlpha = 1;
+            } else if (kind === 1) {
+              g.beginPath();
+              g.moveTo(X[o.a], Y[o.a]);
+              g.lineTo(X[o.b], Y[o.b]);
+              g.strokeStyle = o.c;
+              g.lineWidth = o.lw;
+              const dash = o.line && o.line.dash;
+              g.lineCap = dash ? "butt" : "round";
+              g.setLineDash(dash || []);
+              g.lineDashOffset = dash ? -o.line.cum[o.k] : 0;
+              g.stroke();
+            } else if (kind === 2) {
+              let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
+              const len = Math.hypot(vx, vy) || 1;
+              vx /= len; vy /= len;
+              const bx = X[o.i] - 9 * vx, by = Y[o.i] - 9 * vy;
+              g.beginPath();
+              g.moveTo(X[o.i], Y[o.i]);
+              g.lineTo(bx - 3.4 * vy, by + 3.4 * vx);
+              g.lineTo(bx + 3.4 * vy, by - 3.4 * vx);
+              g.closePath();
+              g.fillStyle = o.c;
+              g.fill();
+            } else {
+              g.beginPath();
+              g.arc(X[o.i], Y[o.i], o.r, 0, 2 * Math.PI);
+              g.setLineDash([]);
+              g.fillStyle = o.h ? "#fff" : o.c;
+              g.fill();
+              g.strokeStyle = o.h ? o.c : "#fff";
+              g.lineWidth = o.h ? 1.5 : 1;
+              g.stroke();
+            }
+          }
+          for (const l of this.labs) {  // beside its point, on the side given by its direction
+            const c = Math.cos(l.a), s = Math.sin(l.a);
+            const hx = c > 0.35 ? 0 : c < -0.35 ? -100 : -50, vy = s > 0.35 ? -100 : s < -0.35 ? 0 : -50;
+            l.el.style.transform = `translate(${X[l.i] + l.r * c}px, ${Y[l.i] - l.r * s}px) translate(${hx}%, ${vy}%)`;
+          }
+        }
+      }
 
-        def __init__(self, f, inside):
-            self.f, self.inside = f, inside
+      const grid = document.getElementById("g"), out = document.getElementById("o");
+      const scenes = S.panels.map((p) => new Scene(p, grid));
+      const Rmax = Math.max(...scenes.map((s) => s.R));
+      const lg = document.getElementById("lg");
+      for (const e of S.legend) {
+        const it = document.createElement("div"), t = document.createElement("span");
+        it.className = "it";
+        const dash = e.d ? ` stroke-dasharray="${e.d.join(" ")}"` : "";
+        it.innerHTML = {
+          dot: `<svg width="24" height="14"><circle cx="12" cy="7" r="4.2" fill="${e.c}"/></svg>`,
+          ring: `<svg width="24" height="14"><circle cx="12" cy="7" r="3.8" fill="#fff" stroke="${e.c}" stroke-width="1.5"/></svg>`,
+          line: `<svg width="24" height="14"><line x1="1" y1="7" x2="23" y2="7" stroke="${e.c}" stroke-width="${e.w || 2}"${dash}/></svg>`,
+          area: `<svg width="24" height="14"><rect x="2" y="1.5" width="20" height="11" fill="${e.c}" fill-opacity="${e.o || 1}" stroke="${e.e || e.c}" stroke-width="1.2"/></svg>`,
+        }[e.k];
+        tex(t, e.t);
+        it.appendChild(t);
+        lg.appendChild(it);
+      }
 
-        def hides(self, view, p, reach=12.0, steps=480):
-            """For each point of p (shape (N, 3)): does the graph cross the line of sight from it to the viewer?"""
-            s = np.linspace(reach / steps / 8, reach, steps)
-            q = p[:, None, :] + s[:, None] * view.sight
-            x1, x2, y = q[..., 0], q[..., 1], q[..., 2]
-            with np.errstate(all="ignore"):
-                d = np.where(self.inside(x1, x2), y - self.f(x1, x2), np.nan)
-            return np.any(d[:, :-1] * d[:, 1:] < 0, axis=1)
+      // the view, shared by all panels and kept by the page when a slider redraws the figure
+      let store = {};
+      try { store = window.parent.__bs3d || (window.parent.__bs3d = {}); } catch (e) {}
+      let view = S.key && store[S.key] ? { ...store[S.key] } : { az: S.az, el: S.el };
+      const keep = () => { if (S.key) store[S.key] = { ...view }; };
 
-    def surface(ax, view, graph, x1, x2, tint=None, zorder=1):
-        """The graph as an opaque surface through the grid points (x1, x2) (2D arrays), drawn back to front
-        in tones of LIGHT, lit from the upper left; faces where tint(x^1, x^2) holds take deeper tones."""
-        p = np.stack([x1, x2, graph.f(x1, x2)], -1)
-        q = np.stack([p[:-1, :-1], p[1:, :-1], p[1:, 1:], p[:-1, 1:]], 2).reshape(-1, 4, 3)
-        n = np.cross(q[:, 2] - q[:, 0], q[:, 3] - q[:, 1])
-        n = n / (np.linalg.norm(n, axis=1, keepdims=True) + 1e-12)
-        k = np.clip(np.abs(n @ np.array([0.3, -0.4, 0.87])) / 1.0034, 0, 1)[:, None]
-        lit, dark = np.array([0.97, 0.985, 1.0]), np.array([0.79, 0.875, 0.955])
-        if tint is not None:
-            m = q.mean(1)
-            deep = tint(m[:, 0], m[:, 1])[:, None]
-            lit, dark = np.where(deep, [0.86, 0.92, 0.985], lit), np.where(deep, [0.64, 0.76, 0.9], dark)
-        col = dark + (lit - dark) * k
-        order = np.argsort(q.mean(1) @ view.eye)
-        verts = np.stack([q @ view.right, q @ view.up], -1)[order]
-        ax.add_collection(PolyCollection(verts, facecolors=col[order], edgecolors=col[order], linewidths=0.3, zorder=zorder))
+      function fit() {  // square-ish canvases holding their balls, so that the scale never changes while turning
+        for (const s of scenes) {
+          const W = s.box.clientWidth;
+          s.size(W, Math.min(S.h, W), S.shared ? Rmax : s.R);
+        }
+        if (window.frameElement) window.frameElement.style.height = out.offsetHeight + "px";
+      }
+      const draw = () => { for (const s of scenes) s.draw(view.az, view.el); };
+      window.typeset = () => {
+        for (const el of texs) try { katex.render(el.dataset.tex, el, { throwOnError: false }); } catch (e) {}
+        fit();
+        draw();
+      };
 
-    def curve(ax, view, graphs, x1, x2, y, color, lw=1.4, ls="-", back=(0, (3, 3)), zorder=3):
-        """The curve through the points (x1, x2, y): with line style `ls` where no graph hides it, and with
-        `back` where one does (None: left out)."""
-        p = np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in (x1, x2, y))), -1).reshape(-1, 3)
-        hid = np.zeros(len(p), bool)
-        for g in graphs:
-            hid |= g.hides(view, p)
-        X, Y = view(p[:, 0], p[:, 1], p[:, 2])
-        keep = ~hid | np.r_[False, ~hid[:-1]]
-        ax.plot(np.where(keep, X, np.nan), np.where(keep, Y, np.nan), color=color, lw=lw, ls=ls, zorder=zorder, solid_capstyle="round")
-        if back is not None and hid.any():
-            keep = hid | np.r_[False, hid[:-1]]
-            ax.plot(np.where(keep, X, np.nan), np.where(keep, Y, np.nan), color=color, lw=0.75 * lw, ls=back, zorder=zorder)
+      let pending = false;
+      const redraw = () => { if (!pending) { pending = true; requestAnimationFrame(() => { pending = false; draw(); }); } };
+      let grab = null;
+      grid.addEventListener("pointerdown", (e) => { grab = { x: e.clientX, y: e.clientY, ...view }; grid.setPointerCapture(e.pointerId); grid.classList.add("drag"); });
+      grid.addEventListener("pointermove", (e) => {
+        if (!grab) return;
+        view = { az: grab.az - (e.clientX - grab.x) * 0.45, el: Math.max(-89, Math.min(89, grab.el + (e.clientY - grab.y) * 0.45)) };
+        keep();
+        redraw();
+      });
+      const drop = () => { grab = null; grid.classList.remove("drag"); };
+      grid.addEventListener("pointerup", drop);
+      grid.addEventListener("pointercancel", drop);
+      grid.addEventListener("dblclick", () => { view = { az: S.az, el: S.el }; if (S.key) delete store[S.key]; redraw(); });
+      new ResizeObserver(() => { fit(); draw(); }).observe(out);
+      if (window.katex) window.typeset();
+    })();
+    </script></body></html>"""
 
-    def seen(view, graphs, x1, x2, y):
-        """Is the point (x1, x2, y) in sight?"""
-        p = np.array([[x1, x2, y]], dtype=float)
-        return not any(g.hides(view, p)[0] for g in graphs)
+    def _flat(*xyz):
+        return np.round(np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in xyz)), -1).ravel(), 3).tolist()
 
-    return Graph, View, curve, seen, surface
+    def sheet(x1, x2, y, wire=(), tint=None, clear=False, flat=None, alpha=1.0):
+        """A surface through the grid points (x1, x2, y) (2D arrays). `wire` lists grid lines to draw, as
+        (axis, every, colour, width): every `every`-th row (axis 0) or column (axis 1), and the last one.
+        Faces whose centre lies in tint = (x^1 lo, x^1 hi, x^2 lo, x^2 hi) (lo excluded) take deeper tones and
+        stay opaque, without wire there when `clear`; the other faces have the opacity `alpha`.
+        `flat` is one colour instead of the shading."""
+        n, m = np.shape(x1)
+        return {"n": n, "m": m, "v": _flat(x1, x2, y), "wire": [list(t) for t in wire], "tint": tint, "clear": clear, "flat": flat, "alpha": alpha}
+
+    def panel(ys, surfaces=(), lines=(), points=(), axes=(), caption=None, box=None):
+        """One drawing of a 3D figure, with heights at the scale `ys`.
+        lines: (x1, x2, y, colour, width[, dash, depth offset]); points: ((x^1, x^2, y), colour[, radius, hollow]);
+        axes: (tail, tip, TeX label, direction of the label in degrees); caption: TeX below the drawing;
+        box: ((x^1 lo, hi), (x^2 lo, hi), (y lo, hi)) to size the drawing by, instead of its own points."""
+        p = {"ys": ys, "surfaces": list(surfaces), "lines": [], "points": [], "heads": [], "labels": [], "caption": caption, "box": box}
+        for ln in lines:
+            p["lines"].append({"p": _flat(*ln[:3]), "c": ln[3], "w": ln[4], "d": ln[5] if len(ln) > 5 else None, "e": ln[6] if len(ln) > 6 else 0})
+        for tail, tip, label, d in axes:
+            a, b = np.asarray(tail, float), np.asarray(tip, float)
+            seg = a + np.linspace(0, 0.96, 60)[:, None] * (b - a)
+            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000"})
+            p["labels"].append({"p": b.tolist(), "t": label, "c": "#000000", "a": d, "r": 5})
+        for q in points:
+            p["points"].append({"p": [float(c) for c in q[0]], "c": q[1], "r": q[2] if len(q) > 2 else 4.0, "h": bool(q[3]) if len(q) > 3 else False})
+        return p
+
+    def turntable(az, el, alt, panels, legend=(), height=360, width=None, cols=1, key=None, shared=True, bias=0.03):
+        """An interactive 3D figure of one or more `panels` (made by panel(), in `cols` columns), first seen
+        from azimuth `az` and elevation `el` (degrees); each drawing at most `height` pixels high, all together
+        at most `width` wide, with a legend box beside them (below them on narrow screens). `key` names the view
+        so that it survives a redraw; with `shared`, all panels have one scale.
+        legend: (kind, colour, TeX[, line width / edge colour, dash / opacity]) with kind "dot", "ring", "line" or "area"."""
+        scene = {"az": az, "el": el, "h": height, "bias": bias, "panels": list(panels), "legend": [], "key": key, "shared": shared}
+        for e in legend:
+            item = {"k": e[0], "c": e[1], "t": e[2]}
+            if len(e) > 3:
+                item["e" if e[0] == "area" else "w"] = e[3]
+            if len(e) > 4:
+                item["o" if e[0] == "area" else "d"] = e[4]
+            scene["legend"].append(item)
+        page = (_PAGE.replace("__MAXW__", str(width or cols * height + (cols - 1) * 14)).replace("__COLS__", str(cols))
+                .replace("__ALT__", _html.escape(alt)).replace("__SCENE__", _json.dumps(scene, separators=(",", ":"))))
+        return mo.Html(f'<iframe srcdoc="{_html.escape(page)}" title="{_html.escape(alt)}" style="display: block; width: 100%; height: {height}px; border: 0;"></iframe>')
+
+    return panel, sheet, turntable
 
 
 @app.cell(hide_code=True)
-def _(arrow, curve, np, seen, tip_label):
-    def axes3d(ax, view, graphs, ends, labels, dirs, tails=((0, 0, 0),) * 3, lw=0.9):
-        """Coordinate axes from the points `tails` to the points `ends`, with arrow heads where the tips are in
-        sight and the `labels` placed beyond the tips in the picture directions `dirs` (degrees)."""
-        for tail, end, label, d in zip(tails, ends, labels, dirs):
-            a, b = np.asarray(tail, float), np.asarray(end, float)
-            p = a + np.linspace(0, 0.96, 160)[:, None] * (b - a)
-            curve(ax, view, graphs, p[:, 0], p[:, 1], p[:, 2], "black", lw=lw, back=(0, (2, 2)), zorder=4)
-            tip = tuple(float(c) for c in view(*b))
-            if seen(view, graphs, *b):
-                arrow(ax, tuple(float(c) for c in view(*(a + 0.9 * (b - a)))), tip, "black", lw=lw)
-            tip_label(ax, tip, d, label, "black", r=4)
-
-    def frame(ax, view, box):
-        """Picture limits holding the 3D box ((x^1 lo, hi), (x^2 lo, hi), (y lo, hi)), and no frame."""
-        c = np.array(np.meshgrid(*box)).reshape(3, -1)
-        X, Y = view(*c)
-        ax.set_xlim(X.min(), X.max())
-        ax.set_ylim(Y.min(), Y.max())
-        ax.set_aspect("equal")
-        ax.axis("off")
-
-    return axes3d, frame
-
-
-@app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, Graph, View, axes3d, curve, frame, math, mo, np, surface, theorem, tip_label):
+def _(BLUE, GREEN, ORANGE, mo, np, panel, sheet, theorem, turntable):
     def _f(x1, x2):
         return x1**2 * np.exp(-(x1**2)) + x2**2
 
-    _L, _W = 2.6, 0.8
-    _view = View(-70, 36, 1.0)
-    _g = [Graph(_f, lambda x1, x2: (np.abs(x1) <= _L + 1e-9) & (np.abs(x2) <= _W + 1e-9))]
-    _fig = Figure(figsize=(FULL, 3.3), layout="constrained")
-    _ax = _fig.subplots()
-    frame(_ax, _view, ((-2.75, 3.0), (-0.85, 1.1), (-0.05, 1.35)))
-    _u1, _u2 = np.meshgrid(np.linspace(-_L, _L, 105), np.linspace(-_W, _W, 33), indexing="ij")
-    surface(_ax, _view, _g[0], _u1, _u2)
-    _s1, _s2 = np.linspace(-_L, _L, 261), np.linspace(-_W, _W, 81)
-    for _k in np.linspace(-_W, _W, 9):
-        _edge = abs(abs(_k) - _W) < 1e-9
-        curve(_ax, _view, _g, _s1, np.full_like(_s1, _k), _f(_s1, _k), BLUE, lw=1.2 if _edge else 0.5, back=None)
-    curve(_ax, _view, _g, _s1, 0 * _s1, _f(_s1, 0), BLUE, lw=1.6, back=None)
-    for _k in np.linspace(-_L, _L, 14):
-        _edge = abs(abs(_k) - _L) < 1e-9
-        curve(_ax, _view, _g, np.full_like(_s2, _k), _s2, _f(_k, _s2), BLUE, lw=1.2 if _edge else 0.5, back=None)
-    axes3d(_ax, _view, _g, ((3.0, 0, 0), (0, 1.1, 0), (0, 0, 1.3)), ("$x^1$", "$x^2$", "$y$"), (-60, 60, 90), tails=((-2.75, 0, 0), (0, 0, 0), (0, 0, 0)))
-    for _x, _name, _d in ((-1, "saddle", 120), (1, "saddle", 60), (0, "global minimum", -60)):
-        _p = tuple(float(c) for c in _view(_x, 0, _f(_x, 0)))
-        _ax.plot(*_p, "o", color="black", ms=4, zorder=6)
-        tip_label(_ax, _p, _d, _name, "black", r=6, fontsize=12)
+    _L, _W = 2.2, 0.7
+    _u1, _u2 = np.meshgrid(np.linspace(-_L, _L, 89), np.linspace(-_W, _W, 29), indexing="ij")
+    _s1, _s2 = np.linspace(-_L, _L, 177), np.linspace(-_W, _W, 57)
+    _edges = [(_s1, np.full_like(_s1, _k), _f(_s1, _k), BLUE, 1.4) for _k in (-_W, _W)]
+    _edges += [(np.full_like(_s2, _k), _s2, _f(_k, _s2), BLUE, 1.4) for _k in (-_L, _L)]
+    _fig = turntable(
+        -70,
+        42,
+        "graph of f with its two saddle points and its global minimum",
+        [
+            panel(
+                1.0,
+                surfaces=[sheet(_u1, _u2, _f(_u1, _u2), wire=[(0, 8, BLUE, 0.6), (1, 4, BLUE, 0.6)])],
+                lines=_edges + [(_s1, 0 * _s1, _f(_s1, 0), BLUE, 2.0)],
+                points=[((-1, 0, _f(-1, 0)), ORANGE), ((1, 0, _f(1, 0)), ORANGE), ((0, 0, 0), GREEN)],
+                axes=[((-2.35, 0, 0), (2.6, 0, 0), "x^1", -60), ((0, 0, 0), (0, 0.95, 0), "x^2", 60), ((0, 0, 0), (0, 0, 1.15), "y", 90)],
+            )
+        ],
+        legend=[("dot", ORANGE, r"\text{saddle points } \vec{a}, \vec{b}"), ("dot", GREEN, r"\text{global minimum } \vec{0}")],
+        height=460,
+    )
 
     mo.vstack(
         [
@@ -417,80 +672,85 @@ def _(definition, mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREY, Graph, LIGHT, View, axes3d, cross_axes, curve, frame, mo, np, surface, tip_label):
+def _(BLUE, Figure, GREY, HALF, LIGHT, ORANGE, RED, cross_axes, legend_box, mo, np, panel, sheet, turntable):
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
-    _fig = Figure(figsize=(FULL, 3.5), layout="constrained")
-    _left, _right = _fig.subplots(1, 2, width_ratios=[1, 1.35])
-
-    # D = (0, 1] x (0, 1]: the edges on the axes are not in D
-    def _domain(ax, view=None):
-        P = (lambda x1, x2: tuple(float(c) for c in view(x1, x2, 0))) if view else (lambda x1, x2: (x1, x2))
-        sq = [P(0, 0), P(1, 0), P(1, 1), P(0, 1)]
-        ax.fill(*zip(*sq), color=LIGHT, lw=0, zorder=0)
-        ax.plot(*zip(P(1, 0), P(1, 1), P(0, 1)), color=BLUE, lw=1.4, zorder=2)
-        ax.plot(*zip(P(0, 1), P(0, 0), P(1, 0)), color=BLUE, lw=1.4, ls=(0, (3, 2)), zorder=2)
-        for c in ((0, 0), (1, 0), (0, 1)):
-            ax.plot(*P(*c), "o", ms=5, mfc="white", mec=BLUE, mew=1.2, zorder=3)
-        ax.plot(*P(1, 1), "o", ms=5, color=BLUE, zorder=3)
-        return P
-
-    _left.set_xlim(-0.2, 1.45)
-    _left.set_ylim(-0.2, 1.35)
-    _left.set_aspect("equal")
-    _left.axis("off")
-    cross_axes(_left, (-0.15, 1.4), (-0.15, 1.3), "$x^1$", "$x^2$")
-    _domain(_left)
+    _fig = Figure(figsize=(HALF, 3.6), layout="constrained")
+    _ax = _fig.subplots()
+    _ax.set_xlim(-0.2, 1.45)
+    _ax.set_ylim(-0.2, 1.35)
+    _ax.set_aspect("equal")
+    _ax.axis("off")
+    cross_axes(_ax, (-0.15, 1.4), (-0.15, 1.3), "$x^1$", "$x^2$")
+    # D = (0, 1] x (0, 1]: the edges on the axes are not in D (a white band lifts them off the axes)
+    _ax.fill([0, 1, 1, 0], [0, 0, 1, 1], color=LIGHT, lw=0, zorder=0)
+    _ax.plot([1, 1, 0], [0, 1, 1], color=BLUE, lw=1.4, zorder=4)
+    _ax.plot([0, 0, 1], [1, 0, 0], color="white", lw=4, zorder=4)
+    _ax.plot([0, 0, 1], [1, 0, 0], color=BLUE, lw=1.4, ls=(0, (3, 2)), zorder=5)
+    for _c in ((0, 0), (1, 0), (0, 1)):
+        _ax.plot(*_c, "o", ms=5, mfc="white", mec=BLUE, mew=1.2, zorder=6)
+    _ax.plot(1, 1, "o", ms=5, color=BLUE, zorder=6)
     _a = (0.55, 0.75)
-    _left.plot([0, _a[0] / _a[1]], [0, 1], color=GREY, lw=0.9, ls=(0, (4, 3)), zorder=1)
-    _left.plot(*_a, "o", color="black", ms=4, zorder=4)
-    _left.plot(_a[0] / 2, _a[1] / 2, "o", color="black", ms=4, zorder=4)
-    tip_label(_left, _a, 0, r"$\vec{a}$", "black")
-    tip_label(_left, (_a[0] / 2, _a[1] / 2), 0, r"$\vec{x}$", "black")
-    tip_label(_left, (1, 0.5), 0, "$D$", BLUE)
-    _left.text(1, -0.05, "$1$", ha="center", va="top", fontsize=12, bbox=_box)
-    _left.text(-0.05, 1, "$1$", ha="right", va="center", fontsize=12, bbox=_box)
+    _ax.plot([0, _a[0] / _a[1]], [0, 1], color=GREY, lw=0.9, ls=(0, (4, 3)), zorder=1)
+    _ax.plot(*_a, "o", color=RED, ms=5, zorder=6)
+    _ax.plot(_a[0] / 2, _a[1] / 2, "o", color=ORANGE, ms=5, zorder=6)
+    _ax.text(1, -0.05, "$1$", ha="center", va="top", fontsize=12, bbox=_box)
+    _ax.text(-0.05, 1, "$1$", ha="right", va="center", fontsize=12, bbox=_box)
+    legend_box(_fig, [("area", LIGHT, "$D$", BLUE), ("dot", RED, r"$\vec{a}$"), ("dot", ORANGE, r"$\vec{x}$")], loc="outside lower center", ncols=3)
 
-    # graph(f) over the disc of radius 3/2, with graph(g) above D in a deeper tone
+    # graph(f) over a disc, faint, with graph(g) above D
     def _f(x1, x2):
         return x1**2 + x2**2
 
-    def _inD(x1, x2):
-        return (x1 > 0) & (x1 <= 1) & (x2 > 0) & (x2 <= 1)
-
     _R = 1.5
-    _view = View(45, 14, 0.55)
-    _g = [Graph(_f, lambda x1, x2: x1**2 + x2**2 <= _R**2 + 1e-9)]
-    frame(_right, _view, ((-1.55, 1.95), (-1.55, 1.95), (-0.1, 2.6)))
-    _P = _domain(_right, _view)
-    _r, _p = np.meshgrid(np.linspace(0, _R, 31), np.linspace(0, 2 * np.pi, 145), indexing="ij")
-    surface(_right, _view, _g[0], _r * np.cos(_p), _r * np.sin(_p), tint=_inD)
-    for _k in np.arange(-1.5, 1.51, 0.25):
-        _h = np.sqrt(max(_R**2 - _k**2, 0.0))
-        _w = np.linspace(-_h, _h, 161)
-        for _c1, _c2 in ((np.full_like(_w, _k), _w), (_w, np.full_like(_w, _k))):
-            _in = _inD(_c1, _c2)
-            curve(_right, _view, _g, np.where(_in, np.nan, _c1), _c2, _f(_c1, _c2), GREY, lw=0.4, back=None)
-            curve(_right, _view, _g, np.where(_in, _c1, np.nan), _c2, _f(_c1, _c2), BLUE, lw=0.6, back=None)
+    _r, _p = np.meshgrid(np.linspace(0, _R, 25), np.linspace(0, 2 * np.pi, 97), indexing="ij")
+    _b1, _b2 = np.meshgrid(np.linspace(0, 1, 11), np.linspace(0, 1, 11), indexing="ij")
+    _s = np.linspace(0, 1, 41)
+    _z, _o = 0 * _s, 1 + 0 * _s
     _phi = np.linspace(0, 2 * np.pi, 241)
-    curve(_right, _view, _g, _R * np.cos(_phi), _R * np.sin(_phi), np.full_like(_phi, _R**2), GREY, lw=1.0, back=None)
-    _s = np.linspace(0, 1, 81)
-    _one = np.ones_like(_s)
-    curve(_right, _view, _g, _one, _s, _f(1, _s), BLUE, lw=1.4)
-    curve(_right, _view, _g, _s, _one, _f(_s, 1), BLUE, lw=1.4)
-    curve(_right, _view, _g, 0 * _s, _s, _f(0, _s), BLUE, lw=1.4, ls=(0, (3, 2)))
-    curve(_right, _view, _g, _s, 0 * _s, _f(_s, 0), BLUE, lw=1.4, ls=(0, (3, 2)))
-    axes3d(_right, _view, _g, ((1.95, 0, 0), (0, 1.95, 0), (0, 0, 2.6)), ("$x^1$", "$x^2$", "$y$"), (-150, -30, 90))
-    _top = tuple(float(c) for c in _view(1, 1, 2))
-    _right.plot(*_top, "o", color="black", ms=4, zorder=6)
-    _right.annotate(r"$g\left(\genfrac{[}{]}{0}{0}{1}{1}\right) = 2$", _top, xytext=(78, 12), textcoords="offset points", fontsize=12, ha="left", va="center", arrowprops={"arrowstyle": "-", "color": GREY, "lw": 0.7, "shrinkB": 4}, bbox=_box, zorder=6)
-    _right.plot(*_view(0, 0, 0), "o", ms=5, mfc="white", mec=BLUE, mew=1.2, zorder=6)
-    tip_label(_right, tuple(float(c) for c in _view(1.06, -1.06, 2.25)), 180, r"$y = f(\vec{x})$", GREY, r=4, fontsize=12)
-    tip_label(_right, tuple(float(c) for c in _view(1, 0.25, 1.06)), -160, r"$y = g(\vec{x})$", BLUE, r=8, fontsize=12)
-    tip_label(_right, _P(1, 0.5), -90, "$D$", BLUE, r=6, fontsize=12)
+    _dash, _faint = [4, 3], "#c4c4c4"
+    _lines = [(_R * np.cos(_phi), _R * np.sin(_phi), _R**2 + 0 * _phi, _faint, 1.0)]
+    for _k in (0.25, 0.5, 0.75):
+        _lines += [(_k + _z, _s, _f(_k, _s), BLUE, 0.8), (_s, _k + _z, _f(_s, _k), BLUE, 0.8)]
+    _lines += [(_o, _s, _f(1, _s), BLUE, 1.6), (_s, _o, _f(_s, 1), BLUE, 1.6)]
+    _lines += [(_z, _s, _f(0, _s), BLUE, 1.6, _dash), (_s, _z, _f(_s, 0), BLUE, 1.6, _dash)]
+    # D in the plane: its edges on the axes dashed, on white bands drawn over the axes
+    _lines += [(_o, _s, _z, BLUE, 1.6), (_s, _o, _z, BLUE, 1.6)]
+    _lines += [(_z, _s, _z, "#ffffff", 4.5, None, 0.01), (_s, _z, _z, "#ffffff", 4.5, None, 0.01)]
+    _lines += [(_z, _s, _z, BLUE, 1.6, _dash, 0.02), (_s, _z, _z, BLUE, 1.6, _dash, 0.02)]
+    _open = [(0, 0, 0), (1, 0, 0), (0, 1, 0), (1, 0, 1), (0, 1, 1)]
+    _graph = turntable(
+        45,
+        14,
+        "graph of g over D, with the graph of f over the plane in a faint tone, and the global maximum of g",
+        [
+            panel(
+                0.55,
+                surfaces=[
+                    sheet(_r * np.cos(_p), _r * np.sin(_p), _f(_r * np.cos(_p), _r * np.sin(_p)), wire=[(0, 4, _faint, 0.5), (1, 8, _faint, 0.5)], tint=(0, 1, 0, 1), clear=True, alpha=0.3),
+                    sheet(_b1, _b2, 0 * _b1, flat=LIGHT),
+                ],
+                lines=_lines,
+                points=[(_q, BLUE, 3.6, True) for _q in _open] + [((1, 1, 0), BLUE, 3.6), ((1, 1, 2), RED)],
+                axes=[((0, 0, 0), (1.75, 0, 0), "x^1", -150), ((0, 0, 0), (0, 1.75, 0), "x^2", -30), ((0, 0, 0), (0, 0, 2.6), "y", 90)],
+            )
+        ],
+        legend=[
+            ("area", "#a9c3e6", r"y = g(\vec{x}), \ \vec{x} \in D", BLUE),
+            ("area", LIGHT, r"y = f(\vec{x}), \ \vec{x} \in \mathbb{R}^2", _faint, 0.35),
+            ("area", LIGHT, "D", BLUE),
+            ("dot", RED, r"\text{global maximum: } g\left( \begin{bmatrix} 1 \\ 1 \end{bmatrix} \right) = 2"),
+            ("ring", BLUE, r"\text{points left out}"),
+        ],
+        height=380,
+    )
 
     mo.vstack(
         [
-            _fig,
+            mo.Html(
+                '<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem;">'
+                f'<div style="flex: 1 1 240px; min-width: 220px;">{mo.as_html(_fig).text}</div>'
+                f'<div style="flex: 1.45 1 300px; min-width: 260px;">{_graph.text}</div></div>'
+            ),
             mo.md(
                 r"""
     Starting from any $\vec{a} \in D$,
@@ -511,41 +771,43 @@ def _(BLUE, FULL, Figure, GREY, Graph, LIGHT, View, axes3d, cross_axes, curve, f
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, LIGHT, RED, cross_axes, definition, mo, np, tip_label):
+def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, legend_box, mo, np):
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
-    _fig = Figure(figsize=(FULL, 3.0), layout="constrained")
-    _left, _right = _fig.subplots(1, 2)
     _th = np.linspace(0, 2 * np.pi, 241)
-    for _ax in (_left, _right):
-        _ax.set_xlim(-2.3, 2.3)
-        _ax.set_ylim(-1.6, 2.0)
-        _ax.set_aspect("equal")
-        _ax.axis("off")
 
-    # bounded: the rectangle 0 <= x^1 <= a, 0 <= x^2 <= b inside B(0, r)
+    def _panel():
+        fig = Figure(figsize=(HALF + 1.6, 2.75), layout="constrained")
+        ax = fig.subplots()
+        ax.set_xlim(-2.3, 2.3)
+        ax.set_ylim(-1.6, 2.0)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        return fig, ax
+
+    # the rectangle 0 <= x^1 <= a, 0 <= x^2 <= b inside B(0, r)
     _a, _b, _r = 1.2, 0.8, 1.55
-    _left.fill(_r * np.cos(_th), _r * np.sin(_th), color=RED, alpha=0.06, lw=0)
-    _left.plot(_r * np.cos(_th), _r * np.sin(_th), color=RED, lw=1.2)
-    _left.fill([0, _a, _a, 0], [0, 0, _b, _b], color=LIGHT, lw=0)
-    _left.plot([0, _a, _a, 0, 0], [0, 0, _b, _b, 0], color=BLUE, lw=1.4)
-    cross_axes(_left, (-2.0, 2.2), (-1.5, 1.95), "$x^1$", "$x^2$")
-    _left.text(_a, -0.06, "$a$", ha="center", va="top", fontsize=12, bbox=_box)
-    _left.text(-0.06, _b, "$b$", ha="right", va="center", fontsize=12, bbox=_box)
-    _left.text(_a / 2, _b / 2, "$D$", color=BLUE, ha="center", va="center", fontsize=13)
-    tip_label(_left, (_r * np.cos(-0.6), _r * np.sin(-0.6)), -30, r"$B(\vec{0}, r)$, $r^2 > a^2 + b^2$", RED, r=4, fontsize=12)
+    _bounded, _ax = _panel()
+    _ax.fill(_r * np.cos(_th), _r * np.sin(_th), color=RED, alpha=0.06, lw=0)
+    _ax.plot(_r * np.cos(_th), _r * np.sin(_th), color=RED, lw=1.2)
+    _ax.fill([0, _a, _a, 0], [0, 0, _b, _b], color=LIGHT, lw=0)
+    _ax.plot([0, _a, _a, 0, 0], [0, 0, _b, _b, 0], color=BLUE, lw=1.4)
+    cross_axes(_ax, (-2.0, 2.2), (-1.5, 1.95), "$x^1$", "$x^2$")
+    _ax.text(_a, -0.06, "$a$", ha="center", va="top", fontsize=12, bbox=_box)
+    _ax.text(-0.06, _b, "$b$", ha="right", va="center", fontsize=12, bbox=_box)
+    legend_box(_bounded, [("area", LIGHT, "$D$", BLUE), ("line", RED, r"$B(\vec{0}, r)$")])
 
-    # unbounded: the strip a <= x^2 <= b leaves every ball
+    # the strip a <= x^2 <= b leaves every ball
     _a, _b, _r = 0.4, 1.0, 1.3
-    _right.fill([-2.3, 2.3, 2.3, -2.3], [_a, _a, _b, _b], color=LIGHT, lw=0)
+    _unbounded, _ax = _panel()
+    _ax.fill([-2.3, 2.3, 2.3, -2.3], [_a, _a, _b, _b], color=LIGHT, lw=0)
     for _h in (_a, _b):
-        _right.plot([-2.3, 2.3], [_h, _h], color=BLUE, lw=1.4)
-    _right.fill(_r * np.cos(_th), _r * np.sin(_th), color=RED, alpha=0.06, lw=0)
-    _right.plot(_r * np.cos(_th), _r * np.sin(_th), color=RED, lw=1.2)
-    cross_axes(_right, (-2.25, 2.25), (-1.5, 1.95), "$x^1$", "$x^2$")
-    _right.text(-0.06, _a, "$a$", ha="right", va="top", fontsize=12, bbox=_box)
-    _right.text(-0.06, _b, "$b$", ha="right", va="bottom", fontsize=12, bbox=_box)
-    _right.text(1.8, (_a + _b) / 2, "$D$", color=BLUE, ha="center", va="center", fontsize=13)
-    tip_label(_right, (_r * np.cos(-0.6), _r * np.sin(-0.6)), -30, r"$B(\vec{0}, r)$", RED, r=4, fontsize=12)
+        _ax.plot([-2.3, 2.3], [_h, _h], color=BLUE, lw=1.4)
+    _ax.fill(_r * np.cos(_th), _r * np.sin(_th), color=RED, alpha=0.06, lw=0)
+    _ax.plot(_r * np.cos(_th), _r * np.sin(_th), color=RED, lw=1.2)
+    cross_axes(_ax, (-2.25, 2.25), (-1.5, 1.95), "$x^1$", "$x^2$")
+    _ax.text(-0.06, _a, "$a$", ha="right", va="top", fontsize=12, bbox=_box)
+    _ax.text(-0.06, _b, "$b$", ha="right", va="bottom", fontsize=12, bbox=_box)
+    legend_box(_unbounded, [("area", LIGHT, "$D$", BLUE), ("line", RED, r"$B(\vec{0}, r)$")])
 
     mo.vstack(
         [
@@ -561,16 +823,10 @@ def _(BLUE, FULL, Figure, LIGHT, RED, cross_axes, definition, mo, np, tip_label)
     """,
                 "Bounded and unbounded sets",
             ),
-            mo.md(
-                r"""
-    $$
-    D = \left\{\, 0 \leq x^1 \leq a,\ 0 \leq x^2 \leq b \,\right\} \ \text{ is bounded},
-    \qquad \qquad
-    D = \left\{\, -\infty < x^1 < +\infty,\ a \leq x^2 \leq b \,\right\} \ \text{ is unbounded}
-    $$
-    """
-            ),
-            _fig,
+            mo.md(r"""$D = \left\{\, 0 \leq x^1 \leq a,\ 0 \leq x^2 \leq b \,\right\}$ is bounded: &nbsp; $B(\vec{0}, r) \supseteq D$ for $r^2 > a^2 + b^2$"""),
+            _bounded,
+            mo.md(r"""$D = \left\{\, -\infty < x^1 < +\infty,\ a \leq x^2 \leq b \,\right\}$ is unbounded"""),
+            _unbounded,
         ]
     )
     return
@@ -618,7 +874,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, HALF, LIGHT, RED, bp1, bp2, br, cross_axes, math, mo, np, table, tip_label):
+def _(BLUE, Figure, HALF, LIGHT, RED, bp1, bp2, br, cross_axes, legend_box, math, mo, np, table):
     _p = (round(bp1.value, 10) + 0.0, round(bp2.value, 10) + 0.0)
     _r = round(br.value, 10)
     _eps = 1e-9
@@ -637,7 +893,7 @@ def _(BLUE, Figure, GREEN, HALF, LIGHT, RED, bp1, bp2, br, cross_axes, math, mo,
     def _yes(b):
         return "yes" if b else "no"
 
-    _fig = Figure(figsize=(HALF + 1.2, HALF + 0.4), layout="constrained")
+    _fig = Figure(figsize=(HALF + 2.2, HALF + 0.4), layout="constrained")
     _ax = _fig.subplots()
     _ax.set_xlim(-0.6, 1.75)
     _ax.set_ylim(-0.6, 1.6)
@@ -645,17 +901,14 @@ def _(BLUE, Figure, GREEN, HALF, LIGHT, RED, bp1, bp2, br, cross_axes, math, mo,
     _ax.axis("off")
     _th = np.linspace(0, np.pi / 2, 120)
     _ax.fill(np.r_[0, np.cos(_th)], np.r_[0, np.sin(_th)], color=LIGHT, lw=0, zorder=0)
-    _ax.plot(np.r_[0, np.cos(_th), 0], np.r_[0, np.sin(_th), 0], color=GREEN, lw=2.0, ls=(0, (4, 2)), zorder=2)
     cross_axes(_ax, (-0.55, 1.7), (-0.55, 1.55), "$x^1$", "$x^2$")
+    _ax.plot(np.r_[0, np.cos(_th), 0], np.r_[0, np.sin(_th), 0], color="white", lw=4, zorder=4)
+    _ax.plot(np.r_[0, np.cos(_th), 0], np.r_[0, np.sin(_th), 0], color=BLUE, lw=1.6, ls=(0, (4, 2)), zorder=5)
     _c = np.linspace(0, 2 * np.pi, 200)
-    _ax.fill(_p[0] + _r * np.cos(_c), _p[1] + _r * np.sin(_c), color=RED, alpha=0.12, lw=0, zorder=3)
-    _ax.plot(_p[0] + _r * np.cos(_c), _p[1] + _r * np.sin(_c), color=RED, lw=1.2, zorder=3)
-    _ax.plot(*_p, "o", color="black", ms=4, zorder=5)
-    tip_label(_ax, (_p[0] + _r * 0.71, _p[1] - _r * 0.71), -45, r"$B(\vec{p}, r)$", RED, r=3, fontsize=12)
-    _lab = (_p[0] + 0.71 * _r + 0.15, _p[1] - 0.71 * _r - 0.05)  # about where the label of the ball sits
-    _spot = max(((0.3, 0.25), (0.65, 0.2), (0.2, 0.65)), key=lambda c: min(math.hypot(c[0] - _p[0], c[1] - _p[1]) - _r, math.hypot(c[0] - _lab[0], c[1] - _lab[1])))
-    tip_label(_ax, _spot, 0, "$D$", BLUE, r=0)
-    tip_label(_ax, (0.92, 0.92), 45, r"$\mathrm{Bd}(D)$", GREEN, r=8, fontsize=12)
+    _ax.fill(_p[0] + _r * np.cos(_c), _p[1] + _r * np.sin(_c), color=RED, alpha=0.12, lw=0, zorder=6)
+    _ax.plot(_p[0] + _r * np.cos(_c), _p[1] + _r * np.sin(_c), color=RED, lw=1.2, zorder=6)
+    _ax.plot(*_p, "o", color="black", ms=4, zorder=7)
+    legend_box(_fig, [("area", LIGHT, "$D$", BLUE), ("line", BLUE, r"$\mathrm{Bd}(D)$", (0, (4, 2))), ("area", (0.70, 0.15, 0.12, 0.15), r"$B(\vec{p}, r)$", RED), ("dot", "black", r"$\vec{p}$")])
 
     mo.vstack(
         [
@@ -666,7 +919,7 @@ def _(BLUE, Figure, GREEN, HALF, LIGHT, RED, bp1, bp2, br, cross_axes, math, mo,
                     (r"$\textcolor{" + RED + r"}{B(\vec{p}, r)}$ contains points in $D$", _yes(_meets_D)),
                     (r"$\textcolor{" + RED + r"}{B(\vec{p}, r)}$ contains points not in $D$", _yes(_meets_out)),
                     (r"$\vec{p} \in D$", _yes(_in_D)),
-                    (r"$\vec{p} \in \textcolor{" + GREEN + r"}{\mathrm{Bd}(D)}$", _yes(_on_Bd)),
+                    (r"$\vec{p} \in \textcolor{" + BLUE + r"}{\mathrm{Bd}(D)}$", _yes(_on_Bd)),
                 ]
             ),
             _fig,
@@ -676,34 +929,40 @@ def _(BLUE, Figure, GREEN, HALF, LIGHT, RED, bp1, bp2, br, cross_axes, math, mo,
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, LIGHT, RED, cross_axes, definition, mo, np, tip_label):
+def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, legend_box, mo, np):
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
     _a, _b, _c, _d = 0.5, 1.7, 0.45, 1.3
-    _fig = Figure(figsize=(FULL, 2.6), layout="constrained")
-    _left, _right = _fig.subplots(1, 2)
-    for _ax, _closed in ((_left, False), (_right, True)):
-        _ax.set_xlim(-0.3, 2.3)
-        _ax.set_ylim(-0.3, 1.65)
-        _ax.set_aspect("equal")
-        _ax.axis("off")
-        cross_axes(_ax, (-0.2, 2.25), (-0.2, 1.6), "$x^1$", "$x^2$")
-        _ax.fill([_a, _b, _b, _a], [_c, _c, _d, _d], color=LIGHT, lw=0)
-        _ax.plot([_a, _b, _b, _a, _a], [_c, _c, _d, _d, _c], color=BLUE, lw=1.4, ls="-" if _closed else (0, (3, 2)))
-        for _x in (_a, _b):
-            for _y in (_c, _d):
-                if _closed:
-                    _ax.plot(_x, _y, "o", ms=5, color=BLUE, zorder=3)
+
+    def _panel(closed):
+        fig = Figure(figsize=(HALF + 2.0, 2.3), layout="constrained")
+        ax = fig.subplots()
+        ax.set_xlim(-0.3, 2.3)
+        ax.set_ylim(-0.3, 1.65)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        cross_axes(ax, (-0.2, 2.25), (-0.2, 1.6), "$x^1$", "$x^2$")
+        ax.fill([_a, _b, _b, _a], [_c, _c, _d, _d], color=LIGHT, lw=0)
+        ax.plot([_a, _b, _b, _a, _a], [_c, _c, _d, _d, _c], color=BLUE, lw=1.4, ls="-" if closed else (0, (3, 2)))
+        for x in (_a, _b):
+            for y in (_c, _d):
+                if closed:
+                    ax.plot(x, y, "o", ms=5, color=BLUE, zorder=3)
                 else:
-                    _ax.plot(_x, _y, "o", ms=5, mfc="white", mec=BLUE, mew=1.2, zorder=3)
-        for _x, _name in ((_a, "$a$"), (_b, "$b$")):
-            _ax.text(_x, -0.05, _name, ha="center", va="top", fontsize=12, bbox=_box)
-        for _y, _name in ((_c, "$c$"), (_d, "$d$")):
-            _ax.text(-0.05, _y, _name, ha="right", va="center", fontsize=12, bbox=_box)
-        _ax.text((_a + _b) / 2, (_c + _d) / 2, "$D$", color=BLUE, ha="center", va="center", fontsize=13)
+                    ax.plot(x, y, "o", ms=5, mfc="white", mec=BLUE, mew=1.2, zorder=3)
+        for x, name in ((_a, "$a$"), (_b, "$b$")):
+            ax.text(x, -0.05, name, ha="center", va="top", fontsize=12, bbox=_box)
+        for y, name in ((_c, "$c$"), (_d, "$d$")):
+            ax.text(-0.05, y, name, ha="right", va="center", fontsize=12, bbox=_box)
+        return fig, ax
+
+    # the open rectangle misses its corner (a, c), which is in its boundary
+    _open, _ax = _panel(False)
     _t = np.linspace(0, 2 * np.pi, 120)
-    _left.fill(_a + 0.16 * np.cos(_t), _c + 0.16 * np.sin(_t), color=RED, alpha=0.12, lw=0, zorder=2)
-    _left.plot(_a + 0.16 * np.cos(_t), _c + 0.16 * np.sin(_t), color=RED, lw=1.0, zorder=2)
-    tip_label(_left, (_a - 0.12, _c + 0.12), 150, r"$\genfrac{[}{]}{0}{0}{a}{c}$", RED, r=3, fontsize=12)
+    _ax.fill(_a + 0.16 * np.cos(_t), _c + 0.16 * np.sin(_t), color=RED, alpha=0.12, lw=0, zorder=2)
+    _ax.plot(_a + 0.16 * np.cos(_t), _c + 0.16 * np.sin(_t), color=RED, lw=1.0, zorder=2)
+    legend_box(_open, [("area", LIGHT, "$D$", BLUE), ("area", (0.70, 0.15, 0.12, 0.15), r"a ball centred at $\genfrac{[}{]}{0}{0}{a}{c}$", RED)])
+    _closed, _ax = _panel(True)
+    legend_box(_closed, [("area", LIGHT, "$D$", BLUE)])
 
     mo.vstack(
         [
@@ -713,35 +972,40 @@ def _(BLUE, FULL, Figure, LIGHT, RED, cross_axes, definition, mo, np, tip_label)
     """,
                 "Closed set",
             ),
-            _fig,
             mo.md(
                 r"""
     $D = \left\{\, a < x^1 < b,\ c < x^2 < d \,\right\}$ is not closed! &nbsp; $\begin{bmatrix} a \\ c \end{bmatrix} \in \mathrm{Bd}(D)$, but $\begin{bmatrix} a \\ c \end{bmatrix} \notin D$ &nbsp; (one missing point is enough!)
-
-    $D = \left\{\, a \leq x^1 \leq b,\ c \leq x^2 \leq d \,\right\}$ is closed!
     """
             ),
+            _open,
+            mo.md(r"""$D = \left\{\, a \leq x^1 \leq b,\ c \leq x^2 \leq d \,\right\}$ is closed!"""),
+            _closed,
         ]
     )
     return
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, HALF, LIGHT, cross_axes, mo, theorem, tip_label):
-    _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
-    _fig = Figure(figsize=(HALF, 2.3), layout="constrained")
+def _(BLUE, Figure, GREEN, HALF, LIGHT, RED, cross_axes, legend_box, mo, theorem):
+    _fig = Figure(figsize=(HALF + 2.2, 2.3), layout="constrained")
     _ax = _fig.subplots()
-    _ax.set_xlim(-0.35, 2.4)
+    _ax.set_xlim(-0.35, 1.55)
     _ax.set_ylim(-0.3, 1.45)
     _ax.set_aspect("equal")
     _ax.axis("off")
     cross_axes(_ax, (-0.2, 1.5), (-0.2, 1.4), "$x^1$", "$x^2$")
     _ax.fill([0, 1, 1, 0], [0, 0, 1, 1], color=LIGHT, lw=0)
-    _ax.plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], color=BLUE, lw=1.4)
-    tip_label(_ax, (0.5, 0.5), 0, r"$\bar{D}$", BLUE, r=0)
-    for _pt, _text, _d in (((0, 0), r"$h\left(\genfrac{[}{]}{0}{0}{0}{0}\right) = 0$", -30), ((1, 1), r"$h\left(\genfrac{[}{]}{0}{0}{1}{1}\right) = 2$", 20)):
-        _ax.plot(*_pt, "o", color="black", ms=4, zorder=5)
-        tip_label(_ax, _pt, _d, _text, "black", r=6, fontsize=12)
+    _ax.plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], color=BLUE, lw=1.4, zorder=4)
+    _ax.plot(0, 0, "o", color=GREEN, ms=6, zorder=5)
+    _ax.plot(1, 1, "o", color=RED, ms=6, zorder=5)
+    legend_box(
+        _fig,
+        [
+            ("area", LIGHT, r"$\bar{D}$", BLUE),
+            ("dot", GREEN, r"global minimum: $h\left(\genfrac{[}{]}{0}{0}{0}{0}\right) = 0$"),
+            ("dot", RED, r"global maximum: $h\left(\genfrac{[}{]}{0}{0}{1}{1}\right) = 2$"),
+        ],
+    )
 
     mo.vstack(
         [
@@ -781,7 +1045,7 @@ def _(mo):
 
     or
 
-    - $\vec{a} \notin \mathrm{Bd}(D)$ &nbsp; $\Longrightarrow$ &nbsp; there is some open ball $B(\vec{a}, r)$ which only contains points of $D$
+    - $\vec{a} \notin \mathrm{Bd}(D) \subseteq D$ &nbsp; $\Longrightarrow$ &nbsp; there is some open ball $B(\vec{a}, r)$ which only contains points of $D$
 
         $\Longrightarrow$ &nbsp; there exists $B(\vec{a}, r) \subseteq D$ with
 
@@ -799,9 +1063,11 @@ def _(mo):
 
     ### Strategy to find global extrema
 
-    1. find critical points on the interior $D \setminus \mathrm{Bd}(D)$ (not on the boundary)
-    2. find global extrema in $\mathrm{Bd}(D)$ (optimization problem in lower dimension &nbsp; $\Longrightarrow$ &nbsp; easier once we have a parameterization of the boundary)
-    3. compare the values of all candidate points
+    ① &nbsp; find critical points on the interior $D \setminus \mathrm{Bd}(D)$ (not on the boundary)
+
+    ② &nbsp; find global extrema in $\mathrm{Bd}(D)$ (optimization problem in lower dimension &nbsp; $\Longrightarrow$ &nbsp; easier once we have a parameterization of the boundary)
+
+    ③ &nbsp; compare the values of all candidate points
 
     **Example.** &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = (x^1)^2 + (x^2)^2 - 2x^1$ &nbsp; on &nbsp; $D = \left\{\, (x^1)^2 + (x^2)^2 \leq 4 \,\right\}$
 
@@ -847,12 +1113,12 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    st = mo.ui.slider(0, 24, 1, value=4, label=r"$t$ (multiples of $\pi/12$)", show_value=True)
+    st = mo.ui.slider(0, 24, 1, value=4, label=r"$k$, with $t = k\pi/12$", show_value=True)
     return (st,)
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREY, LIGHT, RED, cross_axes, math, mo, np, num, st, table, tip_label):
+def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, ORANGE, RED, cross_axes, legend_box, math, mo, np, num, st, table, tip_label):
     _t = st.value * math.pi / 12
     _pt = (2 * math.cos(_t), 2 * math.sin(_t))
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
@@ -860,7 +1126,7 @@ def _(BLUE, FULL, Figure, GREY, LIGHT, RED, cross_axes, math, mo, np, num, st, t
     def _g(t):
         return 4 - 4 * np.cos(t)
 
-    _fig = Figure(figsize=(FULL, 3.3), layout="constrained")
+    _fig = Figure(figsize=(FULL, 3.9), layout="constrained")
     _left, _right = _fig.subplots(1, 2, width_ratios=[1, 1.35])
 
     # D with the level sets of f (circles about a), the candidates and the point of Bd(D) at time t
@@ -876,10 +1142,9 @@ def _(BLUE, FULL, Figure, GREY, LIGHT, RED, cross_axes, math, mo, np, num, st, t
         _ring.set_clip_path(_disc)
     _left.plot(2 * np.cos(_th), 2 * np.sin(_th), color=BLUE, lw=1.4, zorder=2)
     cross_axes(_left, (-2.5, 2.7), (-2.4, 2.55), "$x^1$", "$x^2$")
-    for _p, _name, _d in (((1, 0), r"$\vec{a}$", -90), ((2, 0), r"$\vec{b}$", -120), ((-2, 0), r"$\vec{c}$", -135)):
-        _left.plot(*_p, "o", color="black", ms=4, zorder=5)
-        tip_label(_left, _p, _d, _name, "black")
-    _left.plot(*_pt, "o", color=RED, ms=6, zorder=6)
+    for _p, _col in (((1, 0), GREEN), ((2, 0), ORANGE), ((-2, 0), RED)):
+        _left.plot(*_p, "o", color=_col, ms=6, zorder=5)
+    _left.plot(*_pt, "o", color="black", ms=6, zorder=6)
     tip_label(_left, (-1.45, -1.45), -135, r"$\mathrm{Bd}(D)$", BLUE, r=4, fontsize=12)
 
     # g(t) = f on Bd(D), with the value of f at the interior candidate
@@ -890,29 +1155,82 @@ def _(BLUE, FULL, Figure, GREY, LIGHT, RED, cross_axes, math, mo, np, num, st, t
     cross_axes(_right, (-0.4, 7.2), (-1.6, 9.1), "$t$", "$y$")
     _s = np.linspace(0, 2 * math.pi, 300)
     _right.plot(_s, _g(_s), color=BLUE, lw=1.6)
-    _right.plot([0, 2 * math.pi], [-1, -1], color=GREY, lw=1.0, ls=(0, (4, 3)))
-    _right.text(math.pi, -1.2, r"$f(\vec{a}) = -1$", color=GREY, fontsize=12, ha="center", va="top")
+    _right.plot([0, 2 * math.pi], [-1, -1], color=GREEN, lw=1.0, ls=(0, (4, 3)))
     for _x, _name in ((math.pi, r"$\pi$"), (2 * math.pi, r"$2\pi$")):
         _right.plot([_x, _x], [-0.15, 0.15], color="black", lw=0.9)
         _right.text(_x, 0.35, _name, ha="center", va="bottom", fontsize=12, bbox=_box)
-    for _x, _name in ((0, r"$\vec{b}$"), (math.pi, r"$\vec{c}$"), (2 * math.pi, r"$\vec{b}$")):
-        _right.plot(_x, _g(_x), "o", color="black", ms=4, zorder=5)
-    _right.text(math.pi, 8.3, r"$\vec{c}$", ha="center", va="bottom", fontsize=12)
+    for _x, _col in ((0, ORANGE), (math.pi, RED), (2 * math.pi, ORANGE)):
+        _right.plot(_x, _g(_x), "o", color=_col, ms=6, zorder=5)
     _right.text(4.9, 7.9, r"$g(t) = 4 - 4\cos(t)$", color=BLUE, fontsize=12, ha="left", va="center")
-    _right.plot(_t, _g(_t), "o", color=RED, ms=6, zorder=6)
+    _right.plot(_t, _g(_t), "o", color="black", ms=6, zorder=6)
+    legend_box(
+        _fig,
+        [
+            ("dot", GREEN, r"$\vec{a}$"),
+            ("dot", ORANGE, r"$\vec{b}$"),
+            ("dot", RED, r"$\vec{c}$"),
+            ("dot", "black", r"$\genfrac{[}{]}{0}{0}{2\cos(t)}{2\sin(t)}$ (left), $\genfrac{[}{]}{0}{0}{t}{g(t)}$ (right)"),
+            ("line", GREY, r"level sets of $f$"),
+            ("line", GREEN, r"$y = f(\vec{a}) = -1$", (0, (4, 3))),
+        ],
+        loc="outside lower center",
+        ncols=3,
+    )
 
     mo.vstack(
         [
             mo.hstack([st], justify="start", gap=2, wrap=True),
             table(
                 [
-                    (r"$\begin{bmatrix} 2\cos(t) \\ 2\sin(t) \end{bmatrix} \in \mathrm{Bd}(D)$", rf"$\textcolor{{{RED}}}{{\begin{{bmatrix}} {num(_pt[0])} \\ {num(_pt[1])} \end{{bmatrix}}}}$"),
-                    (r"$g(t) = 4 - 4\cos(t)$", rf"$\textcolor{{{RED}}}{{{num(4 - 4 * math.cos(_t))}}}$"),
+                    (r"$t = k\pi/12$", rf"${num(_t)}$"),
+                    (r"$\begin{bmatrix} 2\cos(t) \\ 2\sin(t) \end{bmatrix} \in \mathrm{Bd}(D)$", rf"$\begin{{bmatrix}} {num(_pt[0])} \\ {num(_pt[1])} \end{{bmatrix}}$"),
+                    (r"$g(t) = 4 - 4\cos(t)$", rf"${num(4 - 4 * math.cos(_t))}$"),
                     (r"$g'(t) = 4\sin(t)$", rf"${num(4 * math.sin(_t))}$"),
                 ]
             ),
             _fig,
         ]
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _(BLUE, GREEN, LIGHT, ORANGE, RED, np, panel, sheet, turntable):
+    # graph(f) over D, the same rule outside D in a faint tone, f restricted to Bd(D), and the three candidates
+    def _f(x1, x2):
+        return x1**2 + x2**2 - 2 * x1
+
+    _r, _p = np.meshgrid(np.linspace(0, 2, 21), np.linspace(0, 2 * np.pi, 97), indexing="ij")
+    _q, _w = np.meshgrid(np.linspace(2, 2.6, 7), np.linspace(0, 2 * np.pi, 97), indexing="ij")
+    _t = np.linspace(0, 2 * np.pi, 241)
+    _c1, _c2 = 2 * np.cos(_t), 2 * np.sin(_t)
+    _faint = "#c4c4c4"
+    turntable(
+        -75,
+        48,
+        "graph of f over the disc D, the same rule outside D in a faint tone, f restricted to the boundary of D, and the three candidates",
+        [
+            panel(
+                0.3,
+                surfaces=[
+                    sheet(_r * np.cos(_p), _r * np.sin(_p), _f(_r * np.cos(_p), _r * np.sin(_p)), wire=[(0, 5, BLUE, 0.6), (1, 8, BLUE, 0.6)]),
+                    sheet(_q * np.cos(_w), _q * np.sin(_w), _f(_q * np.cos(_w), _q * np.sin(_w)), wire=[(0, 6, _faint, 0.5), (1, 8, _faint, 0.5)], alpha=0.3),
+                ],
+                lines=[(_c1, _c2, _f(_c1, _c2), BLUE, 2.2), (_c1, _c2, 0 * _t, BLUE, 1.0, [4, 3])],
+                points=[((1, 0, -1), GREEN), ((2, 0, 0), ORANGE), ((-2, 0, 8), RED)],
+                axes=[((0, 0, 0), (2.9, 0, 0), "x^1", -30), ((0, 0, 0), (0, 2.9, 0), "x^2", 30), ((0, 0, 0), (0, 0, 9), "y", 90)],
+            )
+        ],
+        legend=[
+            ("area", LIGHT, r"y = f(\vec{x}), \ \vec{x} \in D", BLUE),
+            ("area", LIGHT, r"\text{the same rule outside } D", _faint, 0.35),
+            ("line", BLUE, r"f \text{ restricted to } \mathrm{Bd}(D)", 2.2),
+            ("line", BLUE, r"\mathrm{Bd}(D)", 1.0, [4, 3]),
+            ("dot", GREEN, r"\vec{a}: \ f(\vec{a}) = -1 \ (\text{min})"),
+            ("dot", ORANGE, r"\vec{b}: \ f(\vec{b}) = 0"),
+            ("dot", RED, r"\vec{c}: \ f(\vec{c}) = 8 \ (\text{max})"),
+        ],
+        height=400,
     )
     return
 
@@ -927,12 +1245,12 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, HALF, LIGHT, check, cross_axes, mo, q1_max, q1_min):
+def _(BLUE, Figure, HALF, LIGHT, check, cross_axes, legend_box, mo, q1_max, q1_min):
     def _ask(label, field, answer):
         return mo.hstack([mo.md(label), field, mo.md(check(field, answer))], justify="start", align="center")
 
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
-    _fig = Figure(figsize=(HALF - 0.6, 2.4), layout="constrained")
+    _fig = Figure(figsize=(HALF + 0.4, 2.4), layout="constrained")
     _ax = _fig.subplots()
     _ax.set_xlim(-0.6, 3.1)
     _ax.set_ylim(-0.6, 3.75)
@@ -945,7 +1263,7 @@ def _(BLUE, Figure, HALF, LIGHT, check, cross_axes, mo, q1_max, q1_min):
         _ax.plot(*_c, "o", ms=4, color=BLUE, zorder=3)
     _ax.text(2, -0.1, "$2$", ha="center", va="top", fontsize=12, bbox=_box)
     _ax.text(-0.1, 3, "$3$", ha="right", va="center", fontsize=12, bbox=_box)
-    _ax.text(1, 1.5, "$D$", color=BLUE, ha="center", va="center", fontsize=13)
+    legend_box(_fig, [("area", LIGHT, "$D$", BLUE)])
 
     mo.vstack(
         [
