@@ -182,7 +182,25 @@ def _(arrow, math):
         """Fixed-point number for the readout tables (never prints a negative zero)."""
         return f"{round(v, digits) + 0.0:.{digits}f}"
 
-    return cross_axes, num, tip_label
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return cross_axes, legend_box, num, tip_label
 
 
 @app.cell(hide_code=True)
@@ -309,13 +327,13 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, GREEN, ORANGE, a_line, arrow, blank, cross_axes, math, mo, np, num, table, tip_label):
+def _(BLUE, FULL, GREEN, ORANGE, a_line, arrow, blank, cross_axes, legend_box, math, mo, np, num, table, tip_label):
     _a = a_line.value
     _fa = 4 * _a * math.exp(-_a)
     _d = 4 * (1 - _a) * math.exp(-_a)
     _slope = math.degrees(math.atan2(_d, 1))
 
-    _fig, _ax = blank(FULL, 3.4, (-1.75, 6.25), (-0.6, 3.1))
+    _fig, _ax = blank(FULL, 3.9, (-1.75, 6.25), (-0.6, 3.1))
     cross_axes(_ax, (-1.7, 6.2), (-0.5, 3.0), "$x$", "$y$")
     _x = np.linspace(-0.1, 5.1, 300)
     _ax.plot(_x, 4 * _x * np.exp(-_x), color=BLUE, lw=1.4)
@@ -331,9 +349,7 @@ def _(BLUE, FULL, GREEN, ORANGE, a_line, arrow, blank, cross_axes, math, mo, np,
     _nx = _a - _d  # the label of the normal steps aside when its tip comes close to the y-axis
     tip_label(_ax, (_nx, _fa + 1), _slope + 90 + (-70 if -0.05 < _nx < 0.5 else 70 if -0.5 < _nx <= -0.05 else 0), r"$\vec{n}$", ORANGE)
     _ax.plot(_a, _fa, "o", color="black", ms=4, zorder=4)
-    # the label of the point sits in the wedge between the velocity vector and the normal, which nothing else enters
-    _w = math.radians(_slope + (45 if _a >= 0.7 else 30))
-    _ax.annotate(r"$\genfrac{[}{]}{0}{0}{a}{f(a)}$", (_a, _fa), textcoords="offset points", xytext=(38 * math.cos(_w), 38 * math.sin(_w)), ha="center", va="center", fontsize=13)
+    legend_box(_fig, [("dot", "black", r"$\genfrac{[}{]}{0}{0}{a}{f(a)}$"), ("line", GREEN, r"$y = f(a) + f'(a)(x - a)$")], loc="outside lower center", ncols=2)
 
     mo.vstack(
         [
@@ -607,7 +623,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(Arc, BLUE, FULL, Figure, GREEN, GREY, RED, arrow, cross_axes, math, mo, num, pa1, pk, table, tip_label):
+def _(Arc, BLUE, FULL, Figure, GREEN, GREY, RED, arrow, cross_axes, legend_box, math, mo, num, pa1, pk, table, tip_label):
     from fractions import Fraction as _Fraction
 
     _a1, _a2 = pa1.value, pk.value * math.pi / 12
@@ -619,7 +635,7 @@ def _(Arc, BLUE, FULL, Figure, GREEN, GREY, RED, arrow, cross_axes, math, mo, nu
     _dash = (0, (4, 3))
 
     # both panels are drawn at the same scale
-    _fig = Figure(figsize=(FULL, 3.75), layout="constrained")
+    _fig = Figure(figsize=(FULL, 4.2), layout="constrained")
     _left, _right = _fig.subplots(1, 2, width_ratios=[5.6, 12.6])
     for _ax, _xlim in ((_left, (-0.8, 4.8)), (_right, (-6.3, 6.3))):
         _ax.set_xlim(*_xlim)
@@ -635,7 +651,6 @@ def _(Arc, BLUE, FULL, Figure, GREEN, GREY, RED, arrow, cross_axes, math, mo, nu
     tip_label(_left, (_a1 + 1, _a2), 0, r"$\vec{e}_1$", BLUE)
     tip_label(_left, (_a1, _a2 + 1), 90, r"$\vec{e}_2$", RED)
     _left.plot(_a1, _a2, "o", color="black", ms=4, zorder=4)
-    tip_label(_left, (_a1, _a2), -45, r"$\vec{a}$", "black")
 
     cross_axes(_right, (-6.2, 6.2), (-3.4, 5.2), "$y^1$", "$y^2$")
     _right.plot([_fa[0], _fa[0], 0], [0, _fa[1], _fa[1]], color=GREY, lw=0.9, ls=_dash)
@@ -649,7 +664,7 @@ def _(Arc, BLUE, FULL, Figure, GREEN, GREY, RED, arrow, cross_axes, math, mo, nu
     tip_label(_right, _t1, _deg, r"$Df(\vec{a})(\vec{e}_1)$", BLUE, fontsize=12)
     tip_label(_right, _t2, _deg + 90, r"$Df(\vec{a})(\vec{e}_2)$", RED, fontsize=12)
     _right.plot(*_fa, "o", color="black", ms=4, zorder=4)
-    tip_label(_right, _fa, _deg - 90, r"$f(\vec{a})$", "black", fontsize=12)
+    legend_box(_fig, [("dot", "black", r"$\vec{a}$, $f(\vec{a})$")], loc="outside lower center")
 
     mo.vstack(
         [

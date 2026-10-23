@@ -155,7 +155,25 @@ def _(arrow, math):
         if label:
             ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    return (vector,)
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return legend_box, vector
 
 
 @app.cell(hide_code=True)
@@ -209,22 +227,22 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, GREEN, HALF, RED, arrow, blank, definition, mo):
-    _fig, _ax = blank(HALF, 1.75, (-0.6, 4.7), (-0.5, 1.95))
+def _(HALF, ORANGE, RED, arrow, blank, definition, legend_box, mo):
+    _fig, _ax = blank(HALF + 0.9, 1.75, (-0.6, 4.7), (-0.5, 1.95))
     _x, _v, _t = (0.4, 1.4), (1.6, 0.0), 1.7
     _g = (_x[0] + _t * _v[0], _x[1])
     _ax.plot([-0.5, 4.2], [1.4, 1.4], color="black", lw=1.0)
-    arrow(_ax, (0, 0), _g, BLUE)
-    arrow(_ax, (0, 0), _x, RED)
-    arrow(_ax, (0, 0), _v, GREEN)
-    arrow(_ax, _x, _g, GREEN)
-    _ax.plot(0, 0, "o", color="black", ms=3, zorder=4)
-    _ax.text(0.08, 0.78, r"$\vec{x}$", color=RED, fontsize=13, ha="right", va="center")
-    _ax.text(0.8, -0.1, r"$\vec{v}$", color=GREEN, fontsize=13, ha="center", va="top")
-    _ax.text((_x[0] + _g[0]) / 2, 1.52, r"$t\vec{v}$", color=GREEN, fontsize=13, ha="center", va="bottom")
-    _ax.text(1.95, 0.62, r"$\vec{x} + t\vec{v}$", color=BLUE, fontsize=13, ha="left", va="top")
+    arrow(_ax, (0, 0), _g, ORANGE)
+    arrow(_ax, (0, 0), _x, "black")
+    arrow(_ax, (0, 0), _v, RED)
+    arrow(_ax, _x, _g, RED)
+    _ax.plot(0, 0, "o", color="black", ms=4, zorder=4)
+    _ax.text(0.08, 0.78, r"$\vec{x}$", fontsize=13, ha="right", va="center")
+    _ax.text(0.8, -0.1, r"$\vec{v}$", color=RED, fontsize=13, ha="center", va="top")
+    _ax.text((_x[0] + _g[0]) / 2, 1.52, r"$t\vec{v}$", color=RED, fontsize=13, ha="center", va="bottom")
+    _ax.text(1.95, 0.62, r"$\vec{x} + t\vec{v}$", color=ORANGE, fontsize=13, ha="left", va="top")
     _ax.text(4.32, 1.4, "$L$", fontsize=13, ha="left", va="center")
-    _ax.text(-0.12, -0.05, r"$\vec{0}$", fontsize=13, ha="right", va="top")
+    legend_box(_fig, [("dot", "black", r"$\vec{0}$")])
 
     mo.vstack(
         [

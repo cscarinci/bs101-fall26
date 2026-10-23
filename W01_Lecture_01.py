@@ -141,6 +141,30 @@ def _(header):
 
 
 @app.cell(hide_code=True)
+def _():
+    # ---- Helpers of this lecture ----------------------------------------
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return (legend_box,)
+
+
+@app.cell(hide_code=True)
 def _(definition, mo):
     mo.vstack(
         [
@@ -192,7 +216,7 @@ def _(definition, mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREY, arrow):
+def _(BLUE, FULL, Figure, GREY, arrow, legend_box):
     def _pr(x1, x2, x3):
         """Oblique projection of R^3, as on the board: x^2 to the right, x^3 up, x^1 towards the viewer."""
         return x2 - 0.45 * x1, x3 - 0.4 * x1
@@ -208,8 +232,9 @@ def _(BLUE, FULL, Figure, GREY, arrow):
 
     def spaces_figure(arrows):
         """R^1, R^2, R^3 with a point (arrows=False) or the arrow from the origin to it (arrows=True)."""
-        fig = Figure(figsize=(FULL, 2.9 if not arrows else 2.4), layout="constrained")
-        a1, a2, a3 = fig.subplots(1, 3, width_ratios=[1, 1, 1.25])
+        fig = Figure(figsize=(FULL, 3.5 if not arrows else 3.0), layout="constrained")
+        s1, s2, s3 = fig.subfigures(1, 3, width_ratios=[1, 1, 1.25])
+        a1, a2, a3 = s1.subplots(), s2.subplots(), s3.subplots()
         lo = -1.25 if not arrows else -1.05
         for ax, xlim in ((a1, (-0.5, 2.9)), (a2, (-0.5, 2.9)), (a3, (-1.3, 2.95))):
             ax.set_xlim(*xlim)
@@ -223,9 +248,9 @@ def _(BLUE, FULL, Figure, GREY, arrow):
         if arrows:
             arrow(a1, (0, 0), (1.4, 0), BLUE)
             a1.text(0.7, 0.14, "$x$", color=BLUE, fontsize=12, ha="center")
-        a1.plot([0, 1.4], [0, 0], "o", color="black", ms=4, zorder=4)
-        a1.text(0, -0.14, "$0$", fontsize=12, ha="center", va="top")
-        a1.text(1.4, -0.14, "$x$", fontsize=12, ha="center", va="top")
+        a1.plot(0, 0, "o", color="black", ms=5, zorder=4)
+        a1.plot(1.4, 0, "o", color=BLUE, ms=5, zorder=4)
+        legend_box(s1, [("dot", "black", "$0$"), ("dot", BLUE, "$x$")], loc="outside lower center", ncols=2)
 
         # n = 2
         p = (1.4, 1.5)
@@ -236,14 +261,13 @@ def _(BLUE, FULL, Figure, GREY, arrow):
         if arrows:
             arrow(a2, (0, 0), p, BLUE)
             _column(a2, 1.3, 0.62, ("$x^1$", "$x^2$"), BLUE)
-            a2.text(p[0] + 0.1, p[1] + 0.08, r"$(x^1, x^2)$", fontsize=12, ha="left", va="bottom")
         else:
             a2.plot([p[0], p[0], 0], [0, p[1], p[1]], color=GREY, lw=1.0, ls=(0, (4, 3)))
             a2.text(p[0], -0.14, "$x^1$", fontsize=12, ha="center", va="top")
             a2.text(-0.12, p[1], "$x^2$", fontsize=12, ha="right", va="center")
-            a2.text(p[0] + 0.1, p[1] + 0.08, r"$\vec{x} = (x^1, x^2)$", fontsize=12, ha="center", va="bottom")
-        a2.plot([0, p[0]], [0, p[1]], "o", color="black", ms=4, zorder=4)
-        a2.text(0.1, -0.14, "$(0,0)$", fontsize=11, ha="left", va="top")
+        a2.plot(0, 0, "o", color="black", ms=5, zorder=4)
+        a2.plot(*p, "o", color=BLUE, ms=5, zorder=4)
+        legend_box(s2, [("dot", "black", "$(0, 0)$"), ("dot", BLUE, "$(x^1, x^2)$" if arrows else r"$\vec{x} = (x^1, x^2)$")], loc="outside lower center")
 
         # n = 3
         q = (1.0, 1.9, 1.9)
@@ -375,40 +399,36 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, RED, alpha, arrow, math, mo, plane, table, x1, x2, y1, y2):
+def _(BLUE, FULL, Figure, GREEN, GREY, ORANGE, RED, alpha, arrow, legend_box, mo, plane, table, x1, x2, y1, y2):
     _x = (x1.value, x2.value)
     _y = (y1.value, y2.value)
     _s = (_x[0] + _y[0], _x[1] + _y[1])
     _a = alpha.value
     _ax_ = (_a * _x[0], _a * _x[1])
 
-    def _vector(ax, tip, color, label, turn, r=15):
-        """Arrow from the origin (a dot when the vector is zero), labelled beyond its tip on a white box;
-        `turn` (degrees) rotates the label about the tip so that coinciding vectors keep separate labels."""
+    def _vector(ax, tip, color):
+        """Arrow from the origin (a dot when the vector is zero)."""
         if tip[0] == 0 and tip[1] == 0:
             ax.plot(0, 0, "o", color=color, ms=4, zorder=4)
-            _d = math.radians(45 + turn)
         else:
             arrow(ax, (0, 0), tip, color)
-            _d = math.atan2(tip[1], tip[0]) + math.radians(turn)
-        ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(_d), r * math.sin(_d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    _fig = Figure(figsize=(FULL, 3.7), layout="constrained")
+    _fig = Figure(figsize=(FULL, 4.1), layout="constrained")
     _left, _right = _fig.subplots(1, 2)
 
     plane(_left, 12)
     _left.plot([_x[0], _s[0], _y[0]], [_x[1], _s[1], _y[1]], color=GREY, lw=1.0, ls=(0, (4, 3)))
-    _vector(_left, _s, GREEN, r"$\vec{x}+\vec{y}$", 0, r=24)
-    _side = -1 if _x[0] * _y[1] - _x[1] * _y[0] < 0 else 1  # labels go on the outer side of each arrow
-    _vector(_left, _x, BLUE, r"$\vec{x}$", -75 * _side)
-    _vector(_left, _y, RED, r"$\vec{y}$", 75 * _side)
+    _vector(_left, _s, GREEN)
+    _vector(_left, _x, BLUE)
+    _vector(_left, _y, RED)
 
     plane(_right, 12)
-    _vector(_right, _ax_, GREEN, r"$\alpha \cdot \vec{x}$", 75)
-    _vector(_right, _x, BLUE, r"$\vec{x}$", -75)
+    _vector(_right, _ax_, ORANGE)
+    _vector(_right, _x, BLUE)
     for _ax in (_left, _right):
         _ax.set_xticks(range(-8, 9, 4))
         _ax.set_yticks(range(-8, 9, 4))
+    legend_box(_fig, [("line", BLUE, r"$\vec{x}$"), ("line", RED, r"$\vec{y}$"), ("line", GREEN, r"$\vec{x}+\vec{y}$"), ("line", ORANGE, r"$\alpha \cdot \vec{x}$")], loc="outside lower center", ncols=4)
 
     def _col(v, color):
         return rf"\textcolor{{{color}}}{{\begin{{bmatrix}} {v[0] + 0.0:g} \\ {v[1] + 0.0:g} \end{{bmatrix}}}}"
@@ -419,7 +439,7 @@ def _(BLUE, FULL, Figure, GREEN, GREY, RED, alpha, arrow, math, mo, plane, table
             table(
                 [
                     (r"$\vec{x} + \vec{y}$", rf"${_col(_x, BLUE)} + {_col(_y, RED)} = {_col(_s, GREEN)}$"),
-                    (r"$\alpha \cdot \vec{x}$", rf"$({_a:g}) \cdot {_col(_x, BLUE)} = {_col(_ax_, GREEN)}$"),
+                    (r"$\alpha \cdot \vec{x}$", rf"$({_a:g}) \cdot {_col(_x, BLUE)} = {_col(_ax_, ORANGE)}$"),
                 ]
             ),
             _fig,

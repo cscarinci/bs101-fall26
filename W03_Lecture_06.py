@@ -155,7 +155,25 @@ def _(arrow, math):
         if label:
             ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    return (vector,)
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return legend_box, vector
 
 
 @app.cell(hide_code=True)
@@ -359,22 +377,22 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, GREEN, GREY, RED, arrow, blank, mo, t_path, table, vector):
+def _(BLUE, FULL, GREEN, GREY, RED, arrow, blank, legend_box, mo, t_path, table):
     _x, _v, _t = (2.0, 2.0), (0.6, 0.2), t_path.value
     _g = (_x[0] + _t * _v[0], _x[1] + _t * _v[1])
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
     _side = 1 if _t >= 0 else -1  # the two tip labels stay on opposite sides, also when the tips coincide
 
-    # the t-line, the map gamma, and Im(gamma): a line in R^2
-    _fig, _ax = blank(FULL, 2.6, (-6.6, 5.6), (-0.7, 3.7))
+    # the t-line, the map gamma, and Im(gamma): a line in R^2 (0 and its image in red, t and its image in blue)
+    _fig, _ax = blank(FULL, 3.0, (-6.6, 5.6), (-0.7, 3.7))
 
     def _at(s):
         return -5.6 + 0.8 * (s + 1)
 
     arrow(_ax, (-6.2, 1.5), (-1.9, 1.5), "black", lw=0.9)
     _ax.text(-1.9, 1.32, r"$\mathbb{R}$", fontsize=13, ha="right", va="top")
-    _ax.plot(_at(0), 1.5, "o", color="black", ms=3.5)
-    _ax.plot(_at(_t), 1.5, "o", color=BLUE, ms=3.5)
+    _ax.plot(_at(0), 1.5, "o", color=RED, ms=6 if _t == 0 else 4.5, zorder=4)
+    _ax.plot(_at(_t), 1.5, "o", color=BLUE, ms=4.5, zorder=4)
     _ax.text(_at(0), 1.32, "$0$", fontsize=12, ha="center", va="top")
     _ax.text(_at(_t), 1.68, "$t$", fontsize=13, ha="center", va="bottom", color=BLUE)
     arrow(_ax, (-1.55, 2.2), (-0.45, 2.2), "black", lw=0.9, connectionstyle="arc3,rad=-0.3")
@@ -385,14 +403,17 @@ def _(BLUE, FULL, GREEN, GREY, RED, arrow, blank, mo, t_path, table, vector):
     _ax.text(4.8, -0.14, "$y^1$", fontsize=13, ha="right", va="top")
     _ax.text(-0.14, 3.5, "$y^2$", fontsize=13, ha="right", va="top")
     _ax.plot([_x[0] + s * _v[0] for s in (-1.5, 3.7)], [_x[1] + s * _v[1] for s in (-1.5, 3.7)], color="black", lw=1.2)
-    _ax.text(_x[0] + 3.7 * _v[0] + 0.1, _x[1] + 3.7 * _v[1], r"$\mathrm{Im}(\gamma)$", fontsize=13, ha="left", va="center")
-    vector(_ax, (0, 0), _v, GREEN, r"$\vec{v}$")
+    arrow(_ax, (0, 0), _v, GREEN)
     arrow(_ax, (0, 0), _x, RED)
     arrow(_ax, (0, 0), _g, BLUE)
-    _ax.plot(*_x, "o", color="black", ms=3.5, zorder=4)
-    _ax.plot(*_g, "o", color="black", ms=3.5, zorder=4)
-    _ax.annotate(r"$\vec{x} = \gamma(0)$", _x, textcoords="offset points", xytext=(-2, 19), ha="left", va="bottom", color=RED, fontsize=13, zorder=5, bbox=_box)
-    _ax.annotate(r"$\gamma(t)$", _g, textcoords="offset points", xytext=(7, -5) if _t >= 0 else (-7, 3), ha="left" if _t >= 0 else "right", va="top" if _t >= 0 else "bottom", color=BLUE, fontsize=13, zorder=5, bbox=_box)
+    _ax.plot(*_x, "o", color=RED, ms=6 if _t == 0 else 4, zorder=4)  # under the blue dot, as a rim, when the two coincide
+    _ax.plot(*_g, "o", color=BLUE, ms=4, zorder=4)
+    legend_box(
+        _fig,
+        [("line", "black", r"$\mathrm{Im}(\gamma)$"), ("line", GREEN, r"$\vec{v}$"), ("dot", RED, r"$\vec{x} = \gamma(0)$"), ("dot", BLUE, r"$\gamma(t)$")],
+        loc="outside lower center",
+        ncols=4,
+    )
 
     # graph(gamma): a line in R x R^2, in the board's oblique view (t to the right, y^1 towards the viewer, y^2 up)
     def _pr(t, y1, y2):
@@ -513,23 +534,21 @@ def _(BLUE, HALF, RED, arrow, blank, definition, mo, np, ortho, ring):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, GREEN, HALF, RED, arrow, blank, mo, np, ortho, quadric):
+def _(BLUE, GREEN, HALF, ORANGE, RED, arrow, blank, legend_box, mo, np, ortho, quadric):
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
 
     # level sets of f in the plane
-    _fig, _ax = blank(HALF, 3.3, (-3.6, 4.4), (-3.6, 3.8))
+    _fig, _ax = blank(HALF + 1.2, 3.3, (-3.6, 3.9), (-3.6, 3.8))
     arrow(_ax, (-3.4, 0), (3.5, 0), "black", lw=0.9)
     arrow(_ax, (0, -3.4), (0, 3.5), "black", lw=0.9)
     _ax.text(3.5, -0.15, "$x^1$", fontsize=13, ha="right", va="top")
     _ax.text(0.15, 3.5, "$x^2$", fontsize=13, ha="left", va="top")
     _s = np.linspace(-2.9, 2.9, 200)
     for _sign in (1, -1):
-        _ax.plot(_s, _sign * _s, color=GREEN, lw=1.4)
+        _ax.plot(_s, _sign * _s, color=ORANGE, lw=1.4)
         _ax.plot(_sign * np.sqrt(1 + _s[20:-20] ** 2), _s[20:-20], color=BLUE, lw=1.4)
         _ax.plot(_s[35:-35], _sign * np.sqrt(4 + _s[35:-35] ** 2), color=RED, lw=1.4)
-    _ax.text(3.08, 2.95, "$f^{-1}(0)$", color=GREEN, fontsize=12, ha="left", va="center")
-    _ax.text(1.55, 0.55, "$f^{-1}(1)$", color=BLUE, fontsize=12, ha="left", va="center")
-    _ax.text(-0.3, 3.05, "$f^{-1}(-4)$", color=RED, fontsize=12, ha="right", va="center")
+    legend_box(_fig, [("line", BLUE, "$f^{-1}(1)$"), ("line", ORANGE, "$f^{-1}(0)$"), ("line", RED, "$f^{-1}(-4)$")])
 
     # level sets of g in space
     _fig2, _ax2 = blank(HALF, 4.2, (-3.6, 4.7), (-4.8, 4.9))

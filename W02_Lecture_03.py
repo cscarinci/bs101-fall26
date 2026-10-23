@@ -141,21 +141,33 @@ def _(header):
 
 
 @app.cell(hide_code=True)
-def _(arrow, math):
-    def vector(ax, tail, tip, color, label=None, turn=0, r=15, **kw):
-        """Arrow from `tail` to `tip` (a dot when it has zero length), labelled beyond its tip on a white box;
-        `turn` (degrees) rotates the label about the tip so that coinciding vectors keep separate labels."""
-        dx, dy = tip[0] - tail[0], tip[1] - tail[1]
-        if dx == 0 and dy == 0:
+def _(arrow):
+    def vector(ax, tail, tip, color, **kw):
+        """Arrow from `tail` to `tip` (a dot when it has zero length)."""
+        if tip[0] == tail[0] and tip[1] == tail[1]:
             ax.plot(*tip, "o", color=color, ms=4, zorder=4)
-            d = math.radians(45 + turn)
         else:
             arrow(ax, tail, tip, color, **kw)
-            d = math.atan2(dy, dx) + math.radians(turn)
-        if label:
-            ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    return (vector,)
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return legend_box, vector
 
 
 @app.cell(hide_code=True)
@@ -558,11 +570,11 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREY, HALF, LIGHT, RED, ma, mb, mc, md, mo, plane, table, vector):
+def _(BLUE, Figure, GREY, HALF, LIGHT, RED, legend_box, ma, mb, mc, md, mo, plane, table, vector):
     _a, _b, _c, _d = ma.value, mb.value, mc.value, md.value
     _det = _a * _d - _b * _c + 0.0
 
-    _fig = Figure(figsize=(HALF, HALF), layout="constrained")
+    _fig = Figure(figsize=(HALF + 0.4, HALF + 0.7), layout="constrained")
     _ax = _fig.subplots()
     _small = max(abs(_a), abs(_b), abs(_c), abs(_d), abs(_a + _b), abs(_c + _d)) <= 3
     plane(_ax, 4.4 if _small else 7.6)  # the frame follows the parallelogram: nothing is clipped
@@ -572,9 +584,14 @@ def _(BLUE, Figure, GREY, HALF, LIGHT, RED, ma, mb, mc, md, mo, plane, table, ve
     _ax.fill([0, _a, _a + _b, _b], [0, _c, _c + _d, _d], color=LIGHT, lw=0)  # A(unit square)
     _ax.plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], color=GREY, lw=1.0)  # the unit square
     _ax.plot([_a, _a + _b, _b], [_c, _c + _d, _d], color=GREY, lw=1.0, ls=(0, (4, 3)))
-    _side = -1 if _det < 0 else 1  # labels go on the outer side of each arrow
-    vector(_ax, (0, 0), (_a, _c), BLUE, r"$\vec{A}_1$", -75 * _side)
-    vector(_ax, (0, 0), (_b, _d), RED, r"$\vec{A}_2$", 75 * _side)
+    vector(_ax, (0, 0), (_a, _c), BLUE)
+    vector(_ax, (0, 0), (_b, _d), RED)
+    legend_box(
+        _fig,
+        [("line", BLUE, r"$\vec{A}_1$"), ("line", RED, r"$\vec{A}_2$"), ("area", "white", "unit square", GREY), ("area", LIGHT, "its image under $A$")],
+        loc="outside lower center",
+        ncols=2,
+    )
 
     mo.vstack(
         [

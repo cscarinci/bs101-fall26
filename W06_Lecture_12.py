@@ -155,7 +155,25 @@ def _(arrow, math):
         if label:
             ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    return (vector,)
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return legend_box, vector
 
 
 @app.cell(hide_code=True)
@@ -328,7 +346,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, math, mo, np, t0, table, vector):
+def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, ORANGE, legend_box, math, mo, np, t0, table, vector):
     _t = t0.value
     _p = (_t**2, _t**3)
     _v = (2 * _t, 3 * _t**2)
@@ -342,7 +360,7 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, math, mo, np, t0, table, vect
     _xlim, _ylim = ((-4.5, 7.5), (-4.5, 5.5)) if _small else ((-9, 15), (-6, 14))
     _levels = [0.5, 1, 2, 4, 8, 16] if _small else [1, 4, 16, 32, 64, 128]
 
-    _fig = Figure(figsize=(FULL, 5.6), layout="constrained")
+    _fig = Figure(figsize=(FULL, 6.0), layout="constrained")
     _ax = _fig.subplots()
     _X, _Y = np.meshgrid(np.linspace(*_xlim, 500), np.linspace(*_ylim, 500))
     _ax.contour(_X, _Y, _X * _Y, levels=[-_l for _l in reversed(_levels)] + _levels, colors=LIGHT, linewidths=0.9, linestyles="solid")
@@ -391,14 +409,14 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, math, mo, np, t0, table, vect
         _obstacles.extend((x0 + a * (x1 - x0), y0 + b * (y1 - y0), 20) for a in np.linspace(0, 1, 12) for b in np.linspace(0, 1, 5))
 
     _side = 1 if _v[0] * _g[1] - _v[1] * _g[0] >= 0 else -1  # preferred side: away from the other arrow
-    vector(_ax, _p, _tips[0], GREEN)
-    vector(_ax, _p, _tips[1], RED)
+    vector(_ax, _p, _tips[0], ORANGE)
+    vector(_ax, _p, _tips[1], GREEN)
     _ax.plot(*_p, "o", color="black", ms=4, zorder=6)
     _dv = math.atan2(_v[1], _v[0]) - _side * math.pi / 2 if _t != 0 else math.radians(225)
     _dg = math.atan2(_g[1], _g[0]) + _side * math.pi / 2 if _t != 0 else math.radians(135)
     if _t != 0:  # for t_0 = 0 both vectors are zero: nothing to label
-        _label(_tips[0], _dv, r"$\gamma'(t_0)$", GREEN, 40, 16)
-        _label(_tips[1], _dg, r"$\vec{\nabla} f(\gamma(t_0))$", RED, 74, 20)
+        _label(_tips[0], _dv, r"$\gamma'(t_0)$", ORANGE, 40, 16)
+        _label(_tips[1], _dg, r"$\vec{\nabla} f(\gamma(t_0))$", GREEN, 74, 20)
 
     _ax.set_xlim(*_xlim)
     _ax.set_ylim(*_ylim)
@@ -410,6 +428,7 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, math, mo, np, t0, table, vect
     _ax.set_ylabel("$x^2$")
     for _sp in ("top", "right"):
         _ax.spines[_sp].set_visible(False)
+    legend_box(_fig, [("dot", "black", r"$\gamma(t_0)$"), ("line", GREY, r"level set of $f$ through $\gamma(t_0)$"), ("line", LIGHT, "level sets of $f$")], loc="outside lower center", ncols=3)
 
     mo.vstack(
         [
@@ -417,8 +436,8 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, math, mo, np, t0, table, vect
             table(
                 [
                     (r"$\gamma(t_0)$", rf"$\begin{{bmatrix}} {_p[0]:.3f} \\ {_p[1] + 0.0:.3f} \end{{bmatrix}}$"),
-                    (r"$\gamma'(t_0)$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_v[0] + 0.0:.3f} \\ {_v[1]:.3f} \end{{bmatrix}}}}$"),
-                    (r"$\vec{\nabla} f(\gamma(t_0))$", rf"$\textcolor{{{RED}}}{{\begin{{bmatrix}} {_g[0] + 0.0:.3f} \\ {_g[1]:.3f} \end{{bmatrix}}}}$"),
+                    (r"$\gamma'(t_0)$", rf"$\textcolor{{{ORANGE}}}{{\begin{{bmatrix}} {_v[0] + 0.0:.3f} \\ {_v[1]:.3f} \end{{bmatrix}}}}$"),
+                    (r"$\vec{\nabla} f(\gamma(t_0))$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_g[0] + 0.0:.3f} \\ {_g[1]:.3f} \end{{bmatrix}}}}$"),
                     (r"$Df(\gamma(t_0))(\gamma'(t_0))$", rf"${_dot:.3f}$"),
                     (r"$5 t_0^4$", rf"${5 * _t**4:.3f}$"),
                     (r"level set of $f$ through $\gamma(t_0)$", rf"$\textcolor{{{GREY}}}{{f(\vec{{x}}) = t_0^5 = {_level + 0.0:.3f}}}$"),

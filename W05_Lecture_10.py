@@ -169,7 +169,25 @@ def _(arrow):
         if ylabel:
             ax.annotate(ylabel, (0, ylim[1]), textcoords="offset points", xytext=(6, -2), fontsize=12, ha="left", va="top")
 
-    return (cross_axes,)
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return cross_axes, legend_box
 
 
 @app.cell(hide_code=True)
@@ -424,9 +442,9 @@ def _(BLUE, GREEN, HALF, RED, arrow, blank, cross_axes, math, mo, np, theorem):
     _ax.plot(_r * np.cos(_th), _r * np.sin(_th), color=RED, lw=1.4)
     _a = (_R * math.cos(_phi), _R * math.sin(_phi))
     arrow(_ax, _a, (3 * _a[0], 3 * _a[1]), GREEN)
-    arrow(_ax, (0, 0), _a, BLUE)
+    arrow(_ax, (0, 0), _a, "black")
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
-    _ax.text(1.3, 0.75, r"$\vec{a}$", color=BLUE, fontsize=13, ha="left", va="top", bbox=_box)
+    _ax.text(1.3, 0.75, r"$\vec{a}$", fontsize=13, ha="left", va="top", bbox=_box)
     _ax.text(4.5, 2.1, r"$\vec{\nabla} f(\vec{a}) = 2\vec{a}$", color=GREEN, fontsize=13, ha="left", va="top")
     _ax.text(-1.75, 1.9, r"$f^{-1}(R^2)$", color=BLUE, fontsize=12, ha="right", va="bottom")
     _ax.text(-0.95, -1.2, r"$f^{-1}(r^2)$", color=RED, fontsize=12, ha="center", va="center")
@@ -501,14 +519,14 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, ORANGE, cross_axes, ga1, ga2, math, mo, np, table, vector):
+def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, ORANGE, cross_axes, ga1, ga2, legend_box, math, mo, np, table, vector):
     _a = (round(ga1.value, 10) + 0.0, round(ga2.value, 10) + 0.0)
     _R = math.hypot(*_a)
     _grad = (2 * _a[0], 2 * _a[1])
     _v = (-_a[1] + 0.0, _a[0])  # one vector orthogonal to the gradient
     _lim = 3.8 if max(abs(_grad[0] + _a[0]), abs(_grad[1] + _a[1])) <= 3 else 5.6  # the frame follows the gradient: nothing is clipped
 
-    _fig = Figure(figsize=(HALF, HALF), layout="constrained")
+    _fig = Figure(figsize=(HALF, HALF + 0.7 if _R > 0 else HALF), layout="constrained")  # room for the legend
     _ax = _fig.subplots()
     _ax.set_xlim(-_lim, _lim)
     _ax.set_ylim(-_lim, _lim)
@@ -519,21 +537,18 @@ def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, ORANGE, cross_axes, ga1, ga2, math
         _ax.plot(_r * np.cos(_th), _r * np.sin(_th), color=LIGHT, lw=0.8)
     cross_axes(_ax, (-_lim, _lim), (-_lim, _lim), "$x^1$", "$x^2$")
     if _R > 0:
-        _d = math.atan2(_a[1], _a[0])
         _ax.plot(_R * np.cos(_th), _R * np.sin(_th), color=BLUE, lw=1.4)
         _t = (-_a[1] / _R, _a[0] / _R)
         _ax.plot([_a[0] - 2.2 * _t[0], _a[0] + 2.2 * _t[0]], [_a[1] - 2.2 * _t[1], _a[1] + 2.2 * _t[1]], color=GREY, lw=1.0, ls=(0, (4, 3)))
         vector(_ax, _a, (_a[0] + _grad[0], _a[1] + _grad[1]), GREEN, r"$\vec{\nabla} f(\vec{a})$", 0, r=22)
         vector(_ax, _a, (_a[0] + _v[0], _a[1] + _v[1]), ORANGE, r"$\vec{v}$", 45, r=16)
-        _crowded = _R < 0.5  # near the origin the labels of a and of the level set would pile up on the others
-        vector(_ax, (0, 0), _a, BLUE, None if _crowded else r"$\vec{a}$", -45, r=16)
-        _q = _d - math.radians(135)
-        if not _crowded:
-            _ax.annotate(r"$f^{-1}(R^2)$", (_R * math.cos(_q), _R * math.sin(_q)), textcoords="offset points", xytext=(30 * math.cos(_q), 16 * math.sin(_q)), ha="center", va="center", color=BLUE, fontsize=12, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
+        _crowded = _R < 0.5  # near the origin the label of a would pile up on the others
+        vector(_ax, (0, 0), _a, "black", None if _crowded else r"$\vec{a}$", -45, r=16)
+        legend_box(_fig, [("line", BLUE, "$f^{-1}(R^2)$"), ("line", GREY, "tangent line to $f^{-1}(R^2)$", (0, (4, 3)))], loc="outside lower center")
         _perp = rf"$\textcolor{{{ORANGE}}}{{\begin{{bmatrix}} {_v[0]:g} \\ {_v[1]:g} \end{{bmatrix}}}}$"
         _dot = rf"$({_grad[0]:g})({_v[0]:g}) + ({_grad[1]:g})({_v[1]:g}) = 0$"
     else:
-        vector(_ax, (0, 0), _a, BLUE, r"$\vec{a}$", 0)
+        vector(_ax, (0, 0), _a, "black", r"$\vec{a}$", 0)
         _perp = _dot = r"need $\vec{\nabla} f(\vec{a}) \neq \vec{0}$"
 
     mo.vstack(
@@ -541,7 +556,7 @@ def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, ORANGE, cross_axes, ga1, ga2, math
             mo.hstack([ga1, ga2], justify="start", gap=2, wrap=True),
             table(
                 [
-                    (r"$\vec{a}$", rf"$\textcolor{{{BLUE}}}{{\begin{{bmatrix}} {_a[0]:g} \\ {_a[1]:g} \end{{bmatrix}}}}$"),
+                    (r"$\vec{a}$", rf"$\begin{{bmatrix}} {_a[0]:g} \\ {_a[1]:g} \end{{bmatrix}}$"),
                     (r"$f(\vec{a}) = R^2$", rf"$\textcolor{{{BLUE}}}{{{_R**2:.2f}}}$"),
                     (r"$\vec{\nabla} f(\vec{a}) = 2\vec{a}$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_grad[0]:g} \\ {_grad[1]:g} \end{{bmatrix}}}}$"),
                     (r"$\vec{v} = \begin{bmatrix} -a^2 \\ a^1 \end{bmatrix} \in \big( \vec{\nabla} f(\vec{a}) \big)^{\perp}$", _perp),
@@ -555,8 +570,8 @@ def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, ORANGE, cross_axes, ga1, ga2, math
 
 
 @app.cell(hide_code=True)
-def _(BLUE, GREEN, GREY, HALF, arrow, blank, definition, mo, np, theorem):
-    _fig, _ax = blank(HALF, 2.0, (-2.3, 2.9), (-1.05, 1.85))
+def _(BLUE, GREEN, GREY, HALF, arrow, blank, definition, legend_box, mo, np, theorem):
+    _fig, _ax = blank(HALF, 2.45, (-2.3, 2.9), (-1.05, 1.85))
     _x = np.linspace(-2.1, 2.1, 100)
     _ax.plot(_x, -0.12 * _x**2 - 0.15 * _x, color=BLUE, lw=1.4)
     _n = np.array([0.15, 1.0]) / np.hypot(0.15, 1.0)
@@ -565,9 +580,9 @@ def _(BLUE, GREEN, GREY, HALF, arrow, blank, definition, mo, np, theorem):
     _ax.plot(_sq[:, 0], _sq[:, 1], color=GREY, lw=0.8)
     arrow(_ax, (0, 0), tuple(1.4 * _n), GREEN)
     _ax.plot(0, 0, "o", color="black", ms=4, zorder=4)
-    _ax.text(-0.08, -0.14, r"$\vec{a}$", fontsize=13, ha="center", va="top")
     _ax.text(0.38, 1.4, r"$\vec{\nabla} f(\vec{a})$", color=GREEN, fontsize=13, ha="left", va="center")
     _ax.text(2.0, -0.55, r"$f^{-1}(b)$", color=BLUE, fontsize=13, ha="left", va="bottom")
+    legend_box(_fig, [("dot", "black", r"$\vec{a}$")], loc="outside lower center")
 
     mo.vstack(
         [

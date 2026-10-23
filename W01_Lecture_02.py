@@ -141,21 +141,33 @@ def _(header):
 
 
 @app.cell(hide_code=True)
-def _(arrow, math):
-    def vector(ax, tail, tip, color, label=None, turn=0, r=15, **kw):
-        """Arrow from `tail` to `tip` (a dot when it has zero length), labelled beyond its tip on a white box;
-        `turn` (degrees) rotates the label about the tip so that coinciding vectors keep separate labels."""
-        dx, dy = tip[0] - tail[0], tip[1] - tail[1]
-        if dx == 0 and dy == 0:
+def _(arrow):
+    def vector(ax, tail, tip, color, **kw):
+        """Arrow from `tail` to `tip` (a dot when it has zero length)."""
+        if tip[0] == tail[0] and tip[1] == tail[1]:
             ax.plot(*tip, "o", color=color, ms=4, zorder=4)
-            d = math.radians(45 + turn)
         else:
             arrow(ax, tail, tip, color, **kw)
-            d = math.atan2(dy, dx) + math.radians(turn)
-        if label:
-            ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    return (vector,)
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return legend_box, vector
 
 
 @app.cell(hide_code=True)
@@ -324,15 +336,15 @@ def _(np, x1, x2, y1, y2):
 
 
 @app.cell(hide_code=True)
-def _(Arc, BLUE, Figure, GREEN, HALF, RED, controls, dot, math, mo, nonzero, nx, ny, plane, table, vector, x, y):
-    _fig = Figure(figsize=(HALF, HALF), layout="constrained")
+def _(Arc, BLUE, Figure, GREEN, HALF, RED, controls, dot, legend_box, math, mo, nonzero, nx, ny, plane, table, vector, x, y):
+    _fig = Figure(figsize=(HALF, HALF + 0.4), layout="constrained")
     _ax = _fig.subplots()
     plane(_ax, 6)
     _ax.set_xticks(range(-4, 5, 2))
     _ax.set_yticks(range(-4, 5, 2))
-    _side = -1 if x[0] * y[1] - x[1] * y[0] < 0 else 1  # labels go on the outer side of each arrow
-    vector(_ax, (0, 0), tuple(x), BLUE, r"$\vec{x}$", -75 * _side)
-    vector(_ax, (0, 0), tuple(y), RED, r"$\vec{y}$", 75 * _side)
+    vector(_ax, (0, 0), tuple(x), BLUE)
+    vector(_ax, (0, 0), tuple(y), RED)
+    _legend = [("line", BLUE, r"$\vec{x}$"), ("line", RED, r"$\vec{y}$")]
 
     _need = r"need $\vec{x}, \vec{y} \neq \vec{0}$"
     if nonzero:
@@ -343,10 +355,12 @@ def _(Arc, BLUE, Figure, GREEN, HALF, RED, controls, dot, math, mo, nonzero, nx,
         if (_a2 - _a1) % 360 > 180:
             _a1, _a2 = _a2, _a1
         _ax.add_patch(Arc((0, 0), 1.6, 1.6, theta1=_a1, theta2=_a2, color=GREEN, lw=1.4))
+        _legend.append(("line", GREEN, r"$\theta(\vec{x}, \vec{y})$"))
         _quotient = rf"${_cos:.3f}$"
         _angle = rf"$\textcolor{{{GREEN}}}{{{_theta:.3f} \text{{ rad}} = {math.degrees(_theta):.1f}^\circ}}$"
     else:
         _quotient = _angle = _need
+    legend_box(_fig, _legend, loc="outside lower center", ncols=3)
 
     mo.vstack(
         [
@@ -429,17 +443,18 @@ def _(mo, theorem):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, HALF, LIGHT, controls, dot, mo, np, table, x, y):
+def _(BLUE, Figure, GREEN, HALF, LIGHT, controls, dot, legend_box, mo, np, table, x, y):
     _xx, _yy = float(x @ x), float(y @ y)  # exact for the slider values, unlike the squares of the norms
     _disc = (2 * dot) ** 2 - 4 * _xx * _yy
     _vertex = -dot / _xx if _xx > 0 else 0.0
     _t = np.sort(np.append(np.linspace(min(-4, _vertex - 2), max(4, _vertex + 2), 400), _vertex))
     _p = _t**2 * _xx + 2 * _t * dot + _yy
 
-    _fig = Figure(figsize=(HALF, 2.8), layout="constrained")
+    _fig = Figure(figsize=(HALF, 3.5), layout="constrained")
     _ax = _fig.subplots()
     _ax.plot(_t, _p, color=BLUE)
-    _ax.plot(_vertex, float(_p.min()), "o", color="black", ms=4, zorder=4)
+    _ax.plot(_vertex, float(_p.min()), "o", color=GREEN, ms=5, zorder=4)
+    legend_box(_fig, [("line", BLUE, r"$\|t\vec{x} + \vec{y}\|^2$"), ("dot", GREEN, r"minimum of $\|t\vec{x} + \vec{y}\|^2$")], loc="outside lower center")
     _ax.axhline(0, color="black", lw=0.8)
     _ax.axvline(0, color="black", lw=0.8)
     _ax.grid(True, color=LIGHT, lw=0.6)
@@ -468,20 +483,20 @@ def _(BLUE, Figure, HALF, LIGHT, controls, dot, mo, np, table, x, y):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, HALF, RED, controls, mo, np, nx, ny, plane, table, theorem, vector, x, y):
+def _(BLUE, Figure, GREEN, HALF, RED, controls, legend_box, mo, np, nx, ny, plane, table, theorem, vector, x, y):
     _s = x + y
     _ns = float(np.sqrt(_s @ _s))
 
-    _fig = Figure(figsize=(HALF, HALF), layout="constrained")
+    _fig = Figure(figsize=(HALF, HALF + 0.4), layout="constrained")
     _ax = _fig.subplots()
     plane(_ax, 11.5)
     _ax.set_xticks(range(-8, 9, 4))
     _ax.set_yticks(range(-8, 9, 4))
     vector(_ax, tuple(x), tuple(_s), RED, linestyle=(0, (4, 3)))  # y translated to the tip of x
-    vector(_ax, (0, 0), tuple(_s), GREEN, r"$\vec{x}+\vec{y}$", 0, r=24)
-    _side = -1 if x[0] * y[1] - x[1] * y[0] < 0 else 1  # labels go on the outer side of each arrow
-    vector(_ax, (0, 0), tuple(x), BLUE, r"$\vec{x}$", -75 * _side)
-    vector(_ax, (0, 0), tuple(y), RED, r"$\vec{y}$", 75 * _side)
+    vector(_ax, (0, 0), tuple(_s), GREEN)
+    vector(_ax, (0, 0), tuple(x), BLUE)
+    vector(_ax, (0, 0), tuple(y), RED)
+    legend_box(_fig, [("line", BLUE, r"$\vec{x}$"), ("line", RED, r"$\vec{y}$"), ("line", GREEN, r"$\vec{x}+\vec{y}$")], loc="outside lower center", ncols=3)
 
     mo.vstack(
         [
@@ -573,7 +588,7 @@ def _(definition, mo, theorem):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, arrow, definition, mo):
+def _(FULL, Figure, GREY, arrow, definition, mo):
     def _pr(x1, x2, x3):
         """Oblique projection of R^3, as on the board: x^2 to the right, x^3 up, x^1 towards the viewer."""
         return x2 - 0.45 * x1, x3 - 0.4 * x1
@@ -587,22 +602,22 @@ def _(BLUE, FULL, Figure, arrow, definition, mo):
         _ax.axis("off")
     arrow(_a2, (-0.6, 0), (1.9, 0), "black", lw=0.9)
     arrow(_a2, (0, -0.6), (0, 1.9), "black", lw=0.9)
-    arrow(_a2, (0, 0), (1, 0), BLUE)
-    arrow(_a2, (0, 0), (0, 1), BLUE)
-    _a2.text(0.55, -0.14, r"$\vec{e}_1$", color=BLUE, fontsize=13, ha="center", va="top")
-    _a2.text(-0.14, 0.55, r"$\vec{e}_2$", color=BLUE, fontsize=13, ha="right", va="center")
+    arrow(_a2, (0, 0), (1, 0), GREY)
+    arrow(_a2, (0, 0), (0, 1), GREY)
+    _a2.text(0.55, -0.14, r"$\vec{e}_1$", color=GREY, fontsize=13, ha="center", va="top")
+    _a2.text(-0.14, 0.55, r"$\vec{e}_2$", color=GREY, fontsize=13, ha="right", va="center")
     _a2.text(-1.4, 1.75, r"$\mathbb{R}^2$", fontsize=13)
 
     arrow(_a3, _pr(-0.5, 0, 0), _pr(1.9, 0, 0), "black", lw=0.9)
     arrow(_a3, (-0.6, 0), (1.9, 0), "black", lw=0.9)
     arrow(_a3, (0, -0.6), (0, 1.9), "black", lw=0.9)
-    arrow(_a3, (0, 0), _pr(1, 0, 0), BLUE)
-    arrow(_a3, (0, 0), (1, 0), BLUE)
-    arrow(_a3, (0, 0), (0, 1), BLUE)
+    arrow(_a3, (0, 0), _pr(1, 0, 0), GREY)
+    arrow(_a3, (0, 0), (1, 0), GREY)
+    arrow(_a3, (0, 0), (0, 1), GREY)
     _e1 = _pr(1, 0, 0)
-    _a3.text(_e1[0] - 0.12, _e1[1] + 0.12, r"$\vec{e}_1$", color=BLUE, fontsize=13, ha="right", va="bottom")
-    _a3.text(0.6, -0.14, r"$\vec{e}_2$", color=BLUE, fontsize=13, ha="center", va="top")
-    _a3.text(0.14, 0.6, r"$\vec{e}_3$", color=BLUE, fontsize=13, ha="left", va="center")
+    _a3.text(_e1[0] - 0.12, _e1[1] + 0.12, r"$\vec{e}_1$", color=GREY, fontsize=13, ha="right", va="bottom")
+    _a3.text(0.6, -0.14, r"$\vec{e}_2$", color=GREY, fontsize=13, ha="center", va="top")
+    _a3.text(0.14, 0.6, r"$\vec{e}_3$", color=GREY, fontsize=13, ha="left", va="center")
     _a3.text(-1.4, 1.75, r"$\mathbb{R}^3$", fontsize=13)
 
     mo.vstack(

@@ -155,7 +155,25 @@ def _(arrow, math):
         if label:
             ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    return (vector,)
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return legend_box, vector
 
 
 @app.cell(hide_code=True)
@@ -251,7 +269,7 @@ def _(Arc, BLUE, GREEN, GREY, HALF, LIGHT, RED, arrow, blank, definition, math, 
                 r"""
     $\leadsto$ &nbsp; one of the main characteristics of a matrix
 
-    $\leadsto$ &nbsp; use to determine if $A : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ admits an inverse
+    $\leadsto$ &nbsp; used to determine if $A : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ admits an inverse
 
     $\leadsto$ &nbsp; measure of how $A$ “deforms” areas in $\mathbb{R}^2$
     """
@@ -483,7 +501,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, arrow, ma, math, mb, mc, md, mo, plane, table, vector):
+def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, arrow, legend_box, ma, math, mb, mc, md, mo, plane, table, vector):
     _a, _b, _c, _d = ma.value, mb.value, mc.value, md.value
     _det = _a * _d - _b * _c + 0.0
 
@@ -494,7 +512,7 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, arrow, ma, math, mb, mc, md, 
         end = (radius * math.cos(t2), radius * math.sin(t2))
         arrow(ax, start, end, GREEN, connectionstyle=f"arc3,rad={0.35 if ccw else -0.35}")
 
-    _fig = Figure(figsize=(FULL, 3.7), layout="constrained")
+    _fig = Figure(figsize=(FULL, 4.4), layout="constrained")
     _left, _right = _fig.subplots(1, 2)
 
     plane(_left, 2.2)
@@ -502,8 +520,8 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, arrow, ma, math, mb, mc, md, 
     _left.set_yticks(range(-2, 3))
     _left.fill([0, 1, 1, 0], [0, 0, 1, 1], color=LIGHT, lw=0)
     _left.plot([1, 1, 0], [0, 1, 1], color=GREY, lw=1.0, ls=(0, (4, 3)))
-    vector(_left, (0, 0), (1, 0), BLUE, r"$\vec{e}_1$", -75)
-    vector(_left, (0, 0), (0, 1), RED, r"$\vec{e}_2$", 75)
+    vector(_left, (0, 0), (1, 0), BLUE)
+    vector(_left, (0, 0), (0, 1), RED)
     _turn(_left, (1, 0), (0, 1), True, 0.45)
 
     _small = max(abs(_a), abs(_b), abs(_c), abs(_d), abs(_a + _b), abs(_c + _d)) <= 3
@@ -513,9 +531,19 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, arrow, ma, math, mb, mc, md, 
     _right.set_yticks(_ticks)
     _right.fill([0, _a, _a + _b, _b], [0, _c, _c + _d, _d], color=LIGHT, lw=0)
     _right.plot([_a, _a + _b, _b], [_c, _c + _d, _d], color=GREY, lw=1.0, ls=(0, (4, 3)))
-    _side = -1 if _det < 0 else 1  # labels go on the outer side of each arrow
-    vector(_right, (0, 0), (_a, _c), BLUE, r"$\vec{A}_1$", -75 * _side)
-    vector(_right, (0, 0), (_b, _d), RED, r"$\vec{A}_2$", 75 * _side)
+    vector(_right, (0, 0), (_a, _c), BLUE)
+    vector(_right, (0, 0), (_b, _d), RED)
+    legend_box(
+        _fig,
+        [
+            ("line", BLUE, r"$\vec{e}_1$, $\vec{A}_1 = A\vec{e}_1$"),
+            ("line", RED, r"$\vec{e}_2$, $\vec{A}_2 = A\vec{e}_2$"),
+            ("area", LIGHT, r"unit square, $A$ (unit square)", GREY),
+            ("line", GREEN, r"turn from $\vec{e}_1$ to $\vec{e}_2$, from $\vec{A}_1$ to $\vec{A}_2$"),
+        ],
+        loc="outside lower center",
+        ncols=2,
+    )
     if _det != 0:
         _r = 0.45 * min(math.hypot(_a, _c), math.hypot(_b, _d), 2.0)
         _turn(_right, (_a, _c), (_b, _d), _det > 0, max(_r, 0.3))
@@ -530,7 +558,7 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, arrow, ma, math, mb, mc, md, 
                 [
                     (r"$A = \begin{bmatrix} \vec{A}_1 & \vec{A}_2 \end{bmatrix}$", rf"$\begin{{bmatrix}} \textcolor{{{BLUE}}}{{{_a:g}}} & \textcolor{{{RED}}}{{{_b:g}}} \\ \textcolor{{{BLUE}}}{{{_c:g}}} & \textcolor{{{RED}}}{{{_d:g}}} \end{{bmatrix}}$"),
                     (r"$\det A = ad - bc$", rf"$({_a:g})({_d:g}) - ({_b:g})({_c:g}) = {_det:g}$"),
-                    (r"area of $A$(unit square) $= \lvert \det A \rvert$", rf"${abs(_det):g}$"),
+                    (r"area of $A$ (unit square) $= \lvert \det A \rvert$", rf"${abs(_det):g}$"),
                     (r"turn from $\vec{A}_1$ to $\vec{A}_2$", _direction),
                 ]
             ),

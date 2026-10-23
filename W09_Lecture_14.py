@@ -883,7 +883,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, cross_axes, mo, np):
+def _(BLUE, FULL, Figure, GREY, ORANGE, cross_axes, mo, np):
     # the three cases, one panel each, with a critical point at a
     _a = 1.3
     _cases = (
@@ -904,7 +904,7 @@ def _(BLUE, FULL, Figure, GREEN, GREY, cross_axes, mo, np):
         _ax.plot(_x, _f(_x), color=BLUE, lw=1.6, label=r"$y = f(x)$")
         if _d2 != 0:
             _ax.plot(_w, np.full_like(_w, _f(_a)), color=GREY, lw=1.0, ls=(0, (4, 3)), label=r"$y = f(a)$")
-        _ax.plot(_w, _f(_a) + 0.5 * _d2 * (_w - _a) ** 2, color=GREEN, lw=1.4, label=r"$y = f(a) + \frac{1}{2} f''(a)(x - a)^2$")
+        _ax.plot(_w, _f(_a) + 0.5 * _d2 * (_w - _a) ** 2, color=ORANGE, lw=1.4, label=r"$y = f(a) + \frac{1}{2} f''(a)(x - a)^2$")
         _ax.plot(_a, _f(_a), "o", color="black", ms=4, zorder=5)
         _ax.plot([_a, _a], [-0.05, 0.05], color="black", lw=0.9)
         _ax.text(_a, -0.1, "$a$", ha="center", va="top", fontsize=12, bbox=_box)

@@ -141,21 +141,40 @@ def _(header):
 
 
 @app.cell(hide_code=True)
-def _(arrow, math):
-    def vector(ax, tail, tip, color, label=None, turn=0, r=15, **kw):
-        """Arrow from `tail` to `tip` (a dot when it has zero length), labelled beyond its tip on a white box;
-        `turn` (degrees) rotates the label about the tip so that coinciding vectors keep separate labels."""
-        dx, dy = tip[0] - tail[0], tip[1] - tail[1]
-        if dx == 0 and dy == 0:
-            ax.plot(*tip, "o", color=color, ms=4, zorder=4)
-            d = math.radians(45 + turn)
-        else:
-            arrow(ax, tail, tip, color, **kw)
-            d = math.atan2(dy, dx) + math.radians(turn)
-        if label:
-            ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
+def _(np):
+    def angle_mark(ax, angle, name, color):
+        """The angle `angle` (radians, from the first axis) as an arc about the origin, which spirals outwards after a
+        full turn; its `name` sits in the widest quadrant the last turn sweeps, so that it never lies on an axis."""
+        th = np.linspace(0, angle, max(2, int(40 * angle)))
+        r = 0.3 + 0.2 * np.maximum(th - 2 * np.pi, 0) / (2 * np.pi)
+        ax.plot(r * np.cos(th), r * np.sin(th), color=color, lw=1.0)
+        if angle < 0.5:
+            return
+        lo = max(0.0, angle - 2 * np.pi)
+        a, b = max(((max(lo, k * np.pi / 2), min(angle, (k + 1) * np.pi / 2)) for k in range(8)), key=lambda p: p[1] - p[0])
+        m = (a + b) / 2
+        d = 0.5 + 0.2 * max(m - 2 * np.pi, 0) / (2 * np.pi)
+        ax.text(d * np.cos(m), d * np.sin(m), name, color=color, fontsize=12, ha="center", va="center", bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    return (vector,)
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return angle_mark, legend_box
 
 
 @app.cell(hide_code=True)
@@ -285,26 +304,23 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(Arc, BLUE, FULL, GREY, HALF, arrow, blank, helix, math, mo, np, path_axes, path_projection, t_circle, table, vector):
+def _(BLUE, FULL, GREY, HALF, angle_mark, arrow, blank, helix, legend_box, math, mo, np, path_axes, path_projection, t_circle, table):
     _t = t_circle.value
     _p = (math.cos(_t), math.sin(_t))
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
 
-    # Im(gamma): the unit circle
-    _fig, _ax = blank(HALF, 3.3, (-1.7, 2.0), (-1.6, 1.8))
+    # Im(gamma): the unit circle, with the position gamma(t) in black as in every figure of the lecture
+    _fig, _ax = blank(HALF + 1.2, 3.3, (-1.6, 2.0), (-1.6, 1.8))
     arrow(_ax, (-1.5, 0), (1.75, 0), "black", lw=0.9)
     arrow(_ax, (0, -1.5), (0, 1.6), "black", lw=0.9)
     _ax.text(1.8, -0.06, "$y^1$", fontsize=13, ha="center", va="top")
     _ax.text(-0.1, 1.62, "$y^2$", fontsize=13, ha="right", va="center")
     _th = np.linspace(0, 2 * np.pi, 361)
     _ax.plot(np.cos(_th), np.sin(_th), color=BLUE, lw=1.5)
-    _angle = _t % (2 * math.pi)
-    _ax.add_patch(Arc((0, 0), 0.6, 0.6, theta1=0, theta2=math.degrees(_angle), color=GREY, lw=1.0))
-    if _angle >= 0.5:
-        _ax.text(0.5 * math.cos(_angle / 2), 0.5 * math.sin(_angle / 2), "$t$" if _t < 2 * math.pi else r"$t \ \mathrm{mod}\ 2\pi$", color=GREY, fontsize=12, ha="center", va="center", bbox=_box)
-    vector(_ax, (0, 0), _p, BLUE, r"$\gamma(t)$", -35, r=19)
+    angle_mark(_ax, _t, "$t$", GREY)
+    arrow(_ax, (0, 0), _p, "black")
     _ax.plot(*_p, "o", color="black", ms=4, zorder=4)
-    _ax.text(-1.65, 1.6, r"$\mathrm{Im}(\gamma)$", fontsize=13, ha="left", va="center")
+    legend_box(_fig, [("line", BLUE, r"$\mathrm{Im}(\gamma)$"), ("dot", "black", r"$\gamma(t)$")])
 
     # graph(gamma): the helix; its points have three coordinates (t, gamma(t))
     _fig3, _ax3 = blank(FULL, 3.55, (-2.4, 5.6), (-1.95, 1.9))
@@ -335,7 +351,7 @@ def _(Arc, BLUE, FULL, GREY, HALF, arrow, blank, helix, math, mo, np, path_axes,
             mo.hstack([t_circle], justify="start", gap=2, wrap=True),
             table(
                 [
-                    (r"$\gamma(t)$", rf"$\textcolor{{{BLUE}}}{{\begin{{bmatrix}} {_f(_p[0])} \\ {_f(_p[1])} \end{{bmatrix}}}}$"),
+                    (r"$\gamma(t)$", rf"$\begin{{bmatrix}} {_f(_p[0])} \\ {_f(_p[1])} \end{{bmatrix}}$"),
                     (r"$(t, \gamma(t))$", rf"$\begin{{bmatrix}} {_t:.1f} \\ {_f(_p[0])} \\ {_f(_p[1])} \end{{bmatrix}}$"),
                 ]
             ),
@@ -537,26 +553,24 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(Arc, BLUE, GREEN, GREY, HALF, a_circle, arrow, blank, math, mo, np, table, vector):
+def _(BLUE, GREEN, GREY, HALF, a_circle, angle_mark, arrow, blank, legend_box, math, mo, np, table):
     _a = a_circle.value
     _p = (math.cos(_a), math.sin(_a))
     _v = (-math.sin(_a), math.cos(_a))
     _tip = (_p[0] + _v[0], _p[1] + _v[1])
-    _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
 
-    _fig, _ax = blank(HALF, 3.4, (-2.25, 2.25), (-2.1, 2.15))
+    _fig, _ax = blank(HALF + 1.3, 3.4, (-2.0, 2.25), (-2.1, 2.15))
     arrow(_ax, (-1.9, 0), (1.95, 0), "black", lw=0.9)
     arrow(_ax, (0, -1.9), (0, 1.95), "black", lw=0.9)
     _ax.text(2.0, -0.08, "$y^1$", fontsize=13, ha="center", va="top")
     _ax.text(0.1, 1.98, "$y^2$", fontsize=13, ha="left", va="center")
     _th = np.linspace(0, 2 * np.pi, 361)
     _ax.plot(np.cos(_th), np.sin(_th), color=BLUE, lw=1.5)
-    _ax.add_patch(Arc((0, 0), 0.6, 0.6, theta1=0, theta2=math.degrees(_a), color=GREY, lw=1.0))
-    if _a >= 0.5:
-        _ax.text(0.5 * math.cos(_a / 2), 0.5 * math.sin(_a / 2), "$a$", color=GREY, fontsize=12, ha="center", va="center", bbox=_box)
-    vector(_ax, (0, 0), _p, BLUE, r"$\gamma(a)$", -40, r=20)
-    vector(_ax, _p, _tip, GREEN, r"$\gamma'(a)$", 0, r=19)
+    angle_mark(_ax, _a, "$a$", GREY)
+    arrow(_ax, (0, 0), _p, "black")
+    arrow(_ax, _p, _tip, GREEN)
     _ax.plot(*_p, "o", color="black", ms=4, zorder=4)
+    legend_box(_fig, [("line", BLUE, r"$\mathrm{Im}(\gamma)$"), ("dot", "black", r"$\gamma(a)$"), ("line", GREEN, r"$\gamma'(a)$")])
 
     def _f(v):
         return f"{round(v, 2) + 0.0:.2f}"
@@ -566,7 +580,7 @@ def _(Arc, BLUE, GREEN, GREY, HALF, a_circle, arrow, blank, math, mo, np, table,
             mo.hstack([a_circle], justify="start", gap=2, wrap=True),
             table(
                 [
-                    (r"position $\gamma(a)$", rf"$\textcolor{{{BLUE}}}{{\begin{{bmatrix}} {_f(_p[0])} \\ {_f(_p[1])} \end{{bmatrix}}}}$"),
+                    (r"position $\gamma(a)$", rf"$\begin{{bmatrix}} {_f(_p[0])} \\ {_f(_p[1])} \end{{bmatrix}}$"),
                     (r"velocity $\gamma'(a)$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_f(_v[0])} \\ {_f(_v[1])} \end{{bmatrix}}}}$"),
                 ]
             ),
@@ -621,30 +635,28 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, GREEN, ORANGE, a_parabola, arrow, blank, math, mo, np, table, vector):
+def _(BLUE, FULL, GREEN, ORANGE, a_parabola, arrow, blank, legend_box, mo, np, table):
     _a = a_parabola.value
     _p, _v = (_a**2, _a), (2 * _a, 1.0)
     _tip = (_p[0] + _v[0], _p[1] + _v[1])
-    _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
 
-    _fig, _ax = blank(FULL, 4.2, (-3.6, 6.4), (-2.7, 3.0))
+    _fig, _ax = blank(FULL, 4.6, (-3.6, 6.4), (-2.7, 3.0))
     arrow(_ax, (-3.4, 0), (6.1, 0), "black", lw=0.9)
     arrow(_ax, (0, -2.6), (0, 2.8), "black", lw=0.9)
     _ax.text(6.15, -0.1, "$y^1$", fontsize=13, ha="center", va="top")
     _ax.text(-0.12, 2.8, "$y^2$", fontsize=13, ha="right", va="center")
     _t = np.linspace(-2.45, 2.45, 300)
     _ax.plot(_t**2, _t, color=BLUE, lw=1.5)
-    _ax.text(5.0, -1.75, r"$\mathrm{Im}(\gamma)$", color=BLUE, fontsize=13, ha="center", va="center")
     _s = np.array([-12.0, 12.0])
     _ax.plot(_p[0] + _s * _v[0], _p[1] + _s * _v[1], color=ORANGE, lw=1.0 if _a != 0 else 2.0, zorder=2 if _a != 0 else 3)  # at a = 0 it lies on the y^2-axis: drawn wider, over it
-    # the names sit off the line: T_a gamma on the outer side of the parabola, gamma(a) on the inner side
-    _n = math.hypot(*_v)
-    _out = (-_v[1] / _n, _v[0] / _n)
-    _q = (_p[0] - 1.4 * _v[0] / _n, _p[1] - 1.4 * _v[1] / _n)
-    _ax.annotate(r"$T_a\gamma$", _q, textcoords="offset points", xytext=(15 * _out[0], 15 * _out[1]), ha="center", va="center", color=ORANGE, fontsize=13, bbox=_box, zorder=3)
-    vector(_ax, _p, _tip, GREEN, r"$\gamma'(a)$", 0, r=20)
+    arrow(_ax, _p, _tip, GREEN)
     _ax.plot(*_p, "o", color="black", ms=4, zorder=4)
-    _ax.annotate(r"$\gamma(a)$", _p, textcoords="offset points", xytext=(-19 * _out[0], -19 * _out[1]), ha="center", va="center", fontsize=13, bbox=_box, zorder=3)
+    legend_box(
+        _fig,
+        [("line", BLUE, r"$\mathrm{Im}(\gamma)$"), ("dot", "black", r"$\gamma(a)$"), ("line", GREEN, r"$\gamma'(a)$"), ("line", ORANGE, r"$T_a\gamma$")],
+        loc="outside lower center",
+        ncols=4,
+    )
 
     mo.vstack(
         [

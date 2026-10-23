@@ -155,15 +155,33 @@ def _(arrow, math):
         if label:
             ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    return (vector,)
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return legend_box, vector
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, GREEN, RED, arrow, blank, mo, np, vector):
+def _(BLUE, FULL, GREEN, ORANGE, RED, arrow, blank, legend_box, mo, np, vector):
     def _gamma(t):
         return 5.1 + 2.9 * t, 1.7 + 1.0 * np.sin(3.3 * t) - 0.3 * t
 
-    _fig, _ax = blank(FULL, 3.0, (-0.2, 11.7), (-0.55, 4.25))
+    _fig, _ax = blank(FULL, 3.5, (-0.2, 11.7), (-0.55, 4.25))
     # the time axis
     arrow(_ax, (0, 1.2), (3.0, 1.2), "black", lw=0.9)
     for _x, _name in ((1.0, "$a$"), (1.8, "$t$")):
@@ -182,11 +200,10 @@ def _(BLUE, FULL, GREEN, RED, arrow, blank, mo, np, vector):
     arrow(_ax, _pa, _pt, RED)
     vector(_ax, _pa, (_pa[0] + _va[0], _pa[1] + _va[1]), GREEN, r"$\gamma'(a)$", 0, r=20)
     _ax.plot(*_pa, "o", color="black", ms=4, zorder=4)
-    _ax.plot(*_pt, "o", color="black", ms=4, zorder=4)
-    _ax.annotate(r"$\gamma(a)$", _pa, textcoords="offset points", xytext=(-8, 4), ha="right", va="bottom", fontsize=13)
-    _ax.annotate(r"$\gamma(t)$", _pt, textcoords="offset points", xytext=(7, 5), ha="left", va="bottom", fontsize=13)
+    _ax.plot(*_pt, "o", color=ORANGE, ms=4, zorder=4)
     _end = _gamma(1.9)
     _ax.text(_end[0] + 0.15, _end[1], r"$\mathrm{Im}(\gamma)$", fontsize=13, ha="left", va="center")
+    legend_box(_fig, [("dot", "black", r"$\gamma(a)$"), ("dot", ORANGE, r"$\gamma(t)$"), ("line", RED, r"$\gamma(t) - \gamma(a)$")], loc="outside lower center", ncols=3)
 
     mo.vstack(
         [
@@ -265,8 +282,8 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, RED, arrow, blank, definition, mo):
-    _fig, _ax = blank(FULL, 2.9, (-0.7, 9.0), (-0.55, 3.2))
+def _(BLUE, FULL, RED, arrow, blank, definition, legend_box, mo):
+    _fig, _ax = blank(FULL, 3.4, (-0.7, 9.0), (-0.55, 3.2))
     arrow(_ax, (-0.4, 0), (4.5, 0), "black", lw=0.9)
     arrow(_ax, (0, -0.4), (0, 3.0), "black", lw=0.9)
     _ax.text(4.5, -0.12, "$x^1$", fontsize=13, ha="center", va="top")
@@ -276,20 +293,25 @@ def _(BLUE, FULL, RED, arrow, blank, definition, mo):
     arrow(_ax, (_a[0], 0.2), (_a[0], 2.9), RED)
     _ax.text(4.1, _a[1], "$t$", color=BLUE, fontsize=13, ha="left", va="center")
     _ax.text(_a[0], 2.95, "$s$", color=RED, fontsize=13, ha="center", va="bottom")
-    for _pt, _name, _off, _ha, _va in (
-        (_a, r"$\vec{a}$", (-6, -6), "right", "top"),
-        ((2.9, _a[1]), r"$\vec{a} + t\vec{e}_1$", (0, -7), "center", "top"),
-        ((_a[0], 2.2), r"$\vec{a} + s\vec{e}_2$", (8, 0), "left", "center"),
-    ):
-        _ax.plot(*_pt, "o", color="black", ms=4, zorder=4)
-        _ax.annotate(_name, _pt, textcoords="offset points", xytext=_off, ha=_ha, va=_va, fontsize=13)
+    # the points and their values, coloured as the line they lie on
+    for _pt, _c in ((_a, "black"), ((2.9, _a[1]), BLUE), ((_a[0], 2.2), RED)):
+        _ax.plot(*_pt, "o", color=_c, ms=4, zorder=4)
     arrow(_ax, (4.9, 2.0), (5.9, 2.0), "black", connectionstyle="arc3,rad=-0.3")
     _ax.text(5.4, 2.32, "$f$", fontsize=13, ha="center", va="bottom")
     # the real line of values
     arrow(_ax, (6.6, -0.4), (6.6, 3.0), "black", lw=0.9)
-    for _y, _name in ((2.2, r"$f(\vec{a} + t\vec{e}_1)$"), (1.3, r"$f(\vec{a})$"), (0.5, r"$f(\vec{a} + s\vec{e}_2)$")):
-        _ax.plot(6.6, _y, "o", color="black", ms=4, zorder=4)
-        _ax.text(6.8, _y, _name, fontsize=13, ha="left", va="center")
+    for _y, _c in ((2.2, BLUE), (1.3, "black"), (0.5, RED)):
+        _ax.plot(6.6, _y, "o", color=_c, ms=4, zorder=4)
+    legend_box(
+        _fig,
+        [
+            ("dot", "black", r"$\vec{a}$, $f(\vec{a})$"),
+            ("dot", BLUE, r"$\vec{a} + t\vec{e}_1$, $f(\vec{a} + t\vec{e}_1)$"),
+            ("dot", RED, r"$\vec{a} + s\vec{e}_2$, $f(\vec{a} + s\vec{e}_2)$"),
+        ],
+        loc="outside lower center",
+        ncols=3,
+    )
 
     mo.vstack(
         [
@@ -384,7 +406,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, angle, math, mo, np, table, vector):
+def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, angle, legend_box, math, mo, np, table, vector):
     _th = math.radians(angle.value)
     _v = (round(math.cos(_th), 12) + 0.0, round(math.sin(_th), 12) + 0.0)
     _a = (1.0, 1.0)
@@ -397,8 +419,7 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, angle, math, mo, np, table, vector
     def _n(x):
         return f"{round(x, 2) + 0.0:.2f}"
 
-    _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
-    _fig = Figure(figsize=(FULL, 3.7), layout="constrained")
+    _fig = Figure(figsize=(FULL, 4.4), layout="constrained")
     _left, _right = _fig.subplots(1, 2)
 
     # level sets of f, the segment a + t v (t in [-1, 1]) and the direction v
@@ -408,8 +429,6 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, angle, math, mo, np, table, vector
     _left.plot([_a[0] - _v[0], _a[0] + _v[0]], [_a[1] - _v[1], _a[1] + _v[1]], color=BLUE, lw=1.0, ls=(0, (4, 3)))
     vector(_left, _a, (_a[0] + _v[0], _a[1] + _v[1]), BLUE, r"$\vec{v}$")
     _left.plot(*_a, "o", color="black", ms=4, zorder=4)
-    _left.annotate(r"$\vec{a}$", _a, textcoords="offset points", xytext=(14 * _v[1], -14 * _v[0]), ha="center", va="center", fontsize=13, zorder=5, bbox=_box)
-    _left.text(-0.33, -0.33, "level sets of $f$", color=GREY, fontsize=12, ha="left", va="bottom", bbox=_box)
     _left.set_xlim(-0.4, 2.4)
     _left.set_ylim(-0.4, 2.4)
     _left.set_aspect("equal")
@@ -432,11 +451,18 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, angle, math, mo, np, table, vector
     _right.set_xticks([-1, -0.5, 0, 0.5, 1])
     _right.set_yticks([0, 5, 10, 15])
     _right.set_xlabel("$t$")
-    # the two labels sit in the upper corner that the graph leaves free
-    _free_left = _f(_a[0] + _v[0], _a[1] + _v[1]) >= _f(_a[0] - _v[0], _a[1] - _v[1])
-    _x, _ha = (-0.94, "left") if _free_left else (0.94, "right")
-    _right.text(_x, 14.9, r"$f(\vec{a} + t\vec{v})$", color=BLUE, fontsize=12, ha=_ha, va="top", bbox=_box)
-    _right.text(_x, 12.9, r"$f(\vec{a}) + t\, Df(\vec{a})(\vec{v})$", color=GREEN, fontsize=12, ha=_ha, va="top", bbox=_box)
+    legend_box(
+        _fig,
+        [
+            ("dot", "black", r"$\vec{a}$, $f(\vec{a})$"),
+            ("line", GREY, "level sets of $f$"),
+            ("line", BLUE, r"$\vec{a} + t\vec{v}$", (0, (4, 3))),
+            ("line", BLUE, r"$f(\vec{a} + t\vec{v})$"),
+            ("line", GREEN, r"$f(\vec{a}) + t\, Df(\vec{a})(\vec{v})$"),
+        ],
+        loc="outside lower center",
+        ncols=3,
+    )
 
     mo.vstack(
         [

@@ -160,20 +160,42 @@ def _(arrow, math):
 
 @app.cell(hide_code=True)
 def _(arrow):
-    def cross_axes(ax, xlim, ylim, x0, y0):
-        """A bare pair of coordinate axes through the origin, starting at x0 and y0."""
+    def cross_axes(ax, xlim, ylim, x0, y0, xlabel=None, ylabel=None):
+        """A bare pair of coordinate axes through the origin, starting at x0 and y0, named at their tips."""
         ax.set_xlim(*xlim)
         ax.set_ylim(*ylim)
         ax.axis("off")
         arrow(ax, (x0, 0), (xlim[1], 0), "black", lw=0.9)
         arrow(ax, (0, y0), (0, ylim[1]), "black", lw=0.9)
+        if xlabel:
+            ax.annotate(xlabel, (xlim[1], 0), textcoords="offset points", xytext=(0, -6), ha="right", va="top", fontsize=13)
+        if ylabel:
+            ax.annotate(ylabel, (0, ylim[1]), textcoords="offset points", xytext=(6, 0), ha="left", va="top", fontsize=13)
 
     def signed(value, digits=2):
         """A number as ' + 1.20' or ' - 1.20', for writing out sums."""
         v = round(value, digits) + 0.0
         return f"{'-' if v < 0 else '+'} {abs(v):.{digits}f}"
 
-    return cross_axes, signed
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return cross_axes, legend_box, signed
 
 
 @app.cell(hide_code=True)
@@ -318,21 +340,33 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, RED, a_taylor, cross_axes, math, mo, np, signed, table):
+def _(BLUE, FULL, Figure, GREEN, GREY, ORANGE, a_taylor, cross_axes, legend_box, math, mo, np, signed, table):
     _a = a_taylor.value
     _fa = math.exp(_a)
     _x = np.linspace(-2.6, 2.6, 300)
 
-    _fig = Figure(figsize=(FULL, 3.7), layout="constrained")
+    _fig = Figure(figsize=(FULL, 4.7), layout="constrained")
     _ax = _fig.subplots()
-    cross_axes(_ax, (-2.6, 2.8), (-0.85, 5.2), -2.6, -0.25)
+    cross_axes(_ax, (-2.6, 2.8), (-0.85, 5.2), -2.6, -0.25, "$x$", "$y$")
     _ax.plot(_x, np.full_like(_x, _fa), color=GREY, lw=1.2, ls=(0, (4, 3)))
-    _ax.plot(_x, _fa + _fa * (_x - _a), color=RED, lw=1.4)
-    _ax.plot(_x, _fa + _fa * (_x - _a) + 0.5 * _fa * (_x - _a) ** 2, color=GREEN, lw=1.4)
+    _ax.plot(_x, _fa + _fa * (_x - _a), color=GREEN, lw=1.4)
+    _ax.plot(_x, _fa + _fa * (_x - _a) + 0.5 * _fa * (_x - _a) ** 2, color=ORANGE, lw=1.4)
     _ax.plot(_x, np.exp(_x), color=BLUE, lw=1.6)
     _ax.plot(_a, _fa, "o", color="black", ms=4, zorder=4)
     _ax.plot([_a, _a], [-0.08, 0.08], color="black", lw=0.9)
     _ax.text(_a, -0.55, "$a$", ha="center", va="center", fontsize=13)
+    legend_box(
+        _fig,
+        [
+            ("line", BLUE, "$y = f(x)$"),
+            ("line", GREY, "$y = f(a)$", (0, (4, 3))),
+            ("dot", "black", r"$\genfrac{[}{]}{0}{0}{a}{f(a)}$"),
+            ("line", GREEN, "$y = f(a) + f'(a)(x - a)$"),
+            ("line", ORANGE, r"$y = f(a) + f'(a)(x - a) + \frac{1}{2} f''(a)(x - a)^2$"),
+        ],
+        loc="outside lower center",
+        ncols=2,
+    )
 
     _da = "x" if abs(_a) < 1e-9 else rf"(x {signed(-_a, 1)})"
     mo.vstack(
@@ -342,8 +376,8 @@ def _(BLUE, FULL, Figure, GREEN, GREY, RED, a_taylor, cross_axes, math, mo, np, 
                 [
                     (r"$y = f(x)$", rf"$\textcolor{{{BLUE}}}{{y = e^x}}$"),
                     (r"$y = f(a)$", rf"$\textcolor{{{GREY}}}{{y = {_fa:.3f}}}$"),
-                    (r"$y = f(a) + f'(a)(x - a)$", rf"$\textcolor{{{RED}}}{{y = {_fa:.3f} + {_fa:.3f}\,{_da}}}$"),
-                    (r"$y = f(a) + f'(a)(x - a) + \frac{1}{2} f''(a)(x - a)^2$", rf"$\textcolor{{{GREEN}}}{{y = {_fa:.3f} + {_fa:.3f}\,{_da} + {_fa / 2:.3f}\,{_da}^2}}$"),
+                    (r"$y = f(a) + f'(a)(x - a)$", rf"$\textcolor{{{GREEN}}}{{y = {_fa:.3f} + {_fa:.3f}\,{_da}}}$"),
+                    (r"$y = f(a) + f'(a)(x - a) + \frac{1}{2} f''(a)(x - a)^2$", rf"$\textcolor{{{ORANGE}}}{{y = {_fa:.3f} + {_fa:.3f}\,{_da} + {_fa / 2:.3f}\,{_da}^2}}$"),
                 ]
             ),
             _fig,

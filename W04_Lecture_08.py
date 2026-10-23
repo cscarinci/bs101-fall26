@@ -173,35 +173,58 @@ def _(arrow):
         if ylabel:
             ax.annotate(ylabel, (0, ylim[1]), textcoords="offset points", xytext=(8, -10), fontsize=13)
 
-    return (cross_axes,)
+    def legend_box(fig, entries, loc="outside right center", ncols=1):
+        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
+        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        handles = []
+        for kind, c, _label, *style in entries:
+            if kind == "dot":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
+            elif kind == "ring":
+                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
+            elif kind == "line":
+                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
+            else:
+                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
+        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+
+    return cross_axes, legend_box
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, cross_axes, math, mo, np):
-    _fig = Figure(figsize=(FULL, 2.5), layout="constrained")
-    _ax, _ax2 = _fig.subplots(1, 2)
+def _(BLUE, FULL, Figure, GREEN, cross_axes, legend_box, math, mo, np):
+    _fig = Figure(figsize=(FULL, 3.6), layout="constrained")
+    _sub, _sub2 = _fig.subfigures(1, 2)
+    _ax, _ax2 = _sub.subplots(), _sub2.subplots()
 
-    cross_axes(_ax, (-2.3, 2.9), (-0.9, 2.6))
+    cross_axes(_ax, (-1.9, 1.9), (-0.6, 2.4))
     _t = np.linspace(-1.5, 1.5, 200)
     _ax.plot(_t, _t**2, color=BLUE, lw=1.4)
     _ax.plot(0, 0, "o", color="black", ms=6, mfc="white", mew=1.2, zorder=4)
-    _ax.plot(0, 1, "o", color="black", ms=4, zorder=4)
-    _ax.plot(-1.2, 1.44, "o", color=BLUE, ms=4)
-    _ax.text(-1.38, 1.44, r"$\genfrac{[}{]}{0}{0}{t}{t^2}$", color=BLUE, fontsize=13, ha="right", va="center")
-    _ax.text(0.16, 1.0, r"$\genfrac{[}{]}{0}{0}{0}{1}$", fontsize=13, ha="left", va="center")
-    _ax.text(1.62, 2.0, r"$\mathrm{Im}(\gamma)$", color=BLUE, fontsize=12, ha="left", va="center")
-    _ax.text(0.16, -0.5, "not continuous", fontsize=12, ha="left", va="center")
+    _ax.plot(0, 1, "o", color="black", ms=5, zorder=4)
+    _ax.plot(-1.2, 1.44, "o", color=BLUE, ms=5, zorder=4)
+    legend_box(
+        _sub,
+        [("line", BLUE, r"$\mathrm{Im}(\gamma)$"), ("dot", BLUE, r"$\genfrac{[}{]}{0}{0}{t}{t^2}$"), ("dot", "black", r"$\genfrac{[}{]}{0}{0}{0}{1}$"), ("ring", "black", "not continuous")],
+        loc="outside lower center",
+        ncols=2,
+    )
 
-    cross_axes(_ax2, (-2.0, 3.2), (-1.6, 1.9))
+    cross_axes(_ax2, (-1.6, 1.9), (-1.5, 1.7))
     _th = np.linspace(0, 2 * np.pi, 200)
     _ax2.plot(np.cos(_th), np.sin(_th), color=BLUE, lw=1.4)
-    _ax2.plot(1, 0, "o", color=BLUE, ms=5, zorder=4)
-    _ax2.plot(0, 1, "o", color="black", ms=4, zorder=4)
-    _c, _s = math.cos(0.7), math.sin(0.7)
-    _ax2.plot(_c, _s, "o", color=BLUE, ms=4)
-    _ax2.text(_c + 0.16, _s + 0.1, r"$\genfrac{[}{]}{0}{0}{\cos(t)}{\sin(t)}$", color=BLUE, fontsize=13, ha="left", va="center")
-    _ax2.text(-0.16, 1.32, r"$\genfrac{[}{]}{0}{0}{0}{1}$", fontsize=13, ha="right", va="center")
-    _ax2.text(1.14, -0.42, r"$\lim_{t \to 0} \sigma(t)$", fontsize=12, ha="left", va="center")
+    _ax2.plot(1, 0, "o", color=GREEN, ms=5, zorder=4)
+    _ax2.plot(0, 1, "o", color="black", ms=5, zorder=4)
+    _ax2.plot(math.cos(0.7), math.sin(0.7), "o", color=BLUE, ms=5, zorder=4)
+    legend_box(
+        _sub2,
+        [("line", BLUE, r"$\mathrm{Im}(\sigma)$"), ("dot", BLUE, r"$\genfrac{[}{]}{0}{0}{\cos(t)}{\sin(t)}$"), ("dot", "black", r"$\genfrac{[}{]}{0}{0}{0}{1}$"), ("dot", GREEN, r"$\lim_{t \to 0} \sigma(t)$")],
+        loc="outside lower center",
+        ncols=2,
+    )
 
     mo.vstack(
         [
@@ -251,8 +274,8 @@ def _(BLUE, FULL, Figure, cross_axes, math, mo, np):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, GREEN, GREY, HALF, LIGHT, arrow, blank, definition, mo, np):
-    _fig, _ax = blank(HALF, 2.9, (-0.4, 3.8), (-0.4, 3.0))
+def _(BLUE, GREEN, GREY, HALF, LIGHT, RED, arrow, blank, definition, legend_box, mo, np):
+    _fig, _ax = blank(HALF + 1.5, 2.9, (-0.4, 3.8), (-0.4, 3.0))
     arrow(_ax, (-0.3, 0), (3.7, 0), "black", lw=0.9)
     arrow(_ax, (0, -0.3), (0, 2.9), "black", lw=0.9)
     _a, _d = (2.1, 1.5), 1.15
@@ -262,14 +285,13 @@ def _(BLUE, GREEN, GREY, HALF, LIGHT, arrow, blank, definition, mo, np):
     _x = (1.35, 2.05)
     _r = (_a[0] + _d * np.cos(-0.5), _a[1] + _d * np.sin(-0.5))
     _ax.plot([_a[0], _r[0]], [_a[1], _r[1]], color=GREY, lw=1.0, ls=(0, (4, 3)))
-    _ax.text(2.72, 1.36, r"$\delta$", color=GREY, fontsize=13, ha="center", va="bottom")
     arrow(_ax, (0, 0), _a, "black")
-    arrow(_ax, (0, 0), _x, GREY)
+    arrow(_ax, (0, 0), _x, RED)
     arrow(_ax, _a, _x, GREEN)
-    _ax.text(2.2, 1.56, r"$\vec{a}$", fontsize=13, ha="left", va="bottom")
-    _ax.text(0.5, 1.05, r"$\vec{x}$", color=GREY, fontsize=13, ha="right", va="bottom")
-    _ax.text(1.85, 1.92, r"$\vec{x} - \vec{a}$", color=GREEN, fontsize=12, ha="left", va="bottom")
-    _ax.text(3.0, 2.55, r"$B(\vec{a}, \delta)$", color=BLUE, fontsize=12, ha="left", va="bottom")
+    legend_box(
+        _fig,
+        [("line", "black", r"$\vec{a}$"), ("line", RED, r"$\vec{x}$"), ("line", GREEN, r"$\vec{x} - \vec{a}$"), ("line", GREY, r"$\delta$", (0, (4, 3))), ("area", LIGHT, r"$B(\vec{a}, \delta)$", BLUE)],
+    )
 
     mo.vstack(
         [
@@ -317,8 +339,10 @@ def _(BLUE, GREEN, GREY, HALF, LIGHT, arrow, blank, definition, mo, np):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, LIGHT, RED, arrow, blank, blob, definition, mo, np):
-    _fig, _ax = blank(FULL, 2.75, (-0.5, 10.6), (-0.75, 3.35))
+def _(BLUE, FULL, GREEN, LIGHT, RED, arrow, blank, blob, definition, legend_box, mo, np):
+    # the ball about a (blue), the image of the punctured ball (green) and the ball about b (red), as in the next figures
+    _tint = (0.18, 0.49, 0.2, 0.18)
+    _fig, _ax = blank(FULL, 3.4, (-0.5, 10.1), (-0.75, 3.35))
     _th = np.linspace(0, 2 * np.pi, 200)
     # domain
     arrow(_ax, (-0.4, 0), (3.4, 0), "black", lw=0.9)
@@ -326,9 +350,7 @@ def _(BLUE, FULL, LIGHT, RED, arrow, blank, blob, definition, mo, np):
     _ax.text(-0.15, 3.05, r"$\mathbb{R}^n$", fontsize=13, ha="right", va="center")
     _ax.fill(1.5 + 0.85 * np.cos(_th), 1.75 + 0.85 * np.sin(_th), color=LIGHT, lw=0)
     _ax.plot(1.5 + 0.85 * np.cos(_th), 1.75 + 0.85 * np.sin(_th), color=BLUE, lw=1.2, ls=(0, (4, 3)))
-    _ax.plot(1.5, 1.75, "o", color="black", ms=4)
-    _ax.text(1.62, 1.78, r"$\vec{a}$", fontsize=13, ha="left", va="bottom")
-    _ax.text(1.5, 0.72, r"$B(\vec{a}, \delta)$", color=BLUE, fontsize=12, ha="center", va="top")
+    _ax.plot(1.5, 1.75, "o", color="black", ms=5, zorder=4)
     # the map
     arrow(_ax, (3.7, 2.2), (5.0, 2.2), "black", connectionstyle="arc3,rad=-0.3")
     _ax.text(4.35, 2.55, "$f$", fontsize=13, ha="center", va="bottom")
@@ -341,13 +363,21 @@ def _(BLUE, FULL, LIGHT, RED, arrow, blank, blob, definition, mo, np):
     _c, _r = (7.9, 1.9), 1.2
     _ax.plot(_c[0] + _r * np.cos(_th), _c[1] + _r * np.sin(_th), color=RED, lw=1.2, ls=(0, (4, 3)))
     _bx, _by = blob(7.45, 2.35, 0.48, 0.3, seed=3)
-    _ax.fill(_bx, _by, color=LIGHT, lw=0)
-    _ax.plot(_bx, _by, color=BLUE, lw=1.2)
-    _ax.plot(8.2, 1.65, "o", color="black", ms=4)
-    _ax.text(8.32, 1.68, r"$\vec{b}$", fontsize=13, ha="left", va="bottom")
-    _ax.text(9.2, 1.2, r"$B(\vec{b}, \varepsilon)$", color=RED, fontsize=12, ha="left", va="center")
-    _ax.text(9.0, 3.0, r"$f(B(\vec{a}, \delta) - \{\vec{a}\})$", color=BLUE, fontsize=12, ha="left", va="center")
-    _ax.plot([7.9, 8.93], [2.5, 2.95], color=BLUE, lw=0.8)
+    _ax.fill(_bx, _by, color=_tint, lw=0)
+    _ax.plot(_bx, _by, color=GREEN, lw=1.2)
+    _ax.plot(8.2, 1.65, "o", color=RED, ms=5, zorder=4)
+    legend_box(
+        _fig,
+        [
+            ("area", LIGHT, r"$B(\vec{a}, \delta)$", BLUE),
+            ("dot", "black", r"$\vec{a}$"),
+            ("line", RED, r"$B(\vec{b}, \varepsilon)$", (0, (4, 3))),
+            ("dot", RED, r"$\vec{b}$"),
+            ("area", _tint, r"$f(B(\vec{a}, \delta) \setminus \{\vec{a}\})$", GREEN),
+        ],
+        loc="outside lower center",
+        ncols=3,
+    )
 
     mo.vstack(
         [
@@ -365,17 +395,17 @@ def _(BLUE, FULL, LIGHT, RED, arrow, blank, blob, definition, mo, np):
             ),
             mo.md(
                 r"""
-    $\leadsto$ &nbsp; for every $\varepsilon > 0$, we can find $\delta > 0$ such that $\vec{x} \in B(\vec{a}, \delta) - \{\vec{a}\}$ guarantees that $f(\vec{x}) \in B(\vec{b}, \varepsilon)$
+    $\leadsto$ &nbsp; for every $\varepsilon > 0$, we can find $\delta > 0$ such that $\vec{x} \in B(\vec{a}, \delta) \setminus \{\vec{a}\}$ guarantees that $f(\vec{x}) \in B(\vec{b}, \varepsilon)$
 
     $$
-    \Longleftrightarrow \qquad f\big( B(\vec{a}, \delta) - \{\vec{a}\} \big) \subseteq B(\vec{b}, \varepsilon)
+    \Longleftrightarrow \qquad f\big( B(\vec{a}, \delta) \setminus \{\vec{a}\} \big) \subseteq B(\vec{b}, \varepsilon)
     $$
     """
             ),
             _fig,
             mo.md(
                 r"""
-    Choose $B(\vec{b}, \varepsilon)$. Can we find $B(\vec{a}, \delta)$ such that $f\big( B(\vec{a}, \delta) - \{\vec{a}\} \big) \subseteq B(\vec{b}, \varepsilon)$?
+    Choose $B(\vec{b}, \varepsilon)$. Can we find $B(\vec{a}, \delta)$ such that $f\big( B(\vec{a}, \delta) \setminus \{\vec{a}\} \big) \subseteq B(\vec{b}, \varepsilon)$?
 
     If yes for every $\varepsilon > 0$ &nbsp; $\Longrightarrow$ &nbsp; $\displaystyle \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b}$!
 
@@ -434,37 +464,48 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, LIGHT, RED, arrow, cross_axes, eps, mo, np, table):
+def _(BLUE, FULL, Figure, GREEN, LIGHT, RED, arrow, cross_axes, eps, legend_box, mo, np, table):
     _e = eps.value
     _d = _e / 2
-    _fig = Figure(figsize=(FULL, 3.3), layout="constrained")
-    _left, _right = _fig.subplots(1, 2, width_ratios=[1.3, 1])
+    _fig = Figure(figsize=(FULL, 3.9), layout="constrained")
+    _left, _right = _fig.subplots(1, 2, width_ratios=[1.3, 0.8])
 
     cross_axes(_left, (-1.5, 1.6), (-1.3, 1.4), "$x^1$", "$x^2$")
     _th = np.linspace(0, 2 * np.pi, 200)
     _left.fill(_d * np.cos(_th), _d * np.sin(_th), color=LIGHT, lw=0, zorder=0)
     _left.plot(_d * np.cos(_th), _d * np.sin(_th), color=BLUE, lw=1.2, ls=(0, (4, 3)))
     _left.plot(0, 0, "o", color="black", ms=5, mfc="white", mew=1.1, zorder=4)
-    _left.annotate(r"$B(\vec{0}, \delta) - \{\vec{0}\}$", (_d * 0.707, -_d * 0.707), textcoords="offset points", xytext=(5, -5), color=BLUE, fontsize=12, ha="left", va="top")
 
-    _right.set_xlim(-1.3, 3.2)
+    _right.set_xlim(-1.0, 1.4)
     _right.set_ylim(-2.6, 5.9)
     _right.axis("off")
     arrow(_right, (0, -2.6), (0, 5.85), "black", lw=0.9)
     _right.text(-0.2, 5.75, r"$\mathbb{R}$", fontsize=13, ha="right", va="top")
-    for _y, _ly, _name in ((_e, max(_e, 0.6), r"$\varepsilon$"), (-_e, min(-_e, -0.6), r"$-\varepsilon$"), (0, 0, "$0$"), (5, 5, "$5$")):
+    # tick labels at their ticks; below 0.6 the labels of +-eps sit just above and below them, and below 0.3 the 0 is not written
+    _near = _e < 0.6
+    for _y, _name, _va in ((_e, r"$\varepsilon$", "bottom" if _near else "center"), (-_e, r"$-\varepsilon$", "top" if _near else "center"), (0, "$0$", "center"), (5, "$5$", "center")):
         _right.plot([-0.07, 0.07], [_y, _y], color="black", lw=0.9)
-        _right.text(-0.2, _ly, _name, ha="right", va="center", fontsize=12)
+        if _y != 0 or _e >= 0.3:
+            _right.text(-0.2, _y, _name, ha="right", va=_va, fontsize=12)
     # the interval B(0, eps) and the image of the punctured ball, drawn beside the axis
     _right.plot([0.3, 0.3], [-_e, _e], color=RED, lw=1.4)
     _right.plot([0.3, 0.3], [-_e, _e], "o", color=RED, ms=5, mfc="white", mew=1.1, zorder=4)
-    _right.plot([0.6, 0.6], [0, _e], color=BLUE, lw=1.4)
-    _right.plot(0.6, 0, "o", color=BLUE, ms=5, zorder=4)
-    _right.plot(0.6, _e, "o", color=BLUE, ms=5, mfc="white", mew=1.1, zorder=4)
-    _right.plot(0, 5, "o", color="black", ms=4, zorder=4)
-    _right.text(0.3, 5, r"$f(\vec{0})$", fontsize=12, ha="left", va="center")
-    _right.text(0.85, max(_e / 2, 0.5), r"$f(B(\vec{0}, \delta) - \{\vec{0}\})$", color=BLUE, fontsize=12, ha="left", va="center")
-    _right.text(0.85, min(-_e / 2, -0.5), r"$B(0, \varepsilon)$", color=RED, fontsize=12, ha="left", va="center")
+    _right.plot([0.6, 0.6], [0, _e], color=GREEN, lw=1.4)
+    _right.plot(0.6, 0, "o", color=GREEN, ms=5, zorder=4)
+    _right.plot(0.6, _e, "o", color=GREEN, ms=5, mfc="white", mew=1.1, zorder=4)
+    _right.plot(0, 5, "o", color="black", ms=5, zorder=4)
+    legend_box(
+        _fig,
+        [
+            ("area", LIGHT, r"$B(\vec{0}, \delta) \setminus \{\vec{0}\}$", BLUE),
+            ("ring", "black", r"$\vec{0}$"),
+            ("dot", "black", r"$f(\vec{0})$"),
+            ("line", GREEN, r"$f(B(\vec{0}, \delta) \setminus \{\vec{0}\})$"),
+            ("line", RED, r"$B(0, \varepsilon)$"),
+        ],
+        loc="outside lower center",
+        ncols=3,
+    )
 
     mo.vstack(
         [
@@ -472,7 +513,7 @@ def _(BLUE, FULL, Figure, LIGHT, RED, arrow, cross_axes, eps, mo, np, table):
             table(
                 [
                     (r"$\delta = \varepsilon / 2$", rf"${_d:g}$"),
-                    (r"$f\big( B(\vec{0}, \delta) - \{\vec{0}\} \big)$", rf"$\textcolor{{{BLUE}}}{{[0,\, {_e:g})}}$"),
+                    (r"$f\big( B(\vec{0}, \delta) \setminus \{\vec{0}\} \big)$", rf"$\textcolor{{{GREEN}}}{{[0,\, {_e:g})}}$"),
                     (r"$B(0, \varepsilon)$", rf"$\textcolor{{{RED}}}{{({-_e:g},\, {_e:g})}}$"),
                 ]
             ),
@@ -483,29 +524,38 @@ def _(BLUE, FULL, Figure, LIGHT, RED, arrow, cross_axes, eps, mo, np, table):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, GREY, LIGHT, arrow, blank, blob, mo, np, theorem):
-    _fig, _ax = blank(FULL, 2.3, (-0.3, 9.1), (-0.25, 2.75))
+def _(BLUE, FULL, GREEN, GREY, LIGHT, ORANGE, RED, arrow, blank, blob, legend_box, mo, np, theorem):
+    _tint = (0.18, 0.49, 0.2, 0.18)
+    _fig, _ax = blank(FULL, 3.3, (-0.3, 9.1), (0.2, 2.75))
     _th = np.linspace(0, 2 * np.pi, 200)
     _ax.fill(1.2 + 0.8 * np.cos(_th), 1.5 + 0.8 * np.sin(_th), color=LIGHT, lw=0)
     _ax.plot(1.2 + 0.8 * np.cos(_th), 1.5 + 0.8 * np.sin(_th), color=BLUE, lw=1.2, ls=(0, (4, 3)))
     _ax.plot([1.2, 1.2 + 0.8 * 0.82], [1.5, 1.5 + 0.8 * 0.57], color=GREY, lw=1.0, ls=(0, (4, 3)))
-    _ax.plot(1.2, 1.5, "o", color="black", ms=5, mfc="white", mew=1.1, zorder=4)
-    _ax.text(1.12, 1.36, r"$\vec{a}$", fontsize=13, ha="center", va="top")
-    _ax.text(1.42, 1.86, r"$\delta$", color=GREY, fontsize=12, ha="right", va="bottom")
-    _ax.text(1.2, 0.58, r"$B(\vec{a}, \delta)$", color=BLUE, fontsize=12, ha="center", va="top")
+    _ax.plot(1.2, 1.5, "o", color="black", ms=5, zorder=4)
     arrow(_ax, (2.5, 2.0), (3.8, 2.0), "black", connectionstyle="arc3,rad=-0.3")
     _ax.text(3.15, 2.33, "$f$", fontsize=13, ha="center", va="bottom")
-    for _c, _name in ((5.5, r"$\vec{b}_1$"), (7.7, r"$\vec{b}_2$")):
-        _ax.plot(_c + 1.1 * np.cos(_th), 1.5 + 1.1 * np.sin(_th), color="black", lw=1.0, ls=(0, (4, 3)))
+    for _c, _col in ((5.5, RED), (7.7, ORANGE)):
+        _ax.plot(_c + 1.1 * np.cos(_th), 1.5 + 1.1 * np.sin(_th), color=_col, lw=1.2, ls=(0, (4, 3)))
         _ax.plot([_c, _c + 1.1], [1.5, 1.5], color=GREY, lw=1.0, ls=(0, (4, 3)))
-        _ax.plot(_c, 1.5, "o", color="black", ms=4, zorder=4)
-        _ax.text(_c, 1.36, _name, fontsize=13, ha="center", va="top")
-        _ax.text(_c + 0.6, 1.56, r"$\varepsilon$", color=GREY, fontsize=12, ha="center", va="bottom")
+        _ax.plot(_c, 1.5, "o", color=_col, ms=5, zorder=4)
     _bx, _by = blob(5.15, 2.05, 0.4, 0.26, seed=3)
-    _ax.fill(_bx, _by, color=LIGHT, lw=0)
-    _ax.plot(_bx, _by, color=BLUE, lw=1.2)
-    _ax.plot([4.85, 4.3], [1.86, 0.5], color=BLUE, lw=0.8)
-    _ax.text(4.3, 0.42, r"$f(B(\vec{a}, \delta) \setminus \{\vec{a}\})$", color=BLUE, fontsize=12, ha="right", va="top")
+    _ax.fill(_bx, _by, color=_tint, lw=0)
+    _ax.plot(_bx, _by, color=GREEN, lw=1.2)
+    legend_box(
+        _fig,
+        [
+            ("area", LIGHT, r"$B(\vec{a}, \delta)$", BLUE),
+            ("dot", "black", r"$\vec{a}$"),
+            ("line", GREY, r"$\delta$, $\varepsilon$", (0, (4, 3))),
+            ("area", _tint, r"$f(B(\vec{a}, \delta) \setminus \{\vec{a}\})$", GREEN),
+            ("line", RED, r"$B(\vec{b}_1, \varepsilon)$", (0, (4, 3))),
+            ("dot", RED, r"$\vec{b}_1$"),
+            ("line", ORANGE, r"$B(\vec{b}_2, \varepsilon)$", (0, (4, 3))),
+            ("dot", ORANGE, r"$\vec{b}_2$"),
+        ],
+        loc="outside lower center",
+        ncols=4,
+    )
 
     mo.vstack(
         [
@@ -607,22 +657,21 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, arrow, cross_axes, math, mo, np, table, theta):
+def _(BLUE, FULL, Figure, GREEN, GREY, arrow, cross_axes, legend_box, math, mo, np, table, theta):
     _a = math.radians(theta.value)
     _c, _s = math.cos(_a) + 0.0, math.sin(_a) + 0.0
     _c, _s = (0.0 if abs(_c) < 1e-12 else _c), (0.0 if abs(_s) < 1e-12 else _s)
     _val = _c**2
 
-    _fig = Figure(figsize=(FULL, 3.3), layout="constrained")
-    _left, _right = _fig.subplots(1, 2, width_ratios=[1.3, 1])
+    _fig = Figure(figsize=(FULL, 3.9), layout="constrained")
+    _left, _right = _fig.subplots(1, 2, width_ratios=[1.3, 0.8])
     cross_axes(_left, (-1.5, 1.6), (-1.3, 1.4), "$x^1$", "$x^2$")
     _th = np.linspace(0, 2 * np.pi, 200)
     _left.plot(0.8 * np.cos(_th), 0.8 * np.sin(_th), color=GREY, lw=1.0, ls=(0, (4, 3)))
     _left.plot([-1.1 * _c, 1.1 * _c], [-1.1 * _s, 1.1 * _s], color=BLUE, lw=1.4, zorder=3.5)
-    _left.plot(0, 0, "o", color=BLUE, ms=5, mfc="white", mew=1.1, zorder=4)
-    _left.text(0.95, -1.05, r"$B(\vec{0}, \delta)$", color=GREY, fontsize=12, ha="center", va="center", zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
+    _left.plot(0, 0, "o", color="black", ms=5, mfc="white", mew=1.1, zorder=4)
 
-    _right.set_xlim(-1.2, 2.2)
+    _right.set_xlim(-1.2, 1.4)
     _right.set_ylim(-0.5, 1.6)
     _right.axis("off")
     arrow(_right, (0, -0.5), (0, 1.58), "black", lw=0.9)
@@ -631,7 +680,17 @@ def _(BLUE, FULL, Figure, GREEN, GREY, arrow, cross_axes, math, mo, np, table, t
         _right.plot([-0.05, 0.05], [_y, _y], color="black", lw=0.9)
         _right.text(-0.15, _y, f"${_y}$", ha="right", va="center", fontsize=12)
     _right.plot(0, _val, "o", color=GREEN, ms=5, zorder=4)
-    _right.text(0.2, _val, rf"$f(\vec{{x}}) = {_val:.2f}$", color=GREEN, fontsize=12, ha="left", va="center")
+    legend_box(
+        _fig,
+        [
+            ("line", GREY, r"$B(\vec{0}, \delta)$", (0, (4, 3))),
+            ("line", BLUE, rf"$\vec{{x}} = t \genfrac{{[}}{{]}}{{0}}{{0}}{{{_c:.2f}}}{{{_s:.2f}}}, \ t \neq 0$"),
+            ("ring", "black", r"$\vec{0}$"),
+            ("dot", GREEN, rf"$f(\vec{{x}}) = {_val:.2f}$"),
+        ],
+        loc="outside lower center",
+        ncols=2,
+    )
 
     mo.vstack(
         [
@@ -671,7 +730,7 @@ def _(mo):
     ## Summary
 
     - the open ball $B(\vec{a}, \delta) = \{\, \vec{x} \in \mathbb{R}^n \mid \lVert \vec{x} - \vec{a} \rVert < \delta \,\}$ does not include its “boundary”, the sphere $S(\vec{a}, \delta)$
-    - $\displaystyle \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b}$ if for every $\varepsilon > 0$ we can find $\delta > 0$ such that $f\big( B(\vec{a}, \delta) - \{\vec{a}\} \big) \subseteq B(\vec{b}, \varepsilon)$
+    - $\displaystyle \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b}$ if for every $\varepsilon > 0$ we can find $\delta > 0$ such that $f\big( B(\vec{a}, \delta) \setminus \{\vec{a}\} \big) \subseteq B(\vec{b}, \varepsilon)$
     - limits are unique (when they exist)
     - two different ways of approaching $\vec{a}$ with two different values &nbsp; $\Longrightarrow$ &nbsp; the limit does not exist
     - limits of $f + g$, $\lambda f$ and $f \cdot g$ are the sum, the scalar multiple and the dot product of the limits
