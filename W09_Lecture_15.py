@@ -253,6 +253,8 @@ def _(mo, np):
             for (const v of s.v) pts.push(v);
             const P = (k) => [pts[3 * k], pts[3 * k + 1], pts[3 * k + 2]];
             const inTint = (x1, x2) => s.tint && x1 > s.tint[0] && x1 <= s.tint[1] && x2 > s.tint[2] && x2 <= s.tint[3];
+            const sLit = s.tone ? s.tone.map((c) => Math.round(0.06 * c + 0.94 * 255)) : lit;
+            const sDark = s.tone ? s.tone.map((c) => Math.round(0.3 * c + 0.7 * 255)) : dark;
             for (let i = 0; i < n - 1; i++) for (let j = 0; j < m - 1; j++) {
               const q = [id(i, j), id(i + 1, j), id(i + 1, j + 1), id(i, j + 1)];
               const v = q.map(P);
@@ -264,7 +266,7 @@ def _(mo, np):
                 const nn = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
                 const len = Math.hypot(...nn) || 1;
                 const k = Math.min(1, Math.abs((nn[0] * L[0] + nn[1] * L[1] + nn[2] * L[2]) / len) / 1.0034);
-                col = deep ? rgb(dark2, lit2, k) : rgb(dark, lit, k);
+                col = deep ? rgb(dark2, lit2, k) : rgb(sDark, sLit, k);
               }
               quads.push([q, col, deep ? 1 : s.alpha]);
             }
@@ -478,19 +480,33 @@ def _(mo, np):
     def _flat(*xyz):
         return np.round(np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in xyz)), -1).ravel(), 3).tolist()
 
-    def sheet(x1, x2, y, wire=(), tint=None, clear=False, flat=None, alpha=1.0):
+    def sheet(x1, x2, y, wire=(), tint=None, clear=False, flat=None, alpha=1.0, tone=None):
         """A surface through the grid points (x1, x2, y) (2D arrays). `wire` lists grid lines to draw, as
         (axis, every, colour, width): every `every`-th row (axis 0) or column (axis 1), and the last one.
         Faces whose centre lies in tint = (x^1 lo, x^1 hi, x^2 lo, x^2 hi) (lo excluded) take deeper tones and
         stay opaque, without wire there when `clear`; the other faces have the opacity `alpha`.
-        `flat` is one colour instead of the shading."""
+        `flat` is one colour instead of the shading, and `tone` (a colour such as RED) shades the surface in
+        light tones of that colour instead of the light blue ones."""
         n, m = np.shape(x1)
-        return {"n": n, "m": m, "v": _flat(x1, x2, y), "wire": [list(t) for t in wire], "tint": tint, "clear": clear, "flat": flat, "alpha": alpha}
+        rgb = [int(tone[k : k + 2], 16) for k in (1, 3, 5)] if tone else None
+        return {"n": n, "m": m, "v": _flat(x1, x2, y), "wire": [list(t) for t in wire], "tint": tint, "clear": clear, "flat": flat, "alpha": alpha, "tone": rgb}
 
-    def panel(ys, surfaces=(), lines=(), points=(), axes=(), caption=None, box=None):
+    def patch(corners, colour, alpha=1.0, n=6):
+        """The flat parallelogram (or quadrilateral) with the four `corners` (in order), one colour, opacity `alpha`;
+        cut into n x n faces, so that it is drawn in the right order among other surfaces."""
+        c = [np.asarray(q, float) for q in corners]
+        s, t = np.meshgrid(np.linspace(0, 1, n + 1), np.linspace(0, 1, n + 1), indexing="ij")
+        p = (1 - s)[..., None] * (1 - t)[..., None] * c[0] + s[..., None] * (1 - t)[..., None] * c[1] + (s * t)[..., None] * c[2] + ((1 - s) * t)[..., None] * c[3]
+        return sheet(p[..., 0], p[..., 1], p[..., 2], flat=colour, alpha=alpha)
+
+    def panel(ys, surfaces=(), lines=(), points=(), axes=(), arrows=(), arcs=(), texts=(), caption=None, box=None):
         """One drawing of a 3D figure, with heights at the scale `ys`.
         lines: (x1, x2, y, colour, width[, dash, depth offset]); points: ((x^1, x^2, y), colour[, radius, hollow]);
-        axes: (tail, tip, TeX label, direction of the label in degrees); caption: TeX below the drawing;
+        axes: (tail, tip, TeX label, direction of the label in degrees), drawn black;
+        arrows: (tail, tip, colour[, width, dash]), vectors with a head in their colour;
+        arcs: (x1, x2, y, colour[, width]), curves ending in a head, such as a turning arrow;
+        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), short labels such as tick values (names of
+        points and objects go in the legend instead); caption: TeX below the drawing;
         box: ((x^1 lo, hi), (x^2 lo, hi), (y lo, hi)) to size the drawing by, instead of its own points."""
         p = {"ys": ys, "surfaces": list(surfaces), "lines": [], "points": [], "heads": [], "labels": [], "caption": caption, "box": box}
         for ln in lines:
@@ -503,6 +519,17 @@ def _(mo, np):
             p["labels"].append({"p": b.tolist(), "t": label, "c": "#000000", "a": d, "r": 5})
         for q in points:
             p["points"].append({"p": [float(c) for c in q[0]], "c": q[1], "r": q[2] if len(q) > 2 else 4.0, "h": bool(q[3]) if len(q) > 3 else False})
+        for ar in arrows:
+            a, b = np.asarray(ar[0], float), np.asarray(ar[1], float)
+            seg = a + np.linspace(0, 0.96, 40)[:, None] * (b - a)
+            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2]})
+        for arc in arcs:
+            c = np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in arc[:3])), -1)
+            p["lines"].append({"p": _flat(*c[:-1].T), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8, "d": None, "e": 0})
+            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3]})
+        for tx in texts:
+            p["labels"].append({"p": [float(c) for c in tx[0]], "t": tx[1], "c": tx[2], "a": tx[3], "r": tx[4] if len(tx) > 4 else 5})
         return p
 
     def turntable(az, el, alt, panels, legend=(), height=360, width=None, cols=1, key=None, shared=True, bias=0.03):
@@ -523,7 +550,7 @@ def _(mo, np):
                 .replace("__ALT__", _html.escape(alt)).replace("__SCENE__", _json.dumps(scene, separators=(",", ":"))))
         return mo.Html(f'<iframe srcdoc="{_html.escape(page)}" title="{_html.escape(alt)}" style="display: block; width: 100%; height: {height}px; border: 0;"></iframe>')
 
-    return panel, sheet, turntable
+    return panel, patch, sheet, turntable
 
 
 @app.cell(hide_code=True)

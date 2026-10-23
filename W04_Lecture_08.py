@@ -342,7 +342,7 @@ def _(BLUE, GREEN, GREY, HALF, LIGHT, RED, arrow, blank, definition, legend_box,
 def _(BLUE, FULL, GREEN, LIGHT, RED, arrow, blank, blob, definition, legend_box, mo, np):
     # the ball about a (blue), the image of the punctured ball (green) and the ball about b (red), as in the next figures
     _tint = (0.18, 0.49, 0.2, 0.18)
-    _fig, _ax = blank(FULL, 3.4, (-0.5, 10.1), (-0.75, 3.35))
+    _fig, _ax = blank(FULL, 3.4, (-0.5, 10.1), (-0.6, 3.35))
     _th = np.linspace(0, 2 * np.pi, 200)
     # domain
     arrow(_ax, (-0.4, 0), (3.4, 0), "black", lw=0.9)
@@ -354,11 +354,10 @@ def _(BLUE, FULL, GREEN, LIGHT, RED, arrow, blank, blob, definition, legend_box,
     # the map
     arrow(_ax, (3.7, 2.2), (5.0, 2.2), "black", connectionstyle="arc3,rad=-0.3")
     _ax.text(4.35, 2.55, "$f$", fontsize=13, ha="center", va="bottom")
-    # codomain, in the board's oblique projection
-    _o = (6.0, 0.35)
-    arrow(_ax, (_o[0] - 0.4, _o[1]), (_o[0] + 3.6, _o[1]), "black", lw=0.9)
+    # codomain
+    _o = (6.0, 0.0)
+    arrow(_ax, (_o[0] - 0.4, _o[1]), (_o[0] + 3.8, _o[1]), "black", lw=0.9)
     arrow(_ax, (_o[0], _o[1] - 0.5), (_o[0], 3.0), "black", lw=0.9)
-    arrow(_ax, (_o[0] + 0.45 * 0.5, _o[1] + 0.4 * 0.5), (_o[0] - 0.45 * 2.2, _o[1] - 0.4 * 2.2), "black", lw=0.9)
     _ax.text(_o[0] - 0.15, 3.05, r"$\mathbb{R}^m$", fontsize=13, ha="right", va="center")
     _c, _r = (7.9, 1.9), 1.2
     _ax.plot(_c[0] + _r * np.cos(_th), _c[1] + _r * np.sin(_th), color=RED, lw=1.2, ls=(0, (4, 3)))
