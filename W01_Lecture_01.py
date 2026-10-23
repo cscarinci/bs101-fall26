@@ -404,14 +404,14 @@ def _(BLUE, FULL, Figure, GREEN, GREY, RED, alpha, arrow, math, mo, plane, table
     _vector(_left, _y, RED, r"$\vec{y}$", 75 * _side)
 
     plane(_right, 12)
-    _vector(_right, _ax_, GREEN, r"$\alpha\vec{x}$", 75)
+    _vector(_right, _ax_, GREEN, r"$\alpha \cdot \vec{x}$", 75)
     _vector(_right, _x, BLUE, r"$\vec{x}$", -75)
     for _ax in (_left, _right):
         _ax.set_xticks(range(-8, 9, 4))
         _ax.set_yticks(range(-8, 9, 4))
 
     def _col(v, color):
-        return rf"\textcolor{{{color}}}{{\begin{{bmatrix}} {v[0]:g} \\ {v[1]:g} \end{{bmatrix}}}}"
+        return rf"\textcolor{{{color}}}{{\begin{{bmatrix}} {v[0] + 0.0:g} \\ {v[1] + 0.0:g} \end{{bmatrix}}}}"
 
     mo.vstack(
         [

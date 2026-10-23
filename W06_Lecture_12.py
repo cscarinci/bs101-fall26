@@ -280,7 +280,7 @@ def _(mo, theorem):
     \end{aligned}
     $$
 
-    (the first factor $\to 0$ since $\gamma$ is continuous at $t_0$ and $f$ is differentiable at $\vec{a} = \gamma(t_0)$; where $\gamma(t) = \gamma(t_0)$ this factor is set to $0$, and the identity still holds; the second factor $\to \pm \lVert \gamma'(t_0) \rVert$ according to the sign of $t - t_0$, so it stays bounded)
+    (the first factor $\to 0$ since $\gamma$ is continuous at $t_0$ and $f$ is differentiable at $\vec{a} = \gamma(t_0)$; the second factor $\to \pm \lVert \gamma'(t_0) \rVert$, not $+\infty$!)
 
     $$
     \begin{aligned}
@@ -418,7 +418,7 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, math, mo, np, t0, table, vect
                 [
                     (r"$\gamma(t_0)$", rf"$\begin{{bmatrix}} {_p[0]:.3f} \\ {_p[1] + 0.0:.3f} \end{{bmatrix}}$"),
                     (r"$\gamma'(t_0)$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_v[0] + 0.0:.3f} \\ {_v[1]:.3f} \end{{bmatrix}}}}$"),
-                    (r"$Df(\gamma(t_0))$", rf"$\textcolor{{{RED}}}{{\begin{{bmatrix}} {_g[0] + 0.0:.3f} & {_g[1]:.3f} \end{{bmatrix}}}}$"),
+                    (r"$\vec{\nabla} f(\gamma(t_0))$", rf"$\textcolor{{{RED}}}{{\begin{{bmatrix}} {_g[0] + 0.0:.3f} \\ {_g[1]:.3f} \end{{bmatrix}}}}$"),
                     (r"$Df(\gamma(t_0))(\gamma'(t_0))$", rf"${_dot:.3f}$"),
                     (r"$5 t_0^4$", rf"${5 * _t**4:.3f}$"),
                     (r"level set of $f$ through $\gamma(t_0)$", rf"$\textcolor{{{GREY}}}{{f(\vec{{x}}) = t_0^5 = {_level + 0.0:.3f}}}$"),
@@ -506,7 +506,7 @@ def _(mo, theorem):
     \end{aligned}
     $$
 
-    (“does not go to $+\infty$”: this needs some care… not here! In short: $f$ differentiable at $\vec{a}$ gives ${\lVert f(\vec{x}) - f(\vec{a}) \rVert \leq C \lVert \vec{x} - \vec{a} \rVert}$ for $\vec{x}$ near $\vec{a}$, so the factor is bounded; where $f(\vec{x}) = f(\vec{a})$ the first quotient is set to $0$.)
+    (“does not go to $+\infty$”: this needs some care… not here!)
 
     $\Longrightarrow$ &nbsp; $D(g \circ f)(\vec{a}) = Dg(f(\vec{a}))\, Df(\vec{a})$ defines a good affine approximation to $g \circ f$ at $\vec{a}$ &nbsp; $\square$
 

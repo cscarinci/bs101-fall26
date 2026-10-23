@@ -334,7 +334,7 @@ def _(BLUE, FULL, Figure, GREEN, GREY, RED, a_taylor, cross_axes, math, mo, np, 
     _ax.plot([_a, _a], [-0.08, 0.08], color="black", lw=0.9)
     _ax.text(_a, -0.55, "$a$", ha="center", va="center", fontsize=13)
 
-    _da = rf"(x {signed(-_a, 1)})"
+    _da = "x" if abs(_a) < 1e-9 else rf"(x {signed(-_a, 1)})"
     mo.vstack(
         [
             mo.hstack([a_taylor], justify="start", gap=2, wrap=True),

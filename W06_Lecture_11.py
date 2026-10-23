@@ -187,7 +187,7 @@ def _(arrow, math):
 
 @app.cell(hide_code=True)
 def _(mo):
-    phi = mo.ui.slider(0, 355, 5, value=40, label=r"position of $\vec{a}$ on the ellipse (degrees)", show_value=True)
+    phi = mo.ui.slider(0, 355, 5, value=40, label=r"parameter $\varphi$ of $\vec{a} = (3\cos\varphi, 2\sin\varphi)$ on the ellipse (degrees)", show_value=True)
     return (phi,)
 
 
@@ -602,13 +602,17 @@ def _(definition, mo, theorem):
 @app.cell(hide_code=True)
 def _(mo):
     pa1 = mo.ui.slider(0.5, 2.5, 0.25, value=2, label="$a^1$", show_value=True)
-    pk = mo.ui.slider(0, 12, 1, value=4, label=r"$a^2$ (multiples of $\pi/12$)", show_value=True)
+    pk = mo.ui.slider(0, 12, 1, value=4, label=r"$k$, with $a^2 = k\pi/12$", show_value=True)
     return pa1, pk
 
 
 @app.cell(hide_code=True)
 def _(Arc, BLUE, FULL, Figure, GREEN, GREY, RED, arrow, cross_axes, math, mo, num, pa1, pk, table, tip_label):
+    from fractions import Fraction as _Fraction
+
     _a1, _a2 = pa1.value, pk.value * math.pi / 12
+    _k = _Fraction(pk.value, 12)  # a^2 = k pi / 12, written in lowest terms
+    _frac = "0" if _k == 0 else (r"\pi" if _k.numerator == 1 else rf"{_k.numerator}\pi") + ("" if _k.denominator == 1 else rf"/{_k.denominator}")
     _c, _s = math.cos(_a2), math.sin(_a2)
     _fa = (_a1 * _c, _a1 * _s)
     _deg = math.degrees(_a2)
@@ -653,7 +657,7 @@ def _(Arc, BLUE, FULL, Figure, GREEN, GREY, RED, arrow, cross_axes, math, mo, nu
             table(
                 [
                     (r"$\vec{a}$", rf"$\begin{{bmatrix}} {num(_a1)} \\ {num(_a2)} \end{{bmatrix}}$"),
-                    (r"angle $a^2$ of $f(\vec{a})$", rf"$\textcolor{{{GREEN}}}{{{pk.value}\,\pi/12}}$"),
+                    (r"angle $a^2$ of $f(\vec{a})$", rf"$\textcolor{{{GREEN}}}{{{_frac}}}$"),
                     (r"$f(\vec{a})$", rf"$\begin{{bmatrix}} {num(_fa[0])} \\ {num(_fa[1])} \end{{bmatrix}}$"),
                     (
                         r"$Df(\vec{a}) = \begin{bmatrix} Df(\vec{a})(\vec{e}_1) & Df(\vec{a})(\vec{e}_2) \end{bmatrix}$",

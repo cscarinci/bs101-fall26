@@ -560,7 +560,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(BLUE, Figure, GREY, HALF, LIGHT, RED, ma, mb, mc, md, mo, plane, table, vector):
     _a, _b, _c, _d = ma.value, mb.value, mc.value, md.value
-    _det = _a * _d - _b * _c
+    _det = _a * _d - _b * _c + 0.0
 
     _fig = Figure(figsize=(HALF, HALF), layout="constrained")
     _ax = _fig.subplots()

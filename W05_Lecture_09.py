@@ -163,7 +163,7 @@ def _(BLUE, FULL, GREEN, RED, arrow, blank, mo, np, vector):
     def _gamma(t):
         return 5.1 + 2.9 * t, 1.7 + 1.0 * np.sin(3.3 * t) - 0.3 * t
 
-    _fig, _ax = blank(FULL, 2.6, (-0.2, 11.7), (-0.55, 3.65))
+    _fig, _ax = blank(FULL, 3.0, (-0.2, 11.7), (-0.55, 4.25))
     # the time axis
     arrow(_ax, (0, 1.2), (3.0, 1.2), "black", lw=0.9)
     for _x, _name in ((1.0, "$a$"), (1.8, "$t$")):
@@ -180,7 +180,7 @@ def _(BLUE, FULL, GREEN, RED, arrow, blank, mo, np, vector):
     _pa, _pt = _gamma(_a), _gamma(_t)
     _va = ((_gamma(_a + _h)[0] - _pa[0]) / _h, (_gamma(_a + _h)[1] - _pa[1]) / _h)
     arrow(_ax, _pa, _pt, RED)
-    vector(_ax, _pa, (_pa[0] + 0.45 * _va[0], _pa[1] + 0.45 * _va[1]), GREEN, r"$\gamma'(a)$", 0, r=20)
+    vector(_ax, _pa, (_pa[0] + _va[0], _pa[1] + _va[1]), GREEN, r"$\gamma'(a)$", 0, r=20)
     _ax.plot(*_pa, "o", color="black", ms=4, zorder=4)
     _ax.plot(*_pt, "o", color="black", ms=4, zorder=4)
     _ax.annotate(r"$\gamma(a)$", _pa, textcoords="offset points", xytext=(-8, 4), ha="right", va="bottom", fontsize=13)
@@ -196,7 +196,7 @@ def _(BLUE, FULL, GREEN, RED, arrow, blank, mo, np, vector):
 
     - limits of multivariable functions: &nbsp; $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m, \quad \vec{a} \in \mathbb{R}^n, \quad \vec{b} \in \mathbb{R}^m$
     - $\displaystyle \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b}$ &nbsp; if for every $B(\vec{b}, \varepsilon) \subset \mathbb{R}^m$ we can find $B(\vec{a}, \delta) \subset \mathbb{R}^n$ such that $f\big( B(\vec{a}, \delta) - \{\vec{a}\} \big) \subseteq B(\vec{b}, \varepsilon)$
-    - $\leadsto$ &nbsp; we can make $f(\vec{x})$ as close as we want to $\vec{b}$ by taking $\vec{x}$ close enough, but different, to $\vec{a}$
+    - $\leadsto$ &nbsp; we can make $f(\vec{x})$ as close as we want to $\vec{b}$ by taking $\vec{x}$ close enough to, but different from, $\vec{a}$
     - recall: path in $\mathbb{R}^2$ &nbsp; ($n = 1$, $m = 2$)
 
         $$

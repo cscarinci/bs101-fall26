@@ -485,7 +485,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, arrow, ma, math, mb, mc, md, mo, plane, table, vector):
     _a, _b, _c, _d = ma.value, mb.value, mc.value, md.value
-    _det = _a * _d - _b * _c
+    _det = _a * _d - _b * _c + 0.0
 
     def _turn(ax, p, q, ccw, radius):
         """Curved arrow from the direction of p to the direction of q."""

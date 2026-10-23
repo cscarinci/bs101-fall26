@@ -329,7 +329,7 @@ def _(definition, mo, theorem):
     f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = \frac{e^{x^1} + \sqrt{x^2}}{\sin(x^1)}
     $$
 
-    is $C^1$-smooth for $x^1 \neq n\pi$ and $x^2 > 0$
+    is $C^1$-smooth for $x^1 \neq k\pi$ and $x^2 > 0$
 
     $$
     \frac{\partial f}{\partial x^1} = \frac{e^{x^1} \sin(x^1) - \big( e^{x^1} + \sqrt{x^2} \big) \cos(x^1)}{\big( \sin(x^1) \big)^2},
@@ -337,7 +337,7 @@ def _(definition, mo, theorem):
     \frac{\partial f}{\partial x^2} = \frac{1}{2} \frac{1}{\sqrt{x^2}\, \sin(x^1)}
     $$
 
-    both continuous for $x^1 \neq n\pi$, $x^2 > 0$.
+    both continuous for $x^1 \neq k\pi$, $x^2 > 0$.
 
     $\leadsto$ &nbsp; in our course, we will mostly be dealing with this type of functions
 

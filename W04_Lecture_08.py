@@ -195,7 +195,7 @@ def _(BLUE, FULL, Figure, cross_axes, math, mo, np):
     cross_axes(_ax2, (-2.0, 3.2), (-1.6, 1.9))
     _th = np.linspace(0, 2 * np.pi, 200)
     _ax2.plot(np.cos(_th), np.sin(_th), color=BLUE, lw=1.4)
-    _ax2.plot(1, 0, "o", color="black", ms=6, mfc="white", mew=1.2, zorder=4)
+    _ax2.plot(1, 0, "o", color=BLUE, ms=5, zorder=4)
     _ax2.plot(0, 1, "o", color="black", ms=4, zorder=4)
     _c, _s = math.cos(0.7), math.sin(0.7)
     _ax2.plot(_c, _s, "o", color=BLUE, ms=4)
@@ -237,7 +237,7 @@ def _(BLUE, FULL, Figure, cross_axes, math, mo, np):
             mo.md(
                 r"""
     - $\displaystyle \lim_{t \to 0} \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix} = \begin{bmatrix} 1 \\ 0 \end{bmatrix} = \begin{bmatrix} \cos(2\pi) \\ \sin(2\pi) \end{bmatrix} = \begin{bmatrix} \cos(4\pi) \\ \sin(4\pi) \end{bmatrix}$ &nbsp; (also in $\mathrm{Im}(\sigma)$)
-    - $\leadsto$ &nbsp; discontinuity is a “jump” in the parameterization of the image, not necessarily a hole in $\mathrm{Im}(\gamma)$
+    - $\leadsto$ &nbsp; discontinuity is a “jump” in the parameterization of the image, not necessarily a hole in $\mathrm{Im}(\sigma)$
     - $\leadsto$ &nbsp; discontinuity is a hole in $\mathrm{graph}(\gamma)$!
 
     **In this lecture:** local properties of scalar functions and maps

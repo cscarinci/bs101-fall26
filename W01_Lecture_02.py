@@ -429,11 +429,12 @@ def _(mo, theorem):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, HALF, LIGHT, controls, dot, mo, np, nx, ny, table):
-    _disc = (2 * dot) ** 2 - 4 * nx**2 * ny**2
-    _vertex = -dot / nx**2 if nx > 0 else 0.0
+def _(BLUE, Figure, HALF, LIGHT, controls, dot, mo, np, table, x, y):
+    _xx, _yy = float(x @ x), float(y @ y)  # exact for the slider values, unlike the squares of the norms
+    _disc = (2 * dot) ** 2 - 4 * _xx * _yy
+    _vertex = -dot / _xx if _xx > 0 else 0.0
     _t = np.sort(np.append(np.linspace(min(-4, _vertex - 2), max(4, _vertex + 2), 400), _vertex))
-    _p = _t**2 * nx**2 + 2 * _t * dot + ny**2
+    _p = _t**2 * _xx + 2 * _t * dot + _yy
 
     _fig = Figure(figsize=(HALF, 2.8), layout="constrained")
     _ax = _fig.subplots()
@@ -454,9 +455,9 @@ def _(BLUE, Figure, HALF, LIGHT, controls, dot, mo, np, nx, ny, table):
             table(
                 [
                     (r"$(\vec{x}\cdot\vec{y})^2$", rf"${dot**2:g}$"),
-                    (r"$\lVert\vec{x}\rVert^2\lVert\vec{y}\rVert^2$", rf"${nx**2 * ny**2:g}$"),
+                    (r"$\lVert\vec{x}\rVert^2\lVert\vec{y}\rVert^2$", rf"${_xx * _yy:g}$"),
                     (r"discriminant $\big(2 (\vec{x} \cdot \vec{y})\big)^2 - 4 \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2$", rf"${_disc:g}$"),
-                    (r"minimum of $\lVert t\vec{x} + \vec{y} \rVert^2$", rf"${float(_p.min()) + 0.0:.3f}$"),
+                    (r"minimum of $\lVert t\vec{x} + \vec{y} \rVert^2$", rf"${round(float(_p.min()), 3) + 0.0:.3f}$"),
                     (r"$\vec{x}, \vec{y}$ proportional", "yes" if abs(_disc) < 1e-9 else "no"),
                 ]
             ),
@@ -500,7 +501,7 @@ def _(BLUE, Figure, GREEN, HALF, RED, controls, mo, np, nx, ny, plane, table, th
             table(
                 [
                     (r"$\lVert\vec{x}+\vec{y}\rVert$", rf"$\textcolor{{{GREEN}}}{{{_ns:.3f}}}$"),
-                    (r"$\lVert\vec{x}\rVert+\lVert\vec{y}\rVert$", rf"$\textcolor{{{BLUE}}}{{{nx:.3f}}} + \textcolor{{{RED}}}{{{ny:.3f}}} = {nx + ny:.3f}$"),
+                    (r"$\lVert\vec{x}\rVert+\lVert\vec{y}\rVert$", rf"$\textcolor{{{BLUE}}}{{{nx:.3f}}} + \textcolor{{{RED}}}{{{ny:.3f}}} = {round(nx, 3) + round(ny, 3):.3f}$"),
                 ]
             ),
             _fig,
