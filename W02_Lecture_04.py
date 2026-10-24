@@ -127,9 +127,9 @@ def _(mo):
         if not s:
             return ""
         try:
-            return "✅" if abs(float(s) - answer) < 1e-6 else "❌ try again"
+            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
         except ValueError:
-            return "⚠️ enter a number"
+            return "enter a number"
 
     return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
@@ -210,7 +210,7 @@ def _(mo, np):
       .it svg { flex: 0 0 24px; }
       #hint { position: absolute; right: 0; bottom: 0; color: #888; opacity: 0.7; font: 15px Georgia, serif; }
     </style></head><body>
-    <div id="o"><div id="g" role="img" aria-label="__ALT__"><div id="hint" title="drag to turn the view, double click to restore it">&#10227;</div></div><div id="lg"></div></div>
+    <div id="o"><div id="g" role="img" aria-label="__ALT__"><div id="hint">&#10227;</div></div><div id="lg"></div></div>
     <script>
     (function () {
       const S = __SCENE__;
@@ -817,7 +817,7 @@ def _(mo, theorem):
     - as a function: $\exists\, B : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ such that $A \circ B = B \circ A = \mathrm{id}_{\mathbb{R}^2}$, that is, $A \circ B(\vec{x}) = B \circ A(\vec{x}) = \vec{x} \quad \forall\, \vec{x} \in \mathbb{R}^2$
     - as a matrix: $\exists\, B \in \mathrm{Mat}(2 \times 2)$ such that $AB = BA = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}$
     """,
-                r"Inverse of a $2 \times 2$ matrix",
+                r"Invertible $2 \times 2$ matrices",
             ),
             mo.md(
                 r"""
@@ -972,7 +972,7 @@ def _(GREEN, mo, np, panel, theorem, turntable):
 
     admits an inverse if and only if $\det A \neq 0$!
     """,
-                r"Inverse of an $n \times n$ matrix",
+                r"Invertible $n \times n$ matrices",
             ),
             mo.md(
                 r"""
@@ -1015,8 +1015,6 @@ def _(mo):
     - for $A \in \mathrm{Mat}(3 \times 3)$, $\det A$ is defined via three $2 \times 2$ determinants (note the negative sign) and $\lvert \det A \rvert$ = volume of the parallelepiped spanned by the columns of $A$
     - $A \in \mathrm{Mat}(n \times n)$ admits an inverse if and only if $\det A \neq 0$
     - $\det A > 0$ preserves, and $\det A < 0$ reverses, the direction of rotations ($n = 2$) or the “handedness” of orthogonal frames ($n = 3$)
-
-    **Next:** lines and planes and the cross-product in $\mathbb{R}^3$
     """)
     return
 

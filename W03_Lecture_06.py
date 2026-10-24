@@ -127,9 +127,9 @@ def _(mo):
         if not s:
             return ""
         try:
-            return "✅" if abs(float(s) - answer) < 1e-6 else "❌ try again"
+            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
         except ValueError:
-            return "⚠️ enter a number"
+            return "enter a number"
 
     return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
@@ -197,7 +197,7 @@ def _(mo, np):
       .it svg { flex: 0 0 24px; }
       #hint { position: absolute; right: 0; bottom: 0; color: #888; opacity: 0.7; font: 15px Georgia, serif; }
     </style></head><body>
-    <div id="o"><div id="g" role="img" aria-label="__ALT__"><div id="hint" title="drag to turn the view, double click to restore it">&#10227;</div></div><div id="lg"></div></div>
+    <div id="o"><div id="g" role="img" aria-label="__ALT__"><div id="hint">&#10227;</div></div><div id="lg"></div></div>
     <script>
     (function () {
       const S = __SCENE__;
@@ -552,9 +552,9 @@ def _(np, sheet):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## Last time
+    ## So far
 
-    So far: Euclidean Geometry
+    Euclidean Geometry
 
     - $\leadsto$ &nbsp; vectors, lines, planes
     - $\leadsto$ &nbsp; dot products and cross-products (in $\mathbb{R}^3$): lengths, angles, areas, volumes
@@ -1097,8 +1097,6 @@ def _(mo):
     - $\mathrm{Im}(f) \subseteq B$ (not necessarily equal) and $\mathrm{graph}(f) \subseteq A \times B$ help us visualize $f$ as a set of points; the graph essentially determines the function
     - the level set $f^{-1}(\vec{b}) = \{\, \vec{x} \in A \mid f(\vec{x}) = \vec{b} \,\}$ is a set of points in the domain, NOT the value of an inverse function
     - level sets of affine scalar functions on $\mathbb{R}^3$ are planes; level sets of quadratic scalar functions are quadratic surfaces (ellipsoids, hyperboloids, paraboloids, …)
-
-    **Next:** local properties of paths
     """)
     return
 

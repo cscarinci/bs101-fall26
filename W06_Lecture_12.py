@@ -127,9 +127,9 @@ def _(mo):
         if not s:
             return ""
         try:
-            return "✅" if abs(float(s) - answer) < 1e-6 else "❌ try again"
+            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
         except ValueError:
-            return "⚠️ enter a number"
+            return "enter a number"
 
     return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
@@ -182,7 +182,7 @@ def _(mo, theorem):
         [
             mo.md(
                 r"""
-    ## Last time
+    ## So far
 
     - $f : \mathbb{R} \longrightarrow \mathbb{R}$ (single variable, scalar valued) is differentiable at $x = a$ if
 
@@ -591,8 +591,6 @@ def _(mo):
         $$
         D(g \circ f)(\vec{a}) = Dg(f(\vec{a}))\, Df(\vec{a}) \qquad (\text{matrix multiplication!})
         $$
-
-    **Next:** higher order derivatives
     """)
     return
 

@@ -127,9 +127,9 @@ def _(mo):
         if not s:
             return ""
         try:
-            return "✅" if abs(float(s) - answer) < 1e-6 else "❌ try again"
+            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
         except ValueError:
-            return "⚠️ enter a number"
+            return "enter a number"
 
     return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
@@ -733,8 +733,6 @@ def _(mo):
     - limits are unique (when they exist)
     - two different ways of approaching $\vec{a}$ with two different values &nbsp; $\Longrightarrow$ &nbsp; the limit does not exist
     - limits of $f + g$, $\lambda f$ and $f \cdot g$ are the sum, the scalar multiple and the dot product of the limits
-
-    **Next:** differentiability and the derivative
     """)
     return
 

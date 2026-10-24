@@ -127,9 +127,9 @@ def _(mo):
         if not s:
             return ""
         try:
-            return "✅" if abs(float(s) - answer) < 1e-6 else "❌ try again"
+            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
         except ValueError:
-            return "⚠️ enter a number"
+            return "enter a number"
 
     return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
@@ -204,7 +204,7 @@ def _(mo, np):
       .it svg { flex: 0 0 24px; }
       #hint { position: absolute; right: 0; bottom: 0; color: #888; opacity: 0.7; font: 15px Georgia, serif; }
     </style></head><body>
-    <div id="o"><div id="g" role="img" aria-label="__ALT__"><div id="hint" title="drag to turn the view, double click to restore it">&#10227;</div></div><div id="lg"></div></div>
+    <div id="o"><div id="g" role="img" aria-label="__ALT__"><div id="hint">&#10227;</div></div><div id="lg"></div></div>
     <script>
     (function () {
       const S = __SCENE__;
@@ -1082,8 +1082,6 @@ def _(mo):
     - matrices in $\mathrm{Mat}(m \times n)$ are added and multiplied by scalars componentwise; $AB$ is defined only when the number of columns of $A$ equals the number of rows of $B$, and is non-commutative even for square matrices
     - $A \in \mathrm{Mat}(m \times n)$ $\leftrightsquigarrow$ linear function $A : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ with columns $\vec{A}_i = A\vec{e}_i$; matrix multiplication is composition
     - for $A \in \mathrm{Mat}(2 \times 2)$, $\det(A) = ad - bc$ is the signed area of the parallelogram defined by the columns, and $A$ is invertible $\Longleftrightarrow$ $\det(A) \neq 0$
-
-    **Next:** determinants, areas and volumes
     """)
     return
 

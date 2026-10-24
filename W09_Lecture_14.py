@@ -127,9 +127,9 @@ def _(mo):
         if not s:
             return ""
         try:
-            return "✅" if abs(float(s) - answer) < 1e-6 else "❌ try again"
+            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
         except ValueError:
-            return "⚠️ enter a number"
+            return "enter a number"
 
     return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
@@ -219,7 +219,7 @@ def _(mo, np):
       .it svg { flex: 0 0 24px; }
       #hint { position: absolute; right: 0; bottom: 0; color: #888; opacity: 0.7; font: 15px Georgia, serif; }
     </style></head><body>
-    <div id="o"><div id="g" role="img" aria-label="__ALT__"><div id="hint" title="drag to turn the view, double click to restore it">&#10227;</div></div><div id="lg"></div></div>
+    <div id="o"><div id="g" role="img" aria-label="__ALT__"><div id="hint">&#10227;</div></div><div id="lg"></div></div>
     <script>
     (function () {
       const S = __SCENE__;
@@ -1272,8 +1272,6 @@ def _(mo):
 
     - $H = \begin{bmatrix} A & B \\ B & D \end{bmatrix}$ is negative definite if $\det H > 0$ and $A < 0$, positive definite if $\det H > 0$ and $A > 0$, indefinite if $\det H < 0$, and degenerate if $\det H = 0$
     - second derivative test for $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$ at a critical point $\vec{a}$: $Hf(\vec{a})$ negative definite $\Longrightarrow$ local max; positive definite $\Longrightarrow$ local min; indefinite $\Longrightarrow$ saddle point; degenerate $\Longrightarrow$ not sufficient info
-
-    **Next:** global extrema on closed and bounded domains
     """)
     return
 

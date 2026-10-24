@@ -127,9 +127,9 @@ def _(mo):
         if not s:
             return ""
         try:
-            return "✅" if abs(float(s) - answer) < 1e-6 else "❌ try again"
+            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
         except ValueError:
-            return "⚠️ enter a number"
+            return "enter a number"
 
     return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
@@ -197,7 +197,7 @@ def _(mo, np):
       .it svg { flex: 0 0 24px; }
       #hint { position: absolute; right: 0; bottom: 0; color: #888; opacity: 0.7; font: 15px Georgia, serif; }
     </style></head><body>
-    <div id="o"><div id="g" role="img" aria-label="__ALT__"><div id="hint" title="drag to turn the view, double click to restore it">&#10227;</div></div><div id="lg"></div></div>
+    <div id="o"><div id="g" role="img" aria-label="__ALT__"><div id="hint">&#10227;</div></div><div id="lg"></div></div>
     <script>
     (function () {
       const S = __SCENE__;
@@ -1192,8 +1192,6 @@ def _(mo):
     - the cross-product $\vec{w} = \vec{u} \times \vec{v}$ is orthogonal to both $\vec{u}, \vec{v}$, has $\lVert \vec{w} \rVert$ = area of the parallelogram spanned by $\vec{u}$ and $\vec{v}$, and $\vec{u}, \vec{v}, \vec{w}$ is right-handed: $\det \begin{bmatrix} \vec{u} & \vec{v} & \vec{w} \end{bmatrix} > 0$
     - $\vec{u} \times \vec{v}$ is computed as a formal $3 \times 3$ determinant with first row $\vec{e}_1, \vec{e}_2, \vec{e}_3$; every normal vector to $P$ is proportional to $\vec{u} \times \vec{v}$
     - the cross-product is anti-commutative and bilinear
-
-    **Next:** multivariable functions
     """)
     return
 
