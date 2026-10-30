@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 05 · Lines and planes and the cross-product in R³", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 • Lecture 05 • Lines and planes and the cross-product in R³", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -26,11 +26,11 @@ def _(mo):
     # Palette with fixed roles (figures only; text carries no colour):
     #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (tangent vector, gradient, mean)
-    #   ORANGE a third series, only when three are needed
+    #   GREEN  a result made from them (sum, multiple, angle, tangent vector, gradient)
+    #   ORANGE (ochre) a third object, only when three are needed
     #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
-    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#3f5f8f", "#a8554c", "#4f7f5c", "#b9853f", "#9a9a9a", "#e3ebf4"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
     FULL, HALF = 7.4, 3.6
 
@@ -75,12 +75,13 @@ def _(mo):
 
     def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
         """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
-        One head size and one line weight for every figure, so arrows look alike across lectures."""
+        One line weight for every figure; the head is open and sized in points from the line width,
+        so arrows look alike across lectures at any axis range."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={3 * lw:g},head_width={1.3 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -119,48 +120,16 @@ def _(mo):
 
     def table(rows):
         """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
-        return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
+        _md = mo.md("\n".join(["| | |", "|:--|:--|"] + [f"| {k} | {v} |" for k, v in rows]))
+        return mo.Html(f'<div class="readout">{_md.text}</div>')
 
-    def check(field, answer):
-        """Feedback mark for a numeric answer typed into a text field."""
-        s = field.value.strip().replace(",", ".")
-        if not s:
-            return ""
-        try:
-            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
-        except ValueError:
-            return "enter a number"
-
-    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 05", "Week 03", "Lecture 05 · Lines and planes and the cross-product in R³")
+    header("Lecture 05", "Week 03", "Lecture 05 • Lines and planes and the cross-product in R³")
     return
-
-
-@app.cell(hide_code=True)
-def _():
-    def legend_box(fig, entries, loc="outside right center", ncols=1):
-        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
-        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
-        from matplotlib.lines import Line2D
-        from matplotlib.patches import Patch
-
-        handles = []
-        for kind, c, _label, *style in entries:
-            if kind == "dot":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
-            elif kind == "ring":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
-            elif kind == "line":
-                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
-            else:
-                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
-        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
-
-    return (legend_box,)
 
 
 @app.cell(hide_code=True)
@@ -169,8 +138,8 @@ def _(mo, np):
     # Drawn in the browser on canvases, in the style of the static figures: orthographic views of
     # R^3 = R^2 x R (x^1 towards the viewer, x^2 to the right, y up), surfaces drawn back to front.
     # Dragging turns the view at a fixed scale (all panels of a figure together) and a double click restores
-    # it; a figure redrawn by a slider keeps its view. A legend box explains points, curves and surfaces, so
-    # that no label covers the drawing; only the axes carry labels. Typesetting is done by KaTeX.
+    # it; a figure redrawn by a slider keeps its view. Names sit beside the objects they name. Typesetting is done
+    # by KaTeX.
     import html as _html
     import json as _json
 
@@ -267,11 +236,11 @@ def _(mo, np):
             for (let k = 0; k < ln.p.length; k += 3) idx.push(add(ln.p[k], ln.p[k + 1], ln.p[k + 2]));
             const line = { idx, dash: ln.d, cum: new Float64Array(idx.length) };
             for (let k = 0; k < idx.length - 1; k++)
-              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0 });
+              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0, flat: ln.b });
             return line;
           });
           for (const d of spec.points) this.dots.push({ i: add(...d.p), c: d.c, r: d.r, h: d.h });
-          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c });
+          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c, w: h.w, d: h.d });
           // the centre of the scene and the radius of a ball holding it, heights at their drawing scale
           let src = pts;
           if (spec.box) {
@@ -343,7 +312,8 @@ def _(mo, np):
           items.sort((p, q) => p[0] - q[0]);
           g.clearRect(0, 0, W, H);
           g.lineJoin = "round";
-          for (const [, kind, o] of items) {
+          for (let n = 0; n < items.length; n++) {
+            const [, kind, o] = items[n];
             if (kind === 0) {
               const q = o[0];
               g.beginPath();
@@ -356,28 +326,45 @@ def _(mo, np):
               if (o[2] === 1) { g.lineWidth = 0.6; g.setLineDash([]); g.stroke(); }
               g.globalAlpha = 1;
             } else if (kind === 1) {
+              if (o.done) { o.done = false; continue; }
+              let p0 = o, p1 = o;
+              if (o.flat) {  // the pieces of a straight line up to the next surface go in one stroke, so no seams show
+                let grew = true;
+                while (grew) {
+                  grew = false;
+                  for (let m = n + 1; m < items.length && items[m][1] !== 0; m++) {
+                    const q = items[m][2];
+                    if (items[m][1] !== 1 || q.line !== o.line || q.done) continue;
+                    if (q.k === p1.k + 1) { p1 = q; q.done = true; grew = true; }
+                    else if (q.k === p0.k - 1) { p0 = q; q.done = true; grew = true; }
+                  }
+                }
+              }
               g.beginPath();
-              g.moveTo(X[o.a], Y[o.a]);
-              g.lineTo(X[o.b], Y[o.b]);
+              g.moveTo(X[p0.a], Y[p0.a]);
+              g.lineTo(X[p1.b], Y[p1.b]);
               g.strokeStyle = o.c;
               g.lineWidth = o.lw;
               const dash = o.line && o.line.dash;
-              g.lineCap = dash ? "butt" : "round";
+              g.lineCap = dash || o.flat ? "butt" : "round";
               g.setLineDash(dash || []);
-              g.lineDashOffset = dash ? -o.line.cum[o.k] : 0;
+              g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
               g.stroke();
             } else if (kind === 2) {
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
               vx /= len; vy /= len;
-              const bx = X[o.i] - 9 * vx, by = Y[o.i] - 9 * vy;
+              const hl = Math.max(3.5 * o.w, 6), hw = Math.max(1.5 * o.w, 2.6), bx = X[o.i] - hl * vx, by = Y[o.i] - hl * vy;  // open head, as on the page
+              g.strokeStyle = o.c;
+              g.lineWidth = o.w;
+              g.setLineDash([]);
+              g.lineCap = "round";
+              if (!o.d) { g.beginPath(); g.moveTo(X[o.j], Y[o.j]); g.lineTo(X[o.i], Y[o.i]); g.stroke(); }
               g.beginPath();
-              g.moveTo(X[o.i], Y[o.i]);
-              g.lineTo(bx - 3.4 * vy, by + 3.4 * vx);
-              g.lineTo(bx + 3.4 * vy, by - 3.4 * vx);
-              g.closePath();
-              g.fillStyle = o.c;
-              g.fill();
+              g.moveTo(bx - hw * vy, by + hw * vx);
+              g.lineTo(X[o.i], Y[o.i]);
+              g.lineTo(bx + hw * vy, by - hw * vx);
+              g.stroke();
             } else {
               g.beginPath();
               g.arc(X[o.i], Y[o.i], o.r, 0, 2 * Math.PI);
@@ -483,8 +470,8 @@ def _(mo, np):
         axes: (tail, tip, TeX label, direction of the label in degrees), drawn black;
         arrows: (tail, tip, colour[, width, dash]), vectors with a head in their colour;
         arcs: (x1, x2, y, colour[, width]), curves ending in a head, such as a turning arrow;
-        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), short labels such as tick values (names of
-        points and objects go in the legend instead); caption: TeX below the drawing;
+        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), names of points and objects and tick values,
+        each beside its point; caption: TeX below the drawing;
         box: ((x^1 lo, hi), (x^2 lo, hi), (y lo, hi)) to size the drawing by, instead of its own points."""
         p = {"ys": ys, "surfaces": list(surfaces), "lines": [], "points": [], "heads": [], "labels": [], "caption": caption, "box": box}
         for ln in lines:
@@ -492,20 +479,20 @@ def _(mo, np):
         for tail, tip, label, d in axes:
             a, b = np.asarray(tail, float), np.asarray(tip, float)
             seg = a + np.linspace(0, 0.96, 60)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000"})
+            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000", "w": 1.1})
             p["labels"].append({"p": b.tolist(), "t": label, "c": "#000000", "a": d, "r": 5})
         for q in points:
             p["points"].append({"p": [float(c) for c in q[0]], "c": q[1], "r": q[2] if len(q) > 2 else 4.0, "h": bool(q[3]) if len(q) > 3 else False})
         for ar in arrows:
             a, b = np.asarray(ar[0], float), np.asarray(ar[1], float)
             seg = a + np.linspace(0, 0.96, 40)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2]})
+            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None})
         for arc in arcs:
             c = np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in arc[:3])), -1)
             p["lines"].append({"p": _flat(*c[:-1].T), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8, "d": None, "e": 0})
-            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3]})
+            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8})
         for tx in texts:
             p["labels"].append({"p": [float(c) for c in tx[0]], "t": tx[1], "c": tx[2], "a": tx[3], "r": tx[4] if len(tx) > 4 else 5})
         return p
@@ -562,12 +549,12 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(HALF, ORANGE, RED, arrow, blank, definition, legend_box, mo):
+def _(GREEN, HALF, RED, arrow, blank, definition, mo):
     _fig, _ax = blank(HALF + 0.9, 1.75, (-0.6, 4.7), (-0.5, 1.95))
     _x, _v, _t = (0.4, 1.4), (1.6, 0.0), 1.7
     _g = (_x[0] + _t * _v[0], _x[1])
     _ax.plot([-0.5, 4.2], [1.4, 1.4], color="black", lw=1.0)
-    arrow(_ax, (0, 0), _g, ORANGE)
+    arrow(_ax, (0, 0), _g, GREEN)
     arrow(_ax, (0, 0), _x, "black")
     arrow(_ax, (0, 0), _v, RED)
     arrow(_ax, _x, _g, RED)
@@ -575,9 +562,9 @@ def _(HALF, ORANGE, RED, arrow, blank, definition, legend_box, mo):
     _ax.text(0.08, 0.78, r"$\vec{x}$", fontsize=13, ha="right", va="center")
     _ax.text(0.8, -0.1, r"$\vec{v}$", color=RED, fontsize=13, ha="center", va="top")
     _ax.text((_x[0] + _g[0]) / 2, 1.52, r"$t\vec{v}$", color=RED, fontsize=13, ha="center", va="bottom")
-    _ax.text(1.95, 0.62, r"$\vec{x} + t\vec{v}$", color=ORANGE, fontsize=13, ha="left", va="top")
+    _ax.text(1.95, 0.62, r"$\vec{x} + t\vec{v}$", color=GREEN, fontsize=13, ha="left", va="top")
     _ax.text(4.32, 1.4, "$L$", fontsize=13, ha="left", va="center")
-    legend_box(_fig, [("dot", "black", r"$\vec{0}$")])
+    _ax.text(-0.1, -0.08, r"$\vec{0}$", fontsize=13, ha="right", va="top")
 
     mo.vstack(
         [
@@ -593,7 +580,7 @@ def _(HALF, ORANGE, RED, arrow, blank, definition, legend_box, mo):
     Given vectors $\vec{x}$ and $\vec{v}$ in $\mathbb{R}^3$, with $\vec{v}$ non-zero, the **line** through $\vec{x}$ in the direction of $\vec{v}$ is the set
 
     $$
-    L = \left\{\, \gamma(t) = \vec{x} + t\vec{v} \in \mathbb{R}^3 \;\middle|\; t \in \mathbb{R} \,\right\}
+    L = \left\{\, \gamma(t) = \vec{x} + t\vec{v} \in \mathbb{R}^3 \mid t \in \mathbb{R} \,\right\}
     $$
 
     We call the function
@@ -633,7 +620,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(GREY, LIGHT, ORANGE, RED, mo, np, panel, patch, t_line, table, turntable):
+def _(GREEN, GREY, LIGHT, RED, mo, np, panel, patch, t_line, turntable):
     _t = t_line.value
     _x, _v = np.array((0.0, 1.0, 1.0)), np.array((1.0, 2.0, 0.0))
     _g = _x + _t * _v + 0.0
@@ -650,18 +637,13 @@ def _(GREY, LIGHT, ORANGE, RED, mo, np, panel, patch, t_line, table, turntable):
                 1.0,
                 surfaces=[patch(_plane, LIGHT, 0.35, n=12)],
                 lines=[(_rim[:, 0], _rim[:, 1], _rim[:, 2], GREY, 1.0), (_L[:, 0], _L[:, 1], _L[:, 2], "#000000", 1.2)],
-                points=[(tuple(_g), ORANGE)],
+                points=[(tuple(_g), GREEN)],
                 axes=[((-0.5, 0, 0), (2.4, 0, 0), "x^1", -135), ((0, -0.5, 0), (0, 4.9, 0), "x^2", 0), ((0, 0, -0.5), (0, 0, 2.15), "x^3", 90)],
-                arrows=[((0, 0, 0), tuple(_x), "#000000"), ((0, 0, 0), tuple(_v), RED), ((0, 0, 0), tuple(_g), ORANGE)],
+                arrows=[((0, 0, 0), tuple(_x), "#000000"), ((0, 0, 0), tuple(_v), RED), ((0, 0, 0), tuple(_g), GREEN)],
+                texts=[((1.8, -2.4, 1), r"x^3 = 1", "#6b6b6b", 180, 6), (tuple(_L[0]), "L", "#000000", 180, 6), (tuple(0.5 * _x), r"\vec{x}", "#000000", 180, 6),
+                       (tuple(_v), r"\vec{v}", RED, -60, 6), (tuple(_g), r"\gamma(t)", GREEN, 30, 7)],
                 box=((-1.8, 2.4), (-2.4, 4.9), (-0.5, 2.15)),
             )
-        ],
-        legend=[
-            ("area", LIGHT, r"x^3 = 1", GREY, 0.35),
-            ("line", "#000000", "L", 1.2),
-            ("line", "#000000", r"\vec{x}"),
-            ("line", RED, r"\vec{v}"),
-            ("dot", ORANGE, r"\gamma(t)"),
         ],
         height=380,
         key="lecture-05-line",
@@ -671,12 +653,6 @@ def _(GREY, LIGHT, ORANGE, RED, mo, np, panel, patch, t_line, table, turntable):
     mo.vstack(
         [
             mo.hstack([t_line], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"$t$", rf"${_t:g}$"),
-                    (r"$\gamma(t) = \vec{x} + t\vec{v}$", rf"$\begin{{bmatrix}} 0 \\ 1 \\ 1 \end{{bmatrix}} + ({_t:g}) \textcolor{{{RED}}}{{\begin{{bmatrix}} 1 \\ 2 \\ 0 \end{{bmatrix}}}} = \textcolor{{{ORANGE}}}{{\begin{{bmatrix}} {_g[0]:g} \\ {_g[1]:g} \\ {_g[2]:g} \end{{bmatrix}}}}$"),
-                ]
-            ),
             _fig,
         ]
     )
@@ -707,9 +683,9 @@ def _(definition, mo):
 
     $$
     \begin{aligned}
-    \leadsto \qquad L &= \left\{\, \gamma(t) = \vec{x} + t(\vec{y} - \vec{x}) \;\middle|\; t \in \mathbb{R} \,\right\}
-    = \left\{\, \tilde{\gamma}(t) = \vec{y} + 2t(\vec{x} - \vec{y}) \;\middle|\; t \in \mathbb{R} \,\right\} \\
-    &= \left\{\, \hat{\gamma}(t) = \tfrac{1}{2}(\vec{x} + \vec{y}) + t(\vec{x} - \vec{y}) \;\middle|\; t \in \mathbb{R} \,\right\}
+    \leadsto \qquad L &= \left\{\, \gamma(t) = \vec{x} + t(\vec{y} - \vec{x}) \mid t \in \mathbb{R} \,\right\}
+    = \left\{\, \tilde{\gamma}(t) = \vec{y} + 2t(\vec{x} - \vec{y}) \mid t \in \mathbb{R} \,\right\} \\
+    &= \left\{\, \hat{\gamma}(t) = \frac{1}{2}(\vec{x} + \vec{y}) + t(\vec{x} - \vec{y}) \mid t \in \mathbb{R} \,\right\}
     \end{aligned}
     $$
 
@@ -722,39 +698,28 @@ def _(definition, mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, GREY, LIGHT, ORANGE, RED, definition, mo, np, panel, patch, turntable):
+def _(BLUE, GREEN, GREY, LIGHT, RED, definition, mo, np, panel, patch, turntable):
     _x, _u, _v = np.array((0.0, 1.0, 1.0)), np.array((1.0, 2.0, 0.0)), np.array((-1.0, 3.0, 0.0))
     _p = _x + 0.6 * _u + 0.4 * _v  # phi(s, t) at s = 0.6, t = 0.4
-    _plane = [(-1.6, -0.6, 1), (-1.6, 6.8, 1), (1.6, 6.8, 1), (1.6, -0.6, 1)]
+    _plane = [(-1.6, -0.6, 1), (-1.6, 4.3, 1), (1.6, 4.3, 1), (1.6, -0.6, 1)]
     _rim = np.array(_plane + _plane[:1])
-    # phi(1, 1) = x + u + v completes the parallelogram
-    _par = np.array([_x + _u, _x + _u + _v, _x + _v])
-    # x = (0, 1, 1): drop lines to the unit marks on the axes
-    _guides = [((0, 0), (1, 1), (1, 0)), ((0, 0), (1, 0), (1, 1))]
-    _marks = [((-0.1, 0.1), (1, 1), (0, 0)), ((-0.1, 0.1), (0, 0), (1, 1))]
+    _marks = [((-0.08, 0.08), (1, 1), (0, 0)), ((-0.08, 0.08), (0, 0), (1, 1))]
     _fig = turntable(
-        24,
-        26,
-        "the plane P through x in the directions of u and v, with the parallelogram spanned by u and v at x and a point phi(s, t) of P",
+        28,
+        30,
+        "the plane P through x in the directions of u and v, and a point phi(s, t) of P",
         [
             panel(
                 1.0,
                 surfaces=[patch(_plane, LIGHT, 0.35, n=12)],
-                lines=[(_rim[:, 0], _rim[:, 1], _rim[:, 2], GREY, 1.0), (_par[:, 0], _par[:, 1], _par[:, 2], GREY, 1.0, [4, 3])]
-                + [(*_g, GREY, 1.0, [4, 3]) for _g in _guides]
-                + [(*_m, "#000000", 1.0) for _m in _marks],
-                points=[(tuple(_p), ORANGE)],
-                axes=[((-0.5, 0, 0), (2.2, 0, 0), "x^1", -135), ((0, -0.5, 0), (0, 7.2, 0), "x^2", 0), ((0, 0, -0.5), (0, 0, 2.1), "x^3", 90)],
-                arrows=[((0, 0, 0), tuple(_x), "#000000"), (tuple(_x), tuple(_x + _u), BLUE), (tuple(_x), tuple(_x + _v), RED)],
-                texts=[((0, 1, 0), "1", "#000000", -60, 6), ((0, 0, 1), "1", "#000000", 180, 6)],
+                lines=[(_rim[:, 0], _rim[:, 1], _rim[:, 2], GREY, 1.0)] + [(*_m, "#000000", 1.0) for _m in _marks],
+                points=[(tuple(_p), GREEN, 3.5)],
+                axes=[((0, 0, 0), (2.4, 0, 0), "", 0), ((0, 0, 0), (0, 5.0, 0), "", 0), ((0, 0, 0), (0, 0, 2.0), "", 0)],
+                arrows=[((0, 0, 0), tuple(_x), "#000000", 1.6), (tuple(_x), tuple(_x + _u), BLUE, 1.6), (tuple(_x), tuple(_x + _v), RED, 1.6), (tuple(_x), tuple(_p), GREEN, 1.0)],
+                texts=[((0, 1, 0), "1", "#000000", -90, 7), ((0, 0, 1), "1", "#000000", 180, 7), ((1.3, -0.4, 1), "P", "#6b6b6b", 90, 4),
+                       (tuple(_x / 2), r"\vec{x}", "#000000", 180, 6), (tuple(_x + _u), r"\vec{u}", BLUE, -30, 6), (tuple(_x + _v), r"\vec{v}", RED, 60, 6),
+                       (tuple(_p), r"\varphi(s, t)", GREEN, 0, 7)],
             )
-        ],
-        legend=[
-            ("area", LIGHT, "P", GREY, 0.35),
-            ("line", "#000000", r"\vec{x}"),
-            ("line", BLUE, r"\vec{u}"),
-            ("line", RED, r"\vec{v}"),
-            ("dot", ORANGE, r"\varphi(s, t)"),
         ],
         height=380,
         bias=0.25,
@@ -768,7 +733,7 @@ def _(BLUE, GREY, LIGHT, ORANGE, RED, definition, mo, np, panel, patch, turntabl
     Given $\vec{x}, \vec{u}, \vec{v} \in \mathbb{R}^3$, with $\vec{u}, \vec{v}$ not proportional, the **plane** through $\vec{x}$ in the directions of $\vec{u}$ and $\vec{v}$ is the set
 
     $$
-    P = \left\{\, \varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v} \;\middle|\; s, t \in \mathbb{R} \,\right\}
+    P = \left\{\, \varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v} \mid s, t \in \mathbb{R} \,\right\}
     $$
 
     ($\varphi : \mathbb{R}^2 \longrightarrow \mathbb{R}^3$ is an **affine parameterization** of the plane).
@@ -794,7 +759,7 @@ def _(BLUE, GREY, LIGHT, ORANGE, RED, definition, mo, np, panel, patch, turntabl
     **Remark.** There exists a unique plane through $\vec{x}, \vec{y}, \vec{z} \in \mathbb{R}^3$ if and only if $\vec{y} - \vec{x}$, $\vec{z} - \vec{x}$ are not proportional.
 
     $$
-    P = \left\{\, \varphi(s, t) = \vec{x} + s(\vec{y} - \vec{x}) + t(\vec{z} - \vec{x}) \;\middle|\; s, t \in \mathbb{R} \,\right\}
+    P = \left\{\, \varphi(s, t) = \vec{x} + s(\vec{y} - \vec{x}) + t(\vec{z} - \vec{x}) \mid s, t \in \mathbb{R} \,\right\}
     $$
 
     $\leadsto$ &nbsp; different parameterizations are also possible, with different starting points and directions
@@ -802,7 +767,7 @@ def _(BLUE, GREY, LIGHT, ORANGE, RED, definition, mo, np, panel, patch, turntabl
             ),
             definition(
                 r"""
-    Given a plane $P = \left\{\, \vec{x} + s\vec{u} + t\vec{v} \;\middle|\; s, t \in \mathbb{R} \,\right\}$, a vector $\vec{n} \in \mathbb{R}^3$ is called **normal** to $P$ if
+    Given a plane $P = \left\{\, \vec{x} + s\vec{u} + t\vec{v} \mid s, t \in \mathbb{R} \,\right\}$, a vector $\vec{n} \in \mathbb{R}^3$ is called **normal** to $P$ if
 
     $$
     \vec{n} \cdot \vec{u} = \vec{n} \cdot \vec{v} = 0 \qquad (\vec{n} \text{ is orthogonal to both directions in } P)
@@ -832,15 +797,10 @@ def _(BLUE, GREEN, GREY, LIGHT, RED, definition, mo, np, panel, patch, turntable
             panel(
                 1.0,
                 arrows=[((0, 0, 0), tuple(-_w), GREY, 1.8, [5, 4]), ((0, 0, 0), tuple(_w), GREEN), ((0, 0, 0), tuple(_u), BLUE), ((0, 0, 0), tuple(_v), RED)],
-                arcs=[(_turn[:, 0], _turn[:, 1], _turn[:, 2], "#000000", 1.2)],
-                texts=[(tuple(_turn[20]), r"\theta", "#000000", -60, 4)],
+                arcs=[(_turn[:, 0], _turn[:, 1], _turn[:, 2], GREEN, 1.2)],
+                texts=[(tuple(_turn[20]), r"\theta", GREEN, -60, 4), (tuple(_u), r"\vec{u}", BLUE, -30, 6), (tuple(_v), r"\vec{v}", RED, 210, 6),
+                       (tuple(_w), r"\vec{w} = \vec{u} \times \vec{v}", GREEN, 0, 7), (tuple(-_w), r"-\vec{w}", GREY, 0, 7)],
             )
-        ],
-        legend=[
-            ("line", BLUE, r"\vec{u}"),
-            ("line", RED, r"\vec{v}"),
-            ("line", GREEN, r"\vec{w} = \vec{u} \times \vec{v}"),
-            ("line", GREY, r"-\vec{w}", 1.8, [5, 4]),
         ],
         height=300,
     )
@@ -860,15 +820,9 @@ def _(BLUE, GREEN, GREY, LIGHT, RED, definition, mo, np, panel, patch, turntable
                 lines=[(_rim[:, 0], _rim[:, 1], _rim[:, 2], GREY, 1.0)],
                 points=[((0, 0, 0), "#000000")],
                 arrows=[((0, 0, 0), tuple(_x), "#000000"), (tuple(_x), tuple(_x + _u), BLUE), (tuple(_x), tuple(_x + _v), RED), (tuple(_x), tuple(_x + _n), GREEN)],
+                texts=[((0, 0, 0), r"\vec{0}", "#000000", 200, 6), (tuple(_x / 2), r"\vec{x}", "#000000", 180, 6), (tuple(_x + _u), r"\vec{u}", BLUE, -30, 6),
+                       (tuple(_x + _v), r"\vec{v}", RED, 40, 7), (tuple(_x + _n), r"\vec{n} = \alpha\, \vec{u} \times \vec{v}", GREEN, 0, 7), (tuple(_plane[2]), "P", "#6b6b6b", 0, 5)],
             )
-        ],
-        legend=[
-            ("area", LIGHT, "P", GREY, 0.35),
-            ("dot", "#000000", r"\vec{0}"),
-            ("line", "#000000", r"\vec{x}"),
-            ("line", BLUE, r"\vec{u}"),
-            ("line", RED, r"\vec{v}"),
-            ("line", GREEN, r"\vec{n} = \alpha\, \vec{u} \times \vec{v}"),
         ],
         height=300,
         bias=0.25,
@@ -887,10 +841,10 @@ def _(BLUE, GREEN, GREY, LIGHT, RED, definition, mo, np, panel, patch, turntable
 
     $$
     \lVert \vec{w} \rVert^2 = \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2
-    = \Big(\underbrace{\lVert \vec{u} \rVert\, \lVert \vec{v} \rVert \sin\!\big(\theta(\vec{u}, \vec{v})\big)}_{\text{area of parallelogram spanned by } \vec{u} \text{ and } \vec{v}}\Big)^2
+    = \Big(\underbrace{\lVert \vec{u} \rVert\, \lVert \vec{v} \rVert \sin\!\big(\theta(\vec{u}, \vec{v})\big)}_{\mathclap{\footnotesize \text{area of parallelogram spanned by } \vec{u} \text{ and } \vec{v}}\vphantom{\footnotesize \text{area of parallelogram spanned by } \vec{u} \text{ and } \vec{v}}}\Big)^2
     $$
 
-    (if $\vec{u}, \vec{v}$ are proportional this forces $\vec{w} = \vec{0}$) and $\vec{u}, \vec{v}, \vec{w}$ is **right-handed** (positively oriented).
+    and $\vec{u}, \vec{v}, \vec{w}$ is **right-handed** (positively oriented).
     """,
                 "Cross-product",
             ),
@@ -934,7 +888,7 @@ def _(mo, theorem):
 
     $$
     \begin{aligned}
-    \vec{u} \times \vec{v} &= \underbrace{\det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ u^1 & u^2 & u^3 \\ v^1 & v^2 & v^3 \end{bmatrix}}_{\substack{\text{not an honest determinant!} \\ \text{1st row is made of vectors…}}}
+    \vec{u} \times \vec{v} &= \underbrace{\det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ u^1 & u^2 & u^3 \\ v^1 & v^2 & v^3 \end{bmatrix}}_{\mathclap{\footnotesize \begin{matrix}\text{not an honest determinant!} \\ \text{1st row is made of vectors…}\end{matrix}}\vphantom{\footnotesize \begin{matrix}\text{not an honest determinant!} \\ \text{1st row is made of vectors…}\end{matrix}}}
     = \vec{e}_1 \det \begin{bmatrix} u^2 & u^3 \\ v^2 & v^3 \end{bmatrix} - \vec{e}_2 \det \begin{bmatrix} u^1 & u^3 \\ v^1 & v^3 \end{bmatrix} + \vec{e}_3 \det \begin{bmatrix} u^1 & u^2 \\ v^1 & v^2 \end{bmatrix} \\
     &= \vec{e}_1 (u^2 v^3 - u^3 v^2) - \vec{e}_2 (u^1 v^3 - u^3 v^1) + \vec{e}_3 (u^1 v^2 - u^2 v^1)
     = \begin{bmatrix} u^2 v^3 - u^3 v^2 \\ u^3 v^1 - u^1 v^3 \\ u^1 v^2 - u^2 v^1 \end{bmatrix} = \vec{w}
@@ -963,7 +917,7 @@ def _(mo, theorem):
     \det \begin{bmatrix} u^1 & v^1 & (u^2 v^3 - u^3 v^2) \\ u^2 & v^2 & (u^3 v^1 - u^1 v^3) \\ u^3 & v^3 & (u^1 v^2 - u^2 v^1) \end{bmatrix} = \lVert \vec{w} \rVert^2 \geq 0 \qquad (\text{check!})
     $$
 
-    This is strictly positive when $\vec{u}, \vec{v}$ are not proportional; otherwise $\vec{w} = \vec{0}$. $\square$
+    This is strictly positive when $\vec{u}, \vec{v}$ are not proportional; otherwise $\vec{w} = \vec{0}$. <span class=qed>$\square$</span>
 
     **Example.** &nbsp; $\vec{u} = \begin{bmatrix} 1 \\ 2 \\ 0 \end{bmatrix}, \quad \vec{v} = \begin{bmatrix} -1 \\ 3 \\ 0 \end{bmatrix}$
 
@@ -983,7 +937,7 @@ def _(mo, theorem):
 
     $$
     \det \begin{bmatrix} 1 & -1 & 0 \\ 2 & 3 & 0 \\ 0 & 0 & 5 \end{bmatrix}
-    = 1\, (3 \cdot 5 - 0 \cdot 0) - (-1)\, (2 \cdot 5 - 0 \cdot 0) + 0\, (2 \cdot 0 - 3 \cdot 0) = \underbrace{25}_{\lVert \vec{u} \times \vec{v} \rVert^2\,!} > 0
+    = 1\, (3 \cdot 5 - 0 \cdot 0) - (-1)\, (2 \cdot 5 - 0 \cdot 0) + 0\, (2 \cdot 0 - 3 \cdot 0) = \underbrace{25}_{\mathclap{\footnotesize \lVert \vec{u} \times \vec{v} \rVert^2\,!}\vphantom{\footnotesize \lVert \vec{u} \times \vec{v} \rVert^2\,!}} > 0
     $$
     """
             ),
@@ -994,40 +948,27 @@ def _(mo, theorem):
 
 @app.cell(hide_code=True)
 def _(mo):
-    def _s(label, value):
-        return mo.ui.slider(-3, 3, 0.5, value=value, label=label, show_value=True)
-
-    u1, u2, u3 = _s("$u^1$", 1), _s("$u^2$", 2), _s("$u^3$", 0)
-    v1, v2, v3 = _s("$v^1$", -1), _s("$v^2$", 3), _s("$v^3$", 0)
-    return u1, u2, u3, v1, v2, v3
+    v1 = mo.ui.slider(-2, 2, 0.5, value=-1, label="$v^1$", show_value=True)
+    v2 = mo.ui.slider(-2, 3, 0.5, value=3, label="$v^2$", show_value=True)
+    v3 = mo.ui.slider(-1.5, 1.5, 0.5, value=0, label="$v^3$", show_value=True)
+    return v1, v2, v3
 
 
 @app.cell(hide_code=True)
-def _(BLUE, GREEN, GREY, LIGHT, RED, math, mo, np, panel, patch, table, turntable, u1, u2, u3, v1, v2, v3):
-    _u = np.array((u1.value, u2.value, u3.value), float)
+def _(BLUE, GREEN, GREY, LIGHT, RED, math, mo, np, panel, patch, table, turntable, v1, v2, v3):
+    _u = np.array((1, 2, 0), float)
     _v = np.array((v1.value, v2.value, v3.value), float)
     _w = np.cross(_u, _v) + 0.0
-    _norm = math.sqrt(_w @ _w)
 
-    # the frame comes in three sizes (radius of the ball holding the scene, tick step), the smallest holding all
-    # vectors: the scale stays fixed while the sliders move within it (|u x v| <= 25.5 for all slider values)
-    _far = max(np.linalg.norm(_p) for _p in (_u, _v, _u + _v, _w))
-    _R, _step = next(((_r, _k) for _r, _k in ((7, 1), (14, 2), (28, 5)) if _far <= 0.92 * _r), (28, 5))
-    _len, _d = 0.8 * _R, 0.025 * _R
+    # one frame for every slider value (|u x v| < 8), no marks on the axes
+    _R = 9
+    _len = 0.8 * _R
     # axis shafts drawn beneath vectors lying along them; heads and names by the axes primitive
     _shafts, _axes = [], []
     for _i, (_e, _deg) in enumerate(zip(np.eye(3), (180, -60, 90))):
         _s = np.array([-0.3 * _len * _e, 0.9 * _len * _e])
         _shafts.append((_s[:, 0], _s[:, 1], _s[:, 2], "#000000", 1.1, None, -0.1 * _R))
         _axes.append((tuple(0.9 * _len * _e), tuple(_len * _e), f"x^{_i + 1}", _deg))
-    _marks, _ticks = [], []
-    for _k in range(_step, int(0.85 * _len) + 1, _step):  # axis marks every `_step` units, every other one with its value
-        for _i, (_across, _deg) in enumerate(((1, 180), (0, -90), (1, 180))):
-            _c = _k * np.eye(3)[_i]
-            _m = np.array([_c - _d * np.eye(3)[_across], _c + _d * np.eye(3)[_across]])
-            _marks.append((_m[:, 0], _m[:, 1], _m[:, 2], "#000000", 1.0, None, -0.1 * _R))
-            if _k % (2 * _step) == 0:
-                _ticks.append((tuple(_c), f"{_k}", "#000000", _deg, 6))
     _arrows, _dots = [], []
     for _p, _colour in ((_w, GREEN), (_u, BLUE), (_v, RED)):
         if _p @ _p > 0:
@@ -1038,46 +979,33 @@ def _(BLUE, GREEN, GREY, LIGHT, RED, math, mo, np, panel, patch, table, turntabl
     _b = _R / math.sqrt(3)
     _fig = turntable(
         35,
-        24,
+        34,
         "the vectors u and v, their cross-product u x v and the parallelogram spanned by u and v",
         [
             panel(
                 1.0,
                 surfaces=[patch([np.zeros(3), _u, _u + _v, _v], LIGHT, 0.7)],
-                lines=[(_par[:, 0], _par[:, 1], _par[:, 2], GREY, 1.0, [4, 3])] + _shafts + _marks,
+                lines=[(_par[:, 0], _par[:, 1], _par[:, 2], GREY, 1.0, [4, 3])] + _shafts,
                 points=_dots,
                 axes=_axes,
                 arrows=_arrows,
-                texts=_ticks,
+                texts=[(tuple(_p), _n, _c, _a, 7) for _p, _n, _c, _a in ((_u, r"\vec{u}", BLUE, -100), (_v, r"\vec{v}", RED, 30), (_w, r"\vec{u} \times \vec{v}", GREEN, 30)) if _p @ _p > 0],
                 box=((-_b, _b), (-_b, _b), (-_b, _b)),
             )
-        ],
-        legend=[
-            ("line", BLUE, r"\vec{u}"),
-            ("line", RED, r"\vec{v}"),
-            ("line", GREEN, r"\vec{u} \times \vec{v}"),
-            ("area", LIGHT, r"\text{parallelogram spanned by } \vec{u} \text{ and } \vec{v}", GREY, 0.7),
         ],
         height=420,
         key="lecture-05-cross",
     )
 
     def _col(vec, color):
-        return rf"$\textcolor{{{color}}}{{\begin{{bmatrix}} {vec[0]:g} \\ {vec[1]:g} \\ {vec[2]:g} \end{{bmatrix}}}}$"
+        return rf"$\begin{{bmatrix}} {vec[0]:g} \\ {vec[1]:g} \\ {vec[2]:g} \end{{bmatrix}}$"
 
     mo.vstack(
         [
-            mo.vstack(
-                [
-                    mo.hstack([u1, u2, u3], justify="start", gap=2, wrap=True),
-                    mo.hstack([v1, v2, v3], justify="start", gap=2, wrap=True),
-                ]
-            ),
+            mo.hstack([v1, v2, v3], justify="start", gap=2, wrap=True),
             table(
                 [
-                    (r"$\vec{u}, \ \vec{v}$", _col(_u, BLUE) + r", &nbsp; " + _col(_v, RED)),
                     (r"$\vec{u} \times \vec{v}$", _col(_w, GREEN)),
-                    (r"$\lVert \vec{u} \times \vec{v} \rVert$ = area of the parallelogram", rf"${_norm:.3f}$"),
                 ]
             ),
             _fig,
@@ -1122,18 +1050,6 @@ def _(mo, theorem):
 
 @app.cell(hide_code=True)
 def _(mo):
-    def _field():
-        return mo.ui.text(placeholder="?", debounce=True)
-
-    q2_1, q2_2, q2_3, q3_vol = (_field() for _ in range(4))
-    return q2_1, q2_2, q2_3, q3_vol
-
-
-@app.cell(hide_code=True)
-def _(check, mo, q2_1, q2_2, q2_3, q3_vol):
-    def _ask(label, field, answer):
-        return mo.hstack([mo.md(label), field, mo.md(check(field, answer))], justify="start", align="center")
-
     mo.vstack(
         [
             mo.md(
@@ -1155,13 +1071,7 @@ def _(check, mo, q2_1, q2_2, q2_3, q3_vol):
     Let $\vec{u} = \begin{bmatrix} 1 \\ 1 \\ 0 \end{bmatrix}, \; \vec{v} = \begin{bmatrix} 0 \\ 1 \\ 1 \end{bmatrix}, \; \vec{x} = \begin{bmatrix} 1 \\ 0 \\ 2 \end{bmatrix}, \; \varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v}$.
 
     (a) Compute $\vec{n} = \vec{u} \times \vec{v}$.
-    """
-            ),
-            _ask(r"$n^1 =$", q2_1, 1),
-            _ask(r"$n^2 =$", q2_2, -1),
-            _ask(r"$n^3 =$", q2_3, 1),
-            mo.md(
-                r"""
+
     (b) Verify that every vector $\vec{y} \in P = \{\, \varphi(s, t) \mid s, t \in \mathbb{R} \,\}$ satisfies $(\vec{y} - \vec{x}) \cdot \vec{n} = 0$.
 
     (c) Write $(\vec{y} - \vec{x}) \cdot \vec{n} = 0$ as equations on $y^1, y^2, y^3$ and decide if $\vec{y} = \begin{bmatrix} 2 \\ 1 \\ 2 \end{bmatrix}$ and $\vec{y} = \begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix}$ are in $P$.
@@ -1173,26 +1083,12 @@ def _(check, mo, q2_1, q2_2, q2_3, q3_vol):
     (a) Is $A$ invertible?
 
     (b) What is the volume of the parallelepiped spanned by the columns of $A$?
+
+    (c) Is $\vec{A}_1, \vec{A}_2, \vec{A}_3$ right-handed (positively oriented)?
     """
             ),
-            _ask(r"volume $=$", q3_vol, 2),
-            mo.md(r"(c) Is $\vec{A}_1, \vec{A}_2, \vec{A}_3$ right-handed (positively oriented)?"),
         ]
     )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Summary
-
-    - a line in $\mathbb{R}^3$ is $L = \{\, \gamma(t) = \vec{x} + t\vec{v} \mid t \in \mathbb{R} \,\}$ with $\vec{v}$ non-zero: starting point $\vec{x}$, velocity $\vec{v}$; parameterizations are not unique, but their velocities are proportional
-    - a plane in $\mathbb{R}^3$ is $P = \{\, \varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v} \mid s, t \in \mathbb{R} \,\}$ with $\vec{u}, \vec{v}$ not proportional; $\vec{n}$ is normal to $P$ if $\vec{n} \cdot \vec{u} = \vec{n} \cdot \vec{v} = 0$
-    - the cross-product $\vec{w} = \vec{u} \times \vec{v}$ is orthogonal to both $\vec{u}, \vec{v}$, has $\lVert \vec{w} \rVert$ = area of the parallelogram spanned by $\vec{u}$ and $\vec{v}$, and $\vec{u}, \vec{v}, \vec{w}$ is right-handed: $\det \begin{bmatrix} \vec{u} & \vec{v} & \vec{w} \end{bmatrix} > 0$
-    - $\vec{u} \times \vec{v}$ is computed as a formal $3 \times 3$ determinant with first row $\vec{e}_1, \vec{e}_2, \vec{e}_3$; every normal vector to $P$ is proportional to $\vec{u} \times \vec{v}$
-    - the cross-product is anti-commutative and bilinear
-    """)
     return
 
 

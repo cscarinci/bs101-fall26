@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 02 · The Euclidean inner product (the dot product)", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 • Lecture 02 • The Euclidean inner product (the dot product)", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -26,11 +26,11 @@ def _(mo):
     # Palette with fixed roles (figures only; text carries no colour):
     #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (tangent vector, gradient, mean)
-    #   ORANGE a third series, only when three are needed
+    #   GREEN  a result made from them (sum, multiple, angle, tangent vector, gradient)
+    #   ORANGE (ochre) a third object, only when three are needed
     #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
-    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#3f5f8f", "#a8554c", "#4f7f5c", "#b9853f", "#9a9a9a", "#e3ebf4"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
     FULL, HALF = 7.4, 3.6
 
@@ -75,12 +75,13 @@ def _(mo):
 
     def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
         """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
-        One head size and one line weight for every figure, so arrows look alike across lectures."""
+        One line weight for every figure; the head is open and sized in points from the line width,
+        so arrows look alike across lectures at any axis range."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={3 * lw:g},head_width={1.3 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -119,24 +120,15 @@ def _(mo):
 
     def table(rows):
         """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
-        return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
+        _md = mo.md("\n".join(["| | |", "|:--|:--|"] + [f"| {k} | {v} |" for k, v in rows]))
+        return mo.Html(f'<div class="readout">{_md.text}</div>')
 
-    def check(field, answer):
-        """Feedback mark for a numeric answer typed into a text field."""
-        s = field.value.strip().replace(",", ".")
-        if not s:
-            return ""
-        try:
-            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
-        except ValueError:
-            return "enter a number"
-
-    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 02", "Week 01", "Lecture 02 · The Euclidean inner product (the dot product)")
+    header("Lecture 02", "Week 01", "Lecture 02 • The Euclidean inner product (the dot product)")
     return
 
 
@@ -149,25 +141,23 @@ def _(arrow):
         else:
             arrow(ax, tail, tip, color, **kw)
 
-    def legend_box(fig, entries, loc="outside right center", ncols=1):
-        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
-        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
-        from matplotlib.lines import Line2D
-        from matplotlib.patches import Patch
+    def name_tip(ax, tail, tip, name, color, away=None):
+        """The name of the vector from `tail` to `tip`, beside its tip: beyond the tip, or to the side of the arrow
+        away from the direction `away`."""
+        v = (tip[0] - tail[0], tip[1] - tail[1])
+        d = v if away is None else (-v[1], v[0])
+        if away is not None and d[0] * away[0] + d[1] * away[1] > 0:
+            d = (-d[0], -d[1])
+        r = (d[0] ** 2 + d[1] ** 2) ** 0.5
+        d = (d[0] / r, d[1] / r) if r else (1, 0)
+        ax.annotate(name, tip, textcoords="offset points", xytext=(9 * d[0], 9 * d[1]), color=color, fontsize=13,
+                    ha="left" if d[0] > 0.3 else "right" if d[0] < -0.3 else "center", va="bottom" if d[1] > 0.3 else "top" if d[1] < -0.3 else "center")
 
-        handles = []
-        for kind, c, _label, *style in entries:
-            if kind == "dot":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
-            elif kind == "ring":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
-            elif kind == "line":
-                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
-            else:
-                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
-        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+    def num(v):
+        """A value as one would write it: exact when it is a multiple of 1/2, otherwise to two decimals."""
+        return f"{v + 0.0:g}" if abs(2 * v - round(2 * v)) < 1e-9 else f"{v:.2f}"
 
-    return legend_box, vector
+    return name_tip, num, vector
 
 
 @app.cell(hide_code=True)
@@ -176,8 +166,8 @@ def _(mo, np):
     # Drawn in the browser on canvases, in the style of the static figures: orthographic views of
     # R^3 = R^2 x R (x^1 towards the viewer, x^2 to the right, y up), surfaces drawn back to front.
     # Dragging turns the view at a fixed scale (all panels of a figure together) and a double click restores
-    # it; a figure redrawn by a slider keeps its view. A legend box explains points, curves and surfaces, so
-    # that no label covers the drawing; only the axes carry labels. Typesetting is done by KaTeX.
+    # it; a figure redrawn by a slider keeps its view. Names sit beside the objects they name. Typesetting is done
+    # by KaTeX.
     import html as _html
     import json as _json
 
@@ -274,11 +264,11 @@ def _(mo, np):
             for (let k = 0; k < ln.p.length; k += 3) idx.push(add(ln.p[k], ln.p[k + 1], ln.p[k + 2]));
             const line = { idx, dash: ln.d, cum: new Float64Array(idx.length) };
             for (let k = 0; k < idx.length - 1; k++)
-              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0 });
+              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0, flat: ln.b });
             return line;
           });
           for (const d of spec.points) this.dots.push({ i: add(...d.p), c: d.c, r: d.r, h: d.h });
-          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c });
+          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c, w: h.w, d: h.d });
           // the centre of the scene and the radius of a ball holding it, heights at their drawing scale
           let src = pts;
           if (spec.box) {
@@ -350,7 +340,8 @@ def _(mo, np):
           items.sort((p, q) => p[0] - q[0]);
           g.clearRect(0, 0, W, H);
           g.lineJoin = "round";
-          for (const [, kind, o] of items) {
+          for (let n = 0; n < items.length; n++) {
+            const [, kind, o] = items[n];
             if (kind === 0) {
               const q = o[0];
               g.beginPath();
@@ -363,28 +354,45 @@ def _(mo, np):
               if (o[2] === 1) { g.lineWidth = 0.6; g.setLineDash([]); g.stroke(); }
               g.globalAlpha = 1;
             } else if (kind === 1) {
+              if (o.done) { o.done = false; continue; }
+              let p0 = o, p1 = o;
+              if (o.flat) {  // the pieces of a straight line up to the next surface go in one stroke, so no seams show
+                let grew = true;
+                while (grew) {
+                  grew = false;
+                  for (let m = n + 1; m < items.length && items[m][1] !== 0; m++) {
+                    const q = items[m][2];
+                    if (items[m][1] !== 1 || q.line !== o.line || q.done) continue;
+                    if (q.k === p1.k + 1) { p1 = q; q.done = true; grew = true; }
+                    else if (q.k === p0.k - 1) { p0 = q; q.done = true; grew = true; }
+                  }
+                }
+              }
               g.beginPath();
-              g.moveTo(X[o.a], Y[o.a]);
-              g.lineTo(X[o.b], Y[o.b]);
+              g.moveTo(X[p0.a], Y[p0.a]);
+              g.lineTo(X[p1.b], Y[p1.b]);
               g.strokeStyle = o.c;
               g.lineWidth = o.lw;
               const dash = o.line && o.line.dash;
-              g.lineCap = dash ? "butt" : "round";
+              g.lineCap = dash || o.flat ? "butt" : "round";
               g.setLineDash(dash || []);
-              g.lineDashOffset = dash ? -o.line.cum[o.k] : 0;
+              g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
               g.stroke();
             } else if (kind === 2) {
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
               vx /= len; vy /= len;
-              const bx = X[o.i] - 9 * vx, by = Y[o.i] - 9 * vy;
+              const hl = Math.max(3.5 * o.w, 6), hw = Math.max(1.5 * o.w, 2.6), bx = X[o.i] - hl * vx, by = Y[o.i] - hl * vy;  // open head, as on the page
+              g.strokeStyle = o.c;
+              g.lineWidth = o.w;
+              g.setLineDash([]);
+              g.lineCap = "round";
+              if (!o.d) { g.beginPath(); g.moveTo(X[o.j], Y[o.j]); g.lineTo(X[o.i], Y[o.i]); g.stroke(); }
               g.beginPath();
-              g.moveTo(X[o.i], Y[o.i]);
-              g.lineTo(bx - 3.4 * vy, by + 3.4 * vx);
-              g.lineTo(bx + 3.4 * vy, by - 3.4 * vx);
-              g.closePath();
-              g.fillStyle = o.c;
-              g.fill();
+              g.moveTo(bx - hw * vy, by + hw * vx);
+              g.lineTo(X[o.i], Y[o.i]);
+              g.lineTo(bx + hw * vy, by - hw * vx);
+              g.stroke();
             } else {
               g.beginPath();
               g.arc(X[o.i], Y[o.i], o.r, 0, 2 * Math.PI);
@@ -490,8 +498,8 @@ def _(mo, np):
         axes: (tail, tip, TeX label, direction of the label in degrees), drawn black;
         arrows: (tail, tip, colour[, width, dash]), vectors with a head in their colour;
         arcs: (x1, x2, y, colour[, width]), curves ending in a head, such as a turning arrow;
-        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), short labels such as tick values (names of
-        points and objects go in the legend instead); caption: TeX below the drawing;
+        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), names of points and objects and tick values,
+        each beside its point; caption: TeX below the drawing;
         box: ((x^1 lo, hi), (x^2 lo, hi), (y lo, hi)) to size the drawing by, instead of its own points."""
         p = {"ys": ys, "surfaces": list(surfaces), "lines": [], "points": [], "heads": [], "labels": [], "caption": caption, "box": box}
         for ln in lines:
@@ -499,20 +507,20 @@ def _(mo, np):
         for tail, tip, label, d in axes:
             a, b = np.asarray(tail, float), np.asarray(tip, float)
             seg = a + np.linspace(0, 0.96, 60)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000"})
+            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000", "w": 1.1})
             p["labels"].append({"p": b.tolist(), "t": label, "c": "#000000", "a": d, "r": 5})
         for q in points:
             p["points"].append({"p": [float(c) for c in q[0]], "c": q[1], "r": q[2] if len(q) > 2 else 4.0, "h": bool(q[3]) if len(q) > 3 else False})
         for ar in arrows:
             a, b = np.asarray(ar[0], float), np.asarray(ar[1], float)
             seg = a + np.linspace(0, 0.96, 40)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2]})
+            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None})
         for arc in arcs:
             c = np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in arc[:3])), -1)
             p["lines"].append({"p": _flat(*c[:-1].T), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8, "d": None, "e": 0})
-            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3]})
+            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8})
         for tx in texts:
             p["labels"].append({"p": [float(c) for c in tx[0]], "t": tx[1], "c": tx[2], "a": tx[3], "r": tx[4] if len(tx) > 4 else 5})
         return p
@@ -577,7 +585,7 @@ def _(definition, mo, note, theorem):
     we define their **dot product** or **inner product** as the real number
 
     $$
-    \vec{x} \cdot \vec{y} = \underbrace{x^1 y^1 + x^2 y^2 + \dots + x^n y^n}_{\text{sum of products of components}} \in \mathbb{R}
+    \vec{x} \cdot \vec{y} = \underbrace{x^1 y^1 + x^2 y^2 + \dots + x^n y^n}_{\mathclap{\footnotesize \text{sum of products of components}}\vphantom{\footnotesize \text{sum of products of components}}} \in \mathbb{R}
     $$
     """,
                 "Dot product",
@@ -612,7 +620,7 @@ def _(definition, mo, note, theorem):
     """,
                 "Basic properties",
             ),
-            mo.md(r"**Proof.** Exercise (using definitions and properties of real numbers). $\square$"),
+            mo.md(r"**Proof.** Exercise (using definitions and properties of real numbers). <span class=qed>$\square$</span>"),
         ]
     )
     return
@@ -704,7 +712,7 @@ def _(np, x1, x2, y1, y2):
 
 
 @app.cell(hide_code=True)
-def _(Arc, BLUE, Figure, GREEN, HALF, RED, controls, dot, legend_box, math, mo, nonzero, nx, ny, plane, table, vector, x, y):
+def _(Arc, BLUE, Figure, GREEN, HALF, RED, controls, dot, math, mo, name_tip, nonzero, num, nx, ny, plane, table, vector, x, y):
     _fig = Figure(figsize=(HALF, HALF + 0.4), layout="constrained")
     _ax = _fig.subplots()
     plane(_ax, 6)
@@ -712,7 +720,8 @@ def _(Arc, BLUE, Figure, GREEN, HALF, RED, controls, dot, legend_box, math, mo, 
     _ax.set_yticks(range(-4, 5, 2))
     vector(_ax, (0, 0), tuple(x), BLUE)
     vector(_ax, (0, 0), tuple(y), RED)
-    _legend = [("line", BLUE, r"$\vec{x}$"), ("line", RED, r"$\vec{y}$")]
+    name_tip(_ax, (0, 0), tuple(x), r"$\vec{x}$", BLUE, away=tuple(y))
+    name_tip(_ax, (0, 0), tuple(y), r"$\vec{y}$", RED, away=tuple(x))
 
     _need = r"need $\vec{x}, \vec{y} \neq \vec{0}$"
     if nonzero:
@@ -723,22 +732,18 @@ def _(Arc, BLUE, Figure, GREEN, HALF, RED, controls, dot, legend_box, math, mo, 
         if (_a2 - _a1) % 360 > 180:
             _a1, _a2 = _a2, _a1
         _ax.add_patch(Arc((0, 0), 1.6, 1.6, theta1=_a1, theta2=_a2, color=GREEN, lw=1.4))
-        _legend.append(("line", GREEN, r"$\theta(\vec{x}, \vec{y})$"))
-        _quotient = rf"${_cos:.3f}$"
-        _angle = rf"$\textcolor{{{GREEN}}}{{{_theta:.3f} \text{{ rad}} = {math.degrees(_theta):.1f}^\circ}}$"
+        _mid = math.radians(_a1 + ((_a2 - _a1) % 360) / 2)
+        _ax.text(1.35 * math.cos(_mid), 1.35 * math.sin(_mid), r"$\theta$", color=GREEN, fontsize=13, ha="center", va="center")
+        _angle = rf"${num(_theta)} \text{{ rad}} = {math.degrees(_theta):.0f}^\circ$"
     else:
-        _quotient = _angle = _need
-    legend_box(_fig, _legend, loc="outside lower center", ncols=3)
+        _angle = _need
 
     mo.vstack(
         [
             controls,
             table(
                 [
-                    (r"$\vec{x}\cdot\vec{y}$", rf"$\textcolor{{{BLUE}}}{{({x[0]:g})}}\textcolor{{{RED}}}{{({y[0]:g})}} + \textcolor{{{BLUE}}}{{({x[1]:g})}}\textcolor{{{RED}}}{{({y[1]:g})}} = {dot:g}$"),
-                    (r"$\lVert\vec{x}\rVert$", rf"$\textcolor{{{BLUE}}}{{{nx:.3f}}}$"),
-                    (r"$\lVert\vec{y}\rVert$", rf"$\textcolor{{{RED}}}{{{ny:.3f}}}$"),
-                    (r"$\dfrac{\vec{x}\cdot\vec{y}}{\lVert\vec{x}\rVert\,\lVert\vec{y}\rVert}$", _quotient),
+                    (r"$\vec{x}\cdot\vec{y}$", rf"${dot:g}$"),
                     (r"$\theta(\vec{x},\vec{y})$", _angle),
                 ]
             ),
@@ -780,7 +785,7 @@ def _(mo, theorem):
     1. positive definite implies
 
         $$
-        \lVert t\vec{x} + \vec{y} \rVert^2 \geq 0, \quad \text{with ``$=$'' if and only if } \underbrace{t\vec{x} + \vec{y} = \vec{0}}_{\vec{x},\, \vec{y} \text{ proportional}}
+        \lVert t\vec{x} + \vec{y} \rVert^2 \geq 0, \quad \text{with ``$=$'' if and only if } \underbrace{t\vec{x} + \vec{y} = \vec{0}}_{\mathclap{\footnotesize \vec{x},\, \vec{y} \text{ proportional}}\vphantom{\footnotesize \vec{x},\, \vec{y} \text{ proportional}}}
         $$
 
     2. bilinearity and symmetry give
@@ -788,7 +793,7 @@ def _(mo, theorem):
         $$
         \begin{aligned}
         \lVert t\vec{x} + \vec{y} \rVert^2 &= (t\vec{x} + \vec{y}) \cdot (t\vec{x} + \vec{y}) = t^2\, \vec{x} \cdot \vec{x} + t\, \vec{x} \cdot \vec{y} + t\, \vec{y} \cdot \vec{x} + \vec{y} \cdot \vec{y} \\
-        &= \underbrace{t^2 \lVert \vec{x} \rVert^2 + 2t\, \vec{x} \cdot \vec{y} + \lVert \vec{y} \rVert^2}_{\text{quadratic polynomial in } t}
+        &= \underbrace{t^2 \lVert \vec{x} \rVert^2 + 2t\, \vec{x} \cdot \vec{y} + \lVert \vec{y} \rVert^2}_{\mathclap{\footnotesize \text{quadratic polynomial in } t}\vphantom{\footnotesize \text{quadratic polynomial in } t}}
         \end{aligned}
         $$
 
@@ -802,7 +807,7 @@ def _(mo, theorem):
     \Longrightarrow \qquad \text{discriminant:} \quad \big(2 (\vec{x} \cdot \vec{y})\big)^2 - 4 \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2 \leq 0
     $$
 
-    with “$=$” if and only if $\vec{x}, \vec{y}$ are proportional. $\square$
+    with “$=$” if and only if $\vec{x}, \vec{y}$ are proportional. <span class=qed>$\square$</span>
     """
             ),
         ]
@@ -811,9 +816,8 @@ def _(mo, theorem):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, HALF, LIGHT, controls, dot, legend_box, mo, np, table, x, y):
+def _(BLUE, Figure, GREEN, HALF, LIGHT, controls, dot, mo, np, num, table, x, y):
     _xx, _yy = float(x @ x), float(y @ y)  # exact for the slider values, unlike the squares of the norms
-    _disc = (2 * dot) ** 2 - 4 * _xx * _yy
     _vertex = -dot / _xx if _xx > 0 else 0.0
     _t = np.sort(np.append(np.linspace(min(-4, _vertex - 2), max(4, _vertex + 2), 400), _vertex))
     _p = _t**2 * _xx + 2 * _t * dot + _yy
@@ -822,7 +826,6 @@ def _(BLUE, Figure, GREEN, HALF, LIGHT, controls, dot, legend_box, mo, np, table
     _ax = _fig.subplots()
     _ax.plot(_t, _p, color=BLUE)
     _ax.plot(_vertex, float(_p.min()), "o", color=GREEN, ms=5, zorder=4)
-    legend_box(_fig, [("line", BLUE, r"$\|t\vec{x} + \vec{y}\|^2$"), ("dot", GREEN, r"minimum of $\|t\vec{x} + \vec{y}\|^2$")], loc="outside lower center")
     _ax.axhline(0, color="black", lw=0.8)
     _ax.axvline(0, color="black", lw=0.8)
     _ax.grid(True, color=LIGHT, lw=0.6)
@@ -839,9 +842,6 @@ def _(BLUE, Figure, GREEN, HALF, LIGHT, controls, dot, legend_box, mo, np, table
                 [
                     (r"$(\vec{x}\cdot\vec{y})^2$", rf"${dot**2:g}$"),
                     (r"$\lVert\vec{x}\rVert^2\lVert\vec{y}\rVert^2$", rf"${_xx * _yy:g}$"),
-                    (r"discriminant $\big(2 (\vec{x} \cdot \vec{y})\big)^2 - 4 \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2$", rf"${_disc:g}$"),
-                    (r"minimum of $\lVert t\vec{x} + \vec{y} \rVert^2$", rf"${round(float(_p.min()), 3) + 0.0:.3f}$"),
-                    (r"$\vec{x}, \vec{y}$ proportional", "yes" if abs(_disc) < 1e-9 else "no"),
                 ]
             ),
             _fig,
@@ -851,20 +851,22 @@ def _(BLUE, Figure, GREEN, HALF, LIGHT, controls, dot, legend_box, mo, np, table
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, HALF, RED, controls, legend_box, mo, np, nx, ny, plane, table, theorem, vector, x, y):
+def _(BLUE, Figure, GREEN, HALF, RED, controls, mo, name_tip, np, num, nx, ny, plane, table, theorem, vector, x, y):
     _s = x + y
     _ns = float(np.sqrt(_s @ _s))
 
     _fig = Figure(figsize=(HALF, HALF + 0.4), layout="constrained")
     _ax = _fig.subplots()
-    plane(_ax, 11.5)
+    plane(_ax, 9)
     _ax.set_xticks(range(-8, 9, 4))
     _ax.set_yticks(range(-8, 9, 4))
     vector(_ax, tuple(x), tuple(_s), RED, linestyle=(0, (4, 3)))  # y translated to the tip of x
     vector(_ax, (0, 0), tuple(_s), GREEN)
     vector(_ax, (0, 0), tuple(x), BLUE)
     vector(_ax, (0, 0), tuple(y), RED)
-    legend_box(_fig, [("line", BLUE, r"$\vec{x}$"), ("line", RED, r"$\vec{y}$"), ("line", GREEN, r"$\vec{x}+\vec{y}$")], loc="outside lower center", ncols=3)
+    name_tip(_ax, (0, 0), tuple(_s), r"$\vec{x}+\vec{y}$", GREEN)
+    name_tip(_ax, (0, 0), tuple(x), r"$\vec{x}$", BLUE, away=tuple(y))
+    name_tip(_ax, (0, 0), tuple(y), r"$\vec{y}$", RED, away=tuple(x))
 
     mo.vstack(
         [
@@ -879,12 +881,12 @@ def _(BLUE, Figure, GREEN, HALF, RED, controls, legend_box, mo, np, nx, ny, plan
     """,
                 "Triangle inequality",
             ),
-            mo.md(r"**Proof.** Direct consequence of the Cauchy–Schwarz inequality! Exercise. $\square$"),
+            mo.md(r"**Proof.** Direct consequence of the Cauchy–Schwarz inequality! Exercise. <span class=qed>$\square$</span>"),
             controls,
             table(
                 [
-                    (r"$\lVert\vec{x}+\vec{y}\rVert$", rf"$\textcolor{{{GREEN}}}{{{_ns:.3f}}}$"),
-                    (r"$\lVert\vec{x}\rVert+\lVert\vec{y}\rVert$", rf"$\textcolor{{{BLUE}}}{{{nx:.3f}}} + \textcolor{{{RED}}}{{{ny:.3f}}} = {round(nx, 3) + round(ny, 3):.3f}$"),
+                    (r"$\lVert\vec{x}+\vec{y}\rVert$", rf"${num(_ns)}$"),
+                    (r"$\lVert\vec{x}\rVert+\lVert\vec{y}\rVert$", rf"${num(round(nx, 2) + round(ny, 2))}$"),
                 ]
             ),
             _fig,
@@ -947,7 +949,7 @@ def _(definition, mo, theorem):
 
     If $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n, \vec{x}$ were pairwise orthogonal, then $\vec{x}$ would have to be the zero vector $\vec{0}$. This contradicts our assumption that $\vec{x} \neq \vec{0}$.
 
-    $\leadsto$ &nbsp; here we used the specific vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$, but the argument extends to any set of $n$ non-zero pairwise orthogonal vectors (exercise, after Lecture 03). $\square$
+    $\leadsto$ &nbsp; here we used the specific vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$, but the argument also works for any set of $n$ non-zero pairwise orthogonal vectors! <span class=qed>$\square$</span>
     """
             ),
         ]
@@ -956,7 +958,7 @@ def _(definition, mo, theorem):
 
 
 @app.cell(hide_code=True)
-def _(Figure, GREY, arrow, definition, mo, panel, turntable):
+def _(BLUE, Figure, arrow, definition, mo, panel, turntable):
     _fig = Figure(figsize=(2.9, 2.7), layout="constrained")
     _a2 = _fig.subplots()
     _a2.set_xlim(-0.9, 2.1)
@@ -965,10 +967,10 @@ def _(Figure, GREY, arrow, definition, mo, panel, turntable):
     _a2.axis("off")
     arrow(_a2, (-0.6, 0), (1.9, 0), "black", lw=0.9)
     arrow(_a2, (0, -0.6), (0, 1.9), "black", lw=0.9)
-    arrow(_a2, (0, 0), (1, 0), GREY)
-    arrow(_a2, (0, 0), (0, 1), GREY)
-    _a2.text(0.55, -0.14, r"$\vec{e}_1$", color=GREY, fontsize=13, ha="center", va="top")
-    _a2.text(-0.14, 0.55, r"$\vec{e}_2$", color=GREY, fontsize=13, ha="right", va="center")
+    arrow(_a2, (0, 0), (1, 0), BLUE)
+    arrow(_a2, (0, 0), (0, 1), BLUE)
+    _a2.text(0.55, -0.14, r"$\vec{e}_1$", color=BLUE, fontsize=13, ha="center", va="top")
+    _a2.text(-0.14, 0.55, r"$\vec{e}_2$", color=BLUE, fontsize=13, ha="right", va="center")
     _a2.text(0.6, -0.72, r"$\mathbb{R}^2$", fontsize=13, ha="center", va="top")
 
     # each axis is left out from the origin to the tip of e_i, so that the axis never covers the arrow
@@ -981,12 +983,11 @@ def _(Figure, GREY, arrow, definition, mo, panel, turntable):
                 1.0,
                 lines=[([-0.5, 0], [0, 0], [0, 0], "#000000", 1.1), ([0, 0], [-0.6, 0], [0, 0], "#000000", 1.1), ([0, 0], [0, 0], [-0.6, 0], "#000000", 1.1)],
                 arrows=[((1, 0, 0), (1.9, 0, 0), "#000000", 1.1), ((0, 1, 0), (0, 1.9, 0), "#000000", 1.1), ((0, 0, 1), (0, 0, 1.9), "#000000", 1.1)]
-                + [((0, 0, 0), (1, 0, 0), GREY), ((0, 0, 0), (0, 1, 0), GREY), ((0, 0, 0), (0, 0, 1), GREY)],
-                texts=[((0.55, 0, 0), r"\vec{e}_1", GREY, -60), ((0, 0.55, 0), r"\vec{e}_2", GREY, -90), ((0, 0, 0.55), r"\vec{e}_3", GREY, 0)],
+                + [((0, 0, 0), (1, 0, 0), BLUE), ((0, 0, 0), (0, 1, 0), BLUE), ((0, 0, 0), (0, 0, 1), BLUE)],
+                texts=[((0.55, 0, 0), r"\vec{e}_1", BLUE, -60), ((0, 0.55, 0), r"\vec{e}_2", BLUE, -90), ((0, 0, 0.55), r"\vec{e}_3", BLUE, 0)],
                 caption=r"\mathbb{R}^3",
             )
         ],
-        legend=[("line", GREY, r"\vec{e}_1, \vec{e}_2, \vec{e}_3")],
         height=280,
     )
 
@@ -1075,7 +1076,7 @@ def _(mo, theorem):
     **Proof** (for $n = 3$).
 
     $$
-    \begin{aligned}
+    \begin{align*}
     \vec{x} = \begin{bmatrix} x^1 \\ x^2 \\ x^3 \end{bmatrix}
     &= \begin{bmatrix} x^1 \\ 0 \\ 0 \end{bmatrix} + \begin{bmatrix} 0 \\ x^2 \\ 0 \end{bmatrix} + \begin{bmatrix} 0 \\ 0 \\ x^3 \end{bmatrix}
     = x^1 \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix} + x^2 \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix} + x^3 \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} \\
@@ -1086,8 +1087,8 @@ def _(mo, theorem):
     x^2 = \vec{x} \cdot \vec{e}_2 \\
     x^3 = \vec{x} \cdot \vec{e}_3
     \end{cases}
-    \qquad \square
-    \end{aligned}
+    \tag*{$\square$}
+    \end{align*}
     $$
     """
             ),
@@ -1098,18 +1099,6 @@ def _(mo, theorem):
 
 @app.cell(hide_code=True)
 def _(mo):
-    def _field():
-        return mo.ui.text(placeholder="?", debounce=True)
-
-    p1_dot, p1_nx, p2_a, p3_a, p3_b, p3_c = (_field() for _ in range(6))
-    return p1_dot, p1_nx, p2_a, p3_a, p3_b, p3_c
-
-
-@app.cell(hide_code=True)
-def _(check, mo, p1_dot, p1_nx, p2_a, p3_a, p3_b, p3_c):
-    def _ask(label, field, answer):
-        return mo.hstack([mo.md(label), field, mo.md(check(field, answer))], justify="start", align="center")
-
     mo.vstack(
         [
             mo.md(
@@ -1123,12 +1112,7 @@ def _(check, mo, p1_dot, p1_nx, p2_a, p3_a, p3_b, p3_c):
     (a) Compute $2\vec{x} - \vec{y}$.
 
     (b) Compute $\vec{x} \cdot \vec{y}$, $\lVert \vec{x} \rVert$, $\lVert \vec{y} \rVert$.
-    """
-            ),
-            _ask(r"$\vec{x} \cdot \vec{y} =$", p1_dot, 2),
-            _ask(r"$\lVert \vec{x} \rVert =$", p1_nx, 3),
-            mo.md(
-                r"""
+
     (c) Find the angle between $\vec{x}$ and $\vec{y}$.
 
     ### Question 2
@@ -1136,11 +1120,7 @@ def _(check, mo, p1_dot, p1_nx, p2_a, p3_a, p3_b, p3_c):
     Consider $\vec{u} = \begin{bmatrix} 1 \\ 2 \\ -1 \end{bmatrix}, \; \vec{v} = \begin{bmatrix} 2 \\ a \\ 4 \end{bmatrix}$.
 
     (a) Find $a \in \mathbb{R}$ so that $\vec{u} \perp \vec{v}$.
-    """
-            ),
-            _ask(r"$a =$", p2_a, 1),
-            mo.md(
-                r"""
+
     (b) For this value of $a$, compute $\lVert \vec{u} + \vec{v} \rVert$.
 
     (c) Check that $\lVert \vec{u} + \vec{v} \rVert^2 = \lVert \vec{u} \rVert^2 + \lVert \vec{v} \rVert^2$.
@@ -1152,13 +1132,7 @@ def _(check, mo, p1_dot, p1_nx, p2_a, p3_a, p3_b, p3_c):
     (a) Show that $\vec{u}, \vec{v}, \vec{w}$ are pairwise orthogonal.
 
     (b) Write $\vec{x} = \begin{bmatrix} 3 \\ 1 \\ 4 \end{bmatrix}$ in the form $\vec{x} = a\vec{u} + b\vec{v} + c\vec{w}$.
-    """
-            ),
-            _ask(r"$a =$", p3_a, 2),
-            _ask(r"$b =$", p3_b, 1),
-            _ask(r"$c =$", p3_c, 2),
-            mo.md(
-                r"""
+
     (c) Show that $a = \dfrac{\vec{x} \cdot \vec{u}}{\vec{u} \cdot \vec{u}}, \quad b = \dfrac{\vec{x} \cdot \vec{v}}{\vec{v} \cdot \vec{v}}, \quad c = \dfrac{\vec{x} \cdot \vec{w}}{\vec{w} \cdot \vec{w}}$.
 
     (d) Show that there is no non-zero vector $\vec{y} = \begin{bmatrix} p \\ q \\ r \end{bmatrix}$ orthogonal to $\vec{u}$, $\vec{v}$ and $\vec{w}$ at the same time.
@@ -1166,20 +1140,6 @@ def _(check, mo, p1_dot, p1_nx, p2_a, p3_a, p3_b, p3_c):
             ),
         ]
     )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Summary
-
-    - the dot product $\vec{x} \cdot \vec{y} = x^1 y^1 + \dots + x^n y^n \in \mathbb{R}$ is symmetric, bilinear and positive definite
-    - it defines the norm $\lVert \vec{x} \rVert = \sqrt{\vec{x} \cdot \vec{x}}$ and the angle $\theta(\vec{x}, \vec{y})$, which makes sense by the Cauchy–Schwarz inequality $(\vec{x} \cdot \vec{y})^2 \leq \lVert \vec{x} \rVert^2\, \lVert \vec{y} \rVert^2$
-    - triangle inequality: $\lVert \vec{x} + \vec{y} \rVert \leq \lVert \vec{x} \rVert + \lVert \vec{y} \rVert$
-    - $\vec{x} \perp \vec{y}$ when $\vec{x} \cdot \vec{y} = 0$; in $\mathbb{R}^n$ there are at most $n$ non-zero pairwise orthogonal vectors
-    - the standard basis vectors $\vec{e}_1, \dots, \vec{e}_n$ give $\vec{x} = x^1 \vec{e}_1 + \dots + x^n \vec{e}_n$ with $x^i = \vec{x} \cdot \vec{e}_i$
-    """)
     return
 
 

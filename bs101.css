@@ -28,3 +28,29 @@
 span.output > img { display: block; margin: 0 auto; max-width: 100%; height: auto; }
 /* No "made with marimo" badge */
 a[href="https://github.com/marimo-team/marimo"] { display: none !important; }
+
+/* room for brace labels, which take no width and are not counted in the formula height */
+.katex-display { padding: 0.2rem 0.5em 0.9em; }
+
+/* an inline formula never breaks across lines (not "Mat(1 ×" / "n)") */
+.katex { white-space: nowrap; }
+
+/* QED box at the right end of the last line of a proof */
+.qed { float: right; }
+
+/* readout tables under widgets: a thin grey frame and rules, no striping, each value just after its label */
+.readout .markdown table { display: table; width: max-content; max-width: 100%; margin: 0.4rem 0; border-collapse: collapse; border: 1px solid #c8c8c8; }
+.readout thead { display: none; }
+.readout .markdown table tbody tr, .readout .markdown table tbody tr:hover { background: none; }
+.readout td { padding: 0.3rem 0.9rem; vertical-align: middle; text-align: left; border-bottom: 1px solid #e2e2e2; }
+.readout td:first-child { border-right: 1px solid #e2e2e2; }
+.readout td:last-child { text-align: center !important; }
+
+/* a table in the lecture text (cases side by side): the same frame, every column left */
+.readout.cases td { border-right: 1px solid #e2e2e2; }
+.readout.cases td:last-child { text-align: left !important; }
+
+/* a brace label that takes no width leaves no empty strip to scroll to */
+.katex .clap > .katex-inner { transform: translateX(-50%); }
+.katex .clap > .katex-inner > * { margin-left: 0 !important; margin-right: 0 !important; }
+.katex .rlap > .katex-inner:has(> [style*="color: transparent"]) { display: none; }

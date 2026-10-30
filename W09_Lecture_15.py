@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 15 · Global extrema on closed and bounded domains", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 • Lecture 15 • Global extrema on closed and bounded domains", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -26,11 +26,11 @@ def _(mo):
     # Palette with fixed roles (figures only; text carries no colour):
     #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (tangent vector, gradient, mean)
-    #   ORANGE a third series, only when three are needed
+    #   GREEN  a result made from them (sum, multiple, angle, tangent vector, gradient)
+    #   ORANGE (ochre) a third object, only when three are needed
     #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
-    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#3f5f8f", "#a8554c", "#4f7f5c", "#b9853f", "#9a9a9a", "#e3ebf4"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
     FULL, HALF = 7.4, 3.6
 
@@ -75,12 +75,13 @@ def _(mo):
 
     def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
         """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
-        One head size and one line weight for every figure, so arrows look alike across lectures."""
+        One line weight for every figure; the head is open and sized in points from the line width,
+        so arrows look alike across lectures at any axis range."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={3 * lw:g},head_width={1.3 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -119,24 +120,15 @@ def _(mo):
 
     def table(rows):
         """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
-        return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
+        _md = mo.md("\n".join(["| | |", "|:--|:--|"] + [f"| {k} | {v} |" for k, v in rows]))
+        return mo.Html(f'<div class="readout">{_md.text}</div>')
 
-    def check(field, answer):
-        """Feedback mark for a numeric answer typed into a text field."""
-        s = field.value.strip().replace(",", ".")
-        if not s:
-            return ""
-        try:
-            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
-        except ValueError:
-            return "enter a number"
-
-    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 15", "Week 09", "Lecture 15 · Global extrema on closed and bounded domains")
+    header("Lecture 15", "Week 09", "Lecture 15 • Global extrema on closed and bounded domains")
     return
 
 
@@ -161,28 +153,12 @@ def _(arrow, math):
         ax.annotate(text, at, textcoords="offset points", xytext=(r * c, r * s), ha=ha, va=va, color=color, fontsize=fontsize, zorder=6, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
     def num(v, digits=2):
-        """Fixed-point number for the readout tables (never prints a negative zero)."""
+        """Number for the readout tables: exact when a multiple of 1/2, otherwise fixed-point (never a negative zero)."""
+        if abs(2 * v - round(2 * v)) < 1e-9:
+            return f"{round(2 * v) / 2 + 0.0:g}"
         return f"{round(v, digits) + 0.0:.{digits}f}"
 
-    def legend_box(fig, entries, loc="outside right center", ncols=1):
-        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
-        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
-        from matplotlib.lines import Line2D
-        from matplotlib.patches import Patch
-
-        handles = []
-        for kind, c, _label, *style in entries:
-            if kind == "dot":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
-            elif kind == "ring":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
-            elif kind == "line":
-                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
-            else:
-                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
-        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
-
-    return cross_axes, legend_box, num, tip_label
+    return cross_axes, num, tip_label
 
 
 @app.cell(hide_code=True)
@@ -191,8 +167,8 @@ def _(mo, np):
     # Drawn in the browser on canvases, in the style of the static figures: orthographic views of
     # R^3 = R^2 x R (x^1 towards the viewer, x^2 to the right, y up), surfaces drawn back to front.
     # Dragging turns the view at a fixed scale (all panels of a figure together) and a double click restores
-    # it; a figure redrawn by a slider keeps its view. A legend box explains points, curves and surfaces, so
-    # that no label covers the drawing; only the axes carry labels. Typesetting is done by KaTeX.
+    # it; a figure redrawn by a slider keeps its view. Names sit beside the objects they name. Typesetting is done
+    # by KaTeX.
     import html as _html
     import json as _json
 
@@ -289,11 +265,11 @@ def _(mo, np):
             for (let k = 0; k < ln.p.length; k += 3) idx.push(add(ln.p[k], ln.p[k + 1], ln.p[k + 2]));
             const line = { idx, dash: ln.d, cum: new Float64Array(idx.length) };
             for (let k = 0; k < idx.length - 1; k++)
-              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0 });
+              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0, flat: ln.b });
             return line;
           });
           for (const d of spec.points) this.dots.push({ i: add(...d.p), c: d.c, r: d.r, h: d.h });
-          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c });
+          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c, w: h.w, d: h.d });
           // the centre of the scene and the radius of a ball holding it, heights at their drawing scale
           let src = pts;
           if (spec.box) {
@@ -365,7 +341,8 @@ def _(mo, np):
           items.sort((p, q) => p[0] - q[0]);
           g.clearRect(0, 0, W, H);
           g.lineJoin = "round";
-          for (const [, kind, o] of items) {
+          for (let n = 0; n < items.length; n++) {
+            const [, kind, o] = items[n];
             if (kind === 0) {
               const q = o[0];
               g.beginPath();
@@ -378,28 +355,45 @@ def _(mo, np):
               if (o[2] === 1) { g.lineWidth = 0.6; g.setLineDash([]); g.stroke(); }
               g.globalAlpha = 1;
             } else if (kind === 1) {
+              if (o.done) { o.done = false; continue; }
+              let p0 = o, p1 = o;
+              if (o.flat) {  // the pieces of a straight line up to the next surface go in one stroke, so no seams show
+                let grew = true;
+                while (grew) {
+                  grew = false;
+                  for (let m = n + 1; m < items.length && items[m][1] !== 0; m++) {
+                    const q = items[m][2];
+                    if (items[m][1] !== 1 || q.line !== o.line || q.done) continue;
+                    if (q.k === p1.k + 1) { p1 = q; q.done = true; grew = true; }
+                    else if (q.k === p0.k - 1) { p0 = q; q.done = true; grew = true; }
+                  }
+                }
+              }
               g.beginPath();
-              g.moveTo(X[o.a], Y[o.a]);
-              g.lineTo(X[o.b], Y[o.b]);
+              g.moveTo(X[p0.a], Y[p0.a]);
+              g.lineTo(X[p1.b], Y[p1.b]);
               g.strokeStyle = o.c;
               g.lineWidth = o.lw;
               const dash = o.line && o.line.dash;
-              g.lineCap = dash ? "butt" : "round";
+              g.lineCap = dash || o.flat ? "butt" : "round";
               g.setLineDash(dash || []);
-              g.lineDashOffset = dash ? -o.line.cum[o.k] : 0;
+              g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
               g.stroke();
             } else if (kind === 2) {
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
               vx /= len; vy /= len;
-              const bx = X[o.i] - 9 * vx, by = Y[o.i] - 9 * vy;
+              const hl = Math.max(3.5 * o.w, 6), hw = Math.max(1.5 * o.w, 2.6), bx = X[o.i] - hl * vx, by = Y[o.i] - hl * vy;  // open head, as on the page
+              g.strokeStyle = o.c;
+              g.lineWidth = o.w;
+              g.setLineDash([]);
+              g.lineCap = "round";
+              if (!o.d) { g.beginPath(); g.moveTo(X[o.j], Y[o.j]); g.lineTo(X[o.i], Y[o.i]); g.stroke(); }
               g.beginPath();
-              g.moveTo(X[o.i], Y[o.i]);
-              g.lineTo(bx - 3.4 * vy, by + 3.4 * vx);
-              g.lineTo(bx + 3.4 * vy, by - 3.4 * vx);
-              g.closePath();
-              g.fillStyle = o.c;
-              g.fill();
+              g.moveTo(bx - hw * vy, by + hw * vx);
+              g.lineTo(X[o.i], Y[o.i]);
+              g.lineTo(bx + hw * vy, by - hw * vx);
+              g.stroke();
             } else {
               g.beginPath();
               g.arc(X[o.i], Y[o.i], o.r, 0, 2 * Math.PI);
@@ -505,8 +499,8 @@ def _(mo, np):
         axes: (tail, tip, TeX label, direction of the label in degrees), drawn black;
         arrows: (tail, tip, colour[, width, dash]), vectors with a head in their colour;
         arcs: (x1, x2, y, colour[, width]), curves ending in a head, such as a turning arrow;
-        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), short labels such as tick values (names of
-        points and objects go in the legend instead); caption: TeX below the drawing;
+        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), names of points and objects and tick values,
+        each beside its point; caption: TeX below the drawing;
         box: ((x^1 lo, hi), (x^2 lo, hi), (y lo, hi)) to size the drawing by, instead of its own points."""
         p = {"ys": ys, "surfaces": list(surfaces), "lines": [], "points": [], "heads": [], "labels": [], "caption": caption, "box": box}
         for ln in lines:
@@ -514,20 +508,20 @@ def _(mo, np):
         for tail, tip, label, d in axes:
             a, b = np.asarray(tail, float), np.asarray(tip, float)
             seg = a + np.linspace(0, 0.96, 60)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000"})
+            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000", "w": 1.1})
             p["labels"].append({"p": b.tolist(), "t": label, "c": "#000000", "a": d, "r": 5})
         for q in points:
             p["points"].append({"p": [float(c) for c in q[0]], "c": q[1], "r": q[2] if len(q) > 2 else 4.0, "h": bool(q[3]) if len(q) > 3 else False})
         for ar in arrows:
             a, b = np.asarray(ar[0], float), np.asarray(ar[1], float)
             seg = a + np.linspace(0, 0.96, 40)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2]})
+            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None})
         for arc in arcs:
             c = np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in arc[:3])), -1)
             p["lines"].append({"p": _flat(*c[:-1].T), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8, "d": None, "e": 0})
-            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3]})
+            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8})
         for tx in texts:
             p["labels"].append({"p": [float(c) for c in tx[0]], "t": tx[1], "c": tx[2], "a": tx[3], "r": tx[4] if len(tx) > 4 else 5})
         return p
@@ -573,10 +567,11 @@ def _(BLUE, GREEN, ORANGE, mo, np, panel, sheet, theorem, turntable):
                 surfaces=[sheet(_u1, _u2, _f(_u1, _u2), wire=[(0, 8, BLUE, 0.6), (1, 4, BLUE, 0.6)])],
                 lines=_edges + [(_s1, 0 * _s1, _f(_s1, 0), BLUE, 2.0)],
                 points=[((-1, 0, _f(-1, 0)), ORANGE), ((1, 0, _f(1, 0)), ORANGE), ((0, 0, 0), GREEN)],
-                axes=[((-2.35, 0, 0), (2.6, 0, 0), "x^1", -60), ((0, 0, 0), (0, 0.95, 0), "x^2", 60), ((0, 0, 0), (0, 0, 1.15), "y", 90)],
+                axes=[((-2.35, 0, 0), (2.6, 0, 0), "x^1", -60), ((0, 0, 0), (0, 1.6, 0), "x^2", 0), ((0, 0, 0), (0, 0, 1.15), "y", 90)],
+                texts=[((-1, 0, _f(-1, 0)), r"\vec{a}", "black", 90, 7), ((1, 0, _f(1, 0)), r"\vec{b}", "black", 90, 7),
+                       ((0, 0, 0), r"\vec{0}", "black", 30, 12)],
             )
         ],
-        legend=[("dot", ORANGE, r"\text{saddle points } \vec{a}, \vec{b}"), ("dot", GREEN, r"\text{global minimum } \vec{0}")],
         height=460,
     )
 
@@ -595,11 +590,11 @@ def _(BLUE, GREEN, ORANGE, mo, np, panel, sheet, theorem, turntable):
 
     - if $Hf(\vec{a})$ is **negative definite**, then $\vec{a}$ is local max
 
-        $\Big( \det Hf(\vec{a}) > 0$ and $\dfrac{\partial^2 f}{\partial x^1 \partial x^1}(\vec{a}) < 0 \Big)$
+        $\Big( \det Hf(\vec{a}) > 0$ and $\partial^2 f / \partial x^1 \partial x^1 (\vec{a}) < 0 \Big)$
 
     - if $Hf(\vec{a})$ is **positive definite**, then $\vec{a}$ is local min
 
-        $\Big( \det Hf(\vec{a}) > 0$ and $\dfrac{\partial^2 f}{\partial x^1 \partial x^1}(\vec{a}) > 0 \Big)$
+        $\Big( \det Hf(\vec{a}) > 0$ and $\partial^2 f / \partial x^1 \partial x^1 (\vec{a}) > 0 \Big)$
 
     - if $Hf(\vec{a})$ is **indefinite**, then $\vec{a}$ is a saddle point &nbsp; $\big( \det Hf(\vec{a}) < 0 \big)$
     - if $Hf(\vec{a})$ is **degenerate**, we need more info &nbsp; $\big( \det Hf(\vec{a}) = 0 \big)$
@@ -687,7 +682,7 @@ def _(definition, mo):
     $g : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}$, &nbsp; $g\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = (x^1)^2 + (x^2)^2$ &nbsp; for
 
     $$
-    D = \left\{\, \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \in \mathbb{R}^2 \;\middle|\; 0 < x^1 \leq 1,\ 0 < x^2 \leq 1 \,\right\}
+    D = \left\{\, \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \in \mathbb{R}^2 \mid 0 < x^1 \leq 1,\ 0 < x^2 \leq 1 \,\right\}
     $$
 
     $\Longrightarrow$ &nbsp; there is no global minimum; &nbsp; $\begin{bmatrix} 1 \\ 1 \end{bmatrix}$ is the global maximum!
@@ -699,7 +694,15 @@ def _(definition, mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREY, HALF, LIGHT, ORANGE, RED, cross_axes, legend_box, mo, np, panel, sheet, turntable):
+def _(mo):
+    ga1 = mo.ui.slider(0.05, 1, 0.05, value=0.55, label="$a^1$", show_value=True)
+    ga2 = mo.ui.slider(0.05, 1, 0.05, value=0.75, label="$a^2$", show_value=True)
+    gx = mo.ui.slider(0.05, 1, 0.05, value=0.35, label=r"$\vec{x}$")
+    return ga1, ga2, gx
+
+
+@app.cell(hide_code=True)
+def _(BLUE, Figure, GREY, HALF, LIGHT, ORANGE, RED, cross_axes, ga1, ga2, gx, mo, np, panel, sheet, tip_label, turntable):
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
     _fig = Figure(figsize=(HALF, 3.6), layout="constrained")
     _ax = _fig.subplots()
@@ -716,13 +719,19 @@ def _(BLUE, Figure, GREY, HALF, LIGHT, ORANGE, RED, cross_axes, legend_box, mo, 
     for _c in ((0, 0), (1, 0), (0, 1)):
         _ax.plot(*_c, "o", ms=5, mfc="white", mec=BLUE, mew=1.2, zorder=6)
     _ax.plot(1, 1, "o", ms=5, color=BLUE, zorder=6)
-    _a = (0.55, 0.75)
-    _ax.plot([0, _a[0] / _a[1]], [0, 1], color=GREY, lw=0.9, ls=(0, (4, 3)), zorder=1)
+    # a in D; the line from 0 through a, up to where it leaves D; x on that line
+    _a = (round(ga1.value, 10), round(ga2.value, 10))
+    _e = (_a[0] / max(_a), _a[1] / max(_a))
+    _x = (gx.value * _e[0], gx.value * _e[1])
+    _ax.plot([0, _e[0]], [0, _e[1]], color=GREY, lw=0.9, ls=(0, (4, 3)), zorder=1)
     _ax.plot(*_a, "o", color=RED, ms=5, zorder=6)
-    _ax.plot(_a[0] / 2, _a[1] / 2, "o", color=ORANGE, ms=5, zorder=6)
+    _ax.plot(*_x, "o", color=ORANGE, ms=5, zorder=6)
     _ax.text(1, -0.05, "$1$", ha="center", va="top", fontsize=12, bbox=_box)
     _ax.text(-0.05, 1, "$1$", ha="right", va="center", fontsize=12, bbox=_box)
-    legend_box(_fig, [("area", LIGHT, "$D$", BLUE), ("dot", RED, r"$\vec{a}$"), ("dot", ORANGE, r"$\vec{x}$")], loc="outside lower center", ncols=3)
+    # D named outside the square, where the names of a and x never reach; a named on the right, x on the left
+    _ax.annotate("$D$", (0.92, 0.4), xytext=(1.3, 0.4), ha="center", va="center", color=BLUE, fontsize=13, arrowprops={"arrowstyle": "-", "color": BLUE, "lw": 0.8, "shrinkA": 4, "shrinkB": 0})
+    tip_label(_ax, _a, 0, r"$\vec{a}$", "black", r=5)
+    tip_label(_ax, _x, 180, r"$\vec{x}$", "black", r=5)
 
     # graph(f) over a disc, faint, with graph(g) above D
     def _f(x1, x2):
@@ -744,10 +753,14 @@ def _(BLUE, Figure, GREY, HALF, LIGHT, ORANGE, RED, cross_axes, legend_box, mo, 
     _lines += [(_o, _s, _z, BLUE, 1.6), (_s, _o, _z, BLUE, 1.6)]
     _lines += [(_z, _s, _z, "#ffffff", 4.5, None, 0.01), (_s, _z, _z, "#ffffff", 4.5, None, 0.01)]
     _lines += [(_z, _s, _z, BLUE, 1.6, _dash, 0.02), (_s, _z, _z, BLUE, 1.6, _dash, 0.02)]
+    # the line from 0 through a in D and on the graph, with a and x below their values
+    _lines += [(_s * _e[0], _s * _e[1], 0 * _s, GREY, 1.2, _dash, 0.02), (_s * _e[0], _s * _e[1], _f(_s * _e[0], _s * _e[1]), GREY, 1.6, _dash, 0.02)]
+    for _q in (_a, _x):
+        _lines += [(_q[0] + 0 * _s, _q[1] + 0 * _s, _s * _f(*_q), GREY, 0.8, [1, 2])]
     _open = [(0, 0, 0), (1, 0, 0), (0, 1, 0), (1, 0, 1), (0, 1, 1)]
     _graph = turntable(
-        45,
-        14,
+        20,
+        23,
         "graph of g over D, with the graph of f over the plane in a faint tone, and the global maximum of g",
         [
             panel(
@@ -757,22 +770,24 @@ def _(BLUE, Figure, GREY, HALF, LIGHT, ORANGE, RED, cross_axes, legend_box, mo, 
                     sheet(_b1, _b2, 0 * _b1, flat=LIGHT),
                 ],
                 lines=_lines,
-                points=[(_q, BLUE, 3.6, True) for _q in _open] + [((1, 1, 0), BLUE, 3.6), ((1, 1, 2), RED)],
+                points=[(_q, BLUE, 3.6, True) for _q in _open] + [((1, 1, 0), BLUE, 3.6), ((1, 1, 2), RED)]
+                + [((*_a, 0), RED, 4.5), ((*_a, _f(*_a)), RED, 4.5), ((*_x, 0), ORANGE, 4.5), ((*_x, _f(*_x)), ORANGE, 4.5)],
                 axes=[((0, 0, 0), (1.75, 0, 0), "x^1", -150), ((0, 0, 0), (0, 1.75, 0), "x^2", -30), ((0, 0, 0), (0, 0, 2.6), "y", 90)],
+                texts=[
+                    ((0.5, 1, _f(0.5, 1)), r"y = g(\vec{x})", BLUE, 40, 10),
+                    ((_R * np.cos(-2.1), _R * np.sin(-2.1), _R**2), r"y = f(\vec{x})", "#6b6b6b", 150, 6),
+                    ((1, 0.5, 0), "D", BLUE, -120, 6),
+                    ((1, 1, 2), r"g\left( \begin{bmatrix} 1 \\ 1 \end{bmatrix} \right) = 2", "black", 100, 10),
+                ],
             )
         ],
-        legend=[
-            ("area", "#a9c3e6", r"y = g(\vec{x}), \ \vec{x} \in D", BLUE),
-            ("area", LIGHT, r"y = f(\vec{x}), \ \vec{x} \in \mathbb{R}^2", _faint, 0.35),
-            ("area", LIGHT, "D", BLUE),
-            ("dot", RED, r"\text{global maximum: } g\left( \begin{bmatrix} 1 \\ 1 \end{bmatrix} \right) = 2"),
-            ("ring", BLUE, r"\text{points left out}"),
-        ],
         height=380,
+        key="L15-g",
     )
 
     mo.vstack(
         [
+            mo.hstack([ga1, ga2, gx], justify="start", gap=2, wrap=True),
             mo.Html(
                 '<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem;">'
                 f'<div style="flex: 1 1 240px; min-width: 220px;">{mo.as_html(_fig).text}</div>'
@@ -798,7 +813,7 @@ def _(BLUE, Figure, GREY, HALF, LIGHT, ORANGE, RED, cross_axes, legend_box, mo, 
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, legend_box, mo, np):
+def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, mo, np):
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
     _th = np.linspace(0, 2 * np.pi, 241)
 
@@ -821,7 +836,8 @@ def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, legend_box, mo, np
     cross_axes(_ax, (-2.0, 2.2), (-1.5, 1.95), "$x^1$", "$x^2$")
     _ax.text(_a, -0.06, "$a$", ha="center", va="top", fontsize=12, bbox=_box)
     _ax.text(-0.06, _b, "$b$", ha="right", va="center", fontsize=12, bbox=_box)
-    legend_box(_bounded, [("area", LIGHT, "$D$", BLUE), ("line", RED, r"$B(\vec{0}, r)$")])
+    _ax.text(_a / 2, _b / 2, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ax.text(_r * np.cos(-0.7) + 0.05, _r * np.sin(-0.7) - 0.05, r"$B(\vec{0}, r)$", color=RED, fontsize=12, ha="left", va="top")
 
     # the strip a <= x^2 <= b leaves every ball
     _a, _b, _r = 0.4, 1.0, 1.3
@@ -834,7 +850,8 @@ def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, legend_box, mo, np
     cross_axes(_ax, (-2.25, 2.25), (-1.5, 1.95), "$x^1$", "$x^2$")
     _ax.text(-0.06, _a, "$a$", ha="right", va="top", fontsize=12, bbox=_box)
     _ax.text(-0.06, _b, "$b$", ha="right", va="bottom", fontsize=12, bbox=_box)
-    legend_box(_unbounded, [("area", LIGHT, "$D$", BLUE), ("line", RED, r"$B(\vec{0}, r)$")])
+    _ax.text(-2.0, (_a + _b) / 2 - 0.08, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ax.text(_r * np.cos(-0.7) + 0.05, _r * np.sin(-0.7) - 0.05, r"$B(\vec{0}, r)$", color=RED, fontsize=12, ha="left", va="top")
 
     mo.vstack(
         [
@@ -878,7 +895,7 @@ def _(definition, mo):
     $$
 
     $$
-    D = \left\{\, x^1 > 0,\ x^2 > 0,\ (x^1)^2 + (x^2)^2 < 1 \,\right\}
+    D = \left\{\, x^1 \geq 0,\ x^2 \geq 0,\ (x^1)^2 + (x^2)^2 < 1 \,\right\}
     \qquad \Longrightarrow \qquad
     \begin{aligned}
     \mathrm{Bd}(D) = {} & \left\{\, x^1 \geq 0,\ x^2 \geq 0,\ (x^1)^2 + (x^2)^2 = 1 \,\right\} \\
@@ -894,14 +911,14 @@ def _(definition, mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    bp1 = mo.ui.slider(-0.4, 1.4, 0.05, value=0.6, label="$p^1$", show_value=True)
-    bp2 = mo.ui.slider(-0.4, 1.4, 0.05, value=0.8, label="$p^2$", show_value=True)
-    br = mo.ui.slider(0.05, 0.5, 0.05, value=0.2, label="$r$", show_value=True)
+    bp1 = mo.ui.slider(-0.3, 1.3, 0.05, value=0.6, label="$p^1$", show_value=True)
+    bp2 = mo.ui.slider(-0.3, 1.3, 0.05, value=0.8, label="$p^2$", show_value=True)
+    br = mo.ui.slider(0.05, 0.4, 0.05, value=0.2, label="$r$", show_value=True)
     return bp1, bp2, br
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, HALF, LIGHT, RED, bp1, bp2, br, cross_axes, legend_box, math, mo, np, table):
+def _(BLUE, Figure, HALF, LIGHT, RED, bp1, bp2, br, cross_axes, math, mo, np, table, tip_label):
     _p = (round(bp1.value, 10) + 0.0, round(bp2.value, 10) + 0.0)
     _r = round(br.value, 10)
     _eps = 1e-9
@@ -911,42 +928,46 @@ def _(BLUE, Figure, HALF, LIGHT, RED, bp1, bp2, br, cross_axes, legend_box, math
     if _n > 1:
         _q = (_q[0] / _n, _q[1] / _n)
     _to_D = math.hypot(_p[0] - _q[0], _p[1] - _q[1])
-    _in_D = _p[0] > _eps and _p[1] > _eps and math.hypot(*_p) < 1 - _eps
+    _in_D = _p[0] > -_eps and _p[1] > -_eps and math.hypot(*_p) < 1 - _eps
     _to_out = min(_p[0], _p[1], 1 - math.hypot(*_p)) if _in_D else 0.0
     _meets_D = _to_D < _r - _eps
     _meets_out = not (_in_D and _r <= _to_out + _eps)
-    _on_Bd = _to_D < _eps and not _in_D
+    _on_Bd = _to_D < _eps and not (_in_D and _to_out > _eps)
 
     def _yes(b):
         return "yes" if b else "no"
 
-    _fig = Figure(figsize=(HALF + 2.2, HALF + 0.4), layout="constrained")
+    _fig = Figure(figsize=(HALF + 1.0, 3.3), layout="constrained")
     _ax = _fig.subplots()
-    _ax.set_xlim(-0.6, 1.75)
-    _ax.set_ylim(-0.6, 1.6)
+    _ax.set_xlim(-0.75, 2.3)
+    _ax.set_ylim(-0.75, 2.0)
     _ax.set_aspect("equal")
     _ax.axis("off")
     _th = np.linspace(0, np.pi / 2, 120)
     _ax.fill(np.r_[0, np.cos(_th)], np.r_[0, np.sin(_th)], color=LIGHT, lw=0, zorder=0)
-    cross_axes(_ax, (-0.55, 1.7), (-0.55, 1.55), "$x^1$", "$x^2$")
-    _ax.plot(np.r_[0, np.cos(_th), 0], np.r_[0, np.sin(_th), 0], color="white", lw=4, zorder=4)
-    _ax.plot(np.r_[0, np.cos(_th), 0], np.r_[0, np.sin(_th), 0], color=BLUE, lw=1.6, ls=(0, (4, 2)), zorder=5)
+    cross_axes(_ax, (-0.7, 2.25), (-0.7, 1.95), "$x^1$", "$x^2$")
+    # the edges on the axes are in D (solid), the arc is not (dashed)
+    _ax.plot([0, 0, 1], [1, 0, 0], color=BLUE, lw=1.6, zorder=5)
+    _ax.plot(np.cos(_th), np.sin(_th), color=BLUE, lw=1.6, ls=(0, (4, 2)), zorder=5)
+    for _e in ((1, 0), (0, 1)):
+        _ax.plot(*_e, "o", ms=5, mfc="white", mec=BLUE, mew=1.2, zorder=5)
     _c = np.linspace(0, 2 * np.pi, 200)
     _ax.fill(_p[0] + _r * np.cos(_c), _p[1] + _r * np.sin(_c), color=RED, alpha=0.12, lw=0, zorder=6)
     _ax.plot(_p[0] + _r * np.cos(_c), _p[1] + _r * np.sin(_c), color=RED, lw=1.2, zorder=6)
     _ax.plot(*_p, "o", color="black", ms=4, zorder=7)
-    legend_box(_fig, [("area", LIGHT, "$D$", BLUE), ("line", BLUE, r"$\mathrm{Bd}(D)$", (0, (4, 2))), ("area", (0.70, 0.15, 0.12, 0.15), r"$B(\vec{p}, r)$", RED), ("dot", "black", r"$\vec{p}$")])
+    # the names move with the ball: its name at its upper right, the name of p at its lower left
+    tip_label(_ax, (_p[0] + _r * math.sqrt(0.5), _p[1] + _r * math.sqrt(0.5)), 45, r"$B(\vec{p}, r)$", RED, r=2, fontsize=12)
+    tip_label(_ax, _p, 225, r"$\vec{p}$", "black", r=3, fontsize=12)
 
     mo.vstack(
         [
             mo.hstack([bp1, bp2, br], justify="start", gap=2, wrap=True),
             table(
                 [
-                    (r"$\vec{p}$", rf"$\begin{{bmatrix}} {_p[0]:g} \\ {_p[1]:g} \end{{bmatrix}}$"),
-                    (r"$\textcolor{" + RED + r"}{B(\vec{p}, r)}$ contains points in $D$", _yes(_meets_D)),
-                    (r"$\textcolor{" + RED + r"}{B(\vec{p}, r)}$ contains points not in $D$", _yes(_meets_out)),
+                    (r"$B(\vec{p}, r)$ contains points in $D$", _yes(_meets_D)),
+                    (r"$B(\vec{p}, r)$ contains points not in $D$", _yes(_meets_out)),
                     (r"$\vec{p} \in D$", _yes(_in_D)),
-                    (r"$\vec{p} \in \textcolor{" + BLUE + r"}{\mathrm{Bd}(D)}$", _yes(_on_Bd)),
+                    (r"$\vec{p} \in \mathrm{Bd}(D)$", _yes(_on_Bd)),
                 ]
             ),
             _fig,
@@ -956,7 +977,7 @@ def _(BLUE, Figure, HALF, LIGHT, RED, bp1, bp2, br, cross_axes, legend_box, math
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, legend_box, mo, np):
+def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, mo, np):
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
     _a, _b, _c, _d = 0.5, 1.7, 0.45, 1.3
 
@@ -980,6 +1001,7 @@ def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, legend_box, mo, np
             ax.text(x, -0.05, name, ha="center", va="top", fontsize=12, bbox=_box)
         for y, name in ((_c, "$c$"), (_d, "$d$")):
             ax.text(-0.05, y, name, ha="right", va="center", fontsize=12, bbox=_box)
+        ax.text((_a + _b) / 2, (_c + _d) / 2, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
         return fig, ax
 
     # the open rectangle misses its corner (a, c), which is in its boundary
@@ -987,9 +1009,7 @@ def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, legend_box, mo, np
     _t = np.linspace(0, 2 * np.pi, 120)
     _ax.fill(_a + 0.16 * np.cos(_t), _c + 0.16 * np.sin(_t), color=RED, alpha=0.12, lw=0, zorder=2)
     _ax.plot(_a + 0.16 * np.cos(_t), _c + 0.16 * np.sin(_t), color=RED, lw=1.0, zorder=2)
-    legend_box(_open, [("area", LIGHT, "$D$", BLUE), ("area", (0.70, 0.15, 0.12, 0.15), r"a ball centred at $\genfrac{[}{]}{0}{0}{a}{c}$", RED)])
     _closed, _ax = _panel(True)
-    legend_box(_closed, [("area", LIGHT, "$D$", BLUE)])
 
     mo.vstack(
         [
@@ -1013,7 +1033,7 @@ def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, legend_box, mo, np
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, HALF, LIGHT, RED, cross_axes, legend_box, mo, theorem):
+def _(BLUE, Figure, GREEN, HALF, LIGHT, RED, cross_axes, mo, theorem):
     _fig = Figure(figsize=(HALF + 2.2, 2.3), layout="constrained")
     _ax = _fig.subplots()
     _ax.set_xlim(-0.35, 1.55)
@@ -1023,16 +1043,13 @@ def _(BLUE, Figure, GREEN, HALF, LIGHT, RED, cross_axes, legend_box, mo, theorem
     cross_axes(_ax, (-0.2, 1.5), (-0.2, 1.4), "$x^1$", "$x^2$")
     _ax.fill([0, 1, 1, 0], [0, 0, 1, 1], color=LIGHT, lw=0)
     _ax.plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], color=BLUE, lw=1.4, zorder=4)
+    for _c in ((1, 0), (0, 1)):
+        _ax.plot(*_c, "o", ms=5, color=BLUE, zorder=5)
     _ax.plot(0, 0, "o", color=GREEN, ms=6, zorder=5)
     _ax.plot(1, 1, "o", color=RED, ms=6, zorder=5)
-    legend_box(
-        _fig,
-        [
-            ("area", LIGHT, r"$\bar{D}$", BLUE),
-            ("dot", GREEN, r"global minimum: $h\left(\genfrac{[}{]}{0}{0}{0}{0}\right) = 0$"),
-            ("dot", RED, r"global maximum: $h\left(\genfrac{[}{]}{0}{0}{1}{1}\right) = 2$"),
-        ],
-    )
+    _ax.text(0.5, 0.5, r"$\bar{D}$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ax.text(0.06, -0.06, r"$h\left(\genfrac{[}{]}{0}{0}{0}{0}\right) = 0$", color="black", fontsize=12, ha="left", va="top")
+    _ax.text(1.06, 1.04, r"$h\left(\genfrac{[}{]}{0}{0}{1}{1}\right) = 2$", color="black", fontsize=12, ha="left", va="bottom")
 
     mo.vstack(
         [
@@ -1099,7 +1116,7 @@ def _(mo):
     **Example.** &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = (x^1)^2 + (x^2)^2 - 2x^1$ &nbsp; on &nbsp; $D = \left\{\, (x^1)^2 + (x^2)^2 \leq 4 \,\right\}$
 
     $$
-    \mathrm{Bd}(D) = \left\{\, (x^1)^2 + (x^2)^2 = 4 \,\right\} = \underbrace{\left\{\, \begin{bmatrix} 2\cos(t) \\ 2\sin(t) \end{bmatrix} \;\middle|\; t \in [0, 2\pi] \,\right\}}_{\text{parameterization of } \mathrm{Bd}(D)},
+    \mathrm{Bd}(D) = \left\{\, (x^1)^2 + (x^2)^2 = 4 \,\right\} = \underbrace{\left\{\, \gamma(t) = \begin{bmatrix} 2\cos(t) \\ 2\sin(t) \end{bmatrix} \mid t \in [0, 2\pi] \,\right\}}_{\mathclap{\footnotesize \text{parameterization of } \mathrm{Bd}(D)}\vphantom{\footnotesize \text{parameterization of } \mathrm{Bd}(D)}},
     \qquad
     D \setminus \mathrm{Bd}(D) = \left\{\, (x^1)^2 + (x^2)^2 < 4 \,\right\}
     $$
@@ -1140,25 +1157,32 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    st = mo.ui.slider(0, 24, 1, value=4, label=r"$k$, with $t = k\pi/12$", show_value=True)
+    st = mo.ui.slider(0, 24, 1, value=4, label=r"$k$", show_value=True)
     return (st,)
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, ORANGE, RED, cross_axes, legend_box, math, mo, np, num, st, table, tip_label):
+def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, ORANGE, RED, cross_axes, math, mo, np, num, st, table, tip_label):
     _t = st.value * math.pi / 12
+    _frac = "0" if st.value == 0 else (r"\pi" if st.value == 1 else rf"{st.value}\pi") + "/12"  # t = k pi / 12, not simplified
     _pt = (2 * math.cos(_t), 2 * math.sin(_t))
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
 
     def _g(t):
         return 4 - 4 * np.cos(t)
 
+    def _beside(ax, at, ang, name, w, h):
+        # a name centred beside its point in the direction ang (degrees), far enough for a w x h box (points) to clear it
+        c, s = math.cos(math.radians(ang)), math.sin(math.radians(ang))
+        d = w / 2 * abs(c) + h / 2 * abs(s) + 4
+        ax.annotate(name, at, textcoords="offset points", xytext=(d * c, d * s), ha="center", va="center", fontsize=12, zorder=6, bbox=_box)
+
     _fig = Figure(figsize=(FULL, 3.9), layout="constrained")
     _left, _right = _fig.subplots(1, 2, width_ratios=[1, 1.35])
 
     # D with the level sets of f (circles about a), the candidates and the point of Bd(D) at time t
-    _left.set_xlim(-2.6, 2.75)
-    _left.set_ylim(-2.45, 2.6)
+    _left.set_xlim(-2.85, 3.2)
+    _left.set_ylim(-2.65, 3.0)
     _left.set_aspect("equal")
     _left.axis("off")
     _th = np.linspace(0, 2 * np.pi, 241)
@@ -1168,11 +1192,14 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, ORANGE, RED, cross_axes, legend_bo
         (_ring,) = _left.plot(1 + math.sqrt(_c + 1) * np.cos(_th), math.sqrt(_c + 1) * np.sin(_th), color=GREY, lw=0.6, zorder=1)
         _ring.set_clip_path(_disc)
     _left.plot(2 * np.cos(_th), 2 * np.sin(_th), color=BLUE, lw=1.4, zorder=2)
-    cross_axes(_left, (-2.5, 2.7), (-2.4, 2.55), "$x^1$", "$x^2$")
+    cross_axes(_left, (-2.5, 3.15), (-2.4, 2.95), "$x^1$", "$x^2$")
     for _p, _col in (((1, 0), GREEN), ((2, 0), ORANGE), ((-2, 0), RED)):
         _left.plot(*_p, "o", color=_col, ms=6, zorder=5)
     _left.plot(*_pt, "o", color="black", ms=6, zorder=6)
-    tip_label(_left, (-1.45, -1.45), -135, r"$\mathrm{Bd}(D)$", BLUE, r=4, fontsize=12)
+    for _p, _name, _ang in (((1, 0), r"$\vec{a}$", -90), ((2, 0), r"$\vec{b}$", 135), ((-2, 0), r"$\vec{c}$", 45)):
+        tip_label(_left, _p, _ang, _name, "black", r=5)
+    # the name of gamma(t) outside the circle, in the direction of t
+    _beside(_left, _pt, math.degrees(_t), r"$\gamma(t)$", 24, 14)
 
     # g(t) = f on Bd(D), with the value of f at the interior candidate
     _right.set_xlim(-0.6, 7.6)
@@ -1188,31 +1215,18 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, ORANGE, RED, cross_axes, legend_bo
         _right.text(_x, 0.35, _name, ha="center", va="bottom", fontsize=12, bbox=_box)
     for _x, _col in ((0, ORANGE), (math.pi, RED), (2 * math.pi, ORANGE)):
         _right.plot(_x, _g(_x), "o", color=_col, ms=6, zorder=5)
-    _right.text(4.9, 7.9, r"$g(t) = 4 - 4\cos(t)$", color=BLUE, fontsize=12, ha="left", va="center")
+    _right.text(7.5, 7.9, r"$y = g(t) = 4 - 4\cos(t)$", color=BLUE, fontsize=12, ha="right", va="center")
     _right.plot(_t, _g(_t), "o", color="black", ms=6, zorder=6)
-    legend_box(
-        _fig,
-        [
-            ("dot", GREEN, r"$\vec{a}$"),
-            ("dot", ORANGE, r"$\vec{b}$"),
-            ("dot", RED, r"$\vec{c}$"),
-            ("dot", "black", r"$\genfrac{[}{]}{0}{0}{2\cos(t)}{2\sin(t)}$ (left), $\genfrac{[}{]}{0}{0}{t}{g(t)}$ (right)"),
-            ("line", GREY, r"level sets of $f$"),
-            ("line", GREEN, r"$y = f(\vec{a}) = -1$", (0, (4, 3))),
-        ],
-        loc="outside lower center",
-        ncols=3,
-    )
+    _right.text(math.pi, -1.25, r"$y = f(\vec{a}) = -1$", color=GREEN, fontsize=12, ha="center", va="top")
 
     mo.vstack(
         [
             mo.hstack([st], justify="start", gap=2, wrap=True),
             table(
                 [
-                    (r"$t = k\pi/12$", rf"${num(_t)}$"),
-                    (r"$\begin{bmatrix} 2\cos(t) \\ 2\sin(t) \end{bmatrix} \in \mathrm{Bd}(D)$", rf"$\begin{{bmatrix}} {num(_pt[0])} \\ {num(_pt[1])} \end{{bmatrix}}$"),
-                    (r"$g(t) = 4 - 4\cos(t)$", rf"${num(4 - 4 * math.cos(_t))}$"),
-                    (r"$g'(t) = 4\sin(t)$", rf"${num(4 * math.sin(_t))}$"),
+                    (r"$t = k\pi/12$", rf"${_frac}$"),
+                    (r"$g(t)$", rf"${num(4 - 4 * math.cos(_t))}$"),
+                    (r"$g'(t)$", rf"${num(4 * math.sin(_t))}$"),
                 ]
             ),
             _fig,
@@ -1222,7 +1236,7 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, ORANGE, RED, cross_axes, legend_bo
 
 
 @app.cell(hide_code=True)
-def _(BLUE, GREEN, LIGHT, ORANGE, RED, np, panel, sheet, turntable):
+def _(BLUE, GREEN, ORANGE, RED, np, panel, sheet, turntable):
     # graph(f) over D, the same rule outside D in a faint tone, f restricted to Bd(D), and the three candidates
     def _f(x1, x2):
         return x1**2 + x2**2 - 2 * x1
@@ -1246,16 +1260,15 @@ def _(BLUE, GREEN, LIGHT, ORANGE, RED, np, panel, sheet, turntable):
                 lines=[(_c1, _c2, _f(_c1, _c2), BLUE, 2.2), (_c1, _c2, 0 * _t, BLUE, 1.0, [4, 3])],
                 points=[((1, 0, -1), GREEN), ((2, 0, 0), ORANGE), ((-2, 0, 8), RED)],
                 axes=[((0, 0, 0), (2.9, 0, 0), "x^1", -30), ((0, 0, 0), (0, 2.9, 0), "x^2", 30), ((0, 0, 0), (0, 0, 9), "y", 90)],
+                texts=[
+                    ((1, 0, -1), r"f(\vec{a}) = -1", "black", -90, 7),
+                    ((2, 0, 0), r"f(\vec{b}) = 0", "black", 50, 8),
+                    ((-2, 0, 8), r"f(\vec{c}) = 8", "black", 180, 7),
+                    ((0, -2, 0), r"\mathrm{Bd}(D)", BLUE, -90, 6),
+                    ((2 ** 0.5, 2 ** 0.5, _f(2 ** 0.5, 2 ** 0.5)), r"f \text{ restricted to } \mathrm{Bd}(D)", BLUE, -10, 6),
+                    ((-0.5, 1.2, _f(-0.5, 1.2)), r"y = f(\vec{x})", BLUE, 180, 4),
+                ],
             )
-        ],
-        legend=[
-            ("area", LIGHT, r"y = f(\vec{x}), \ \vec{x} \in D", BLUE),
-            ("area", LIGHT, r"\text{the same rule outside } D", _faint, 0.35),
-            ("line", BLUE, r"f \text{ restricted to } \mathrm{Bd}(D)", 2.2),
-            ("line", BLUE, r"\mathrm{Bd}(D)", 1.0, [4, 3]),
-            ("dot", GREEN, r"\vec{a}: \ f(\vec{a}) = -1 \ (\text{min})"),
-            ("dot", ORANGE, r"\vec{b}: \ f(\vec{b}) = 0"),
-            ("dot", RED, r"\vec{c}: \ f(\vec{c}) = 8 \ (\text{max})"),
         ],
         height=400,
     )
@@ -1263,19 +1276,7 @@ def _(BLUE, GREEN, LIGHT, ORANGE, RED, np, panel, sheet, turntable):
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    def _field():
-        return mo.ui.text(placeholder="?", debounce=True)
-
-    q1_max, q1_min = _field(), _field()
-    return q1_max, q1_min
-
-
-@app.cell(hide_code=True)
-def _(BLUE, Figure, HALF, LIGHT, check, cross_axes, legend_box, mo, q1_max, q1_min):
-    def _ask(label, field, answer):
-        return mo.hstack([mo.md(label), field, mo.md(check(field, answer))], justify="start", align="center")
-
+def _(BLUE, Figure, HALF, LIGHT, cross_axes, mo):
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
     _fig = Figure(figsize=(HALF + 0.4, 2.4), layout="constrained")
     _ax = _fig.subplots()
@@ -1290,7 +1291,7 @@ def _(BLUE, Figure, HALF, LIGHT, check, cross_axes, legend_box, mo, q1_max, q1_m
         _ax.plot(*_c, "o", ms=4, color=BLUE, zorder=3)
     _ax.text(2, -0.1, "$2$", ha="center", va="top", fontsize=12, bbox=_box)
     _ax.text(-0.1, 3, "$3$", ha="right", va="center", fontsize=12, bbox=_box)
-    legend_box(_fig, [("area", LIGHT, "$D$", BLUE)])
+    _ax.text(1, 1.5, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
 
     mo.vstack(
         [
@@ -1317,24 +1318,8 @@ def _(BLUE, Figure, HALF, LIGHT, check, cross_axes, legend_box, mo, q1_max, q1_m
             ),
             _fig,
             mo.md(r"""$\leadsto$ &nbsp; parameterize the boundary with 4 different line segments"""),
-            _ask(r"global maximum value of $f$ over $D$ $=$", q1_max, 5),
-            _ask(r"global minimum value of $f$ over $D$ $=$", q1_min, -3),
         ]
     )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Summary
-
-    - $\vec{a} \in D$ is a global maximum (minimum) of $f : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}$ if $f(\vec{x}) \leq f(\vec{a})$ ($f(\vec{x}) \geq f(\vec{a})$) for all $\vec{x} \in D$
-    - $D$ is bounded if it is contained in some ball $B(\vec{0}, r)$; its boundary $\mathrm{Bd}(D)$ is the set of points $\vec{a}$ such that any ball centered at $\vec{a}$ contains both points in $D$ and points not in $D$; $D$ is closed if $\mathrm{Bd}(D) \subseteq D$
-    - a continuous $f$ over a closed and bounded domain $D$ has both a global maximum and a global minimum
-    - a global extremum lies in $\mathrm{Bd}(D)$, or it is a local extremum in $D \setminus \mathrm{Bd}(D)$
-    - strategy: find the critical points in $D \setminus \mathrm{Bd}(D)$; find the global extrema of $f$ on $\mathrm{Bd}(D)$, via a parameterization of the boundary; compare the values of all candidate points
-    """)
     return
 
 

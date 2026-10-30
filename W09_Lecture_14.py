@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 14 · Local extrema and the second derivative test", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 • Lecture 14 • Local extrema and the second derivative test", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -26,11 +26,11 @@ def _(mo):
     # Palette with fixed roles (figures only; text carries no colour):
     #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (tangent vector, gradient, mean)
-    #   ORANGE a third series, only when three are needed
+    #   GREEN  a result made from them (sum, multiple, angle, tangent vector, gradient)
+    #   ORANGE (ochre) a third object, only when three are needed
     #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
-    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#3f5f8f", "#a8554c", "#4f7f5c", "#b9853f", "#9a9a9a", "#e3ebf4"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
     FULL, HALF = 7.4, 3.6
 
@@ -75,12 +75,13 @@ def _(mo):
 
     def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
         """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
-        One head size and one line weight for every figure, so arrows look alike across lectures."""
+        One line weight for every figure; the head is open and sized in points from the line width,
+        so arrows look alike across lectures at any axis range."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={3 * lw:g},head_width={1.3 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -119,24 +120,15 @@ def _(mo):
 
     def table(rows):
         """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
-        return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
+        _md = mo.md("\n".join(["| | |", "|:--|:--|"] + [f"| {k} | {v} |" for k, v in rows]))
+        return mo.Html(f'<div class="readout">{_md.text}</div>')
 
-    def check(field, answer):
-        """Feedback mark for a numeric answer typed into a text field."""
-        s = field.value.strip().replace(",", ".")
-        if not s:
-            return ""
-        try:
-            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
-        except ValueError:
-            return "enter a number"
-
-    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 14", "Week 09", "Lecture 14 · Local extrema and the second derivative test")
+    header("Lecture 14", "Week 09", "Lecture 14 • Local extrema and the second derivative test")
     return
 
 
@@ -161,28 +153,12 @@ def _(arrow, math):
         ax.annotate(text, at, textcoords="offset points", xytext=(r * c, r * s), ha=ha, va=va, color=color, fontsize=fontsize, zorder=6, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
     def num(v, digits=2):
-        """Fixed-point number for the readout tables (never prints a negative zero)."""
+        """Number for the readout tables: exact when a multiple of 1/2, otherwise fixed-point (never a negative zero)."""
+        if abs(2 * v - round(2 * v)) < 1e-9:
+            return f"{round(2 * v) / 2 + 0.0:g}"
         return f"{round(v, digits) + 0.0:.{digits}f}"
 
-    def legend_box(fig, entries, loc="outside right center", ncols=1):
-        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
-        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
-        from matplotlib.lines import Line2D
-        from matplotlib.patches import Patch
-
-        handles = []
-        for kind, c, _label, *style in entries:
-            if kind == "dot":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
-            elif kind == "ring":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
-            elif kind == "line":
-                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
-            else:
-                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
-        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
-
-    return cross_axes, legend_box, num, tip_label
+    return cross_axes, num, tip_label
 
 
 @app.cell(hide_code=True)
@@ -191,8 +167,8 @@ def _(mo, np):
     # Drawn in the browser on canvases, in the style of the static figures: orthographic views of
     # R^3 = R^2 x R (x^1 towards the viewer, x^2 to the right, y up), surfaces drawn back to front.
     # Dragging turns the view at a fixed scale (all panels of a figure together) and a double click restores
-    # it; a figure redrawn by a slider keeps its view. A legend box explains points, curves and surfaces, so
-    # that no label covers the drawing; only the axes carry labels. Typesetting is done by KaTeX.
+    # it; a figure redrawn by a slider keeps its view. Names sit beside the objects they name. Typesetting is done
+    # by KaTeX.
     import html as _html
     import json as _json
 
@@ -289,11 +265,11 @@ def _(mo, np):
             for (let k = 0; k < ln.p.length; k += 3) idx.push(add(ln.p[k], ln.p[k + 1], ln.p[k + 2]));
             const line = { idx, dash: ln.d, cum: new Float64Array(idx.length) };
             for (let k = 0; k < idx.length - 1; k++)
-              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0 });
+              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0, flat: ln.b });
             return line;
           });
           for (const d of spec.points) this.dots.push({ i: add(...d.p), c: d.c, r: d.r, h: d.h });
-          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c });
+          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c, w: h.w, d: h.d });
           // the centre of the scene and the radius of a ball holding it, heights at their drawing scale
           let src = pts;
           if (spec.box) {
@@ -365,7 +341,8 @@ def _(mo, np):
           items.sort((p, q) => p[0] - q[0]);
           g.clearRect(0, 0, W, H);
           g.lineJoin = "round";
-          for (const [, kind, o] of items) {
+          for (let n = 0; n < items.length; n++) {
+            const [, kind, o] = items[n];
             if (kind === 0) {
               const q = o[0];
               g.beginPath();
@@ -378,28 +355,45 @@ def _(mo, np):
               if (o[2] === 1) { g.lineWidth = 0.6; g.setLineDash([]); g.stroke(); }
               g.globalAlpha = 1;
             } else if (kind === 1) {
+              if (o.done) { o.done = false; continue; }
+              let p0 = o, p1 = o;
+              if (o.flat) {  // the pieces of a straight line up to the next surface go in one stroke, so no seams show
+                let grew = true;
+                while (grew) {
+                  grew = false;
+                  for (let m = n + 1; m < items.length && items[m][1] !== 0; m++) {
+                    const q = items[m][2];
+                    if (items[m][1] !== 1 || q.line !== o.line || q.done) continue;
+                    if (q.k === p1.k + 1) { p1 = q; q.done = true; grew = true; }
+                    else if (q.k === p0.k - 1) { p0 = q; q.done = true; grew = true; }
+                  }
+                }
+              }
               g.beginPath();
-              g.moveTo(X[o.a], Y[o.a]);
-              g.lineTo(X[o.b], Y[o.b]);
+              g.moveTo(X[p0.a], Y[p0.a]);
+              g.lineTo(X[p1.b], Y[p1.b]);
               g.strokeStyle = o.c;
               g.lineWidth = o.lw;
               const dash = o.line && o.line.dash;
-              g.lineCap = dash ? "butt" : "round";
+              g.lineCap = dash || o.flat ? "butt" : "round";
               g.setLineDash(dash || []);
-              g.lineDashOffset = dash ? -o.line.cum[o.k] : 0;
+              g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
               g.stroke();
             } else if (kind === 2) {
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
               vx /= len; vy /= len;
-              const bx = X[o.i] - 9 * vx, by = Y[o.i] - 9 * vy;
+              const hl = Math.max(3.5 * o.w, 6), hw = Math.max(1.5 * o.w, 2.6), bx = X[o.i] - hl * vx, by = Y[o.i] - hl * vy;  // open head, as on the page
+              g.strokeStyle = o.c;
+              g.lineWidth = o.w;
+              g.setLineDash([]);
+              g.lineCap = "round";
+              if (!o.d) { g.beginPath(); g.moveTo(X[o.j], Y[o.j]); g.lineTo(X[o.i], Y[o.i]); g.stroke(); }
               g.beginPath();
-              g.moveTo(X[o.i], Y[o.i]);
-              g.lineTo(bx - 3.4 * vy, by + 3.4 * vx);
-              g.lineTo(bx + 3.4 * vy, by - 3.4 * vx);
-              g.closePath();
-              g.fillStyle = o.c;
-              g.fill();
+              g.moveTo(bx - hw * vy, by + hw * vx);
+              g.lineTo(X[o.i], Y[o.i]);
+              g.lineTo(bx + hw * vy, by - hw * vx);
+              g.stroke();
             } else {
               g.beginPath();
               g.arc(X[o.i], Y[o.i], o.r, 0, 2 * Math.PI);
@@ -505,8 +499,8 @@ def _(mo, np):
         axes: (tail, tip, TeX label, direction of the label in degrees), drawn black;
         arrows: (tail, tip, colour[, width, dash]), vectors with a head in their colour;
         arcs: (x1, x2, y, colour[, width]), curves ending in a head, such as a turning arrow;
-        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), short labels such as tick values (names of
-        points and objects go in the legend instead); caption: TeX below the drawing;
+        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), names of points and objects and tick values,
+        each beside its point; caption: TeX below the drawing;
         box: ((x^1 lo, hi), (x^2 lo, hi), (y lo, hi)) to size the drawing by, instead of its own points."""
         p = {"ys": ys, "surfaces": list(surfaces), "lines": [], "points": [], "heads": [], "labels": [], "caption": caption, "box": box}
         for ln in lines:
@@ -514,20 +508,20 @@ def _(mo, np):
         for tail, tip, label, d in axes:
             a, b = np.asarray(tail, float), np.asarray(tip, float)
             seg = a + np.linspace(0, 0.96, 60)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000"})
+            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000", "w": 1.1})
             p["labels"].append({"p": b.tolist(), "t": label, "c": "#000000", "a": d, "r": 5})
         for q in points:
             p["points"].append({"p": [float(c) for c in q[0]], "c": q[1], "r": q[2] if len(q) > 2 else 4.0, "h": bool(q[3]) if len(q) > 3 else False})
         for ar in arrows:
             a, b = np.asarray(ar[0], float), np.asarray(ar[1], float)
             seg = a + np.linspace(0, 0.96, 40)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2]})
+            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None})
         for arc in arcs:
             c = np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in arc[:3])), -1)
             p["lines"].append({"p": _flat(*c[:-1].T), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8, "d": None, "e": 0})
-            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3]})
+            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8})
         for tx in texts:
             p["labels"].append({"p": [float(c) for c in tx[0]], "t": tx[1], "c": tx[2], "a": tx[3], "r": tx[4] if len(tx) > 4 else 5})
         return p
@@ -563,19 +557,19 @@ def _(mo):
     - if $f$ is $C^2$-smooth at $\vec{x} = \vec{a}$ (continuous 2nd order partial derivatives at $\vec{a}$), then
 
         $$
-        f(\vec{x}) = \underbrace{f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) + \frac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})}_{\text{good quadratic approximation}} + \underbrace{o\big( \lVert \vec{x} - \vec{a} \rVert^2 \big)}_{\substack{\text{error goes to zero} \\ \text{faster than } \lVert \vec{x} - \vec{a} \rVert^2}}
+        f(\vec{x}) = \underbrace{f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) + \frac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})}_{\mathclap{\footnotesize \text{good quadratic approximation}}\vphantom{\footnotesize \text{good quadratic approximation}}} + \underbrace{o\big( \lVert \vec{x} - \vec{a} \rVert^2 \big)}_{\mathclap{\footnotesize \begin{matrix}\text{error goes to zero} \\ \text{faster than } \lVert \vec{x} - \vec{a} \rVert^2\end{matrix}}\vphantom{\footnotesize \begin{matrix}\text{error goes to zero} \\ \text{faster than } \lVert \vec{x} - \vec{a} \rVert^2\end{matrix}}}
         $$
 
     - where
 
         $$
-        \underbrace{Df(\vec{a}) = \begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) & \cdots & \dfrac{\partial f}{\partial x^n}(\vec{a}) \end{bmatrix} \in \mathrm{Mat}(1 \times n)}_{\text{derivative matrix}},
+        \underbrace{Df(\vec{a}) = \begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) & \cdots & \dfrac{\partial f}{\partial x^n}(\vec{a}) \end{bmatrix} \in \mathrm{Mat}(1 \times n)}_{\mathclap{\footnotesize \text{derivative matrix}}\vphantom{\footnotesize \text{derivative matrix}}},
         \qquad
         \underbrace{Hf(\vec{a}) = \begin{bmatrix}
         \dfrac{\partial^2 f}{\partial x^1 \partial x^1}(\vec{a}) & \cdots & \dfrac{\partial^2 f}{\partial x^1 \partial x^n}(\vec{a}) \\
         \vdots & \ddots & \vdots \\
         \dfrac{\partial^2 f}{\partial x^n \partial x^1}(\vec{a}) & \cdots & \dfrac{\partial^2 f}{\partial x^n \partial x^n}(\vec{a})
-        \end{bmatrix} \in \mathrm{Mat}(n \times n)}_{\text{Hessian matrix}}
+        \end{bmatrix} \in \mathrm{Mat}(n \times n)}_{\mathclap{\footnotesize \text{Hessian matrix}}\vphantom{\footnotesize \text{Hessian matrix}}}
         $$
 
     **In this lecture:** application to optimization: finding maximal / minimal values of scalar valued functions
@@ -657,9 +651,9 @@ def _(definition, mo, theorem):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, RED, cross_axes, definition, legend_box, mo, np, panel, sheet, turntable):
+def _(BLUE, GREEN, RED, definition, mo, np, panel, sheet, turntable):
     # f has a local maximum at a (but larger values further along e_1); its restrictions to a + t e_1 and a + t e_2
-    _a, _delta = (1.4, 1.3), 0.6
+    _a = (1.4, 1.3)
 
     def _f(x1, x2):
         u, w = x1 - _a[0], x2 - _a[1]
@@ -669,8 +663,6 @@ def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, RED, cross_axes, definition, legen
     _u1, _u2 = np.meshgrid(np.linspace(_a[0] - 1.3, _a[0] + 3.2, 91), np.linspace(_a[1] - 1.2, _a[1] + 1.2, 49), indexing="ij")
     _t1, _t2 = np.linspace(-1.3, 3.2, 181), np.linspace(-1.2, 1.2, 97)
     _k = np.array([-0.9, 0.9])
-    _th = np.linspace(0, 2 * np.pi, 121)
-    _s = np.linspace(0, 1, 30)
     _graph = turntable(
         28,
         24,
@@ -684,62 +676,32 @@ def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, RED, cross_axes, definition, legen
                     (_a[0] + 0 * _t2, _a[1] + _t2, _f(_a[0], _a[1] + _t2), RED, 2.4),
                     (_a[0] + _t1, _a[1] + 0 * _t1, 0 * _t1, BLUE, 1.0, [4, 3]),
                     (_a[0] + 0 * _t2, _a[1] + _t2, 0 * _t2, RED, 1.0, [4, 3]),
-                    (_a[0] + _delta * np.cos(_th), _a[1] + _delta * np.sin(_th), 0 * _th, GREY, 1.2),
                     (_a[0] + _k, _a[1] + 0 * _k, _fa + 0 * _k, GREEN, 2.2),
                     (_a[0] + 0 * _k, _a[1] + _k, _fa + 0 * _k, GREEN, 2.2),
-                    (_a[0] + 0 * _s, _a[1] + 0 * _s, _fa * _s, GREY, 1.0, [3, 3]),
                 ],
-                points=[((_a[0], _a[1], _fa), "#000000"), ((_a[0], _a[1], 0), GREY, 3.4)],
+                points=[((_a[0], _a[1], _fa), "#000000")],
                 axes=[((0, 0, 0), (5.0, 0, 0), "x^1", -150), ((0, 0, 0), (0, 2.9, 0), "x^2", -20), ((0, 0, 0), (0, 0, 2.5), "y", 90)],
+                texts=[
+                    ((_a[0] + 2.3, _a[1], _f(_a[0] + 2.3, _a[1])), r"y = f(\vec{a} + t\vec{e}_1)", BLUE, 150, 6),
+                    ((_a[0], _a[1] + 0.35, _f(_a[0], _a[1] + 0.35)), r"y = f(\vec{a} + t\vec{e}_2)", RED, 45, 45),
+                    ((_a[0] + _t1[-1], _a[1], 0), r"\vec{a} + t\vec{e}_1", BLUE, -60, 6),
+                    ((_a[0], _a[1] + _t2[-1], 0), r"\vec{a} + t\vec{e}_2", RED, -20, 6),
+                ],
             )
-        ],
-        legend=[
-            ("line", BLUE, r"y = f(\vec{a} + t\vec{e}_1)", 2.4),
-            ("line", RED, r"y = f(\vec{a} + t\vec{e}_2)", 2.4),
-            ("line", GREEN, r"\text{horizontal tangent lines}", 2.2),
-            ("dot", "#000000", r"\begin{bmatrix} a^1 \\ a^2 \\ f(\vec{a}) \end{bmatrix}"),
-            ("dot", GREY, r"\vec{a}"),
-            ("line", BLUE, r"\vec{a} + t\vec{e}_1", 1.0, [4, 3]),
-            ("line", RED, r"\vec{a} + t\vec{e}_2", 1.0, [4, 3]),
-            ("line", GREY, r"B(\vec{a}, \delta)", 1.2),
         ],
         height=440,
     )
 
-    # the restrictions as single variable functions, with the horizontal tangent line at t = 0
-    _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
-    _fig = Figure(figsize=(HALF + 0.6, 3.1), layout="constrained")
-    _ax = _fig.subplots()
-    _ax.set_xlim(-1.6, 3.7)
-    _ax.set_ylim(-0.4, 2.4)
-    _ax.set_aspect("equal")
-    _ax.axis("off")
-    _ax.axvspan(-_delta, _delta, color=LIGHT, alpha=0.6, lw=0)
-    cross_axes(_ax, (-1.5, 3.65), (-0.35, 2.35), "$t$", "$y$")
-    _ax.plot(_t1, _f(_a[0] + _t1, _a[1]), color=BLUE, lw=1.6)
-    _ax.plot(_t2, _f(_a[0], _a[1] + _t2), color=RED, lw=1.6)
-    _ax.plot(_k, _fa + 0 * _k, color=GREEN, lw=1.6)
-    _ax.plot(0, _fa, "o", color="black", ms=4, zorder=5)
-    for _x, _name in ((-_delta, r"$-\delta$"), (_delta, r"$\delta$")):
-        _ax.plot([_x, _x], [-0.05, 0.05], color="black", lw=0.9)
-        _ax.text(_x, -0.1, _name, ha="center", va="top", fontsize=12, bbox=_box)
-    legend_box(
-        _fig,
-        [("line", BLUE, r"$y = f(\vec{a} + t\vec{e}_1)$"), ("line", RED, r"$y = f(\vec{a} + t\vec{e}_2)$"), ("line", GREEN, r"$y = f(\vec{a})$")],
-        loc="outside lower center",
-        ncols=2,
-    )
 
     mo.vstack(
         [
             _graph,
-            mo.as_html(_fig).center(),
             mo.md(
                 r"""
     Repeat with $g(t) = f(\vec{a} + t\vec{e}_i)$ for each $i = 1, \dots, n$
 
     $$
-    \Longrightarrow \qquad \vec{\nabla} f(\vec{a}) = \begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) \\ \vdots \\ \dfrac{\partial f}{\partial x^n}(\vec{a}) \end{bmatrix} = \begin{bmatrix} 0 \\ \vdots \\ 0 \end{bmatrix} = \vec{0} \qquad \square
+    \Longrightarrow \qquad \vec{\nabla} f(\vec{a}) = \begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) \\ \vdots \\ \dfrac{\partial f}{\partial x^n}(\vec{a}) \end{bmatrix} = \begin{bmatrix} 0 \\ \vdots \\ 0 \end{bmatrix} = \vec{0} \tag*{$\square$}
     $$
     """
             ),
@@ -787,12 +749,12 @@ def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, RED, cross_axes, definition, legen
 
 @app.cell(hide_code=True)
 def _(mo):
-    theta = mo.ui.slider(0, 180, 5, value=30, label=r"direction $\theta$ of $\vec{u}$ (degrees)", show_value=True)
+    theta = mo.ui.slider(0, 180, 5, value=30, label=r"$\theta$", show_value=True)
     return (theta,)
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREY, HALF, ORANGE, RED, cross_axes, legend_box, math, mo, np, num, panel, sheet, table, theta, turntable):
+def _(BLUE, GREEN, ORANGE, RED, math, mo, np, num, panel, sheet, table, theta, turntable):
     _th = math.radians(theta.value)
     _u = (round(math.cos(_th), 12) + 0.0, round(math.sin(_th), 12) + 0.0)
     _c = round(-math.cos(2 * _th), 12) + 0.0  # f(t u) = c t^2
@@ -814,55 +776,31 @@ def _(BLUE, Figure, GREY, HALF, ORANGE, RED, cross_axes, legend_box, math, mo, n
             panel(
                 0.55,
                 surfaces=[sheet(_g1, _g2, _f(_g1, _g2), wire=[(0, 5, BLUE, 0.5), (1, 5, BLUE, 0.5)])],
-                lines=_edges + [(_t, 0 * _t, _f(_t, 0), GREY, 1.6), (0 * _t, _t, _f(0, _t), GREY, 1.6), (_s * _u[0], _s * _u[1], _c * _s**2, RED, 2.4)],
-                points=[((0, 0, 0), ORANGE)],
+                lines=_edges + [(_t, 0 * _t, _f(_t, 0), GREEN, 1.6), (0 * _t, _t, _f(0, _t), ORANGE, 1.6), (_s * _u[0], _s * _u[1], _c * _s**2, RED, 2.4)],
+                points=[((0, 0, 0), "#000000")],
                 axes=[((0, 0, 0), (1.7, 0, 0), "x^1", -90), ((0, 0, 0), (0, 1.7, 0), "x^2", -60), ((0, 0, 0), (0, 0, 1.4), "y", 90)],
+                texts=[
+                    ((_R, 0, _f(_R, 0)), r"y = f(t\vec{e}_1)", GREEN, -150, 10),
+                    ((0, -_R, _f(0, -_R)), r"y = f(t\vec{e}_2)", ORANGE, 160, 6),
+                    ((0, 0, 1.1), r"y = f(t\vec{u})", RED, 0, 8),
+                    ((0, 0, 0), r"\vec{0}", "#000000", 60, 25),
+                ],
                 box=((-1, 1.7), (-1, 1.7), (-1, 1.4)),
             )
         ],
-        legend=[
-            ("line", GREY, r"y = f(t\vec{e}_1), \ y = f(t\vec{e}_2)", 1.6),
-            ("line", RED, r"y = f(t\vec{u})", 2.4),
-            ("dot", ORANGE, r"\text{saddle point } \vec{0}"),
-        ],
-        height=360,
+        height=420,
         key="lecture-14-saddle",
     )
 
-    # the sections as graphs of single variable functions
-    _fig = Figure(figsize=(HALF + 0.3, 3.4), layout="constrained")
-    _ax = _fig.subplots()
-    _ax.set_xlim(-1.3, 1.6)
-    _ax.set_ylim(-1.35, 1.45)
-    _ax.set_aspect("equal")
-    _ax.axis("off")
-    cross_axes(_ax, (-1.25, 1.5), (-1.3, 1.4), "$t$", "$y$")
-    _ax.plot(_t, -(_t**2), color=GREY, lw=1.0, ls=(0, (4, 3)))
-    _ax.plot(_t, _t**2, color=GREY, lw=1.0, ls=(0, (4, 3)))
-    _ax.plot(_t, _c * _t**2, color=RED, lw=1.6)
-    _ax.plot(0, 0, "o", color=ORANGE, ms=5, zorder=5)
-    legend_box(
-        _fig,
-        [("line", GREY, r"$y = f(t\vec{e}_1) = -t^2$, $y = f(t\vec{e}_2) = t^2$", (0, (4, 3))), ("line", RED, r"$y = f(t\vec{u})$")],
-        loc="outside lower center",
-    )
-
-    _kind = "local maximum" if _c < 0 else "local minimum" if _c > 0 else r"both a local maximum and a local minimum ($f(t\vec{u}) = 0$ for all $t$)"
     mo.vstack(
         [
             mo.hstack([theta], justify="start", gap=2, wrap=True),
             table(
                 [
-                    (r"$\vec{u} = \begin{bmatrix} \cos\theta \\ \sin\theta \end{bmatrix}$", rf"$\textcolor{{{RED}}}{{\begin{{bmatrix}} {num(_u[0])} \\ {num(_u[1])} \end{{bmatrix}}}}$"),
-                    (r"$f(t\vec{u}) = \big( \sin^2\theta - \cos^2\theta \big)\, t^2$", rf"$\textcolor{{{RED}}}{{{num(_c)}\, t^2}}$"),
-                    (r"$t = 0$ for $t \longmapsto f(t\vec{u})$", _kind),
+                    (r"$f(t\vec{u}) = \big( \sin^2\theta - \cos^2\theta \big)\, t^2$ for $\vec{u} = \begin{bmatrix} \cos\theta \\ \sin\theta \end{bmatrix}$", rf"${num(_c)}\, t^2$"),
                 ]
             ),
-            mo.Html(
-                '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem 1rem;">'
-                f'<div style="flex: 1.5 1 320px; min-width: 260px;">{_graph.text}</div>'
-                f'<div style="flex: 1 1 240px; min-width: 220px;">{mo.as_html(_fig).text}</div></div>'
-            ),
+            _graph,
         ]
     )
     return
@@ -880,8 +818,8 @@ def _(mo):
     $\leadsto$ &nbsp; if $\vec{a}$ is a critical point of $f$ ($Df(\vec{a}) = 0 \in \mathrm{Mat}(1 \times n)$)
 
     $$
-    \underbrace{f(\vec{x}) \approx f(\vec{a}) + \frac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})}_{\text{near } \vec{x} = \vec{a}}
-    \qquad \Big( \tfrac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a}) \text{ determines the behavior of } f \text{ near } \vec{x} = \vec{a}! \Big)
+    \underbrace{f(\vec{x}) \approx f(\vec{a}) + \frac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})}_{\mathclap{\footnotesize \text{near } \vec{x} = \vec{a}}\vphantom{\footnotesize \text{near } \vec{x} = \vec{a}}}
+    \quad \left( \begin{matrix} \dfrac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a}) \\[4pt] \text{determines the behavior} \\ \text{of } f \text{ near } \vec{x} = \vec{a}! \end{matrix} \right)
     $$
 
     **Recall:** $f : \mathbb{R} \longrightarrow \mathbb{R}$ $C^2$-smooth with $f'(a) = 0$
@@ -893,7 +831,7 @@ def _(mo):
     because near $x = a$
 
     $$
-    f(x) = f(a) + f'(a)(x - a) + \frac{1}{2} f''(a)(x - a)^2 + \underbrace{o\big( (x - a)^2 \big)}_{\substack{\text{error goes to zero} \\ \text{faster than } (x - a)^2}}
+    f(x) = f(a) + f'(a)(x - a) + \frac{1}{2} f''(a)(x - a)^2 + \underbrace{o\big( (x - a)^2 \big)}_{\mathclap{\footnotesize \begin{matrix}\text{error goes to zero} \\ \text{faster than } (x - a)^2\end{matrix}}\vphantom{\footnotesize \begin{matrix}\text{error goes to zero} \\ \text{faster than } (x - a)^2\end{matrix}}}
     $$
 
     and if $a$ is a critical point
@@ -910,7 +848,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREY, ORANGE, cross_axes, mo, np):
+def _(BLUE, FULL, GREEN, Figure, GREY, cross_axes, mo, np):
     # the three cases, one panel each, with a critical point at a
     _a = 1.3
     _cases = (
@@ -922,22 +860,24 @@ def _(BLUE, FULL, Figure, GREY, ORANGE, cross_axes, mo, np):
     _fig = Figure(figsize=(FULL, 2.7), layout="constrained")
     _x = np.linspace(_a - 1.45, _a + 1.45, 200)
     _w = np.linspace(_a - 1.1, _a + 1.1, 100)
-    for _ax, (_name, _f, _d2) in zip(_fig.subplots(1, 3), _cases):
+    for _i, (_ax, (_name, _f, _d2)) in enumerate(zip(_fig.subplots(1, 3), _cases)):
         _ax.set_xlim(-0.35, 3.0)
         _ax.set_ylim(-0.3, 2.05)
         _ax.set_aspect("equal")
         _ax.axis("off")
         cross_axes(_ax, (-0.3, 2.95), (-0.25, 2.0), "$x$", "$y$")
-        _ax.plot(_x, _f(_x), color=BLUE, lw=1.6, label=r"$y = f(x)$")
+        _ax.plot(_x, _f(_x), color=BLUE, lw=1.6)
         if _d2 != 0:
-            _ax.plot(_w, np.full_like(_w, _f(_a)), color=GREY, lw=1.0, ls=(0, (4, 3)), label=r"$y = f(a)$")
-        _ax.plot(_w, _f(_a) + 0.5 * _d2 * (_w - _a) ** 2, color=ORANGE, lw=1.4, label=r"$y = f(a) + \frac{1}{2} f''(a)(x - a)^2$")
+            _ax.plot(_w, np.full_like(_w, _f(_a)), color=GREY, lw=1.0, ls=(0, (4, 3)))
+        _ax.plot(_w, _f(_a) + 0.5 * _d2 * (_w - _a) ** 2, color=GREEN, lw=1.4)
+        if _i == 0:
+            _ax.text(2.3, 0.97, "$y = f(x)$", color=BLUE, fontsize=11, ha="left", va="bottom")
+            _ax.text(_w[0] + 0.05, _f(_a) + 0.06, "$y = f(a)$", color="#6b6b6b", fontsize=11, ha="left", va="bottom")
+            _ax.text(1.4, 0.42, r"$y = f(a) + \dfrac{1}{2} f''(a)(x - a)^2$", color=GREEN, fontsize=11, ha="center", va="top")
         _ax.plot(_a, _f(_a), "o", color="black", ms=4, zorder=5)
         _ax.plot([_a, _a], [-0.05, 0.05], color="black", lw=0.9)
         _ax.text(_a, -0.1, "$a$", ha="center", va="top", fontsize=12, bbox=_box)
         _ax.set_title(_name, fontsize=13, y=-0.16)
-    _handles, _labels = _fig.axes[0].get_legend_handles_labels()
-    _fig.legend(_handles, _labels, loc="outside lower center", ncols=3, frameon=True, fontsize=12)
 
     mo.vstack(
         [
@@ -973,7 +913,7 @@ def _(mo):
     $$
 
     $$
-    \Longrightarrow \qquad q(\vec{x}) = f(\vec{a}) + \frac{1}{2} \Big( A \underbrace{(x^1 - a^1)^2}_{(v^1)^2} + 2B \underbrace{(x^1 - a^1)(x^2 - a^2)}_{v^1 v^2} + D \underbrace{(x^2 - a^2)^2}_{(v^2)^2} \Big)
+    \Longrightarrow \qquad q(\vec{x}) = f(\vec{a}) + \frac{1}{2} \Big( A \underbrace{(x^1 - a^1)^2}_{\mathclap{\footnotesize (v^1)^2}\vphantom{\footnotesize (v^1)^2}} + 2B \underbrace{(x^1 - a^1)(x^2 - a^2)}_{\mathclap{\footnotesize v^1 v^2}\vphantom{\footnotesize v^1 v^2}} + D \underbrace{(x^2 - a^2)^2}_{\mathclap{\footnotesize (v^2)^2}\vphantom{\footnotesize (v^2)^2}} \Big)
     $$
 
     ① &nbsp; if $A \neq 0$ &nbsp; $\leadsto$ &nbsp; complete the square
@@ -982,10 +922,10 @@ def _(mo):
     \Longrightarrow \qquad q(\vec{x}) = f(\vec{a}) + \frac{1}{2} \left( A \left( v^1 + \frac{B}{A} v^2 \right)^2 + \frac{AD - B^2}{A} (v^2)^2 \right)
     $$
 
-    - if $\underbrace{A < 0 \text{ and } AD - B^2 > 0}_{\text{negative definite}}$, then $\mathrm{graph}(q)$ is a paraboloid opening downwards
-    - if $\underbrace{A > 0 \text{ and } AD - B^2 > 0}_{\text{positive definite}}$, then $\mathrm{graph}(q)$ is a paraboloid opening upwards
-    - if $\underbrace{A \neq 0 \text{ and } AD - B^2 < 0}_{\text{indefinite}}$, then $\mathrm{graph}(q)$ is a horse saddle
-    - if $A \neq 0$ and $\underbrace{AD - B^2 = 0}_{\text{degenerate}}$
+    - if $\underbrace{A < 0 \text{ and } AD - B^2 > 0}_{\footnotesize \text{negative definite}}$, then $\mathrm{graph}(q)$ is a paraboloid opening downwards
+    - if $\underbrace{A > 0 \text{ and } AD - B^2 > 0}_{\footnotesize \text{positive definite}}$, then $\mathrm{graph}(q)$ is a paraboloid opening upwards
+    - if $\underbrace{A \neq 0 \text{ and } AD - B^2 < 0}_{\footnotesize \text{indefinite}}$, then $\mathrm{graph}(q)$ is a horse saddle
+    - if $A \neq 0$ and $\underbrace{AD - B^2 = 0}_{\footnotesize \text{degenerate}}$
 
         $$
         \Longrightarrow \qquad q(\vec{x}) = f(\vec{a}) + \frac{1}{2} A \left( v^1 + \frac{B}{A} v^2 \right)^2
@@ -994,8 +934,8 @@ def _(mo):
 
     ② &nbsp; if $A = 0$
 
-    - $B \neq 0$ &nbsp; ($\Longleftrightarrow$ &nbsp; $AD - B^2 < 0$) &nbsp; $\Longrightarrow$ &nbsp; $q(\vec{x}) = f(\vec{a}) + \frac{1}{2} (2B v^1 + D v^2) v^2$ &nbsp; $\Longrightarrow$ &nbsp; $\mathrm{graph}(q)$ is a horse saddle
-    - $B = 0$ &nbsp; ($\Longleftrightarrow$ &nbsp; $AD - B^2 = 0$) &nbsp; $\Longrightarrow$ &nbsp; $q(\vec{x}) = f(\vec{a}) + \frac{1}{2} D (v^2)^2$ &nbsp; $\Longrightarrow$ &nbsp; $\mathrm{graph}(q)$ contains a horizontal line
+    - $B \neq 0$ &nbsp; ($\Longleftrightarrow$ &nbsp; $AD - B^2 < 0$) &nbsp; $\Longrightarrow$ &nbsp; $q(\vec{x}) = f(\vec{a}) + \dfrac{1}{2} (2B v^1 + D v^2) v^2$ &nbsp; $\Longrightarrow$ &nbsp; $\mathrm{graph}(q)$ is a horse saddle
+    - $B = 0$ &nbsp; ($\Longleftrightarrow$ &nbsp; $AD - B^2 = 0$) &nbsp; $\Longrightarrow$ &nbsp; $q(\vec{x}) = f(\vec{a}) + \dfrac{1}{2} D (v^2)^2 \rule{0pt}{1.9em}$ &nbsp; $\Longrightarrow$ &nbsp; $\mathrm{graph}(q)$ contains a horizontal line
     """)
     return
 
@@ -1029,18 +969,25 @@ def _(BLUE, GREEN, GREY, np, panel, sheet, turntable):
             _x1, _x2 = _a[0] + _r * np.cos(_p), _a[1] + _r * np.sin(_p)
             _wire = [(0, 4, BLUE, 0.5), (1, 6, BLUE, 0.5)]
             _rim = [(_a[0] + np.cos(_phi), _a[1] + np.sin(_phi))]
+        _rr, _bk = (0.85, 0.85) if _square else (1.0, 0.0)  # the point of the rim beside which the name of the graph goes
         _lines = [(_c1, _c2, _q(_c1, _c2), BLUE, 1.2) for _c1, _c2 in _rim]
         _lines.append((_a[0] + 0 * _s, _a[1] + 0 * _s, _fa * _s, GREY, 1.0, [3, 3]))
+        _lines.append((_a[0] * _s, _a[1] * _s, _fa + 0 * _s, GREY, 1.0, [3, 3]))  # from f(a) on the y axis to the point
         if _name == "degenerate":  # the horizontal line v^1 + (B / A) v^2 = 0 at height f(a)
             _d = np.array([-_B, _A]) / np.hypot(_A, _B)
             _lines.append((_a[0] + 0.85 * _w * _d[0], _a[1] + 0.85 * _w * _d[1], _fa + 0 * _w, GREEN, 2.2))
         _panels.append(
             panel(
                 0.6,
-                surfaces=[sheet(_x1, _x2, _q(_x1, _x2), wire=_wire)],
+                surfaces=[sheet(_x1, _x2, _q(_x1, _x2), wire=_wire, alpha=0.6 if _name == "positive definite" else 1.0)],
                 lines=_lines,
                 points=[((_a[0], _a[1], _fa), "#000000"), ((_a[0], _a[1], 0), GREY, 3.4)],
                 axes=[((0, 0, 0), (2.2, 0, 0), "x^1", -150), ((0, 0, 0), (0, 3.2, 0), "x^2", -20), ((0, 0, 0), (0, 0, 2.9), "y", 90)],
+                texts=[
+                    ((_a[0], _a[1], 0), r"\vec{x} = \vec{a}", "#000000", -30, 6),
+                    ((0, 0, _fa), r"f(\vec{a})", "#000000", 180, 6),
+                    ((_a[0] - _bk, _a[1] + _rr, _q(_a[0] - _bk, _a[1] + _rr)), r"y = q(\vec{x})", BLUE, 20 if _square else 10, 6),
+                ],
                 caption=rf"\text{{{_name}}}",
                 box=((-0.2, 2.2), (-0.2, 3.2), (-0.2, 2.9)),
             )
@@ -1050,12 +997,7 @@ def _(BLUE, GREEN, GREY, np, panel, sheet, turntable):
         24,
         "graph of q near a critical point a in the four cases: negative definite, positive definite, indefinite, degenerate",
         _panels,
-        legend=[
-            ("dot", "#000000", r"\begin{bmatrix} a^1 \\ a^2 \\ f(\vec{a}) \end{bmatrix}"),
-            ("dot", GREY, r"\vec{a}"),
-            ("line", GREEN, r"\text{horizontal line in } \mathrm{graph}(q)", 2.2),
-        ],
-        height=300,
+        height=260,
         cols=2,
     )
     return
@@ -1073,90 +1015,6 @@ def _(definition):
     - **degenerate** if $\det H = 0$
     """,
         "Definite, indefinite and degenerate matrices",
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    hA = mo.ui.slider(-2, 2, 0.25, value=1, label="$A$", show_value=True)
-    hB = mo.ui.slider(-2, 2, 0.25, value=0.5, label="$B$", show_value=True)
-    hD = mo.ui.slider(-2, 2, 0.25, value=1, label="$D$", show_value=True)
-    return hA, hB, hD
-
-
-@app.cell(hide_code=True)
-def _(BLUE, Figure, GREY, HALF, cross_axes, hA, hB, hD, legend_box, mo, np, panel, sheet, table, turntable):
-    _A, _B, _D = hA.value, hB.value, hD.value
-    _det = _A * _D - _B**2  # exact: the slider values are multiples of 1/4
-
-    def _q(x1, x2):
-        return 0.5 * (_A * x1**2 + 2 * _B * x1 * x2 + _D * x2**2)
-
-    if _det > 0:
-        _kind, _shape = ("negative definite", "paraboloid opening downwards") if _A < 0 else ("positive definite", "paraboloid opening upwards")
-    elif _det < 0:
-        _kind, _shape = "indefinite", "horse saddle"
-    else:
-        _kind, _shape = "degenerate", "contains a horizontal line"
-
-    # graph(q) over the unit disc, at a fixed scale whatever A, B, D
-    _r, _p = np.meshgrid(np.linspace(0, 1, 17), np.linspace(0, 2 * np.pi, 73), indexing="ij")
-    _x1, _x2 = _r * np.cos(_p), _r * np.sin(_p)
-    _phi = np.linspace(0, 2 * np.pi, 241)
-    _graph = turntable(
-        35,
-        28,
-        "graph of the quadratic function q for the chosen A, B, D",
-        [
-            panel(
-                0.5,
-                surfaces=[sheet(_x1, _x2, _q(_x1, _x2), wire=[(0, 4, BLUE, 0.5), (1, 6, BLUE, 0.5)])],
-                lines=[(np.cos(_phi), np.sin(_phi), _q(np.cos(_phi), np.sin(_phi)), BLUE, 1.2)],
-                points=[((0, 0, 0), "#000000")],
-                axes=[((0, 0, 0), (1.6, 0, 0), "x^1", -120), ((0, 0, 0), (0, 1.6, 0), "x^2", -40), ((0, 0, 0), (0, 0, 1.9), "y", 90)],
-                box=((-1, 1.6), (-1, 1.6), (-2, 2)),
-            )
-        ],
-        legend=[("area", "#dbe8f6", r"y = q(\vec{x})", BLUE)],
-        height=340,
-        key="lecture-14-explorer",
-    )
-
-    # level sets of q (negative levels dashed)
-    _fig = Figure(figsize=(HALF + 0.2, 3.6), layout="constrained")
-    _ax = _fig.subplots()
-    _ax.set_xlim(-1.25, 1.35)
-    _ax.set_ylim(-1.2, 1.3)
-    _ax.set_aspect("equal")
-    _ax.axis("off")
-    _X, _Y = np.meshgrid(np.linspace(-1, 1, 301), np.linspace(-1, 1, 301))
-    _Q = np.where(_X**2 + _Y**2 <= 1, _q(_X, _Y), np.nan)
-    if np.nanmax(np.abs(_Q)) > 1e-9:
-        _ax.contour(_X, _Y, _Q, levels=[-1.5, -1, -0.6, -0.3, -0.1, 0.1, 0.3, 0.6, 1, 1.5], colors=GREY, linewidths=0.8)
-    _ax.plot(np.cos(_phi), np.sin(_phi), color=GREY, lw=0.6)
-    cross_axes(_ax, (-1.2, 1.3), (-1.15, 1.25), "$x^1$", "$x^2$")
-    _ax.plot(0, 0, "o", color="black", ms=4, zorder=5)
-    legend_box(_fig, [("line", GREY, r"$q(\vec{x}) = c > 0$"), ("line", GREY, r"$q(\vec{x}) = c < 0$", (0, (4, 2)))], loc="outside lower center", ncols=2)
-
-    mo.vstack(
-        [
-            mo.hstack([hA, hB, hD], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"$q(\vec{x})$, with $\vec{a} = \vec{0}$ and $f(\vec{a}) = 0$", r"$\frac{1}{2} \big( A (x^1)^2 + 2B\, x^1 x^2 + D (x^2)^2 \big)$"),
-                    (r"$Hf(\vec{a}) = \begin{bmatrix} A & B \\ B & D \end{bmatrix}$", rf"$\begin{{bmatrix}} {_A:g} & {_B:g} \\ {_B:g} & {_D:g} \end{{bmatrix}}$"),
-                    (r"$\det Hf(\vec{a}) = AD - B^2$", rf"${_det:g}$"),
-                    (r"$Hf(\vec{a})$ is", _kind),
-                    (r"$\mathrm{graph}(q)$", rf"$\textcolor{{{BLUE}}}{{\text{{{_shape}}}}}$"),
-                ]
-            ),
-            mo.Html(
-                '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem 1rem;">'
-                f'<div style="flex: 1.5 1 320px; min-width: 260px;">{_graph.text}</div>'
-                f'<div style="flex: 1 1 240px; min-width: 220px;">{mo.as_html(_fig).text}</div></div>'
-            ),
-        ]
     )
     return
 
@@ -1187,7 +1045,7 @@ def _(mo, theorem):
     \quad \Longleftrightarrow \quad
     \begin{cases} x^2 = (x^1)^2 \\ x^1 = (x^2)^2 \end{cases}
     \quad \Longleftrightarrow \quad
-    \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} = \underbrace{\begin{bmatrix} 0 \\ 0 \end{bmatrix}}_{\vec{a}} \text{ or } \underbrace{\begin{bmatrix} 1 \\ 1 \end{bmatrix}}_{\vec{b}}
+    \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} = \underbrace{\begin{bmatrix} 0 \\ 0 \end{bmatrix}}_{\mathclap{\footnotesize \vec{a}}\vphantom{\footnotesize \vec{a}}} \text{ or } \underbrace{\begin{bmatrix} 1 \\ 1 \end{bmatrix}}_{\mathclap{\footnotesize \vec{b}}\vphantom{\footnotesize \vec{b}}}
     $$
 
     $\leadsto$ &nbsp; Hessian matrix:
@@ -1200,7 +1058,7 @@ def _(mo, theorem):
 
     $$
     Hf(\vec{a}) = \begin{bmatrix} 0 & -3 \\ -3 & 0 \end{bmatrix}
-    \qquad \Longrightarrow \qquad \underbrace{\det Hf(\vec{a}) = -9 < 0}_{\text{indefinite}}
+    \qquad \Longrightarrow \qquad \underbrace{\det Hf(\vec{a}) = -9 < 0}_{\mathclap{\footnotesize \text{indefinite}}\vphantom{\footnotesize \text{indefinite}}}
     \qquad \Longrightarrow \qquad \vec{a} \text{ is a saddle}
     $$
 
@@ -1208,7 +1066,7 @@ def _(mo, theorem):
 
     $$
     Hf(\vec{b}) = \begin{bmatrix} 6 & -3 \\ -3 & 6 \end{bmatrix}
-    \qquad \Longrightarrow \qquad \underbrace{\det Hf(\vec{b}) = 27 > 0, \quad \frac{\partial^2 f}{\partial x^1 \partial x^1}(\vec{b}) = 6 > 0}_{\text{positive definite}}
+    \qquad \Longrightarrow \qquad \underbrace{\det Hf(\vec{b}) = 27 > 0, \quad \frac{\partial^2 f}{\partial x^1 \partial x^1}(\vec{b}) = 6 > 0}_{\mathclap{\footnotesize \text{positive definite}}\vphantom{\footnotesize \text{positive definite}}}
     \qquad \Longrightarrow \qquad \vec{b} \text{ is local min}
     $$
     """
@@ -1219,60 +1077,64 @@ def _(mo, theorem):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, ORANGE, legend_box, np):
-    # level sets of f around the saddle a and the local minimum b
-    def _f(x1, x2):
-        return x1**3 - 3 * x1 * x2 + x2**3
-
-    _fig = Figure(figsize=(HALF + 2.6, HALF + 0.6), layout="constrained")
-    _ax = _fig.subplots()
-    _X, _Y = np.meshgrid(np.linspace(-1.6, 2.2, 500), np.linspace(-1.6, 2.2, 500))
-    _ax.contour(_X, _Y, _f(_X, _Y), levels=[-0.9, -0.6, -0.3, 0.3, 0.8, 1.6, 3], colors=GREY, linewidths=0.6, linestyles="solid")
-    _ax.contour(_X, _Y, _f(_X, _Y), levels=[0], colors=BLUE, linewidths=1.4, linestyles="solid")
-    _ax.axhline(0, color="black", lw=0.8)
-    _ax.axvline(0, color="black", lw=0.8)
-    _ax.grid(True, color=LIGHT, lw=0.6)
-    _ax.set_axisbelow(True)
-    _ax.set_xlim(-1.6, 2.2)
-    _ax.set_ylim(-1.6, 2.2)
-    _ax.set_aspect("equal")
-    _ax.set_xticks([-1, 0, 1, 2])
-    _ax.set_yticks([-1, 0, 1, 2])
-    _ax.set_xlabel("$x^1$")
-    _ax.set_ylabel("$x^2$", rotation=0, labelpad=10)
-    for _sp in ("top", "right"):
-        _ax.spines[_sp].set_visible(False)
-    _ax.plot(0, 0, "o", color=ORANGE, ms=6, zorder=5)
-    _ax.plot(1, 1, "o", color=GREEN, ms=6, zorder=5)
-    legend_box(
-        _fig,
-        [
-            ("dot", ORANGE, r"$\vec{a}$, saddle"),
-            ("dot", GREEN, r"$\vec{b}$, local min"),
-            ("line", BLUE, r"$f^{-1}(0)$"),
-            ("line", GREY, r"level sets of $f$"),
-        ],
-    )
-    _fig
-    return
+def _(mo):
+    level = mo.ui.slider(-1.2, 0.8, 0.1, value=-0.5, label="$c$", show_value=True)
+    return (level,)
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Summary
+def _(BLUE, GREY, RED, level, mo, np, panel, sheet, turntable):
+    import contourpy
 
-    - $\vec{a}$ is a local maximum (minimum) of $f$ if $f(\vec{x}) \leq f(\vec{a})$ ($f(\vec{x}) \geq f(\vec{a})$) for all $\vec{x}$ in some open ball $B(\vec{a}, \delta)$
-    - a local extremum where $f$ is differentiable is a critical point, $\vec{\nabla} f(\vec{a}) = \vec{0}$; a critical point that is not a local extremum is a saddle point
-    - near a critical point
+    # graph(f) over a disc around the saddle a and the local minimum b, cut by the plane y = c
+    def _f(x1, x2):
+        return x1**3 - 3 * x1 * x2 + x2**3
 
-        $$
-        f(\vec{x}) \approx f(\vec{a}) + \frac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})
-        $$
+    _lc = level.value
+    _o, _R = (0.5, 0.5), 1.0
+    _r, _p = np.meshgrid(np.linspace(0, _R, 21), np.linspace(0, 2 * np.pi, 97), indexing="ij")
+    _x1, _x2 = _o[0] + _r * np.cos(_p), _o[1] + _r * np.sin(_p)
+    _phi = np.linspace(0, 2 * np.pi, 241)
+    _rim = (_o[0] + _R * np.cos(_phi), _o[1] + _R * np.sin(_phi))
+    _top = (_o[0] + _R * np.cos(-np.pi / 4), _o[1] + _R * np.sin(-np.pi / 4))  # the highest point of the rim
 
-    - $H = \begin{bmatrix} A & B \\ B & D \end{bmatrix}$ is negative definite if $\det H > 0$ and $A < 0$, positive definite if $\det H > 0$ and $A > 0$, indefinite if $\det H < 0$, and degenerate if $\det H = 0$
-    - second derivative test for $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$ at a critical point $\vec{a}$: $Hf(\vec{a})$ negative definite $\Longrightarrow$ local max; positive definite $\Longrightarrow$ local min; indefinite $\Longrightarrow$ saddle point; degenerate $\Longrightarrow$ not sufficient info
-    """)
+    # the level set f = c inside the disc, in pieces
+    _g = np.linspace(-_R, _R, 241)
+    _G1, _G2 = np.meshgrid(_o[0] + _g, _o[1] + _g)
+    _pieces = []
+    for _ln in contourpy.contour_generator(_G1, _G2, _f(_G1, _G2)).lines(_lc):
+        _in = np.hypot(_ln[:, 0] - _o[0], _ln[:, 1] - _o[1]) <= _R
+        _cut = np.flatnonzero(np.diff(_in.astype(int))) + 1
+        for _seg, _keep in zip(np.split(_ln, _cut), np.split(_in, _cut)):
+            if _keep[0] and len(_seg) > 1:
+                _pieces.append(_seg)
+    _plane = [(_o[0] - _R, _o[1] - _R, _lc), (_o[0] + _R, _o[1] - _R, _lc), (_o[0] + _R, _o[1] + _R, _lc), (_o[0] - _R, _o[1] + _R, _lc)]
+
+    _graph = turntable(
+        -135,
+        30,
+        "graph of f over a disc around the saddle a and the local minimum b, cut by the plane y = c along the level set f = c",
+        [
+            panel(
+                0.45,
+                surfaces=[sheet(_x1, _x2, _f(_x1, _x2), wire=[(0, 4, BLUE, 0.5), (1, 8, BLUE, 0.5)])],
+                lines=[(_rim[0], _rim[1], _f(*_rim), BLUE, 1.2)] + [(_q[:, 0], _q[:, 1], _lc + 0 * _q[:, 0], RED, 2.4) for _q in _pieces]
+                + [(np.linspace(_e0[0], _e1[0], 60), np.linspace(_e0[1], _e1[1], 60), np.full(60, _lc), GREY, 1.2) for _e0, _e1 in zip(_plane, _plane[1:] + _plane[:1])],  # the edge of the plane y = c
+                points=[((0, 0, 0), "#000000"), ((1, 1, -1), "#000000")],
+                axes=[((0, 0, 0), (2.4, 0, 0), "x^1", 90), ((0, 0, 0), (0, 2.4, 0), "x^2", 90), ((0, 0, 0), (0, 0, 2.6), "y", 90)],
+                texts=[
+                    ((0, 0, 0), r"\vec{a}", "#000000", -90, 8),
+                    ((1, 1, -1), r"\vec{b}", "#000000", 0, 9),
+                    ((_top[0], _top[1], _f(*_top)), r"y = f(\vec{x})", BLUE, 0, 6),
+                    (_plane[3], r"y = c", GREY, 180, 6),
+                ],
+                box=((_o[0] - _R, 2.4), (_o[1] - _R, 2.4), (-1.2, 2.6)),
+            )
+        ],
+        height=420,
+        key="lecture-14-level",
+    )
+    mo.vstack([mo.hstack([level], justify="start"), _graph])
     return
 
 

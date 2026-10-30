@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 13 · Higher order derivatives", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 • Lecture 13 • Higher order derivatives", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -26,11 +26,11 @@ def _(mo):
     # Palette with fixed roles (figures only; text carries no colour):
     #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (tangent vector, gradient, mean)
-    #   ORANGE a third series, only when three are needed
+    #   GREEN  a result made from them (sum, multiple, angle, tangent vector, gradient)
+    #   ORANGE (ochre) a third object, only when three are needed
     #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
-    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#3f5f8f", "#a8554c", "#4f7f5c", "#b9853f", "#9a9a9a", "#e3ebf4"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
     FULL, HALF = 7.4, 3.6
 
@@ -75,12 +75,13 @@ def _(mo):
 
     def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
         """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
-        One head size and one line weight for every figure, so arrows look alike across lectures."""
+        One line weight for every figure; the head is open and sized in points from the line width,
+        so arrows look alike across lectures at any axis range."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={3 * lw:g},head_width={1.3 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -121,22 +122,12 @@ def _(mo):
         """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
         return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
 
-    def check(field, answer):
-        """Feedback mark for a numeric answer typed into a text field."""
-        s = field.value.strip().replace(",", ".")
-        if not s:
-            return ""
-        try:
-            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
-        except ValueError:
-            return "enter a number"
-
-    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 13", "Week 07", "Lecture 13 · Higher order derivatives")
+    header("Lecture 13", "Week 07", "Lecture 13 • Higher order derivatives")
     return
 
 
@@ -159,7 +150,7 @@ def _(arrow, math):
 
 
 @app.cell(hide_code=True)
-def _(arrow):
+def _(arrow, np):
     def cross_axes(ax, xlim, ylim, x0, y0, xlabel=None, ylabel=None):
         """A bare pair of coordinate axes through the origin, starting at x0 and y0, named at their tips."""
         ax.set_xlim(*xlim)
@@ -177,25 +168,43 @@ def _(arrow):
         v = round(value, digits) + 0.0
         return f"{'-' if v < 0 else '+'} {abs(v):.{digits}f}"
 
-    def legend_box(fig, entries, loc="outside right center", ncols=1):
-        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
-        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
-        from matplotlib.lines import Line2D
-        from matplotlib.patches import Patch
+    def free_name(ax, anchors, text, color, avoid, frame, scale, fontsize=13, gap=4, step=1):
+        """Write `text` beside the first of the `anchors` (points of the object it names, in order of preference) where
+        its box, set off by `gap` (or 2.5 `gap`) points to one of the four diagonal sides, covers none of the points `avoid`, stays inside
+        `frame` ((x lo, hi), (y lo, hi)) and lies closer to its own object than to anything else; `scale` is points per
+        data unit (or a pair: across, up). Returns points of the box, for later names to avoid."""
+        from matplotlib.font_manager import FontProperties
+        from matplotlib.textpath import TextToPath
 
-        handles = []
-        for kind, c, _label, *style in entries:
-            if kind == "dot":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
-            elif kind == "ring":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
-            elif kind == "line":
-                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
-            else:
-                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
-        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
+        _sizes = [TextToPath().get_text_width_height_descent(_line, FontProperties(family="serif", size=fontsize), ismath=True) for _line in text.split("\n")]
+        w, h = max(_s[0] for _s in _sizes), sum(_s[1] for _s in _sizes) + 0.35 * fontsize * (len(_sizes) - 1)  # a name may have several lines
+        sx, sy = scale if isinstance(scale, tuple) else (scale, scale)
+        w, h = (w + 8) / sx, (h + 4) / sy
+        pts, own = np.asarray(avoid, float), np.asarray(anchors, float)
+        others = pts[np.min(np.hypot((pts[:, None, 0] - own[None, :, 0]) * sx, (pts[:, None, 1] - own[None, :, 1]) * sy), axis=1) > 2]
 
-    return cross_axes, legend_box, signed
+        def gap_to(q, x0, y0):  # distance in points from the box to the nearest of the points q
+            dx = np.maximum(np.maximum(x0 - q[:, 0], q[:, 0] - x0 - w), 0) * sx
+            dy = np.maximum(np.maximum(y0 - q[:, 1], q[:, 1] - y0 - h), 0) * sy
+            return np.min(np.hypot(dx, dy)) if len(q) else np.inf
+        (fx0, fx1), (fy0, fy1) = frame
+        best = None
+        for k, (x, y) in enumerate(anchors[::step]):
+            for g, cx, cy in ((g, cx, cy) for g in (gap, 2.5 * gap) for cx, cy in ((1, 1), (-1, 1), (1, -1), (-1, -1))):
+                x0, y0 = x + cx * g / sx - (w if cx < 0 else 0), y + cy * g / sy - (h if cy < 0 else 0)
+                if x0 < fx0 or x0 + w > fx1 or y0 < fy0 or y0 + h > fy1:
+                    continue
+                hits = int(np.count_nonzero((pts[:, 0] > x0) & (pts[:, 0] < x0 + w) & (pts[:, 1] > y0) & (pts[:, 1] < y0 + h)))
+                far = int(gap_to(own, x0, y0) + 3 > gap_to(others, x0, y0))  # its own object clearly the nearest
+                if best is None or (hits, far, k) < best[0]:
+                    best = ((hits, far, k), x, y, g, cx, cy, x0, y0)
+            if best is not None and best[0][:2] == (0, 0):
+                break
+        _, x, y, g, cx, cy, x0, y0 = best
+        ax.annotate(text, (x, y), textcoords="offset points", xytext=(cx * g, cy * g), ha="left" if cx > 0 else "right", va="bottom" if cy > 0 else "top", multialignment="left", color=color, fontsize=fontsize, zorder=5)
+        return [(x0 + i * w / 24, y0 + j * h / 8) for i in range(25) for j in range(9)]  # dense, so that no small name slips between them
+
+    return cross_axes, free_name, signed
 
 
 @app.cell(hide_code=True)
@@ -225,10 +234,10 @@ def _(definition, mo, theorem):
             mo.md(r"""## II.8 &nbsp; Higher order derivatives"""),
             definition(
                 r"""
-    $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ is called **$C^2$-smooth** at $\vec{x} = \vec{a}$ if all partial derivatives $\dfrac{\partial f}{\partial x^i}(\vec{x})$ are well-defined around $\vec{x} = \vec{a}$, their partial derivatives $\dfrac{\partial}{\partial x^j} \dfrac{\partial f}{\partial x^i}(\vec{x})$ are also all well-defined around $\vec{x} = \vec{a}$, and are all continuous at $\vec{x} = \vec{a}$
+    $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ is called **$C^2$-smooth** at $\vec{x} = \vec{a}$ if all partial derivatives $\partial f / \partial x^i (\vec{x})$ are well-defined around $\vec{x} = \vec{a}$, their partial derivatives $\dfrac{\partial}{\partial x^j} \dfrac{\partial f}{\partial x^i}(\vec{x})$ are also all well-defined around $\vec{x} = \vec{a}$, and are all continuous at $\vec{x} = \vec{a}$
 
     $$
-    \frac{\partial}{\partial x^j} \frac{\partial f}{\partial x^i}(\vec{x}) = \frac{\partial^2 f}{\partial x^j \partial x^i}(\vec{x}) \qquad (\text{second order partial derivative of } f \text{ with respect to } x^i \text{ and } x^j)
+    \frac{\partial}{\partial x^j} \frac{\partial f}{\partial x^i}(\vec{x}) = \frac{\partial^2 f}{\partial x^j \partial x^i}(\vec{x}) \quad \left(\begin{matrix}\text{second order partial derivative of } f \\ \text{with respect to } x^i \text{ and } x^j\end{matrix}\right)
     $$
     """,
                 r"$C^2$-smooth functions",
@@ -312,7 +321,7 @@ def _(definition, mo, theorem):
     **Recall:** $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ differentiable at $\vec{x} = \vec{a}$
 
     $$
-    \Longrightarrow \qquad f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) \qquad \text{affine approximation of } f \text{ at } \vec{a} \quad (\text{1st order Taylor approximation})
+    \Longrightarrow \qquad f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) \qquad \begin{matrix}\text{affine approximation of } f \text{ at } \vec{a} \\ (\text{1st order Taylor approximation})\end{matrix}
     $$
     """
             ),
@@ -335,19 +344,23 @@ def _(definition, mo, theorem):
 
 @app.cell(hide_code=True)
 def _(mo):
-    a_taylor = mo.ui.slider(-1.5, 1.5, 0.1, value=0.5, label="$a$", show_value=True)
+    a_taylor = mo.ui.slider(-1.5, 0.7, 0.1, value=0.5, label="$a$", show_value=True)
     return (a_taylor,)
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, ORANGE, a_taylor, cross_axes, legend_box, math, mo, np, signed, table):
+def _(BLUE, FULL, Figure, GREEN, GREY, ORANGE, a_taylor, cross_axes, free_name, math, mo, np):
+    from matplotlib.font_manager import FontProperties
+    from matplotlib.textpath import TextToPath
+
     _a = a_taylor.value
     _fa = math.exp(_a)
-    _x = np.linspace(-2.6, 2.6, 300)
+    _x = np.linspace(-2.3, 2.4, 300)
 
-    _fig = Figure(figsize=(FULL, 4.7), layout="constrained")
+    _fig = Figure(figsize=(6.3, 4.0), layout="constrained")
     _ax = _fig.subplots()
-    cross_axes(_ax, (-2.6, 2.8), (-0.85, 5.2), -2.6, -0.25, "$x$", "$y$")
+    cross_axes(_ax, (-2.3, 2.6), (-0.85, 5.2), -2.3, -0.25, "$x$", "$y$")
+    _ax.set_xlim(-2.3, 3.75)  # room on the right for the names at the ends of the tangent line and of y = f(a)
     _ax.plot(_x, np.full_like(_x, _fa), color=GREY, lw=1.2, ls=(0, (4, 3)))
     _ax.plot(_x, _fa + _fa * (_x - _a), color=GREEN, lw=1.4)
     _ax.plot(_x, _fa + _fa * (_x - _a) + 0.5 * _fa * (_x - _a) ** 2, color=ORANGE, lw=1.4)
@@ -355,31 +368,28 @@ def _(BLUE, FULL, Figure, GREEN, GREY, ORANGE, a_taylor, cross_axes, legend_box,
     _ax.plot(_a, _fa, "o", color="black", ms=4, zorder=4)
     _ax.plot([_a, _a], [-0.08, 0.08], color="black", lw=0.9)
     _ax.text(_a, -0.55, "$a$", ha="center", va="center", fontsize=13)
-    legend_box(
-        _fig,
-        [
-            ("line", BLUE, "$y = f(x)$"),
-            ("line", GREY, "$y = f(a)$", (0, (4, 3))),
-            ("dot", "black", r"$\genfrac{[}{]}{0}{0}{a}{f(a)}$"),
-            ("line", GREEN, "$y = f(a) + f'(a)(x - a)$"),
-            ("line", ORANGE, r"$y = f(a) + f'(a)(x - a) + \frac{1}{2} f''(a)(x - a)^2$"),
-        ],
-        loc="outside lower center",
-        ncols=2,
-    )
+    _fig.draw_without_rendering()  # lays the figure out, to measure the axis
+    _bb = _ax.get_window_extent()
+    _scale = (_bb.width * 72 / _fig.dpi / 6.05, _bb.height * 72 / _fig.dpi / 6.05)  # points per data unit, across and up
 
-    _da = "x" if abs(_a) < 1e-9 else rf"(x {signed(-_a, 1)})"
+    def _height(name):  # height of a name in data units
+        _s = [TextToPath().get_text_width_height_descent(_l, FontProperties(family="serif", size=13), ismath=True) for _l in name.split("\n")]
+        return (sum(_q[1] for _q in _s) + 0.35 * 13 * (len(_s) - 1) + 4) / _scale[1]
+
+    def _put(x, y, name, color, va="bottom"):
+        _ax.text(x, y, name, ha="left", va=va, multialignment="left", color=color, fontsize=13, zorder=5)
+
+    # every name stays at one place, or moves with its own line, as a changes
+    _put(-2.0, 4.39, "$y = f(a) + f'(a)(x - a)$\n$\\;\\; + \\dfrac{1}{2} f''(a)(x - a)^2$", ORANGE)
+    _put(0.28, 4.17, "$y = f(x) = e^x$", BLUE)
+    _put(2.48, _fa, "$y = f(a)$", GREY, va="center")  # at the end of the dashed line
+    _xe = min(2.4, _a - 1 + 5.2 / _fa)  # where the tangent line leaves the picture: its right end, or the top
+    _gname = "$y = f(a)$\n$\\;\\; + f'(a)(x - a)$"
+    _put(_xe + 0.08, min(_fa + _fa * (_xe - _a), 5.2 - _height(_gname) / 2), _gname, GREEN, va="center")
+
     mo.vstack(
         [
             mo.hstack([a_taylor], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"$y = f(x)$", rf"$\textcolor{{{BLUE}}}{{y = e^x}}$"),
-                    (r"$y = f(a)$", rf"$\textcolor{{{GREY}}}{{y = {_fa:.3f}}}$"),
-                    (r"$y = f(a) + f'(a)(x - a)$", rf"$\textcolor{{{GREEN}}}{{y = {_fa:.3f} + {_fa:.3f}\,{_da}}}$"),
-                    (r"$y = f(a) + f'(a)(x - a) + \frac{1}{2} f''(a)(x - a)^2$", rf"$\textcolor{{{ORANGE}}}{{y = {_fa:.3f} + {_fa:.3f}\,{_da} + {_fa / 2:.3f}\,{_da}^2}}$"),
-                ]
-            ),
             _fig,
         ]
     )
@@ -395,7 +405,7 @@ def _(mo, theorem):
     If $f$ is $C^2$-smooth at $\vec{a}$, then its 2nd order Taylor approximation at $\vec{a}$ is a good approximation
 
     $$
-    \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a}) - \frac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert^2} = 0
+    \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a}) - \dfrac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert^2} = 0
     $$
 
     (error goes to zero faster than $(\text{distance})^2$)
@@ -426,36 +436,6 @@ def _(mo, theorem):
 
 @app.cell(hide_code=True)
 def _(mo):
-    qx1 = mo.ui.slider(0, 2, 0.05, value=1.1, label="$x^1$", show_value=True)
-    qx2 = mo.ui.slider(-1, 1, 0.05, value=-0.1, label="$x^2$", show_value=True)
-    return qx1, qx2
-
-
-@app.cell(hide_code=True)
-def _(math, mo, qx1, qx2, table):
-    _x1, _x2 = qx1.value, qx2.value
-    _f = _x1 * math.exp(_x2)
-    _g1 = 1 + (_x1 - 1) + _x2
-    _g2 = _x1 + _x1 * _x2 + 0.5 * _x2**2
-    mo.vstack(
-        [
-            mo.hstack([qx1, qx2], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"$f(\vec{x}) = x^1 e^{x^2}$", rf"${_f:.4f}$"),
-                    (r"1st order Taylor approximation $1 + (x^1 - 1) + x^2$", rf"${_g1 + 0.0:.4f}$"),
-                    (r"error of the 1st order Taylor approximation", rf"${_f - _g1 + 0.0:.4f}$"),
-                    (r"2nd order Taylor approximation $g(\vec{x}) = x^1 + x^1 x^2 + \frac{1}{2} (x^2)^2$", rf"${_g2 + 0.0:.4f}$"),
-                    (r"error of the 2nd order Taylor approximation", rf"${_f - _g2 + 0.0:.4f}$"),
-                ]
-            ),
-        ]
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
     mo.md(r"""
     **Remark.** From Taylor approximation in single variable calculus
 
@@ -463,24 +443,6 @@ def _(mo):
     e^t = 1 + t + \frac{1}{2} t^2 + \cdots \quad (\text{near } t = 0)
     \qquad \Longrightarrow \qquad x^1 e^{x^2} = x^1 \left( 1 + x^2 + \frac{1}{2} (x^2)^2 + \cdots \right)
     $$
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Summary
-
-    - $f$ is $C^2$-smooth at $\vec{a}$ when its second order partial derivatives are well-defined around $\vec{a}$ and continuous at $\vec{a}$; then their order does not matter
-    - the Hessian matrix $Hf(\vec{a}) = D(\vec{\nabla} f)(\vec{a}) \in \mathrm{Mat}(n \times n)$ generalizes $f''(a)$
-    - quadratic approximation:
-
-        $$
-        f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) + \frac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})
-        $$
-
-        with error going to zero faster than $\lVert \vec{x} - \vec{a} \rVert^2$
     """)
     return
 

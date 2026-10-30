@@ -14,10 +14,10 @@ SITE = HERE / "site"
 PARTS = [  # (name, first lecture, last lecture)
     ("I. Euclidean Geometry", 1, 5),
     ("II. Differentiation", 6, 13),
-    ("III. Applications to Optimization", 14, 15),
-    ("IV. Integration of scalar functions", 16, 19),
-    ("V. Vector fields and surfaces", 20, 22),
-    ("VI. Integration of vector fields", 23, 28),
+    ("III. Applications to Optimization", 14, 16),
+    ("IV. Vector fields and line integrals", 17, 19),
+    ("V. Multiple integrals", 20, 22),
+    ("VI. Surface integrals, Stokes and Gauss", 23, 27),
 ]
 
 TITLES = {  # lecture number -> title shown on the index
@@ -36,6 +36,8 @@ TITLES = {  # lecture number -> title shown on the index
     13: "Higher order derivatives",
     14: "Local extrema and the second derivative test",
     15: "Global extrema on closed and bounded domains",
+    16: "Method of Lagrange multipliers",
+    17: "Differentiation of vector fields",
 }
 
 DRAFTS = set()  # lectures kept in the repo but not published

@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 09 · Differentiability and the derivative", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 • Lecture 09 • Differentiability and the derivative", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -26,11 +26,11 @@ def _(mo):
     # Palette with fixed roles (figures only; text carries no colour):
     #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (tangent vector, gradient, mean)
-    #   ORANGE a third series, only when three are needed
+    #   GREEN  a result made from them (sum, multiple, angle, tangent vector, gradient)
+    #   ORANGE (ochre) a third object, only when three are needed
     #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
-    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#3f5f8f", "#a8554c", "#4f7f5c", "#b9853f", "#9a9a9a", "#e3ebf4"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
     FULL, HALF = 7.4, 3.6
 
@@ -75,12 +75,13 @@ def _(mo):
 
     def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
         """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
-        One head size and one line weight for every figure, so arrows look alike across lectures."""
+        One line weight for every figure; the head is open and sized in points from the line width,
+        so arrows look alike across lectures at any axis range."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={3 * lw:g},head_width={1.3 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -121,22 +122,12 @@ def _(mo):
         """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
         return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
 
-    def check(field, answer):
-        """Feedback mark for a numeric answer typed into a text field."""
-        s = field.value.strip().replace(",", ".")
-        if not s:
-            return ""
-        try:
-            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
-        except ValueError:
-            return "enter a number"
-
-    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 09", "Week 05", "Lecture 09 · Differentiability and the derivative")
+    header("Lecture 09", "Week 05", "Lecture 09 • Differentiability and the derivative")
     return
 
 
@@ -155,55 +146,63 @@ def _(arrow, math):
         if label:
             ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    def legend_box(fig, entries, loc="outside right center", ncols=1):
-        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
-        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
-        from matplotlib.lines import Line2D
-        from matplotlib.patches import Patch
-
-        handles = []
-        for kind, c, _label, *style in entries:
-            if kind == "dot":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
-            elif kind == "ring":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
-            elif kind == "line":
-                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
-            else:
-                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
-        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
-
-    return legend_box, vector
+    return (vector,)
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, GREEN, ORANGE, RED, arrow, blank, legend_box, mo, np, vector):
+def _(mo):
+    last_t = mo.ui.slider(0.4, 5, 0.05, value=3, label=r"$t$", show_value=True)
+    return (last_t,)
+
+
+@app.cell(hide_code=True)
+def _(BLUE, FULL, GREEN, RED, arrow, blank, last_t, mo, np, vector):
+    # the path: three cubic pieces, two units of time each (t in [0, 6]), through the points _K with the velocities _V
+    # there (the start, the right end of the arch, the lowest point, the end)
+    _K = np.array([(5.05, 1.45), (8.35, 2.6), (6.8, 0.6), (10.55, 1.8)])
+    _V = np.array([(0.4, 4.5), (-0.6, -3.0), (4.0, 0.0), (2.0, -1.5)])
+
     def _gamma(t):
-        return 5.1 + 2.9 * t, 1.7 + 1.0 * np.sin(3.3 * t) - 0.3 * t
+        _u = np.asarray(t, float) / 2
+        _i = np.clip(np.floor(_u).astype(int), 0, 2)
+        _u = (_u - _i)[..., None]
+        _g = (2 * _u**3 - 3 * _u**2 + 1) * _K[_i] + (_u**3 - 2 * _u**2 + _u) * _V[_i] + (3 * _u**2 - 2 * _u**3) * _K[_i + 1] + (_u**3 - _u**2) * _V[_i + 1]
+        return _g[..., 0], _g[..., 1]
 
     _fig, _ax = blank(FULL, 3.5, (-0.2, 11.7), (-0.55, 4.25))
     # the time axis
     arrow(_ax, (0, 1.2), (3.0, 1.2), "black", lw=0.9)
-    for _x, _name in ((1.0, "$a$"), (1.8, "$t$")):
-        _ax.plot(_x, 1.2, "o", color="black", ms=4)
-        _ax.text(_x, 0.98, _name, ha="center", va="top", fontsize=13)
+    _a, _t, _h = 0.8, last_t.value, 1e-4
+    _near = abs(_t - _a) < 0.9  # t this close to a: no room for the names of t and gamma(t) beside a and gamma(a)
+    _ax.plot(0.2 + 0.43 * _t, 1.2, "o", color=RED, ms=4)
+    _ax.plot(0.2 + 0.43 * _a, 1.2, "o", color="black", ms=4)
+    _ax.text(0.2 + 0.43 * _a, 0.98, "$a$", ha="center", va="top", fontsize=13)
+    if abs(_t - _a) >= 0.45:
+        _ax.text(0.2 + 0.43 * _t, 0.98, "$t$", ha="center", va="top", fontsize=13)
     arrow(_ax, (3.3, 1.4), (4.0, 1.4), "black", connectionstyle="arc3,rad=-0.3")
     _ax.text(3.65, 1.67, r"$\gamma$", fontsize=13, ha="center", va="bottom")
     # the plane with the image of the path
     arrow(_ax, (4.2, 0), (11.5, 0), "black", lw=0.9)
     arrow(_ax, (4.5, -0.3), (4.5, 3.5), "black", lw=0.9)
-    _s = np.linspace(0, 1.9, 300)
+    _s = np.linspace(0, 6, 600)
     _ax.plot(*_gamma(_s), color=BLUE, lw=1.4)
-    _a, _t, _h = 0.3, 0.72, 1e-4
     _pa, _pt = _gamma(_a), _gamma(_t)
     _va = ((_gamma(_a + _h)[0] - _pa[0]) / _h, (_gamma(_a + _h)[1] - _pa[1]) / _h)
-    arrow(_ax, _pa, _pt, RED)
+    if _t != _a:
+        _q = ((_pt[0] - _pa[0]) / (_t - _a), (_pt[1] - _pa[1]) / (_t - _a))
+        arrow(_ax, _pa, (_pa[0] + _q[0], _pa[1] + _q[1]), RED)
     vector(_ax, _pa, (_pa[0] + _va[0], _pa[1] + _va[1]), GREEN, r"$\gamma'(a)$", 0, r=20)
     _ax.plot(*_pa, "o", color="black", ms=4, zorder=4)
-    _ax.plot(*_pt, "o", color=ORANGE, ms=4, zorder=4)
-    _end = _gamma(1.9)
-    _ax.text(_end[0] + 0.15, _end[1], r"$\mathrm{Im}(\gamma)$", fontsize=13, ha="left", va="center")
-    legend_box(_fig, [("dot", "black", r"$\gamma(a)$"), ("dot", ORANGE, r"$\gamma(t)$"), ("line", RED, r"$\gamma(t) - \gamma(a)$")], loc="outside lower center", ncols=3)
+    _ax.plot(*_pt, "o", color=RED, ms=4, zorder=4)
+    _end = _gamma(6)
+    _ax.text(_end[0] + 0.15, _end[1], r"$\mathrm{Im}(\gamma)$", color=BLUE, fontsize=13, ha="left", va="center")
+    _ax.text(_pa[0] - 0.08, _pa[1] + 0.1, r"$\gamma(a)$", fontsize=13, ha="right", va="bottom")
+    # the red arrow named once, fixed, below gamma(a) inside the arch
+    _ax.text(_pa[0] + 0.17, _pa[1] - 0.92, r"$\dfrac{\gamma(t) - \gamma(a)}{t - a}$", color=RED, fontsize=13, ha="center", va="top")
+    if not _near:
+        # gamma(t) named just past its point, away from gamma(a)
+        _d = np.array((_pt[0] - _pa[0], _pt[1] - _pa[1])) / np.hypot(_pt[0] - _pa[0], _pt[1] - _pa[1])
+        _ax.annotate(r"$\gamma(t)$", _pt, textcoords="offset points", xytext=(24 * _d[0], 17 * _d[1]), fontsize=13, ha="center", va="center", zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
     mo.vstack(
         [
@@ -221,10 +220,11 @@ def _(BLUE, FULL, GREEN, ORANGE, RED, arrow, blank, legend_box, mo, np, vector):
         $$
 
         $$
-        \leadsto \qquad \gamma'(a) = \underbrace{\lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a}}_{\text{displacement per unit of time}} = \begin{bmatrix} (\gamma^1)'(a) \\ (\gamma^2)'(a) \end{bmatrix} \qquad (\text{velocity of } \gamma \text{ at time } t = a)
+        \leadsto \qquad \gamma'(a) = \underbrace{\lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a}}_{\mathclap{\footnotesize \text{displacement per unit of time}}\vphantom{\footnotesize \text{displacement per unit of time}}} = \begin{bmatrix} (\gamma^1)'(a) \\ (\gamma^2)'(a) \end{bmatrix} \qquad (\text{velocity of } \gamma \text{ at time } t = a)
         $$
     """
             ),
+            last_t,
             _fig,
             mo.md(r"""**In this lecture:** differentiability and the derivative, for $n = 2$, $m = 1$ &nbsp; $\leadsto$ &nbsp; scalar functions on $\mathbb{R}^2$
 
@@ -282,7 +282,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, RED, arrow, blank, definition, legend_box, mo):
+def _(BLUE, FULL, RED, arrow, blank, definition, mo):
     _fig, _ax = blank(FULL, 3.4, (-0.7, 9.0), (-0.55, 3.2))
     arrow(_ax, (-0.4, 0), (4.5, 0), "black", lw=0.9)
     arrow(_ax, (0, -0.4), (0, 3.0), "black", lw=0.9)
@@ -302,16 +302,11 @@ def _(BLUE, FULL, RED, arrow, blank, definition, legend_box, mo):
     arrow(_ax, (6.6, -0.4), (6.6, 3.0), "black", lw=0.9)
     for _y, _c in ((2.2, BLUE), (1.3, "black"), (0.5, RED)):
         _ax.plot(6.6, _y, "o", color=_c, ms=4, zorder=4)
-    legend_box(
-        _fig,
-        [
-            ("dot", "black", r"$\vec{a}$, $f(\vec{a})$"),
-            ("dot", BLUE, r"$\vec{a} + t\vec{e}_1$, $f(\vec{a} + t\vec{e}_1)$"),
-            ("dot", RED, r"$\vec{a} + s\vec{e}_2$, $f(\vec{a} + s\vec{e}_2)$"),
-        ],
-        loc="outside lower center",
-        ncols=3,
-    )
+    _ax.text(_a[0] - 0.08, _a[1] - 0.08, r"$\vec{a}$", fontsize=13, ha="right", va="top")
+    _ax.text(2.9, _a[1] + 0.1, r"$\vec{a} + t\vec{e}_1$", fontsize=13, ha="center", va="bottom")
+    _ax.text(_a[0] + 0.1, 2.2, r"$\vec{a} + s\vec{e}_2$", fontsize=13, ha="left", va="center")
+    for _y, _c, _name in ((2.2, BLUE, r"$f(\vec{a} + t\vec{e}_1)$"), (1.3, "black", r"$f(\vec{a})$"), (0.5, RED, r"$f(\vec{a} + s\vec{e}_2)$")):
+        _ax.text(6.75, _y, _name, fontsize=13, ha="left", va="center")
 
     mo.vstack(
         [
@@ -327,8 +322,8 @@ def _(BLUE, FULL, RED, arrow, blank, definition, legend_box, mo):
     provided that the limit exists.
 
     $$
-    \leadsto \qquad \frac{\partial f}{\partial x^1}(\vec{a}) = \underbrace{\frac{d}{dt} f(\vec{a} + t\vec{e}_1) \Big|_{t = 0}}_{\text{real single variable differentiation at } t = 0}
-    \qquad \leadsto \qquad \underbrace{t \longmapsto f(\vec{a} + t\vec{e}_1)}_{\text{real single variable real valued function!}}
+    \leadsto \qquad \frac{\partial f}{\partial x^1}(\vec{a}) = \underbrace{\frac{d}{dt} f(\vec{a} + t\vec{e}_1) \Big|_{t = 0}}_{\mathclap{\footnotesize \begin{matrix}\text{real single variable} \\ \text{differentiation at } t = 0\end{matrix}}\vphantom{\footnotesize \begin{matrix}\text{real single variable} \\ \text{differentiation at } t = 0\end{matrix}}}
+    \qquad \leadsto \qquad \underbrace{t \longmapsto f(\vec{a} + t\vec{e}_1)}_{\mathclap{\footnotesize \begin{matrix}\text{real single variable} \\ \text{real valued function!}\end{matrix}}\vphantom{\footnotesize \begin{matrix}\text{real single variable} \\ \text{real valued function!}\end{matrix}}}
     $$
 
     Similarly, the partial derivative of $f$ at $\vec{x} = \vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix}$ in the direction of $\vec{e}_2 = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$ is
@@ -400,88 +395,6 @@ def _(BLUE, FULL, RED, arrow, blank, definition, legend_box, mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    angle = mo.ui.slider(0, 355, 5, value=30, label=r"direction of $\vec{v}$ (degrees)", show_value=True)
-    return (angle,)
-
-
-@app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, angle, legend_box, math, mo, np, table, vector):
-    _th = math.radians(angle.value)
-    _v = (round(math.cos(_th), 12) + 0.0, round(math.sin(_th), 12) + 0.0)
-    _a = (1.0, 1.0)
-
-    def _f(x1, x2):
-        return x1**2 * x2**3
-
-    _D = 2 * _a[0] * _a[1] ** 3 * _v[0] + 3 * _a[0] ** 2 * _a[1] ** 2 * _v[1]
-
-    def _n(x):
-        return f"{round(x, 2) + 0.0:.2f}"
-
-    _fig = Figure(figsize=(FULL, 4.4), layout="constrained")
-    _left, _right = _fig.subplots(1, 2)
-
-    # level sets of f, the segment a + t v (t in [-1, 1]) and the direction v
-    _g = np.linspace(-0.4, 2.4, 200)
-    _X, _Y = np.meshgrid(_g, _g)
-    _left.contour(_X, _Y, _f(_X, _Y), levels=[-1, -0.3, 0.1, 0.5, 1, 2, 4, 8, 16], colors=GREY, linewidths=0.6, linestyles="solid")
-    _left.plot([_a[0] - _v[0], _a[0] + _v[0]], [_a[1] - _v[1], _a[1] + _v[1]], color=BLUE, lw=1.0, ls=(0, (4, 3)))
-    vector(_left, _a, (_a[0] + _v[0], _a[1] + _v[1]), BLUE, r"$\vec{v}$")
-    _left.plot(*_a, "o", color="black", ms=4, zorder=4)
-    _left.set_xlim(-0.4, 2.4)
-    _left.set_ylim(-0.4, 2.4)
-    _left.set_aspect("equal")
-    _left.set_xticks([0, 1, 2])
-    _left.set_yticks([0, 1, 2])
-    _left.set_xlabel("$x^1$")
-    _left.set_ylabel("$x^2$", rotation=0, labelpad=10)
-
-    # the restriction t -> f(a + t v) and its tangent line at t = 0
-    _t = np.linspace(-1, 1, 200)
-    _right.axhline(0, color="black", lw=0.8)
-    _right.axvline(0, color="black", lw=0.8)
-    _right.grid(True, color=LIGHT, lw=0.6)
-    _right.set_axisbelow(True)
-    _right.plot(_t, _f(_a[0] + _t * _v[0], _a[1] + _t * _v[1]), color=BLUE, lw=1.4)
-    _right.plot(_t, 1 + _D * _t, color=GREEN, lw=1.4)
-    _right.plot(0, 1, "o", color="black", ms=4, zorder=4)
-    _right.set_xlim(-1, 1)
-    _right.set_ylim(-3, 16)  # holds every value of f(a + t v) and of the tangent line for unit v
-    _right.set_xticks([-1, -0.5, 0, 0.5, 1])
-    _right.set_yticks([0, 5, 10, 15])
-    _right.set_xlabel("$t$")
-    legend_box(
-        _fig,
-        [
-            ("dot", "black", r"$\vec{a}$, $f(\vec{a})$"),
-            ("line", GREY, "level sets of $f$"),
-            ("line", BLUE, r"$\vec{a} + t\vec{v}$", (0, (4, 3))),
-            ("line", BLUE, r"$f(\vec{a} + t\vec{v})$"),
-            ("line", GREEN, r"$f(\vec{a}) + t\, Df(\vec{a})(\vec{v})$"),
-        ],
-        loc="outside lower center",
-        ncols=3,
-    )
-
-    mo.vstack(
-        [
-            mo.hstack([angle], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"$f(\vec{x})$", r"$(x^1)^2 (x^2)^3$"),
-                    (r"$\vec{a}$", r"$\begin{bmatrix} 1 \\ 1 \end{bmatrix}$"),
-                    (r"$\vec{v}$", rf"$\textcolor{{{BLUE}}}{{\begin{{bmatrix}} {_n(_v[0])} \\ {_n(_v[1])} \end{{bmatrix}}}}$"),
-                    (r"$Df(\vec{a})(\vec{v})$", rf"$\textcolor{{{GREEN}}}{{{_n(_D)}}}$"),
-                ]
-            ),
-            _fig,
-        ]
-    )
-    return
-
-
-@app.cell(hide_code=True)
 def _(definition, mo):
     mo.vstack(
         [
@@ -490,14 +403,23 @@ def _(definition, mo):
     $\leadsto$ &nbsp; to call a function $f$ differentiable at $\vec{x} = \vec{a}$ we want also that all directional derivatives for all $\vec{v} \in \mathbb{R}^2$ be well-defined and that
 
     $$
-    Df(\vec{a})(\vec{v}) = \underbrace{v^1 \frac{\partial f}{\partial x^1}(\vec{a}) + v^2 \frac{\partial f}{\partial x^2}(\vec{a})}_{\text{linear combination of partial derivatives}}
+    Df(\vec{a})(\vec{v}) = \underbrace{v^1 \frac{\partial f}{\partial x^1}(\vec{a}) + v^2 \frac{\partial f}{\partial x^2}(\vec{a})}_{\mathclap{\footnotesize \text{linear combination of partial derivatives}}\vphantom{\footnotesize \text{linear combination of partial derivatives}}}
     $$
 
     **Remark.** &nbsp; $\dfrac{\partial f}{\partial x^i}(\vec{a}) = Df(\vec{a})(\vec{e}_i)$
-
-    ### Differentiability
     """
             ),
+            definition(
+                r"""
+    $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$ is **continuous** at $\vec{x} = \vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix}$ if
+
+    $$
+    \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = f(\vec{a})
+    $$
+    """,
+                "Continuity",
+            ),
+            mo.md(r"""### Differentiability"""),
             definition(
                 r"""
     $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$ is **differentiable** at $\vec{x} = \vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix}$ if the directional derivative
@@ -529,7 +451,7 @@ def _(definition, mo):
     $\leadsto$ &nbsp; now NOT a limit over real numbers! (Stronger than just existence + linearity of directional derivatives.)
 
     $$
-    \Longrightarrow \qquad f(\vec{x}) \approx f(\vec{a}) + \underbrace{Df(\vec{a})(\vec{x} - \vec{a})}_{\text{more flexible than } m \lVert \vec{x} - \vec{a} \rVert} \quad \text{for } \vec{x} \approx \vec{a}
+    \Longrightarrow \qquad f(\vec{x}) \approx f(\vec{a}) + \underbrace{Df(\vec{a})(\vec{x} - \vec{a})}_{\mathclap{\footnotesize \text{more flexible than } m \lVert \vec{x} - \vec{a} \rVert}\vphantom{\footnotesize \text{more flexible than } m \lVert \vec{x} - \vec{a} \rVert}} \quad \text{for } \vec{x} \approx \vec{a}
     $$
 
     **Example.** &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = x^1$
@@ -537,7 +459,7 @@ def _(definition, mo):
     $$
     \begin{aligned}
     \Longrightarrow \qquad Df(\vec{a})(\vec{v}) &= \frac{d}{dt} f(\vec{a} + t\vec{v}) \Big|_{t = 0} = \frac{d}{dt} (a^1 + t v^1) \Big|_{t = 0} = v^1 \\
-    &= v^1 \underbrace{\frac{\partial f}{\partial x^1}(\vec{a})}_{= 1} + v^2 \underbrace{\frac{\partial f}{\partial x^2}(\vec{a})}_{= 0} \qquad \forall\, \vec{v}
+    &= v^1 \underbrace{\frac{\partial f}{\partial x^1}(\vec{a})}_{\mathclap{\footnotesize = 1}\vphantom{\footnotesize = 1}} + v^2 \underbrace{\frac{\partial f}{\partial x^2}(\vec{a})}_{\mathclap{\footnotesize = 0}\vphantom{\footnotesize = 0}} \qquad \forall\, \vec{v}
     \end{aligned}
     $$
 
@@ -561,27 +483,6 @@ def _(definition, mo):
             ),
         ]
     )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Summary
-
-    - dividing by $\vec{x} - \vec{a}$ makes no sense, and dividing by $\lVert \vec{x} - \vec{a} \rVert$ is too restrictive: already $f(\vec{x}) = x^1$ would not be differentiable
-    - partial derivatives $\dfrac{\partial f}{\partial x^i}(\vec{a})$: the usual single variable derivative with respect to $x^i$, with $x^j$ held constant ($j \neq i$)
-    - directional derivative
-
-        $$
-        Df(\vec{a})(\vec{v}) = \frac{d}{dt} f(\vec{a} + t\vec{v}) \Big|_{t = 0} \qquad \text{and} \qquad \frac{\partial f}{\partial x^i}(\vec{a}) = Df(\vec{a})(\vec{e}_i)
-        $$
-    - $f$ is differentiable at $\vec{a}$ if $Df(\vec{a})(\vec{v})$ exists and is linear in $\vec{v}$, and
-
-        $$
-        \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0
-        $$
-    """)
     return
 
 

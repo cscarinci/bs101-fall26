@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 06 · Multivariable functions", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 • Lecture 06 • Multivariable functions", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -26,11 +26,11 @@ def _(mo):
     # Palette with fixed roles (figures only; text carries no colour):
     #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (tangent vector, gradient, mean)
-    #   ORANGE a third series, only when three are needed
+    #   GREEN  a result made from them (sum, multiple, angle, tangent vector, gradient)
+    #   ORANGE (ochre) a third object, only when three are needed
     #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
-    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#3f5f8f", "#a8554c", "#4f7f5c", "#b9853f", "#9a9a9a", "#e3ebf4"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
     FULL, HALF = 7.4, 3.6
 
@@ -75,12 +75,13 @@ def _(mo):
 
     def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
         """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
-        One head size and one line weight for every figure, so arrows look alike across lectures."""
+        One line weight for every figure; the head is open and sized in points from the line width,
+        so arrows look alike across lectures at any axis range."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={3 * lw:g},head_width={1.3 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -119,48 +120,16 @@ def _(mo):
 
     def table(rows):
         """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
-        return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
+        _md = mo.md("\n".join(["| | |", "|:--|:--|"] + [f"| {k} | {v} |" for k, v in rows]))
+        return mo.Html(f'<div class="readout">{_md.text}</div>')
 
-    def check(field, answer):
-        """Feedback mark for a numeric answer typed into a text field."""
-        s = field.value.strip().replace(",", ".")
-        if not s:
-            return ""
-        try:
-            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
-        except ValueError:
-            return "enter a number"
-
-    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 06", "Week 03", "Lecture 06 · Multivariable functions")
+    header("Lecture 06", "Week 03", "Lecture 06 • Multivariable functions")
     return
-
-
-@app.cell(hide_code=True)
-def _():
-    def legend_box(fig, entries, loc="outside right center", ncols=1):
-        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
-        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
-        from matplotlib.lines import Line2D
-        from matplotlib.patches import Patch
-
-        handles = []
-        for kind, c, _label, *style in entries:
-            if kind == "dot":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
-            elif kind == "ring":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
-            elif kind == "line":
-                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
-            else:
-                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
-        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
-
-    return (legend_box,)
 
 
 @app.cell(hide_code=True)
@@ -169,8 +138,8 @@ def _(mo, np):
     # Drawn in the browser on canvases, in the style of the static figures: orthographic views of
     # R^3 = R^2 x R (x^1 towards the viewer, x^2 to the right, y up), surfaces drawn back to front.
     # Dragging turns the view at a fixed scale (all panels of a figure together) and a double click restores
-    # it; a figure redrawn by a slider keeps its view. A legend box explains points, curves and surfaces, so
-    # that no label covers the drawing; only the axes carry labels. Typesetting is done by KaTeX.
+    # it; a figure redrawn by a slider keeps its view. Names sit beside the objects they name. Typesetting is done
+    # by KaTeX.
     import html as _html
     import json as _json
 
@@ -267,11 +236,11 @@ def _(mo, np):
             for (let k = 0; k < ln.p.length; k += 3) idx.push(add(ln.p[k], ln.p[k + 1], ln.p[k + 2]));
             const line = { idx, dash: ln.d, cum: new Float64Array(idx.length) };
             for (let k = 0; k < idx.length - 1; k++)
-              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0 });
+              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0, flat: ln.b });
             return line;
           });
           for (const d of spec.points) this.dots.push({ i: add(...d.p), c: d.c, r: d.r, h: d.h });
-          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c });
+          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c, w: h.w, d: h.d });
           // the centre of the scene and the radius of a ball holding it, heights at their drawing scale
           let src = pts;
           if (spec.box) {
@@ -343,7 +312,8 @@ def _(mo, np):
           items.sort((p, q) => p[0] - q[0]);
           g.clearRect(0, 0, W, H);
           g.lineJoin = "round";
-          for (const [, kind, o] of items) {
+          for (let n = 0; n < items.length; n++) {
+            const [, kind, o] = items[n];
             if (kind === 0) {
               const q = o[0];
               g.beginPath();
@@ -356,28 +326,45 @@ def _(mo, np):
               if (o[2] === 1) { g.lineWidth = 0.6; g.setLineDash([]); g.stroke(); }
               g.globalAlpha = 1;
             } else if (kind === 1) {
+              if (o.done) { o.done = false; continue; }
+              let p0 = o, p1 = o;
+              if (o.flat) {  // the pieces of a straight line up to the next surface go in one stroke, so no seams show
+                let grew = true;
+                while (grew) {
+                  grew = false;
+                  for (let m = n + 1; m < items.length && items[m][1] !== 0; m++) {
+                    const q = items[m][2];
+                    if (items[m][1] !== 1 || q.line !== o.line || q.done) continue;
+                    if (q.k === p1.k + 1) { p1 = q; q.done = true; grew = true; }
+                    else if (q.k === p0.k - 1) { p0 = q; q.done = true; grew = true; }
+                  }
+                }
+              }
               g.beginPath();
-              g.moveTo(X[o.a], Y[o.a]);
-              g.lineTo(X[o.b], Y[o.b]);
+              g.moveTo(X[p0.a], Y[p0.a]);
+              g.lineTo(X[p1.b], Y[p1.b]);
               g.strokeStyle = o.c;
               g.lineWidth = o.lw;
               const dash = o.line && o.line.dash;
-              g.lineCap = dash ? "butt" : "round";
+              g.lineCap = dash || o.flat ? "butt" : "round";
               g.setLineDash(dash || []);
-              g.lineDashOffset = dash ? -o.line.cum[o.k] : 0;
+              g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
               g.stroke();
             } else if (kind === 2) {
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
               vx /= len; vy /= len;
-              const bx = X[o.i] - 9 * vx, by = Y[o.i] - 9 * vy;
+              const hl = Math.max(3.5 * o.w, 6), hw = Math.max(1.5 * o.w, 2.6), bx = X[o.i] - hl * vx, by = Y[o.i] - hl * vy;  // open head, as on the page
+              g.strokeStyle = o.c;
+              g.lineWidth = o.w;
+              g.setLineDash([]);
+              g.lineCap = "round";
+              if (!o.d) { g.beginPath(); g.moveTo(X[o.j], Y[o.j]); g.lineTo(X[o.i], Y[o.i]); g.stroke(); }
               g.beginPath();
-              g.moveTo(X[o.i], Y[o.i]);
-              g.lineTo(bx - 3.4 * vy, by + 3.4 * vx);
-              g.lineTo(bx + 3.4 * vy, by - 3.4 * vx);
-              g.closePath();
-              g.fillStyle = o.c;
-              g.fill();
+              g.moveTo(bx - hw * vy, by + hw * vx);
+              g.lineTo(X[o.i], Y[o.i]);
+              g.lineTo(bx + hw * vy, by - hw * vx);
+              g.stroke();
             } else {
               g.beginPath();
               g.arc(X[o.i], Y[o.i], o.r, 0, 2 * Math.PI);
@@ -483,8 +470,8 @@ def _(mo, np):
         axes: (tail, tip, TeX label, direction of the label in degrees), drawn black;
         arrows: (tail, tip, colour[, width, dash]), vectors with a head in their colour;
         arcs: (x1, x2, y, colour[, width]), curves ending in a head, such as a turning arrow;
-        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), short labels such as tick values (names of
-        points and objects go in the legend instead); caption: TeX below the drawing;
+        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), names of points and objects and tick values,
+        each beside its point; caption: TeX below the drawing;
         box: ((x^1 lo, hi), (x^2 lo, hi), (y lo, hi)) to size the drawing by, instead of its own points."""
         p = {"ys": ys, "surfaces": list(surfaces), "lines": [], "points": [], "heads": [], "labels": [], "caption": caption, "box": box}
         for ln in lines:
@@ -492,20 +479,20 @@ def _(mo, np):
         for tail, tip, label, d in axes:
             a, b = np.asarray(tail, float), np.asarray(tip, float)
             seg = a + np.linspace(0, 0.96, 60)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000"})
+            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000", "w": 1.1})
             p["labels"].append({"p": b.tolist(), "t": label, "c": "#000000", "a": d, "r": 5})
         for q in points:
             p["points"].append({"p": [float(c) for c in q[0]], "c": q[1], "r": q[2] if len(q) > 2 else 4.0, "h": bool(q[3]) if len(q) > 3 else False})
         for ar in arrows:
             a, b = np.asarray(ar[0], float), np.asarray(ar[1], float)
             seg = a + np.linspace(0, 0.96, 40)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2]})
+            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None})
         for arc in arcs:
             c = np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in arc[:3])), -1)
             p["lines"].append({"p": _flat(*c[:-1].T), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8, "d": None, "e": 0})
-            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3]})
+            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8})
         for tx in texts:
             p["labels"].append({"p": [float(c) for c in tx[0]], "t": tx[1], "c": tx[2], "a": tx[3], "r": tx[4] if len(tx) > 4 else 5})
         return p
@@ -533,17 +520,18 @@ def _(mo, np):
 
 @app.cell(hide_code=True)
 def _(np, sheet):
-    def quadric(b, zmax, colour, tone=None, alpha=1.0, every=6):
-        """The level set (x^1)^2 + (x^2)^2 - (x^3)^2 = b for |x^3| <= zmax, as sheets with circles and meridians
-        (one every `every` x 7.5 degrees) in `colour`: one sheet for b > 0, the cone for b = 0, two sheets for b < 0."""
-        phi = np.linspace(0, 2 * np.pi, 49)
+    def quadric(b, zmax, colour, tone=None, alpha=1.0, every=6, rings=6, phase=0.0):
+        """The level set (x^1)^2 + (x^2)^2 - (x^3)^2 = b for |x^3| <= zmax, as sheets with circles (every `rings`-th
+        and the last) and meridians (one every `every` x 7.5 degrees, none when every is None) in `colour`: one sheet
+        for b > 0, the cone for b = 0, two sheets for b < 0. The meridians start at the angle `phase` (degrees)."""
+        phi = np.radians(phase) + np.linspace(0, 2 * np.pi, 49)
         if b >= 0:
             z = np.linspace(-zmax, zmax, 25)
             parts = [(np.sqrt(b + z**2), z)]
         else:
             r = np.linspace(0, np.sqrt(zmax**2 + b), 13)
             parts = [(r, s * np.sqrt(r**2 - b)) for s in (1, -1)]
-        wire = [(0, 6, colour, 0.6), (1, every, colour, 0.6)]
+        wire = [(0, rings, colour, 0.9)] + ([(1, every, colour, 0.6)] if every else [])
         return [sheet(r[:, None] * np.cos(phi), r[:, None] * np.sin(phi), z[:, None] + 0 * phi, wire=wire, tone=tone, alpha=alpha) for r, z in parts]
 
     return (quadric,)
@@ -617,12 +605,12 @@ def _(definition, mo):
         $$
         \begin{aligned}
         \gamma : \mathbb{R} &\longrightarrow \mathbb{R}^3 \\
-        \underbrace{t}_{\text{variable}} &\longmapsto \underbrace{\begin{bmatrix} x^1 + t v^1 \\ x^2 + t v^2 \\ x^3 + t v^3 \end{bmatrix}}_{\vec{x} \text{ and } \vec{v} \text{ fixed here}}
+        \underbrace{t}_{\mathclap{\footnotesize \text{variable}}\vphantom{\footnotesize \text{variable}}} &\longmapsto \underbrace{\begin{bmatrix} x^1 + t v^1 \\ x^2 + t v^2 \\ x^3 + t v^3 \end{bmatrix}}_{\mathclap{\footnotesize \vec{x} \text{ and } \vec{v} \text{ fixed here}}\vphantom{\footnotesize \vec{x} \text{ and } \vec{v} \text{ fixed here}}}
         \end{aligned}
         \qquad \qquad
         \begin{aligned}
         \varphi : \mathbb{R}^2 &\longrightarrow \mathbb{R}^3 \\
-        \underbrace{(s, t)}_{\text{variables}} &\longmapsto \underbrace{\begin{bmatrix} x^1 + s u^1 + t v^1 \\ x^2 + s u^2 + t v^2 \\ x^3 + s u^3 + t v^3 \end{bmatrix}}_{\vec{x},\ \vec{u} \text{ and } \vec{v} \text{ fixed here!}}
+        \underbrace{(s, t)}_{\mathclap{\footnotesize \text{variables}}\vphantom{\footnotesize \text{variables}}} &\longmapsto \underbrace{\begin{bmatrix} x^1 + s u^1 + t v^1 \\ x^2 + s u^2 + t v^2 \\ x^3 + s u^3 + t v^3 \end{bmatrix}}_{\mathclap{\footnotesize \vec{x},\ \vec{u} \text{ and } \vec{v} \text{ fixed here!}}\vphantom{\footnotesize \vec{x},\ \vec{u} \text{ and } \vec{v} \text{ fixed here!}}}
         \end{aligned}
         $$
 
@@ -631,7 +619,7 @@ def _(definition, mo):
         $$
         \begin{aligned}
         T : \mathbb{R}^n &\longrightarrow \mathbb{R}^m \\
-        \underbrace{\begin{bmatrix} x^1 \\ \vdots \\ x^n \end{bmatrix}}_{\text{variables}} &\longmapsto \underbrace{\begin{bmatrix} t^1{}_1 x^1 + \dots + t^1{}_n x^n \\ \vdots \\ t^m{}_1 x^1 + \dots + t^m{}_n x^n \end{bmatrix}}_{t^i{}_j \text{ are fixed}}
+        \underbrace{\begin{bmatrix} x^1 \\ \vdots \\ x^n \end{bmatrix}}_{\mathclap{\footnotesize \text{variables}}\vphantom{\footnotesize \text{variables}}} &\longmapsto \underbrace{\begin{bmatrix} t^1{}_1 x^1 + \dots + t^1{}_n x^n \\ \vdots \\ t^m{}_1 x^1 + \dots + t^m{}_n x^n \end{bmatrix}}_{\mathclap{\footnotesize t^i{}_j \text{ are fixed}}\vphantom{\footnotesize t^i{}_j \text{ are fixed}}}
         \end{aligned}
         $$
     """
@@ -653,13 +641,13 @@ def _(definition, mo):
     - the **image** of $f$ is
 
         $$
-        \mathrm{Im}(f) = \left\{\, \vec{y} \in \mathbb{R}^m \;\middle|\; \exists\, \vec{x} \in A,\ f(\vec{x}) = \vec{y} \,\right\} \underbrace{\subseteq B}_{\text{not necessarily equal!}} \qquad \big(\mathrm{Im}(f) \subseteq \mathrm{Codom}(f)\big)
+        \mathrm{Im}(f) = \left\{\, \vec{y} \in \mathbb{R}^m \mid \exists\, \vec{x} \in A,\ f(\vec{x}) = \vec{y} \,\right\} \underbrace{\subseteq B}_{\mathclap{\footnotesize \text{not necessarily equal!}}\vphantom{\footnotesize \text{not necessarily equal!}}} \qquad \big(\mathrm{Im}(f) \subseteq \mathrm{Codom}(f)\big)
         $$
 
     - the **graph** of $f$ is
 
         $$
-        \mathrm{graph}(f) = \left\{\, (\vec{x}, \vec{y}) \in \mathbb{R}^n \times \mathbb{R}^m \;\middle|\; \vec{x} \in A,\ \vec{y} = f(\vec{x}) \,\right\} \subseteq A \times B
+        \mathrm{graph}(f) = \left\{\, (\vec{x}, \vec{y}) \in \mathbb{R}^n \times \mathbb{R}^m \mid \vec{x} \in A,\ \vec{y} = f(\vec{x}) \,\right\} \subseteq A \times B
         $$
     """,
                 "Image and graph",
@@ -669,11 +657,11 @@ def _(definition, mo):
     **Example.** &nbsp; $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^2$ affine parameterization, &nbsp; $\gamma(t) = \vec{x} + t\vec{v}$ &nbsp; (with $\vec{v} \neq \vec{0}$)
 
     $$
-    \leadsto \qquad \mathrm{Im}(\gamma) = \left\{\, \vec{y} \in \mathbb{R}^2 \;\middle|\; \exists\, t \in \mathbb{R},\ \vec{y} = \gamma(t) \,\right\} \qquad \text{line in } \mathbb{R}^2 \text{ through } \vec{x} \text{ in the direction of } \vec{v}
+    \leadsto \qquad \mathrm{Im}(\gamma) = \left\{\, \vec{y} \in \mathbb{R}^2 \mid \exists\, t \in \mathbb{R},\ \vec{y} = \gamma(t) \,\right\} \qquad \text{line in } \mathbb{R}^2 \text{ through } \vec{x} \text{ in the direction of } \vec{v}
     $$
 
     $$
-    \leadsto \qquad \mathrm{graph}(\gamma) = \left\{\, (t, \vec{y}) \in \mathbb{R} \times \mathbb{R}^2 \;\middle|\; t \in \mathbb{R},\ \vec{y} = \gamma(t) \,\right\} \qquad \text{subset of } \mathbb{R} \times \mathbb{R}^2 \approx \mathbb{R}^3
+    \leadsto \qquad \mathrm{graph}(\gamma) = \left\{\, (t, \vec{y}) \in \mathbb{R} \times \mathbb{R}^2 \mid t \in \mathbb{R},\ \vec{y} = \gamma(t) \,\right\} \qquad \text{subset of } \mathbb{R} \times \mathbb{R}^2 \approx \mathbb{R}^3
     $$
 
     $$
@@ -694,66 +682,58 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, GREEN, GREY, RED, arrow, blank, legend_box, mo, np, panel, t_path, table, turntable):
-    _x, _v, _t = (2.0, 2.0), (0.6, 0.2), t_path.value
+def _(FULL, GREEN, GREY, RED, arrow, blank, mo, np, panel, t_path, turntable):
+    _x, _v, _t = (1.0, 2.0), (1.2, 0.4), t_path.value
     _g = (_x[0] + _t * _v[0], _x[1] + _t * _v[1])
 
-    # the t-line, the map gamma, and Im(gamma): a line in R^2 (0 and its image in red, t and its image in blue)
-    _fig, _ax = blank(FULL, 3.0, (-6.6, 5.6), (-0.7, 3.7))
+    # the t-line, the map gamma, and Im(gamma): a line in R^2 (0 and its image in black, t and its image in green)
+    _fig, _ax = blank(FULL, 3.0, (-6.6, 6.9), (-0.7, 3.9))
 
     def _at(s):
         return -5.6 + 0.8 * (s + 1)
 
     arrow(_ax, (-6.2, 1.5), (-1.9, 1.5), "black", lw=0.9)
     _ax.text(-1.9, 1.32, r"$\mathbb{R}$", fontsize=13, ha="right", va="top")
-    _ax.plot(_at(0), 1.5, "o", color=RED, ms=6 if _t == 0 else 4.5, zorder=4)
-    _ax.plot(_at(_t), 1.5, "o", color=BLUE, ms=4.5, zorder=4)
+    _ax.plot(_at(0), 1.5, "o", color="black", ms=6 if _t == 0 else 4.5, zorder=4)
+    _ax.plot(_at(_t), 1.5, "o", color=GREEN, ms=4.5, zorder=4)
     _ax.text(_at(0), 1.32, "$0$", fontsize=12, ha="center", va="top")
-    _ax.text(_at(_t), 1.68, "$t$", fontsize=13, ha="center", va="bottom", color=BLUE)
+    _ax.text(_at(_t), 1.68, "$t$", fontsize=13, ha="center", va="bottom", color=GREEN)
     arrow(_ax, (-1.55, 2.2), (-0.45, 2.2), "black", lw=0.9, connectionstyle="arc3,rad=-0.3")
     _ax.text(-1.0, 2.5, r"$\gamma$", fontsize=13, ha="center", va="bottom")
 
-    arrow(_ax, (-0.4, 0), (4.8, 0), "black", lw=0.9)
-    arrow(_ax, (0, -0.4), (0, 3.5), "black", lw=0.9)
-    _ax.text(4.8, -0.14, "$y^1$", fontsize=13, ha="right", va="top")
-    _ax.text(-0.14, 3.5, "$y^2$", fontsize=13, ha="right", va="top")
-    _ax.plot([_x[0] + s * _v[0] for s in (-1.5, 3.7)], [_x[1] + s * _v[1] for s in (-1.5, 3.7)], color="black", lw=1.2)
-    arrow(_ax, (0, 0), _v, GREEN)
-    arrow(_ax, (0, 0), _x, RED)
-    arrow(_ax, (0, 0), _g, BLUE)
-    _ax.plot(*_x, "o", color=RED, ms=6 if _t == 0 else 4, zorder=4)  # under the blue dot, as a rim, when the two coincide
-    _ax.plot(*_g, "o", color=BLUE, ms=4, zorder=4)
-    legend_box(
-        _fig,
-        [("line", "black", r"$\mathrm{Im}(\gamma)$"), ("line", GREEN, r"$\vec{v}$"), ("dot", RED, r"$\vec{x} = \gamma(0)$"), ("dot", BLUE, r"$\gamma(t)$")],
-        loc="outside lower center",
-        ncols=4,
-    )
+    arrow(_ax, (-0.4, 0), (5.6, 0), "black", lw=0.9)
+    arrow(_ax, (0, -0.4), (0, 3.7), "black", lw=0.9)
+    _ax.text(5.6, -0.14, "$y^1$", fontsize=13, ha="right", va="top")
+    _ax.text(-0.14, 3.7, "$y^2$", fontsize=13, ha="right", va="top")
+    _ax.plot([_x[0] + s * _v[0] for s in (-1.3, 3.4)], [_x[1] + s * _v[1] for s in (-1.3, 3.4)], color="black", lw=1.2)
+    arrow(_ax, (0, 0), _v, RED)
+    arrow(_ax, (0, 0), _x, "black")
+    arrow(_ax, (0, 0), _g, GREEN)
+    _ax.plot(*_x, "o", color="black", ms=6 if _t == 0 else 4, zorder=4)  # under the blue dot, as a rim, when the two coincide
+    _ax.plot(*_g, "o", color=GREEN, ms=4, zorder=4)
+    _ax.text(_x[0] + 3.4 * _v[0] + 0.1, _x[1] + 3.4 * _v[1], r"$\mathrm{Im}(\gamma)$", fontsize=13, ha="left", va="center")
+    _ax.text(_v[0] + 0.1, _v[1] + 0.05, r"$\vec{v}$", color=RED, fontsize=13, ha="left", va="bottom")
+    _ax.text(_x[0], _x[1] + 0.35, r"$\vec{x} = \gamma(0)$", fontsize=13, ha="center", va="bottom")
+    _ax.text(_g[0] + 0.05, _g[1] - 0.15, r"$\gamma(t)$", color=GREEN, fontsize=13, ha="left", va="top")
 
     # graph(gamma): a line in R x R^2, with t to the right, y^1 towards the viewer and y^2 up; over t, a copy of the (y^1, y^2)-axes
-    _s = np.array([-1.5, 3.7])
-    _copy = [] if _t == 0 else [((-0.5, _t, 0), (3.8, _t, 0), GREY, 1.2), ((0, _t, -0.5), (0, _t, 2.7), GREY, 1.2)]
+    _s = np.array([-1.3, 3.4])
+    _copy = [] if _t == 0 else [((-0.5, _t, 0), (5.0, _t, 0), GREY, 1.2), ((0, _t, -0.5), (0, _t, 3.3), GREY, 1.2)]
     _graph = turntable(
-        30,
+        -20,
         20,
         "graph of gamma, a line in R x R^2, with its points (0, x) and (t, gamma(t)), and the axes of {t} x R^2",
         [
             panel(
                 1.0,
                 lines=[(_x[0] + _s * _v[0], _s, _x[1] + _s * _v[1], "#000000", 1.6)],
-                arrows=_copy + [((0, 0, 0), (_x[0], 0, _x[1]), RED), ((0, _t, 0), (_g[0], _t, _g[1]), BLUE)],
-                points=[((_x[0], 0, _x[1]), RED, 6.0 if _t == 0 else 4.5), ((_g[0], _t, _g[1]), BLUE, 4.5), ((0, _t, 0), GREY, 3.5)],
-                axes=[((-0.5, 0, 0), (4.4, 0, 0), "y^1", -120), ((0, -1.5, 0), (0, 4.0, 0), "t", 0), ((0, 0, -0.5), (0, 0, 3.2), "y^2", 90)],
-                texts=[((0, 0, 0), "0", "#000000", -45)],
-                box=((-0.3, 4.2), (-1.3, 3.8), (-0.3, 3.0)),
+                arrows=_copy + [((0, 0, 0), (_x[0], 0, _x[1]), "#000000"), ((0, _t, 0), (_g[0], _t, _g[1]), GREEN)],
+                points=[((_x[0], 0, _x[1]), "#000000", 6.0 if _t == 0 else 4.5), ((_g[0], _t, _g[1]), GREEN, 4.5), ((0, _t, 0), GREY, 3.5)],
+                axes=[((-0.5, 0, 0), (5.6, 0, 0), "y^1", -120), ((0, -1.5, 0), (0, 4.0, 0), "t", 0), ((0, 0, -0.5), (0, 0, 3.8), "y^2", 90)],
+                texts=[((0, 0, 0), "0", "#000000", -45), ((_x[0] + 3.4 * _v[0], 3.4, _x[1] + 3.4 * _v[1]), r"\mathrm{graph}(\gamma)", "#000000", 0, 6),
+                       ((_x[0], 0, _x[1]), r"\begin{bmatrix} 0 \\ \vec{x} \end{bmatrix}", "#000000", 45, 9), ((_g[0], _t, _g[1]), r"\begin{bmatrix} t \\ \gamma(t) \end{bmatrix}", GREEN, 45, 10)],
+                box=((-0.3, 5.4), (-1.3, 3.8), (-0.3, 3.6)),
             )
-        ],
-        legend=[
-            ("line", "#000000", r"\mathrm{graph}(\gamma)", 1.6),
-            ("dot", RED, r"(0, \vec{x})"),
-            ("dot", BLUE, r"(t, \gamma(t))"),
-            ("dot", GREY, r"(t, \vec{0})"),
-            ("line", GREY, r"\{t\} \times \mathbb{R}^2", 1.2),
         ],
         height=420,
         key="lecture-06-graph-line",
@@ -762,14 +742,6 @@ def _(BLUE, FULL, GREEN, GREY, RED, arrow, blank, legend_box, mo, np, panel, t_p
     mo.vstack(
         [
             mo.hstack([t_path], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"$\vec{x} = \gamma(0)$", rf"$\textcolor{{{RED}}}{{\begin{{bmatrix}} {_x[0]:g} \\ {_x[1]:g} \end{{bmatrix}}}}$"),
-                    (r"$\vec{v}$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_v[0]:g} \\ {_v[1]:g} \end{{bmatrix}}}}$"),
-                    (r"$\gamma(t) = \vec{x} + t\vec{v}$", rf"$\textcolor{{{BLUE}}}{{\begin{{bmatrix}} {_g[0]:g} \\ {_g[1]:g} \end{{bmatrix}}}}$"),
-                    (r"$(t, \gamma(t)) \in \mathrm{graph}(\gamma)$", rf"$\textcolor{{{BLUE}}}{{\begin{{bmatrix}} {_t:g} \\ {_g[0]:g} \\ {_g[1]:g} \end{{bmatrix}}}}$"),
-                ]
-            ),
             _fig,
             _graph,
         ]
@@ -778,7 +750,7 @@ def _(BLUE, FULL, GREEN, GREY, RED, arrow, blank, legend_box, mo, np, panel, t_p
 
 
 @app.cell(hide_code=True)
-def _(BLUE, LIGHT, ORANGE, RED, definition, mo, np, panel, sheet, turntable):
+def _(BLUE, GREY, LIGHT, RED, definition, mo, np, panel, sheet, turntable):
     # The sphere of radius 2 with its equator, two of its points and the coordinate axes
     _th, _ph = np.meshgrid(np.linspace(0, np.pi, 25), np.linspace(0, 2 * np.pi, 49), indexing="ij")
     _q = [tuple(2 * np.array(_d) / np.linalg.norm(_d)) for _d in ((0.3, 1.0, 1.7), (0.2, 1.3, 1.5))]
@@ -789,14 +761,14 @@ def _(BLUE, LIGHT, ORANGE, RED, definition, mo, np, panel, sheet, turntable):
         [
             panel(
                 1.0,
-                surfaces=[sheet(2 * np.sin(_th) * np.cos(_ph), 2 * np.sin(_th) * np.sin(_ph), 2 * np.cos(_th), wire=[(0, 12, BLUE, 1.4), (1, 12, BLUE, 0.5)], alpha=0.3)],
-                arrows=[((0, 0, 0), _q[0], RED), ((0, 0, 0), _q[1], ORANGE)],
+                surfaces=[sheet(2 * np.sin(_th) * np.cos(_ph), 2 * np.sin(_th) * np.sin(_ph), 2 * np.cos(_th), wire=[(0, 12, GREY, 1.0), (1, 12, GREY, 0.5)], flat=LIGHT, alpha=0.5)],
+                arrows=[((0, 0, 0), _q[0], BLUE), ((0, 0, 0), _q[1], RED)],
                 points=[(tuple(2 * _d), "#000000", 2.6) for _d in np.eye(3)],
                 axes=[((-1.0, 0, 0), (3.0, 0, 0), "x^1", -120), ((0, -1.0, 0), (0, 3.0, 0), "x^2", 0), ((0, 0, -1.0), (0, 0, 3.0), "x^3", 90)],
-                texts=[(tuple(2 * _d), "2", "#000000", _a) for _d, _a in zip(np.eye(3), (120, -60, 150))] + [((0, 0, 0), r"\vec{0}", "#000000", -60)],
+                texts=[(tuple(2 * _d), "2", "#000000", _a) for _d, _a in zip(np.eye(3), (120, -60, 150))] + [((0, 0, 0), r"\vec{0}", "#000000", -60), (_q[0], r"\vec{x}", BLUE, 150, 7), (_q[1], r"\vec{y}", RED, 20, 7),
+                                                                                                  ((-0.871, 1.452, -1.065), "f^{-1}(2)", "#6b6b6b", -40, 8)],
             )
         ],
-        legend=[("area", LIGHT, "f^{-1}(2)", BLUE), ("line", RED, r"\vec{x}"), ("line", ORANGE, r"\vec{y}")],
         height=360,
     )
 
@@ -817,7 +789,7 @@ def _(BLUE, LIGHT, ORANGE, RED, definition, mo, np, panel, sheet, turntable):
     Given $f : A \subseteq \mathbb{R}^n \longrightarrow B \subseteq \mathbb{R}^m$, $\vec{b} \in B$ fixed, the **level set** of $f$ with value $\vec{b}$ is
 
     $$
-    f^{-1}(\vec{b}) = \left\{\, \vec{x} \in \mathbb{R}^n \;\middle|\; \vec{x} \in A \text{ and } f(\vec{x}) = \vec{b} \,\right\}
+    f^{-1}(\vec{b}) = \left\{\, \vec{x} \in \mathbb{R}^n \mid \vec{x} \in A \text{ and } f(\vec{x}) = \vec{b} \,\right\}
     $$
     """,
                 "Level set",
@@ -827,7 +799,7 @@ def _(BLUE, LIGHT, ORANGE, RED, definition, mo, np, panel, sheet, turntable):
     **Example.** &nbsp; $f : \mathbb{R}^3 \longrightarrow \mathbb{R}, \quad \vec{x} \longmapsto \lVert \vec{x} \rVert$
 
     $$
-    \text{fix } r = 2 \qquad \Longrightarrow \qquad f^{-1}(2) = \left\{\, \vec{x} \in \mathbb{R}^3 \;\middle|\; \lVert \vec{x} \rVert = 2 \,\right\} = \text{sphere centered at } \vec{0} \text{ with radius } r = 2
+    \text{fix } r = 2 \qquad \Longrightarrow \qquad f^{-1}(2) = \left\{\, \vec{x} \in \mathbb{R}^3 \mid \lVert \vec{x} \rVert = 2 \,\right\} = \text{sphere centered at } \vec{0} \text{ with radius } r = 2
     $$
     """
             ),
@@ -841,7 +813,7 @@ def _(BLUE, LIGHT, ORANGE, RED, definition, mo, np, panel, sheet, turntable):
     $\leadsto$ &nbsp; if $f$ is invertible then, for each $\vec{b} \in B$,
 
     $$
-    f^{-1}(\vec{b}) = \left\{\, \vec{x} \in A \;\middle|\; f(\vec{x}) = \vec{b} \,\right\} \quad \text{has a single element, which we call ``$f^{-1}(\vec{b})$''}
+    f^{-1}(\vec{b}) = \left\{\, \vec{x} \in A \mid f(\vec{x}) = \vec{b} \,\right\} \quad \text{has a single element, which we call ``$f^{-1}(\vec{b})$''}
     $$
     """
             ),
@@ -851,7 +823,7 @@ def _(BLUE, LIGHT, ORANGE, RED, definition, mo, np, panel, sheet, turntable):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, HALF, ORANGE, RED, arrow, blank, legend_box, mo, np, panel, quadric, turntable):
+def _(BLUE, HALF, ORANGE, RED, arrow, blank, mo, np, panel, quadric, turntable):
     # level sets of f in the plane
     _fig, _ax = blank(HALF + 1.2, 3.3, (-3.6, 3.9), (-3.6, 3.8))
     arrow(_ax, (-3.4, 0), (3.5, 0), "black", lw=0.9)
@@ -863,7 +835,9 @@ def _(BLUE, HALF, ORANGE, RED, arrow, blank, legend_box, mo, np, panel, quadric,
         _ax.plot(_s, _sign * _s, color=ORANGE, lw=1.4)
         _ax.plot(_sign * np.sqrt(1 + _s[20:-20] ** 2), _s[20:-20], color=BLUE, lw=1.4)
         _ax.plot(_s[35:-35], _sign * np.sqrt(4 + _s[35:-35] ** 2), color=RED, lw=1.4)
-    legend_box(_fig, [("line", BLUE, "$f^{-1}(1)$"), ("line", ORANGE, "$f^{-1}(0)$"), ("line", RED, "$f^{-1}(-4)$")])
+    _ax.text(1.75, 0.95, "$f^{-1}(1)$", color=BLUE, fontsize=12, ha="left", va="center")
+    _ax.text(2.9, 2.9, "$f^{-1}(0)$", color=ORANGE, fontsize=12, ha="left", va="bottom")
+    _ax.text(-1.9, -2.92, "$f^{-1}(-4)$", color=RED, fontsize=12, ha="center", va="top")
 
     # level sets of g in space, one inside the other: g^{-1}(-4) inside the cone g^{-1}(0) inside g^{-1}(1)
     _fig2 = turntable(
@@ -873,11 +847,11 @@ def _(BLUE, HALF, ORANGE, RED, arrow, blank, legend_box, mo, np, panel, quadric,
         [
             panel(
                 1.0,
-                surfaces=quadric(1, 2.2, BLUE, BLUE, 0.35, 12) + quadric(0, 3.0, ORANGE, ORANGE, 0.35, 12) + quadric(-4, 3.6, RED, RED, 0.5, 12),
+                surfaces=quadric(1, 3.0, BLUE, BLUE, 0.25, 24, 12, 118) + quadric(0, 3.0, ORANGE, ORANGE, 0.25, 24, 12, 118) + quadric(-4, 3.0, RED, RED, 0.45, 24, 12, 118),  # all cut at |x^3| <= 3; rims, waists, and the two meridians that outline each surface in the first view, as on the page
                 axes=[((-1.2, 0, 0), (4.4, 0, 0), "x^1", -120), ((0, -1.2, 0), (0, 4.0, 0), "x^2", 0), ((0, 0, -1.2), (0, 0, 5.0), "x^3", 90)],
+                texts=[((0, np.sqrt(1 + 9), 3.0), "g^{-1}(1)", BLUE, 0, 8), ((0, -3.0, 3.0), "g^{-1}(0)", ORANGE, 180, 8), ((0, np.sqrt(10), -3.0), "g^{-1}(-4)", RED, -20, 10)],
             )
         ],
-        legend=[("area", BLUE, "g^{-1}(1)", BLUE, 0.25), ("area", ORANGE, "g^{-1}(0)", ORANGE, 0.25), ("area", RED, "g^{-1}(-4)", RED, 0.25)],
         height=420,
     )
 
@@ -890,7 +864,7 @@ def _(BLUE, HALF, ORANGE, RED, arrow, blank, legend_box, mo, np, panel, quadric,
     What are the level sets with values $1, 0, -4$?
 
     $$
-    f^{-1}(b) = \left\{\, \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \;\middle|\; (x^1)^2 - (x^2)^2 = b \,\right\}
+    f^{-1}(b) = \left\{\, \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \mid (x^1)^2 - (x^2)^2 = b \,\right\}
     $$
 
     - $f^{-1}(0) \iff \lvert x^1 \rvert = \lvert x^2 \rvert$ &nbsp; two intersecting lines (a cone)
@@ -923,7 +897,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, HALF, LIGHT, b_level, legend_box, mo, np, panel, plane, quadric, table, turntable):
+def _(BLUE, Figure, HALF, b_level, mo, np, panel, plane, quadric, table, turntable):
     _b = b_level.value
 
     # f^{-1}(b) in the plane
@@ -942,7 +916,7 @@ def _(BLUE, Figure, HALF, LIGHT, b_level, legend_box, mo, np, panel, plane, quad
             _left.plot(_s, _sign * np.sqrt(_s**2 - _b), color=BLUE, lw=1.4)
         else:
             _left.plot(_s, _sign * _s, color=BLUE, lw=1.4)
-    legend_box(_fig, [("line", BLUE, "$f^{-1}(b)$")], loc="outside lower center")
+    _left.text(3.9, 3.9, "$f^{-1}(b)$", color=BLUE, fontsize=12, ha="right", va="top", bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
     # g^{-1}(b) in space, for -3 <= x^3 <= 3 (the scale holds every b)
     _graph = turntable(
@@ -954,15 +928,15 @@ def _(BLUE, Figure, HALF, LIGHT, b_level, legend_box, mo, np, panel, plane, quad
                 1.0,
                 surfaces=quadric(_b, 3.0, BLUE),
                 axes=[((-1.2, 0, 0), (4.6, 0, 0), "x^1", -120), ((0, -1.2, 0), (0, 4.4, 0), "x^2", 0), ((0, 0, -1.2), (0, 0, 4.0), "x^3", 90)],
+                texts=[((0, np.sqrt(max(_b + 9, 0)), 3.0), "g^{-1}(b)", BLUE, 0, 8)],
                 box=((-2.8, 2.8), (-2.8, 2.8), (-2.8, 2.8)),
             )
         ],
-        legend=[("area", LIGHT, "g^{-1}(b)", BLUE)],
         height=380,
         key="lecture-06-quadric",
     )
 
-    _flat = "two intersecting lines (a cone)" if _b == 0 else "a hyperbola"
+    _flat = "cone" if _b == 0 else "hyperbola"
     _solid = "cone" if _b == 0 else "hyperboloid of one sheet" if _b > 0 else "hyperboloid of two sheets"
 
     mo.vstack(
@@ -970,8 +944,8 @@ def _(BLUE, Figure, HALF, LIGHT, b_level, legend_box, mo, np, panel, plane, quad
             mo.hstack([b_level], justify="start", gap=2, wrap=True),
             table(
                 [
-                    (r"$f^{-1}(b) \subseteq \mathbb{R}^2$", rf"$(x^1)^2 - (x^2)^2 = {_b:g}$ &nbsp; ({_flat})"),
-                    (r"$g^{-1}(b) \subseteq \mathbb{R}^3$", rf"$(x^1)^2 + (x^2)^2 - (x^3)^2 = {_b:g}$ &nbsp; ({_solid})"),
+                    (r"$f^{-1}(b) \subseteq \mathbb{R}^2$", _flat),
+                    (r"$g^{-1}(b) \subseteq \mathbb{R}^3$", _solid),
                 ]
             ),
             mo.Html(
@@ -1074,7 +1048,7 @@ def _(mo):
     Consider the surface
 
     $$
-    S = \left\{\, \begin{bmatrix} x^1 \\ x^2 \\ x^3 \end{bmatrix} \in \mathbb{R}^3 \;\middle|\; (x^1)^2 + (x^2)^2 - x^3 = 1 \,\right\}
+    S = \left\{\, \begin{bmatrix} x^1 \\ x^2 \\ x^3 \end{bmatrix} \in \mathbb{R}^3 \mid (x^1)^2 + (x^2)^2 - x^3 = 1 \,\right\}
     $$
 
     Find
@@ -1084,19 +1058,6 @@ def _(mo):
     (b) a function $g$ such that $S$ is the graph of $g$
 
     (c) a function $h$ such that $S$ is the image of $h$
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Summary
-
-    - a multivariable function $f : A \subseteq \mathbb{R}^n \longrightarrow B \subseteq \mathbb{R}^m$ has 3 parts: domain, codomain and rule of assignment; scalar functions ($m = 1$), paths ($n = 1$), parameterized surfaces ($n = 2$)
-    - $\mathrm{Im}(f) \subseteq B$ (not necessarily equal) and $\mathrm{graph}(f) \subseteq A \times B$ help us visualize $f$ as a set of points; the graph essentially determines the function
-    - the level set $f^{-1}(\vec{b}) = \{\, \vec{x} \in A \mid f(\vec{x}) = \vec{b} \,\}$ is a set of points in the domain, NOT the value of an inverse function
-    - level sets of affine scalar functions on $\mathbb{R}^3$ are planes; level sets of quadratic scalar functions are quadratic surfaces (ellipsoids, hyperboloids, paraboloids, …)
     """)
     return
 

@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 01 · The Cartesian n-space", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 • Lecture 01 • The Cartesian n-space", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -26,11 +26,11 @@ def _(mo):
     # Palette with fixed roles (figures only; text carries no colour):
     #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (tangent vector, gradient, mean)
-    #   ORANGE a third series, only when three are needed
+    #   GREEN  a result made from them (sum, multiple, angle, tangent vector, gradient)
+    #   ORANGE (ochre) a third object, only when three are needed
     #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
-    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#3f5f8f", "#a8554c", "#4f7f5c", "#b9853f", "#9a9a9a", "#e3ebf4"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
     FULL, HALF = 7.4, 3.6
 
@@ -75,12 +75,13 @@ def _(mo):
 
     def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
         """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
-        One head size and one line weight for every figure, so arrows look alike across lectures."""
+        One line weight for every figure; the head is open and sized in points from the line width,
+        so arrows look alike across lectures at any axis range."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={3 * lw:g},head_width={1.3 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -119,49 +120,16 @@ def _(mo):
 
     def table(rows):
         """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
-        return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
+        _md = mo.md("\n".join(["| | |", "|:--|:--|"] + [f"| {k} | {v} |" for k, v in rows]))
+        return mo.Html(f'<div class="readout">{_md.text}</div>')
 
-    def check(field, answer):
-        """Feedback mark for a numeric answer typed into a text field."""
-        s = field.value.strip().replace(",", ".")
-        if not s:
-            return ""
-        try:
-            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
-        except ValueError:
-            return "enter a number"
-
-    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 01", "Week 01", "Lecture 01 · The Cartesian n-space")
+    header("Lecture 01", "Week 01", "Lecture 01 • The Cartesian n-space")
     return
-
-
-@app.cell(hide_code=True)
-def _():
-    # ---- Helpers of this lecture ----------------------------------------
-    def legend_box(fig, entries, loc="outside right center", ncols=1):
-        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
-        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
-        from matplotlib.lines import Line2D
-        from matplotlib.patches import Patch
-
-        handles = []
-        for kind, c, _label, *style in entries:
-            if kind == "dot":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
-            elif kind == "ring":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
-            elif kind == "line":
-                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
-            else:
-                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
-        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
-
-    return (legend_box,)
 
 
 @app.cell(hide_code=True)
@@ -170,8 +138,8 @@ def _(mo, np):
     # Drawn in the browser on canvases, in the style of the static figures: orthographic views of
     # R^3 = R^2 x R (x^1 towards the viewer, x^2 to the right, y up), surfaces drawn back to front.
     # Dragging turns the view at a fixed scale (all panels of a figure together) and a double click restores
-    # it; a figure redrawn by a slider keeps its view. A legend box explains points, curves and surfaces, so
-    # that no label covers the drawing; only the axes carry labels. Typesetting is done by KaTeX.
+    # it; a figure redrawn by a slider keeps its view. Names sit beside the objects they name. Typesetting is done
+    # by KaTeX.
     import html as _html
     import json as _json
 
@@ -268,11 +236,11 @@ def _(mo, np):
             for (let k = 0; k < ln.p.length; k += 3) idx.push(add(ln.p[k], ln.p[k + 1], ln.p[k + 2]));
             const line = { idx, dash: ln.d, cum: new Float64Array(idx.length) };
             for (let k = 0; k < idx.length - 1; k++)
-              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0 });
+              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0, flat: ln.b });
             return line;
           });
           for (const d of spec.points) this.dots.push({ i: add(...d.p), c: d.c, r: d.r, h: d.h });
-          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c });
+          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c, w: h.w, d: h.d });
           // the centre of the scene and the radius of a ball holding it, heights at their drawing scale
           let src = pts;
           if (spec.box) {
@@ -344,7 +312,8 @@ def _(mo, np):
           items.sort((p, q) => p[0] - q[0]);
           g.clearRect(0, 0, W, H);
           g.lineJoin = "round";
-          for (const [, kind, o] of items) {
+          for (let n = 0; n < items.length; n++) {
+            const [, kind, o] = items[n];
             if (kind === 0) {
               const q = o[0];
               g.beginPath();
@@ -357,28 +326,45 @@ def _(mo, np):
               if (o[2] === 1) { g.lineWidth = 0.6; g.setLineDash([]); g.stroke(); }
               g.globalAlpha = 1;
             } else if (kind === 1) {
+              if (o.done) { o.done = false; continue; }
+              let p0 = o, p1 = o;
+              if (o.flat) {  // the pieces of a straight line up to the next surface go in one stroke, so no seams show
+                let grew = true;
+                while (grew) {
+                  grew = false;
+                  for (let m = n + 1; m < items.length && items[m][1] !== 0; m++) {
+                    const q = items[m][2];
+                    if (items[m][1] !== 1 || q.line !== o.line || q.done) continue;
+                    if (q.k === p1.k + 1) { p1 = q; q.done = true; grew = true; }
+                    else if (q.k === p0.k - 1) { p0 = q; q.done = true; grew = true; }
+                  }
+                }
+              }
               g.beginPath();
-              g.moveTo(X[o.a], Y[o.a]);
-              g.lineTo(X[o.b], Y[o.b]);
+              g.moveTo(X[p0.a], Y[p0.a]);
+              g.lineTo(X[p1.b], Y[p1.b]);
               g.strokeStyle = o.c;
               g.lineWidth = o.lw;
               const dash = o.line && o.line.dash;
-              g.lineCap = dash ? "butt" : "round";
+              g.lineCap = dash || o.flat ? "butt" : "round";
               g.setLineDash(dash || []);
-              g.lineDashOffset = dash ? -o.line.cum[o.k] : 0;
+              g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
               g.stroke();
             } else if (kind === 2) {
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
               vx /= len; vy /= len;
-              const bx = X[o.i] - 9 * vx, by = Y[o.i] - 9 * vy;
+              const hl = Math.max(3.5 * o.w, 6), hw = Math.max(1.5 * o.w, 2.6), bx = X[o.i] - hl * vx, by = Y[o.i] - hl * vy;  // open head, as on the page
+              g.strokeStyle = o.c;
+              g.lineWidth = o.w;
+              g.setLineDash([]);
+              g.lineCap = "round";
+              if (!o.d) { g.beginPath(); g.moveTo(X[o.j], Y[o.j]); g.lineTo(X[o.i], Y[o.i]); g.stroke(); }
               g.beginPath();
-              g.moveTo(X[o.i], Y[o.i]);
-              g.lineTo(bx - 3.4 * vy, by + 3.4 * vx);
-              g.lineTo(bx + 3.4 * vy, by - 3.4 * vx);
-              g.closePath();
-              g.fillStyle = o.c;
-              g.fill();
+              g.moveTo(bx - hw * vy, by + hw * vx);
+              g.lineTo(X[o.i], Y[o.i]);
+              g.lineTo(bx + hw * vy, by - hw * vx);
+              g.stroke();
             } else {
               g.beginPath();
               g.arc(X[o.i], Y[o.i], o.r, 0, 2 * Math.PI);
@@ -484,8 +470,8 @@ def _(mo, np):
         axes: (tail, tip, TeX label, direction of the label in degrees), drawn black;
         arrows: (tail, tip, colour[, width, dash]), vectors with a head in their colour;
         arcs: (x1, x2, y, colour[, width]), curves ending in a head, such as a turning arrow;
-        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), short labels such as tick values (names of
-        points and objects go in the legend instead); caption: TeX below the drawing;
+        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), names of points and objects and tick values,
+        each beside its point; caption: TeX below the drawing;
         box: ((x^1 lo, hi), (x^2 lo, hi), (y lo, hi)) to size the drawing by, instead of its own points."""
         p = {"ys": ys, "surfaces": list(surfaces), "lines": [], "points": [], "heads": [], "labels": [], "caption": caption, "box": box}
         for ln in lines:
@@ -493,20 +479,20 @@ def _(mo, np):
         for tail, tip, label, d in axes:
             a, b = np.asarray(tail, float), np.asarray(tip, float)
             seg = a + np.linspace(0, 0.96, 60)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000"})
+            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000", "w": 1.1})
             p["labels"].append({"p": b.tolist(), "t": label, "c": "#000000", "a": d, "r": 5})
         for q in points:
             p["points"].append({"p": [float(c) for c in q[0]], "c": q[1], "r": q[2] if len(q) > 2 else 4.0, "h": bool(q[3]) if len(q) > 3 else False})
         for ar in arrows:
             a, b = np.asarray(ar[0], float), np.asarray(ar[1], float)
             seg = a + np.linspace(0, 0.96, 40)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2]})
+            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None})
         for arc in arcs:
             c = np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in arc[:3])), -1)
             p["lines"].append({"p": _flat(*c[:-1].T), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8, "d": None, "e": 0})
-            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3]})
+            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8})
         for tx in texts:
             p["labels"].append({"p": [float(c) for c in tx[0]], "t": tx[1], "c": tx[2], "a": tx[3], "r": tx[4] if len(tx) > 4 else 5})
         return p
@@ -561,7 +547,7 @@ def _(definition, mo):
     For each $n \in \mathbb{Z}_{>0} = \{1, 2, 3, \dots\}$ (positive integers), we define the **Cartesian $n$-space** $\mathbb{R}^n$ as the set of all ordered lists of $n$ real numbers ($n$-tuples of real numbers)
 
     $$
-    \mathbb{R}^n = \left\{\, \vec{x} = (x^1, x^2, \dots, x^n) \;\middle|\; x^i \in \mathbb{R},\ \forall\, i = 1, 2, \dots, n \,\right\}
+    \mathbb{R}^n = \left\{\, \vec{x} = (x^1, x^2, \dots, x^n) \mid x^i \in \mathbb{R},\ \forall\, i = 1, 2, \dots, n \,\right\}
     $$
     """,
                 "Cartesian $n$-space",
@@ -569,22 +555,23 @@ def _(definition, mo):
             mo.md(
                 r"""
     **Example.**
-
+    """
+            ),
+            mo.Html('<div class="readout cases">' + mo.md(r"""
     | | | |
     |:--|:--|:--|
     | ${n = 1}$ | ${\mathbb{R}^1 = \mathbb{R} \ni x = (x^1)}$ | list of a single number (no need for arrows here) |
     | ${n = 2}$ | ${\mathbb{R}^2 = \mathbb{R} \times \mathbb{R} \ni \vec{x} = (x^1, x^2)}$ | ordered pairs of numbers (order matters! ${(x^1, x^2) \neq (x^2, x^1)}$ unless ${x^1 = x^2}$) |
     | ${n = 3}$ | ${\mathbb{R}^3 \ni \vec{x} = (x^1, x^2, x^3)}$ | ordered triples |
-    | $\;\vdots$ | | |
-    """
-            ),
+    """).text + "</div>"),
+            mo.md(r"$\;\vdots$"),
         ]
     )
     return
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREY, arrow, legend_box, mo, panel, turntable):
+def _(BLUE, Figure, GREY, arrow, mo, panel, turntable):
     def _column(ax, x, y, entries, color, dy=0.3, w=0.2):
         """A column vector drawn by hand at (x, y): stacked entries between two square brackets."""
         n = len(entries)
@@ -597,15 +584,13 @@ def _(BLUE, Figure, GREY, arrow, legend_box, mo, panel, turntable):
     def spaces_figure(arrows):
         """R^1 and R^2 (drawn flat) beside R^3 (a rotatable view), with a point (arrows=False) or the arrow from
         the origin to it (arrows=True)."""
-        fig = Figure(figsize=(4.6, 3.5 if not arrows else 2.9), layout="constrained")
-        s1, s2 = fig.subfigures(1, 2)
-        a1, a2 = s1.subplots(), s2.subplots()
+        fig = Figure(figsize=(4.6, 3.1 if not arrows else 2.5), layout="constrained")
+        a1, a2 = fig.subplots(1, 2)
         lo = -1.25 if not arrows else -0.6
         for ax in (a1, a2):
             ax.set_xlim(-0.5, 2.9)
             ax.set_ylim(lo, 2.75)
             ax.set_aspect("equal")
-            ax.set_anchor("N")  # the two drawings start level, above legends of different heights
             ax.axis("off")
 
         # n = 1
@@ -616,7 +601,8 @@ def _(BLUE, Figure, GREY, arrow, legend_box, mo, panel, turntable):
             a1.text(0.7, 0.14, "$x$", color=BLUE, fontsize=12, ha="center")
         a1.plot(0, 0, "o", color="black", ms=5, zorder=4)
         a1.plot(1.4, 0, "o", color=BLUE, ms=5, zorder=4)
-        legend_box(s1, [("dot", "black", "$0$"), ("dot", BLUE, "$x$")], loc="outside lower center")
+        a1.text(0, -0.16, "$0$", fontsize=12, ha="center", va="top")
+        a1.text(1.4, -0.16, "$x$", color="black", fontsize=12, ha="center", va="top")
 
         # n = 2
         p = (1.4, 1.5)
@@ -624,16 +610,18 @@ def _(BLUE, Figure, GREY, arrow, legend_box, mo, panel, turntable):
         arrow(a2, (0, -0.5), (0, 2.4), "black", lw=0.9)
         a2.text(2.6, 0, r"$\mathbb{R}$", fontsize=12, va="center")
         a2.text(0, 2.48, r"$\mathbb{R}$", fontsize=12, ha="center", va="bottom")
+        a2.text(0.08, -0.12, "$(0, 0)$", fontsize=11, ha="left", va="top")
         if arrows:
             arrow(a2, (0, 0), p, BLUE)
             _column(a2, 1.3, 0.62, ("$x^1$", "$x^2$"), BLUE)
+            a2.text(p[0] + 0.1, p[1] + 0.06, "$(x^1, x^2)$", color="black", fontsize=11, ha="left", va="bottom")
         else:
             a2.plot([p[0], p[0], 0], [0, p[1], p[1]], color=GREY, lw=1.0, ls=(0, (4, 3)))
-            a2.text(p[0], -0.14, "$x^1$", fontsize=12, ha="center", va="top")
+            a2.text(p[0] + 0.12, -0.12, "$x^1$", fontsize=12, ha="left", va="top")
             a2.text(-0.12, p[1], "$x^2$", fontsize=12, ha="right", va="center")
+            a2.text(p[0] + 0.1, p[1] + 0.06, r"$\vec{x} = (x^1, x^2)$", color="black", fontsize=11, ha="left", va="bottom")
         a2.plot(0, 0, "o", color="black", ms=5, zorder=4)
         a2.plot(*p, "o", color=BLUE, ms=5, zorder=4)
-        legend_box(s2, [("dot", "black", "$(0, 0)$"), ("dot", BLUE, "$(x^1, x^2)$" if arrows else r"$\vec{x} = (x^1, x^2)$")], loc="outside lower center")
 
         if not arrows:
             for ax, n, name in ((a1, 1, "the real line"), (a2, 2, "the real plane")):
@@ -643,9 +631,15 @@ def _(BLUE, Figure, GREY, arrow, legend_box, mo, panel, turntable):
         q = (1.0, 1.8, 1.6)
         axes = [((0 if arrows else -0.5, 0, 0), (2.1, 0, 0), r"\mathbb{R}", -150), ((0, -0.4, 0), (0, 2.3, 0), r"\mathbb{R}", 0), ((0, 0, -0.4), (0, 0, 2.1), r"\mathbb{R}", 90)]
         dots = [((0, 0, 0), "#000000"), (q, BLUE)]
+        origin = ((0, 0, 0), "(0, 0, 0)", "#000000", -60, 12)
         if arrows:
-            space = panel(1.0, arrows=[((0, 0, 0), q, BLUE)], points=dots, axes=axes)
-            legend = [("dot", "#000000", "(0, 0, 0)"), ("dot", BLUE, "(x^1, x^2, x^3)"), ("line", BLUE, r"\begin{bmatrix} x^1 \\ x^2 \\ x^3 \end{bmatrix}")]
+            space = panel(
+                1.0,
+                arrows=[((0, 0, 0), q, BLUE)],
+                points=dots,
+                axes=axes,
+                texts=[origin, (q, "(x^1, x^2, x^3)", "#000000", 30, 7), (tuple(0.7 * c for c in q), r"\begin{bmatrix} x^1 \\ x^2 \\ x^3 \end{bmatrix}", BLUE, 150, 14)],
+            )
             alt = "the arrow from the origin to the point (x1, x2, x3) in R3, written as a column vector"
         else:
             floor = (q[0], q[1], 0)
@@ -655,12 +649,11 @@ def _(BLUE, Figure, GREY, arrow, legend_box, mo, panel, turntable):
                 lines=[([a[0], b[0]], [a[1], b[1]], [a[2], b[2]], GREY, 1.0, [4, 3]) for a, b in guides],
                 points=dots,
                 axes=axes,
-                texts=[((q[0], 0, 0), "x^1", "#000000", 150), ((0, q[1], 0), "x^2", "#000000", 60), ((0, 0, q[2]), "x^3", "#000000", 180)],
+                texts=[origin, (q, r"\vec{x} = (x^1, x^2, x^3)", "#000000", 30, 7), ((q[0], 0, 0), "x^1", "#000000", 150), ((0, q[1], 0), "x^2", "#000000", 60), ((0, 0, q[2]), "x^3", "#000000", 180)],
                 caption=r"\begin{gathered} n = 3 \\ \text{the real space} \end{gathered}",
             )
-            legend = [("dot", "#000000", "(0, 0, 0)"), ("dot", BLUE, r"\vec{x} = (x^1, x^2, x^3)")]
             alt = "the real space R3: three axes through the origin and a point x = (x1, x2, x3), with dashed lines to its coordinates on the axes"
-        view = turntable(30, 22, alt, [space], legend=legend, height=300)
+        view = turntable(30, 22, alt, [space], height=300)
         return mo.Html(
             '<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem;">'
             f'<div style="flex: 1 1 300px; min-width: 260px;">{mo.as_html(fig).text}</div>'
@@ -735,9 +728,9 @@ def _(definition, mo):
     via
 
     $$
-    \underbrace{\begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix} + \begin{bmatrix} y^1 \\ y^2 \\ \vdots \\ y^n \end{bmatrix} = \begin{bmatrix} x^1 + y^1 \\ x^2 + y^2 \\ \vdots \\ x^n + y^n \end{bmatrix}}_{\text{component-wise addition}}
+    \underbrace{\begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix} + \begin{bmatrix} y^1 \\ y^2 \\ \vdots \\ y^n \end{bmatrix} = \begin{bmatrix} x^1 + y^1 \\ x^2 + y^2 \\ \vdots \\ x^n + y^n \end{bmatrix}}_{\mathclap{\footnotesize \text{component-wise addition}}\vphantom{\footnotesize \text{component-wise addition}}}
     \qquad \qquad
-    \underbrace{\alpha \cdot \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix} = \begin{bmatrix} \alpha x^1 \\ \alpha x^2 \\ \vdots \\ \alpha x^n \end{bmatrix}}_{\text{component-wise multiplication}}
+    \underbrace{\alpha \cdot \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix} = \begin{bmatrix} \alpha x^1 \\ \alpha x^2 \\ \vdots \\ \alpha x^n \end{bmatrix}}_{\mathclap{\footnotesize \text{component-wise multiplication}}\vphantom{\footnotesize \text{component-wise multiplication}}}
     $$
     """,
                 "Vector addition and scalar–vector multiplication",
@@ -765,47 +758,54 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, ORANGE, RED, alpha, arrow, legend_box, mo, plane, table, x1, x2, y1, y2):
+def _(BLUE, FULL, Figure, GREEN, GREY, RED, alpha, arrow, mo, plane, table, x1, x2, y1, y2):
     _x = (x1.value, x2.value)
     _y = (y1.value, y2.value)
     _s = (_x[0] + _y[0], _x[1] + _y[1])
     _a = alpha.value
     _ax_ = (_a * _x[0], _a * _x[1])
 
-    def _vector(ax, tip, color):
-        """Arrow from the origin (a dot when the vector is zero)."""
+    def _vector(ax, tip, color, name, away=None):
+        """Arrow from the origin (a dot when the vector is zero), named beside its tip: beyond the tip, or to the
+        side of the arrow away from the vector `away`."""
         if tip[0] == 0 and tip[1] == 0:
             ax.plot(0, 0, "o", color=color, ms=4, zorder=4)
         else:
             arrow(ax, (0, 0), tip, color)
+        d = tip if away is None else (-tip[1], tip[0])
+        if away is not None and d[0] * away[0] + d[1] * away[1] > 0:
+            d = (-d[0], -d[1])
+        r = (d[0] ** 2 + d[1] ** 2) ** 0.5 or 1
+        d = (d[0] / r, d[1] / r) if r else (1, 0)
+        ax.annotate(name, tip, textcoords="offset points", xytext=(9 * d[0], 9 * d[1]), color=color, fontsize=13,
+                    ha="left" if d[0] > 0.3 else "right" if d[0] < -0.3 else "center", va="bottom" if d[1] > 0.3 else "top" if d[1] < -0.3 else "center")
 
     _fig = Figure(figsize=(FULL, 4.1), layout="constrained")
     _left, _right = _fig.subplots(1, 2)
 
-    plane(_left, 12)
+    plane(_left, 9)
     _left.plot([_x[0], _s[0], _y[0]], [_x[1], _s[1], _y[1]], color=GREY, lw=1.0, ls=(0, (4, 3)))
-    _vector(_left, _s, GREEN)
-    _vector(_left, _x, BLUE)
-    _vector(_left, _y, RED)
+    _vector(_left, _s, GREEN, r"$\vec{x}+\vec{y}$")
+    _vector(_left, _x, BLUE, r"$\vec{x}$", away=_y)
+    _vector(_left, _y, RED, r"$\vec{y}$", away=_x)
 
-    plane(_right, 12)
-    _vector(_right, _ax_, ORANGE)
-    _vector(_right, _x, BLUE)
+    plane(_right, 9)
+    _vector(_right, _ax_, GREEN, r"$\alpha \cdot \vec{x}$")
+    _vector(_right, _x, BLUE, r"$\vec{x}$", away=(_x[1], -_x[0]))
     for _ax in (_left, _right):
         _ax.set_xticks(range(-8, 9, 4))
         _ax.set_yticks(range(-8, 9, 4))
-    legend_box(_fig, [("line", BLUE, r"$\vec{x}$"), ("line", RED, r"$\vec{y}$"), ("line", GREEN, r"$\vec{x}+\vec{y}$"), ("line", ORANGE, r"$\alpha \cdot \vec{x}$")], loc="outside lower center", ncols=4)
 
     def _col(v, color):
-        return rf"\textcolor{{{color}}}{{\begin{{bmatrix}} {v[0] + 0.0:g} \\ {v[1] + 0.0:g} \end{{bmatrix}}}}"
+        return rf"\begin{{bmatrix}} {v[0] + 0.0:g} \\ {v[1] + 0.0:g} \end{{bmatrix}}"
 
     mo.vstack(
         [
             mo.hstack([x1, x2, y1, y2, alpha], justify="start", gap=2, wrap=True),
             table(
                 [
-                    (r"$\vec{x} + \vec{y}$", rf"${_col(_x, BLUE)} + {_col(_y, RED)} = {_col(_s, GREEN)}$"),
-                    (r"$\alpha \cdot \vec{x}$", rf"$({_a:g}) \cdot {_col(_x, BLUE)} = {_col(_ax_, ORANGE)}$"),
+                    (r"$\vec{x} + \vec{y}$", rf"${_col(_s, GREEN)}$"),
+                    (r"$\alpha \cdot \vec{x}$", rf"${_col(_ax_, GREEN)}$"),
                 ]
             ),
             _fig,
@@ -837,22 +837,9 @@ def _(mo, theorem):
     """,
                 "Properties of the operations",
             ),
-            mo.md(r"**Proof.** Exercise! $\square$"),
+            mo.md(r"**Proof.** Exercise! <span class=qed>$\square$</span>"),
         ]
     )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Summary
-
-    - $\mathbb{R}^n$ is the set of ordered lists $\vec{x} = (x^1, \dots, x^n)$ of $n$ real numbers: points in an $n$-dimensional space
-    - every point is also a unique arrow from the origin, the $n$-vector $\vec{x}$ (a column matrix of size $n$)
-    - vector addition and scalar–vector multiplication are defined component-wise, and are interpreted in terms of arrows from the origin
-    - they are associative, distributive and commutative, with neutral and null operations, as in $\mathbb{R}$
-    """)
     return
 
 

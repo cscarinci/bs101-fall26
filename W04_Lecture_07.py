@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 07 · Local properties of paths", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 • Lecture 07 • Local properties of paths", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -26,11 +26,11 @@ def _(mo):
     # Palette with fixed roles (figures only; text carries no colour):
     #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (tangent vector, gradient, mean)
-    #   ORANGE a third series, only when three are needed
+    #   GREEN  a result made from them (sum, multiple, angle, tangent vector, gradient)
+    #   ORANGE (ochre) a third object, only when three are needed
     #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
-    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#3f5f8f", "#a8554c", "#4f7f5c", "#b9853f", "#9a9a9a", "#e3ebf4"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
     FULL, HALF = 7.4, 3.6
 
@@ -75,12 +75,13 @@ def _(mo):
 
     def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
         """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
-        One head size and one line weight for every figure, so arrows look alike across lectures."""
+        One line weight for every figure; the head is open and sized in points from the line width,
+        so arrows look alike across lectures at any axis range."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={3 * lw:g},head_width={1.3 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -121,22 +122,12 @@ def _(mo):
         """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
         return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
 
-    def check(field, answer):
-        """Feedback mark for a numeric answer typed into a text field."""
-        s = field.value.strip().replace(",", ".")
-        if not s:
-            return ""
-        try:
-            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
-        except ValueError:
-            return "enter a number"
-
-    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 07", "Week 04", "Lecture 07 · Local properties of paths")
+    header("Lecture 07", "Week 04", "Lecture 07 • Local properties of paths")
     return
 
 
@@ -156,25 +147,7 @@ def _(np):
         d = 0.5 + 0.2 * max(m - 2 * np.pi, 0) / (2 * np.pi)
         ax.text(d * np.cos(m), d * np.sin(m), name, color=color, fontsize=12, ha="center", va="center", bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    def legend_box(fig, entries, loc="outside right center", ncols=1):
-        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
-        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
-        from matplotlib.lines import Line2D
-        from matplotlib.patches import Patch
-
-        handles = []
-        for kind, c, _label, *style in entries:
-            if kind == "dot":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
-            elif kind == "ring":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
-            elif kind == "line":
-                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
-            else:
-                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
-        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
-
-    return angle_mark, legend_box
+    return (angle_mark,)
 
 
 @app.cell(hide_code=True)
@@ -183,8 +156,8 @@ def _(mo, np):
     # Drawn in the browser on canvases, in the style of the static figures: orthographic views of
     # R^3 = R^2 x R (x^1 towards the viewer, x^2 to the right, y up), surfaces drawn back to front.
     # Dragging turns the view at a fixed scale (all panels of a figure together) and a double click restores
-    # it; a figure redrawn by a slider keeps its view. A legend box explains points, curves and surfaces, so
-    # that no label covers the drawing; only the axes carry labels. Typesetting is done by KaTeX.
+    # it; a figure redrawn by a slider keeps its view. Names sit beside the objects they name. Typesetting is done
+    # by KaTeX.
     import html as _html
     import json as _json
 
@@ -281,11 +254,11 @@ def _(mo, np):
             for (let k = 0; k < ln.p.length; k += 3) idx.push(add(ln.p[k], ln.p[k + 1], ln.p[k + 2]));
             const line = { idx, dash: ln.d, cum: new Float64Array(idx.length) };
             for (let k = 0; k < idx.length - 1; k++)
-              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0 });
+              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0, flat: ln.b });
             return line;
           });
           for (const d of spec.points) this.dots.push({ i: add(...d.p), c: d.c, r: d.r, h: d.h });
-          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c });
+          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c, w: h.w, d: h.d });
           // the centre of the scene and the radius of a ball holding it, heights at their drawing scale
           let src = pts;
           if (spec.box) {
@@ -357,7 +330,8 @@ def _(mo, np):
           items.sort((p, q) => p[0] - q[0]);
           g.clearRect(0, 0, W, H);
           g.lineJoin = "round";
-          for (const [, kind, o] of items) {
+          for (let n = 0; n < items.length; n++) {
+            const [, kind, o] = items[n];
             if (kind === 0) {
               const q = o[0];
               g.beginPath();
@@ -370,28 +344,45 @@ def _(mo, np):
               if (o[2] === 1) { g.lineWidth = 0.6; g.setLineDash([]); g.stroke(); }
               g.globalAlpha = 1;
             } else if (kind === 1) {
+              if (o.done) { o.done = false; continue; }
+              let p0 = o, p1 = o;
+              if (o.flat) {  // the pieces of a straight line up to the next surface go in one stroke, so no seams show
+                let grew = true;
+                while (grew) {
+                  grew = false;
+                  for (let m = n + 1; m < items.length && items[m][1] !== 0; m++) {
+                    const q = items[m][2];
+                    if (items[m][1] !== 1 || q.line !== o.line || q.done) continue;
+                    if (q.k === p1.k + 1) { p1 = q; q.done = true; grew = true; }
+                    else if (q.k === p0.k - 1) { p0 = q; q.done = true; grew = true; }
+                  }
+                }
+              }
               g.beginPath();
-              g.moveTo(X[o.a], Y[o.a]);
-              g.lineTo(X[o.b], Y[o.b]);
+              g.moveTo(X[p0.a], Y[p0.a]);
+              g.lineTo(X[p1.b], Y[p1.b]);
               g.strokeStyle = o.c;
               g.lineWidth = o.lw;
               const dash = o.line && o.line.dash;
-              g.lineCap = dash ? "butt" : "round";
+              g.lineCap = dash || o.flat ? "butt" : "round";
               g.setLineDash(dash || []);
-              g.lineDashOffset = dash ? -o.line.cum[o.k] : 0;
+              g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
               g.stroke();
             } else if (kind === 2) {
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
               vx /= len; vy /= len;
-              const bx = X[o.i] - 9 * vx, by = Y[o.i] - 9 * vy;
+              const hl = Math.max(3.5 * o.w, 6), hw = Math.max(1.5 * o.w, 2.6), bx = X[o.i] - hl * vx, by = Y[o.i] - hl * vy;  // open head, as on the page
+              g.strokeStyle = o.c;
+              g.lineWidth = o.w;
+              g.setLineDash([]);
+              g.lineCap = "round";
+              if (!o.d) { g.beginPath(); g.moveTo(X[o.j], Y[o.j]); g.lineTo(X[o.i], Y[o.i]); g.stroke(); }
               g.beginPath();
-              g.moveTo(X[o.i], Y[o.i]);
-              g.lineTo(bx - 3.4 * vy, by + 3.4 * vx);
-              g.lineTo(bx + 3.4 * vy, by - 3.4 * vx);
-              g.closePath();
-              g.fillStyle = o.c;
-              g.fill();
+              g.moveTo(bx - hw * vy, by + hw * vx);
+              g.lineTo(X[o.i], Y[o.i]);
+              g.lineTo(bx + hw * vy, by - hw * vx);
+              g.stroke();
             } else {
               g.beginPath();
               g.arc(X[o.i], Y[o.i], o.r, 0, 2 * Math.PI);
@@ -497,8 +488,8 @@ def _(mo, np):
         axes: (tail, tip, TeX label, direction of the label in degrees), drawn black;
         arrows: (tail, tip, colour[, width, dash]), vectors with a head in their colour;
         arcs: (x1, x2, y, colour[, width]), curves ending in a head, such as a turning arrow;
-        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), short labels such as tick values (names of
-        points and objects go in the legend instead); caption: TeX below the drawing;
+        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), names of points and objects and tick values,
+        each beside its point; caption: TeX below the drawing;
         box: ((x^1 lo, hi), (x^2 lo, hi), (y lo, hi)) to size the drawing by, instead of its own points."""
         p = {"ys": ys, "surfaces": list(surfaces), "lines": [], "points": [], "heads": [], "labels": [], "caption": caption, "box": box}
         for ln in lines:
@@ -506,20 +497,20 @@ def _(mo, np):
         for tail, tip, label, d in axes:
             a, b = np.asarray(tail, float), np.asarray(tip, float)
             seg = a + np.linspace(0, 0.96, 60)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000"})
+            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000", "w": 1.1})
             p["labels"].append({"p": b.tolist(), "t": label, "c": "#000000", "a": d, "r": 5})
         for q in points:
             p["points"].append({"p": [float(c) for c in q[0]], "c": q[1], "r": q[2] if len(q) > 2 else 4.0, "h": bool(q[3]) if len(q) > 3 else False})
         for ar in arrows:
             a, b = np.asarray(ar[0], float), np.asarray(ar[1], float)
             seg = a + np.linspace(0, 0.96, 40)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2]})
+            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None})
         for arc in arcs:
             c = np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in arc[:3])), -1)
             p["lines"].append({"p": _flat(*c[:-1].T), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8, "d": None, "e": 0})
-            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3]})
+            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8})
         for tx in texts:
             p["labels"].append({"p": [float(c) for c in tx[0]], "t": tx[1], "c": tx[2], "a": tx[3], "r": tx[4] if len(tx) > 4 else 5})
         return p
@@ -595,7 +586,7 @@ def _(definition, mo):
     $$
     \gamma(t) = \vec{x} + t\vec{v} = \begin{bmatrix} x^1 + t v^1 \\ x^2 + t v^2 \end{bmatrix} = \begin{bmatrix} \gamma^1(t) \\ \gamma^2(t) \end{bmatrix}
     \qquad \leadsto \qquad
-    \underbrace{\gamma^1(t) = x^1 + t v^1, \quad \gamma^2(t) = x^2 + t v^2}_{\text{pair of affine single variable functions}}
+    \underbrace{\gamma^1(t) = x^1 + t v^1, \quad \gamma^2(t) = x^2 + t v^2}_{\mathclap{\footnotesize \text{pair of affine single variable functions}}\vphantom{\footnotesize \text{pair of affine single variable functions}}}
     $$
 
     **Example.**
@@ -613,15 +604,15 @@ def _(definition, mo):
 
     $$
     \begin{aligned}
-    \mathrm{Im}(\gamma) &= \left\{\, \begin{bmatrix} y^1 \\ y^2 \end{bmatrix} \in \mathbb{R}^2 \;\middle|\; \exists\, t \in \mathbb{R},\ y^1 = \gamma^1(t),\ y^2 = \gamma^2(t) \,\right\} \\
-    &= \underbrace{\left\{\, \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix} \in \mathbb{R}^2 \;\middle|\; t \in \mathbb{R} \,\right\}}_{\text{unit circle } (y^1)^2 + (y^2)^2 = 1}
+    \mathrm{Im}(\gamma) &= \left\{\, \begin{bmatrix} y^1 \\ y^2 \end{bmatrix} \in \mathbb{R}^2 \mid \exists\, t \in \mathbb{R},\ y^1 = \gamma^1(t),\ y^2 = \gamma^2(t) \,\right\} \\
+    &= \underbrace{\left\{\, \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix} \in \mathbb{R}^2 \mid t \in \mathbb{R} \,\right\}}_{\mathclap{\footnotesize \text{unit circle } (y^1)^2 + (y^2)^2 = 1}\vphantom{\footnotesize \text{unit circle } (y^1)^2 + (y^2)^2 = 1}}
     \end{aligned}
     $$
 
     $$
     \begin{aligned}
-    \mathrm{graph}(\gamma) &= \left\{\, \begin{bmatrix} t \\ y^1 \\ y^2 \end{bmatrix} \in \mathbb{R} \times \mathbb{R}^2 = \mathbb{R}^3 \;\middle|\; t \in \mathbb{R},\ y^1 = \gamma^1(t),\ y^2 = \gamma^2(t) \,\right\} \\
-    &= \underbrace{\left\{\, \begin{bmatrix} t \\ \cos(t) \\ \sin(t) \end{bmatrix} \in \mathbb{R}^3 \;\middle|\; t \in \mathbb{R} \,\right\}}_{\text{helix}}
+    \mathrm{graph}(\gamma) &= \left\{\, \begin{bmatrix} t \\ y^1 \\ y^2 \end{bmatrix} \in \mathbb{R} \times \mathbb{R}^2 = \mathbb{R}^3 \mid t \in \mathbb{R},\ y^1 = \gamma^1(t),\ y^2 = \gamma^2(t) \,\right\} \\
+    &= \underbrace{\left\{\, \begin{bmatrix} t \\ \cos(t) \\ \sin(t) \end{bmatrix} \in \mathbb{R}^3 \mid t \in \mathbb{R} \,\right\}}_{\mathclap{\footnotesize \text{helix}}\vphantom{\footnotesize \text{helix}}}
     \end{aligned}
     $$
     """
@@ -638,7 +629,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, GREY, HALF, angle_mark, arrow, blank, legend_box, math, mo, np, panel, t_circle, table, turntable):
+def _(BLUE, GREEN, HALF, angle_mark, arrow, blank, math, mo, np, panel, t_circle, turntable):
     _t = t_circle.value
     _p = (math.cos(_t), math.sin(_t))
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
@@ -651,10 +642,13 @@ def _(BLUE, GREY, HALF, angle_mark, arrow, blank, legend_box, math, mo, np, pane
     _ax.text(-0.1, 1.62, "$y^2$", fontsize=13, ha="right", va="center")
     _th = np.linspace(0, 2 * np.pi, 361)
     _ax.plot(np.cos(_th), np.sin(_th), color=BLUE, lw=1.5)
-    angle_mark(_ax, _t, "$t$", GREY)
+    angle_mark(_ax, _t, "$t$", GREEN)
     arrow(_ax, (0, 0), _p, "black")
     _ax.plot(*_p, "o", color="black", ms=4, zorder=4)
-    legend_box(_fig, [("line", BLUE, r"$\mathrm{Im}(\gamma)$"), ("dot", "black", r"$\gamma(t)$")])
+    # gamma(t) just outside the circle (above the y^1-axis, right of the y^2-axis); Im(gamma) where the point is not
+    _ax.text(1.15 * _p[0] if abs(_p[0]) >= 0.35 else 0.1, 1.15 * _p[1] if abs(_p[1]) >= 0.35 else 0.1, r"$\gamma(t)$", fontsize=13, ha="left" if _p[0] > -0.35 else "right", va="bottom" if _p[1] > -0.35 else "top")
+    _m = math.radians(next(_d for _d in (225, 315, 135) if abs((math.degrees(_t) - _d + 180) % 360 - 180) >= 50))
+    _ax.text(1.08 * math.cos(_m), 1.08 * math.sin(_m), r"$\mathrm{Im}(\gamma)$", color=BLUE, fontsize=13, ha="left" if math.cos(_m) > 0 else "right", va="bottom" if math.sin(_m) > 0 else "top")
 
     # graph(gamma): the helix {(t, cos t, sin t)}, t to the right at a quarter of its length (so that two turns fit), y^1 towards the viewer
     _c = 0.25
@@ -670,26 +664,18 @@ def _(BLUE, GREY, HALF, angle_mark, arrow, blank, legend_box, math, mo, np, pane
                 lines=[(np.cos(_s), _c * _s, np.sin(_s), BLUE, 2.0)],
                 points=[((_p[0], _c * _t, _p[1]), "#000000")] + [((0, _c * _k, 0), "#000000", 2.2) for _k, _ in _ticks],
                 axes=[((0, -0.5, 0), (0, _c * 13.8, 0), "t", 0), ((-1.2, 0, 0), (1.5, 0, 0), "y^1", -120), ((0, 0, -1.2), (0, 0, 1.4), "y^2", 90)],
-                texts=[((0, _c * _k, 0), _name, "#000000", -90) for _k, _name in _ticks],
+                texts=[((0, _c * _k, 0), _name, "#000000", -90) for _k, _name in _ticks]
+                + [((0, _c * 2.5 * math.pi, 1), r"\mathrm{graph}(\gamma)", BLUE, 90, 6),
+                   ((_p[0], _c * _t, _p[1]), r"\begin{bmatrix} t \\ \gamma(t) \end{bmatrix}", "#000000", math.degrees(math.atan2(46 * _p[1] - 14 * _p[0], -26 * _p[0])), 7)],
             )
         ],
-        legend=[("line", BLUE, r"\mathrm{graph}(\gamma)", 2.0), ("dot", "#000000", r"(t, \gamma(t))")],
         height=400,
         key="lecture-07-helix",
     )
 
-    def _f(v):
-        return f"{round(v, 2) + 0.0:.2f}"
-
     mo.vstack(
         [
             mo.hstack([t_circle], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"$\gamma(t)$", rf"$\begin{{bmatrix}} {_f(_p[0])} \\ {_f(_p[1])} \end{{bmatrix}}$"),
-                    (r"$(t, \gamma(t))$", rf"$\begin{{bmatrix}} {_t:.1f} \\ {_f(_p[0])} \\ {_f(_p[1])} \end{{bmatrix}}$"),
-                ]
-            ),
             _fig,
             _graph,
         ]
@@ -704,10 +690,10 @@ def _(mo):
 
     $$
     \begin{aligned}
-    \underbrace{(\gamma + \sigma)(t)}_{\text{addition of paths}} &= \underbrace{\gamma(t) + \sigma(t)}_{\text{addition of vectors}} && \leadsto \qquad \gamma + \sigma : \mathbb{R} \longrightarrow \mathbb{R}^m \\[26pt]
-    \underbrace{(\lambda \gamma)(t)}_{\substack{\text{multiplication of scalar} \\ \text{function and a path}}} &= \underbrace{\lambda(t)\, \gamma(t)}_{\substack{\text{multiplication of} \\ \text{scalar and vector}}} && \leadsto \qquad \lambda \gamma : \mathbb{R} \longrightarrow \mathbb{R}^m \\[26pt]
-    \underbrace{(\gamma \cdot \sigma)(t)}_{\text{dot product of paths}} &= \underbrace{\gamma(t) \cdot \sigma(t)}_{\text{dot product of vectors}} && \leadsto \qquad \gamma \cdot \sigma : \mathbb{R} \longrightarrow \mathbb{R} \\[26pt]
-    \underbrace{(\gamma \times \sigma)(t)}_{\text{cross-product of paths in } \mathbb{R}^3} &= \underbrace{\gamma(t) \times \sigma(t)}_{\text{cross-product of vectors in } \mathbb{R}^3} && \leadsto \qquad \gamma \times \sigma : \mathbb{R} \longrightarrow \mathbb{R}^3 \quad (\text{if } m = 3) \\[10pt]
+    \underbrace{(\gamma + \sigma)(t)}_{\footnotesize \begin{matrix}\text{addition} \\ \text{of paths}\end{matrix}} &= \underbrace{\gamma(t) + \sigma(t)}_{\footnotesize \begin{matrix}\text{addition} \\ \text{of vectors}\end{matrix}} && \leadsto \qquad \gamma + \sigma : \mathbb{R} \longrightarrow \mathbb{R}^m \\[40pt]
+    \underbrace{(\lambda \gamma)(t)}_{\footnotesize \begin{matrix}\text{multiplication of scalar} \\ \text{function and a path}\end{matrix}} &= \underbrace{\lambda(t)\, \gamma(t)}_{\footnotesize \begin{matrix}\text{multiplication of} \\ \text{scalar and vector}\end{matrix}} && \leadsto \qquad \lambda \gamma : \mathbb{R} \longrightarrow \mathbb{R}^m \\[40pt]
+    \underbrace{(\gamma \cdot \sigma)(t)}_{\footnotesize \begin{matrix}\text{dot product} \\ \text{of paths}\end{matrix}} &= \underbrace{\gamma(t) \cdot \sigma(t)}_{\footnotesize \begin{matrix}\text{dot product} \\ \text{of vectors}\end{matrix}} && \leadsto \qquad \gamma \cdot \sigma : \mathbb{R} \longrightarrow \mathbb{R} \\[40pt]
+    \underbrace{(\gamma \times \sigma)(t)}_{\footnotesize \begin{matrix}\text{cross-product of} \\ \text{paths in } \mathbb{R}^3\end{matrix}} &= \underbrace{\gamma(t) \times \sigma(t)}_{\footnotesize \begin{matrix}\text{cross-product of} \\ \text{vectors in } \mathbb{R}^3\end{matrix}} && \leadsto \qquad \gamma \times \sigma : \mathbb{R} \longrightarrow \mathbb{R}^3 \quad (\text{if } m = 3) \\[10pt]
     \end{aligned}
     $$
 
@@ -803,10 +789,11 @@ def _(BLUE, definition, math, mo, np, panel, theorem, turntable):
                 lines=_lines,
                 points=[((1, 0, 0), "#000000", 4.5, True), ((0, 0, 1), "#000000")] + [((0, _c * _k, 0), "#000000", 2.2) for _k, _ in _ticks],
                 axes=[((0, _c * -4.8, 0), (0, _c * 9.2, 0), "t", 0), ((-1.2, 0, 0), (1.5, 0, 0), "y^1", -120), ((0, 0, -1.2), (0, 0, 1.4), "y^2", 90)],
-                texts=[((0, _c * _k, 0), _name, "#000000", -90) for _k, _name in _ticks],
+                texts=[((0, _c * _k, 0), _name, "#000000", 90 if _k < 0 else -90) for _k, _name in _ticks]  # -pi above the axis, clear of the name of the ring
+                + [((0, _c * 2.5 * math.pi, 1), r"\mathrm{graph}(\gamma)", BLUE, 90, 6), ((1, 0, 0), r"\lim_{t \to 0} \begin{bmatrix} 0 \\ \gamma(t) \end{bmatrix}", "#000000", 162, 25),
+                   ((0, 0, 1), r"\begin{bmatrix} 0 \\ \gamma(0) \end{bmatrix}", "#000000", 35, 8)],
             )
         ],
-        legend=[("line", BLUE, r"\mathrm{graph}(\gamma)", 2.0), ("ring", "#000000", r"(0, \lim_{t \to 0} \gamma(t))"), ("dot", "#000000", r"(0, \gamma(0))")],
         height=400,
     )
 
@@ -892,12 +879,12 @@ def _(definition, mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    a_circle = mo.ui.slider(0, 6.25, 0.05, value=0.8, label="$a$", show_value=True)
+    a_circle = mo.ui.slider(0, 6.25, 0.05, value=0.5, label="$a$", show_value=True)
     return (a_circle,)
 
 
 @app.cell(hide_code=True)
-def _(BLUE, GREEN, GREY, HALF, a_circle, angle_mark, arrow, blank, legend_box, math, mo, np, table):
+def _(BLUE, GREEN, HALF, a_circle, angle_mark, arrow, blank, math, mo, np):
     _a = a_circle.value
     _p = (math.cos(_a), math.sin(_a))
     _v = (-math.sin(_a), math.cos(_a))
@@ -910,24 +897,21 @@ def _(BLUE, GREEN, GREY, HALF, a_circle, angle_mark, arrow, blank, legend_box, m
     _ax.text(0.1, 1.98, "$y^2$", fontsize=13, ha="left", va="center")
     _th = np.linspace(0, 2 * np.pi, 361)
     _ax.plot(np.cos(_th), np.sin(_th), color=BLUE, lw=1.5)
-    angle_mark(_ax, _a, "$a$", GREY)
+    angle_mark(_ax, _a, "$a$", GREEN)
     arrow(_ax, (0, 0), _p, "black")
     arrow(_ax, _p, _tip, GREEN)
     _ax.plot(*_p, "o", color="black", ms=4, zorder=4)
-    legend_box(_fig, [("line", BLUE, r"$\mathrm{Im}(\gamma)$"), ("dot", "black", r"$\gamma(a)$"), ("line", GREEN, r"$\gamma'(a)$")])
-
-    def _f(v):
-        return f"{round(v, 2) + 0.0:.2f}"
+    # gamma(a) just outside the circle, gamma'(a) beyond its tip, Im(gamma) where neither is
+    _ax.text(1.15 * _p[0] if abs(_p[0]) >= 0.35 else 0.1, 1.15 * _p[1] if abs(_p[1]) >= 0.35 else 0.1, r"$\gamma(a)$", fontsize=13, ha="left" if _p[0] > -0.35 else "right", va="bottom" if _p[1] > -0.35 else "top")
+    _cross = _v[0] < -0.35 and 0 < _tip[0] < 0.9  # beyond the tip the name would cross the y^2-axis: right of the tip instead
+    _ax.annotate(r"$\gamma'(a)$", _tip, textcoords="offset points", xytext=(5 if _cross else 5 * _v[0], 5 * _v[1]), color=GREEN, fontsize=13,
+                 ha="left" if _v[0] > 0.35 or _cross else "right" if _v[0] < -0.35 else "center", va="bottom" if _v[1] > 0.35 else "top" if _v[1] < -0.35 else "center")
+    _m = math.radians(next(_d for _d in (225, 315, 135, 45) if min(abs((math.degrees(_a) + _k - _d + 180) % 360 - 180) for _k in (0, 45)) >= 50))
+    _ax.text(1.08 * math.cos(_m), 1.08 * math.sin(_m), r"$\mathrm{Im}(\gamma)$", color=BLUE, fontsize=13, ha="left" if math.cos(_m) > 0 else "right", va="bottom" if math.sin(_m) > 0 else "top")
 
     mo.vstack(
         [
             mo.hstack([a_circle], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"position $\gamma(a)$", rf"$\begin{{bmatrix}} {_f(_p[0])} \\ {_f(_p[1])} \end{{bmatrix}}$"),
-                    (r"velocity $\gamma'(a)$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_f(_v[0])} \\ {_f(_v[1])} \end{{bmatrix}}}}$"),
-                ]
-            ),
             _fig,
         ]
     )
@@ -953,7 +937,7 @@ def _(definition, mo, theorem):
     If $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^m$ is differentiable at $t = a$ with velocity vector $\gamma'(a) \neq \vec{0}$, we call the line through $\vec{x} = \gamma(a)$ in the direction of $\vec{v} = \gamma'(a)$ the **tangent line** to $\gamma$ at $t = a$
 
     $$
-    T_a \gamma = \left\{\, \vec{y} = \gamma(a) + s\, \gamma'(a) \;\middle|\; s \in \mathbb{R} \,\right\}
+    T_a \gamma = \left\{\, \vec{y} = \gamma(a) + s\, \gamma'(a) \mid s \in \mathbb{R} \,\right\}
     $$
     """,
                 "Tangent line",
@@ -963,7 +947,7 @@ def _(definition, mo, theorem):
     **Example.** &nbsp; $\gamma(t) = \begin{bmatrix} t^2 \\ t \end{bmatrix} \quad \leadsto \quad \gamma'(t) = \begin{bmatrix} 2t \\ 1 \end{bmatrix}$
 
     $$
-    T_a \gamma = \left\{\, \vec{y} = \begin{bmatrix} a^2 \\ a \end{bmatrix} + s \begin{bmatrix} 2a \\ 1 \end{bmatrix} \;\middle|\; s \in \mathbb{R} \,\right\}
+    T_a \gamma = \left\{\, \vec{y} = \begin{bmatrix} a^2 \\ a \end{bmatrix} + s \begin{bmatrix} 2a \\ 1 \end{bmatrix} \mid s \in \mathbb{R} \,\right\}
     $$
     """
             ),
@@ -979,42 +963,38 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, GREEN, ORANGE, a_parabola, arrow, blank, legend_box, mo, np, table):
+def _(BLUE, FULL, GREEN, RED, a_parabola, arrow, blank, mo, np):
     _a = a_parabola.value
     _p, _v = (_a**2, _a), (2 * _a, 1.0)
     _tip = (_p[0] + _v[0], _p[1] + _v[1])
 
-    _fig, _ax = blank(FULL, 4.6, (-3.6, 6.4), (-2.7, 3.0))
-    arrow(_ax, (-3.4, 0), (6.1, 0), "black", lw=0.9)
+    _fig, _ax = blank(FULL, 4.6, (-2.2, 4.9), (-2.7, 3.0))  # the drawing cut at y^1 = -2 and y^1 = 4
+    arrow(_ax, (-2.0, 0), (4.6, 0), "black", lw=0.9)
     arrow(_ax, (0, -2.6), (0, 2.8), "black", lw=0.9)
-    _ax.text(6.15, -0.1, "$y^1$", fontsize=13, ha="center", va="top")
+    _ax.text(4.65, -0.1, "$y^1$", fontsize=13, ha="center", va="top")
     _ax.text(-0.12, 2.8, "$y^2$", fontsize=13, ha="right", va="center")
-    _t = np.linspace(-2.45, 2.45, 300)
+    _t = np.linspace(-2, 2, 300)
     _ax.plot(_t**2, _t, color=BLUE, lw=1.5)
-    _s = np.array([-12.0, 12.0])
-    _ax.plot(_p[0] + _s * _v[0], _p[1] + _s * _v[1], color=ORANGE, lw=1.0 if _a != 0 else 2.0, zorder=2 if _a != 0 else 3)  # at a = 0 it lies on the y^2-axis: drawn wider, over it
+    _cut = (4 - _a**2) / _v[0] if _a != 0 else None  # the s at which the line reaches y^1 = 4
+    _s = np.array(sorted([(-2 - _a**2) / _v[0], _cut]) if _a != 0 else [-12.0, 12.0])  # and y^1 = -2
+    _ax.plot(_p[0] + _s * _v[0], _p[1] + _s * _v[1], color=RED, lw=1.0 if _a != 0 else 2.0, zorder=2 if _a != 0 else 3)  # at a = 0 it lies on the y^2-axis: drawn wider, over it
     arrow(_ax, _p, _tip, GREEN)
     _ax.plot(*_p, "o", color="black", ms=4, zorder=4)
-    legend_box(
-        _fig,
-        [("line", BLUE, r"$\mathrm{Im}(\gamma)$"), ("dot", "black", r"$\gamma(a)$"), ("line", GREEN, r"$\gamma'(a)$"), ("line", ORANGE, r"$T_a\gamma$")],
-        loc="outside lower center",
-        ncols=4,
-    )
+    _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
+    _n = np.array((-1.0, 2 * _a)) / np.hypot(1.0, 2 * _a)  # normal to the line, away from the curve
+    _va = "bottom" if _n[1] > 0.35 else "top" if _n[1] < -0.35 else "center"
+    _end = _p + (min(_cut, 2.4 - _a) if _a > 0 else max(_cut, -2.3 - _a) if _a < 0 else -2.4) * np.array(_v)
+    _ax.annotate(r"$T_a\gamma$", _end, textcoords="offset points", xytext=(6 * _n[0], 6 * _n[1]), color=RED, fontsize=13, ha="right", va=_va, zorder=5, bbox=_box)
+    _ax.annotate(r"$\gamma'(a)$", _tip, textcoords="offset points", xytext=(6 * _n[0], 6 * _n[1]), color=GREEN, fontsize=13, ha="right", va=_va, zorder=5, bbox=_box)
+    if abs(_a) >= 0.5:  # inside the curve, below (above) the point
+        _ax.annotate(r"$\gamma(a)$", _p, textcoords="offset points", xytext=(6, -6 if _a > 0 else 6), fontsize=13, ha="left", va="top" if _a > 0 else "bottom", zorder=5, bbox=_box)
+    else:  # near the vertex: left of the y^2-axis
+        _ax.annotate(r"$\gamma(a)$", (-0.1, _a), textcoords="offset points", xytext=(0, 3 if _a >= 0 else -3), fontsize=13, ha="right", va="bottom" if _a >= 0 else "top", zorder=5, bbox=_box)
+    _ax.text(4, -2 if _a >= 0 else 2, r"$\mathrm{Im}(\gamma)$", color=BLUE, fontsize=13, ha="right", va="top" if _a >= 0 else "bottom")  # at the end of the branch the line does not reach
 
     mo.vstack(
         [
             mo.hstack([a_parabola], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"position $\gamma(a)$", rf"$\begin{{bmatrix}} {_p[0] + 0.0:.2f} \\ {_p[1] + 0.0:g} \end{{bmatrix}}$"),
-                    (r"velocity $\gamma'(a)$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_v[0] + 0.0:g} \\ 1 \end{{bmatrix}}}}$"),
-                    (
-                        r"tangent line $T_a \gamma$",
-                        rf"$\textcolor{{{ORANGE}}}{{\left\{{\, \vec{{y}} = \begin{{bmatrix}} {_p[0] + 0.0:.2f} \\ {_p[1] + 0.0:g} \end{{bmatrix}} + s \begin{{bmatrix}} {_v[0] + 0.0:g} \\ 1 \end{{bmatrix}} \;\middle\vert\; s \in \mathbb{{R}} \,\right\}}}}$",
-                    ),
-                ]
-            ),
             _fig,
         ]
     )
@@ -1023,18 +1003,6 @@ def _(BLUE, FULL, GREEN, ORANGE, a_parabola, arrow, blank, legend_box, mo, np, t
 
 @app.cell(hide_code=True)
 def _(mo):
-    def _field():
-        return mo.ui.text(placeholder="?", debounce=True)
-
-    q1_a, q1_b = _field(), _field()
-    return q1_a, q1_b
-
-
-@app.cell(hide_code=True)
-def _(check, mo, q1_a, q1_b):
-    def _ask(label, field, answer):
-        return mo.hstack([mo.md(label), field, mo.md(check(field, answer))], justify="start", align="center")
-
     mo.vstack(
         [
             mo.md(
@@ -1055,12 +1023,7 @@ def _(check, mo, q1_a, q1_b):
     (a) Find $\displaystyle \lim_{t \to 0} \gamma(t)$.
 
     (b) Find $a, b \in \mathbb{R}$ such that $\gamma$ is continuous at $t = 0$.
-    """
-            ),
-            _ask(r"$a =$", q1_a, 0),
-            _ask(r"$b =$", q1_b, 1),
-            mo.md(
-                r"""
+
     ### Question 2
 
     Consider $\sigma : \mathbb{R} \longrightarrow \mathbb{R}^3$, $\sigma(t) = \begin{bmatrix} t \\ \cos(t) \\ \sin(t) \end{bmatrix}$ and $f : \mathbb{R}^3 \longrightarrow \mathbb{R}$, $f(\vec{x}) = (x^2)^2 + (x^3)^2$.
@@ -1074,34 +1037,6 @@ def _(check, mo, q1_a, q1_b):
             ),
         ]
     )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Summary
-
-    - a path $\gamma : A \subseteq \mathbb{R} \longrightarrow \mathbb{R}^m$ is an ordered list of single variable functions $\gamma^1, \dots, \gamma^m$; vector operations extend to paths
-    - $\lim_{t \to a} \gamma(t) = \vec{b}$: we can make $\gamma(t)$ arbitrarily close to $\vec{b}$ by taking $t$ sufficiently close to $a$ (but different from $a$); $\gamma$ is continuous at $t = a$ if
-
-        $$
-        \lim_{t \to a} \gamma(t) = \gamma(a)
-        $$
-    - the derivative (velocity)
-
-        $$
-        \gamma'(a) = \lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a}
-        $$
-
-        $\gamma(a)$ is the position
-    - limits, continuity and derivatives of paths can be computed componentwise
-    - if $\gamma'(a) \neq \vec{0}$, the tangent line to $\gamma$ at $t = a$ is
-
-        $$
-        T_a \gamma = \{\, \vec{y} = \gamma(a) + s\, \gamma'(a) \mid s \in \mathbb{R} \,\}
-        $$
-    """)
     return
 
 

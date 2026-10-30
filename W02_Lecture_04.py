@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 04 · Determinants, areas and volumes", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 • Lecture 04 • Determinants, areas and volumes", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -26,11 +26,11 @@ def _(mo):
     # Palette with fixed roles (figures only; text carries no colour):
     #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (tangent vector, gradient, mean)
-    #   ORANGE a third series, only when three are needed
+    #   GREEN  a result made from them (sum, multiple, angle, tangent vector, gradient)
+    #   ORANGE (ochre) a third object, only when three are needed
     #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
-    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#3f5f8f", "#a8554c", "#4f7f5c", "#b9853f", "#9a9a9a", "#e3ebf4"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
     FULL, HALF = 7.4, 3.6
 
@@ -75,12 +75,13 @@ def _(mo):
 
     def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
         """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
-        One head size and one line weight for every figure, so arrows look alike across lectures."""
+        One line weight for every figure; the head is open and sized in points from the line width,
+        so arrows look alike across lectures at any axis range."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={3 * lw:g},head_width={1.3 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -119,24 +120,15 @@ def _(mo):
 
     def table(rows):
         """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
-        return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
+        _md = mo.md("\n".join(["| | |", "|:--|:--|"] + [f"| {k} | {v} |" for k, v in rows]))
+        return mo.Html(f'<div class="readout">{_md.text}</div>')
 
-    def check(field, answer):
-        """Feedback mark for a numeric answer typed into a text field."""
-        s = field.value.strip().replace(",", ".")
-        if not s:
-            return ""
-        try:
-            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
-        except ValueError:
-            return "enter a number"
-
-    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 04", "Week 02", "Lecture 04 · Determinants, areas and volumes")
+    header("Lecture 04", "Week 02", "Lecture 04 • Determinants, areas and volumes")
     return
 
 
@@ -155,25 +147,7 @@ def _(arrow, math):
         if label:
             ax.annotate(label, tip, textcoords="offset points", xytext=(r * math.cos(d), r * math.sin(d)), ha="center", va="center", color=color, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
 
-    def legend_box(fig, entries, loc="outside right center", ncols=1):
-        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
-        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
-        from matplotlib.lines import Line2D
-        from matplotlib.patches import Patch
-
-        handles = []
-        for kind, c, _label, *style in entries:
-            if kind == "dot":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
-            elif kind == "ring":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
-            elif kind == "line":
-                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
-            else:
-                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
-        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
-
-    return legend_box, vector
+    return (vector,)
 
 
 @app.cell(hide_code=True)
@@ -182,8 +156,8 @@ def _(mo, np):
     # Drawn in the browser on canvases, in the style of the static figures: orthographic views of
     # R^3 = R^2 x R (x^1 towards the viewer, x^2 to the right, y up), surfaces drawn back to front.
     # Dragging turns the view at a fixed scale (all panels of a figure together) and a double click restores
-    # it; a figure redrawn by a slider keeps its view. A legend box explains points, curves and surfaces, so
-    # that no label covers the drawing; only the axes carry labels. Typesetting is done by KaTeX.
+    # it; a figure redrawn by a slider keeps its view. Names sit beside the objects they name. Typesetting is done
+    # by KaTeX.
     import html as _html
     import json as _json
 
@@ -280,11 +254,11 @@ def _(mo, np):
             for (let k = 0; k < ln.p.length; k += 3) idx.push(add(ln.p[k], ln.p[k + 1], ln.p[k + 2]));
             const line = { idx, dash: ln.d, cum: new Float64Array(idx.length) };
             for (let k = 0; k < idx.length - 1; k++)
-              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0 });
+              if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0, flat: ln.b });
             return line;
           });
           for (const d of spec.points) this.dots.push({ i: add(...d.p), c: d.c, r: d.r, h: d.h });
-          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c });
+          for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c, w: h.w, d: h.d });
           // the centre of the scene and the radius of a ball holding it, heights at their drawing scale
           let src = pts;
           if (spec.box) {
@@ -356,7 +330,8 @@ def _(mo, np):
           items.sort((p, q) => p[0] - q[0]);
           g.clearRect(0, 0, W, H);
           g.lineJoin = "round";
-          for (const [, kind, o] of items) {
+          for (let n = 0; n < items.length; n++) {
+            const [, kind, o] = items[n];
             if (kind === 0) {
               const q = o[0];
               g.beginPath();
@@ -369,28 +344,45 @@ def _(mo, np):
               if (o[2] === 1) { g.lineWidth = 0.6; g.setLineDash([]); g.stroke(); }
               g.globalAlpha = 1;
             } else if (kind === 1) {
+              if (o.done) { o.done = false; continue; }
+              let p0 = o, p1 = o;
+              if (o.flat) {  // the pieces of a straight line up to the next surface go in one stroke, so no seams show
+                let grew = true;
+                while (grew) {
+                  grew = false;
+                  for (let m = n + 1; m < items.length && items[m][1] !== 0; m++) {
+                    const q = items[m][2];
+                    if (items[m][1] !== 1 || q.line !== o.line || q.done) continue;
+                    if (q.k === p1.k + 1) { p1 = q; q.done = true; grew = true; }
+                    else if (q.k === p0.k - 1) { p0 = q; q.done = true; grew = true; }
+                  }
+                }
+              }
               g.beginPath();
-              g.moveTo(X[o.a], Y[o.a]);
-              g.lineTo(X[o.b], Y[o.b]);
+              g.moveTo(X[p0.a], Y[p0.a]);
+              g.lineTo(X[p1.b], Y[p1.b]);
               g.strokeStyle = o.c;
               g.lineWidth = o.lw;
               const dash = o.line && o.line.dash;
-              g.lineCap = dash ? "butt" : "round";
+              g.lineCap = dash || o.flat ? "butt" : "round";
               g.setLineDash(dash || []);
-              g.lineDashOffset = dash ? -o.line.cum[o.k] : 0;
+              g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
               g.stroke();
             } else if (kind === 2) {
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
               vx /= len; vy /= len;
-              const bx = X[o.i] - 9 * vx, by = Y[o.i] - 9 * vy;
+              const hl = Math.max(3.5 * o.w, 6), hw = Math.max(1.5 * o.w, 2.6), bx = X[o.i] - hl * vx, by = Y[o.i] - hl * vy;  // open head, as on the page
+              g.strokeStyle = o.c;
+              g.lineWidth = o.w;
+              g.setLineDash([]);
+              g.lineCap = "round";
+              if (!o.d) { g.beginPath(); g.moveTo(X[o.j], Y[o.j]); g.lineTo(X[o.i], Y[o.i]); g.stroke(); }
               g.beginPath();
-              g.moveTo(X[o.i], Y[o.i]);
-              g.lineTo(bx - 3.4 * vy, by + 3.4 * vx);
-              g.lineTo(bx + 3.4 * vy, by - 3.4 * vx);
-              g.closePath();
-              g.fillStyle = o.c;
-              g.fill();
+              g.moveTo(bx - hw * vy, by + hw * vx);
+              g.lineTo(X[o.i], Y[o.i]);
+              g.lineTo(bx + hw * vy, by - hw * vx);
+              g.stroke();
             } else {
               g.beginPath();
               g.arc(X[o.i], Y[o.i], o.r, 0, 2 * Math.PI);
@@ -496,8 +488,8 @@ def _(mo, np):
         axes: (tail, tip, TeX label, direction of the label in degrees), drawn black;
         arrows: (tail, tip, colour[, width, dash]), vectors with a head in their colour;
         arcs: (x1, x2, y, colour[, width]), curves ending in a head, such as a turning arrow;
-        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), short labels such as tick values (names of
-        points and objects go in the legend instead); caption: TeX below the drawing;
+        texts: ((x^1, x^2, y), TeX, colour, direction[, distance]), names of points and objects and tick values,
+        each beside its point; caption: TeX below the drawing;
         box: ((x^1 lo, hi), (x^2 lo, hi), (y lo, hi)) to size the drawing by, instead of its own points."""
         p = {"ys": ys, "surfaces": list(surfaces), "lines": [], "points": [], "heads": [], "labels": [], "caption": caption, "box": box}
         for ln in lines:
@@ -505,20 +497,20 @@ def _(mo, np):
         for tail, tip, label, d in axes:
             a, b = np.asarray(tail, float), np.asarray(tip, float)
             seg = a + np.linspace(0, 0.96, 60)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000"})
+            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000", "w": 1.1})
             p["labels"].append({"p": b.tolist(), "t": label, "c": "#000000", "a": d, "r": 5})
         for q in points:
             p["points"].append({"p": [float(c) for c in q[0]], "c": q[1], "r": q[2] if len(q) > 2 else 4.0, "h": bool(q[3]) if len(q) > 3 else False})
         for ar in arrows:
             a, b = np.asarray(ar[0], float), np.asarray(ar[1], float)
             seg = a + np.linspace(0, 0.96, 40)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2]})
+            p["lines"].append({"p": _flat(*seg.T), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None, "e": 0, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": ar[2], "w": ar[3] if len(ar) > 3 else 1.8, "d": ar[4] if len(ar) > 4 else None})
         for arc in arcs:
             c = np.stack(np.broadcast_arrays(*(np.asarray(v, dtype=float) for v in arc[:3])), -1)
             p["lines"].append({"p": _flat(*c[:-1].T), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8, "d": None, "e": 0})
-            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3]})
+            p["heads"].append({"p": c[-1].tolist(), "q": c[max(0, len(c) - 4)].tolist(), "c": arc[3], "w": arc[4] if len(arc) > 4 else 1.8})
         for tx in texts:
             p["labels"].append({"p": [float(c) for c in tx[0]], "t": tx[1], "c": tx[2], "a": tx[3], "r": tx[4] if len(tx) > 4 else 5})
         return p
@@ -563,10 +555,10 @@ def _(mo):
 
         $$
         A\vec{e}_1 = \begin{bmatrix} a & b \\ c & d \\ e & f \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix}
-        = \underbrace{\begin{bmatrix} a \\ c \\ e \end{bmatrix}}_{\text{1st column of } A} \in \mathbb{R}^3
+        = \underbrace{\begin{bmatrix} a \\ c \\ e \end{bmatrix}}_{\mathclap{\footnotesize \text{1st column of } A}\vphantom{\footnotesize \text{1st column of } A}} \in \mathbb{R}^3
         \qquad \qquad
         A\vec{e}_2 = \begin{bmatrix} a & b \\ c & d \\ e & f \end{bmatrix} \begin{bmatrix} 0 \\ 1 \end{bmatrix}
-        = \underbrace{\begin{bmatrix} b \\ d \\ f \end{bmatrix}}_{\text{2nd column of } A} \in \mathbb{R}^3
+        = \underbrace{\begin{bmatrix} b \\ d \\ f \end{bmatrix}}_{\mathclap{\footnotesize \text{2nd column of } A}\vphantom{\footnotesize \text{2nd column of } A}} \in \mathbb{R}^3
         $$
 
     - in general, $A \in \mathrm{Mat}(m \times n)$: &nbsp; $A = \begin{bmatrix} \vec{A}_1 & \vec{A}_2 & \cdots & \vec{A}_n \end{bmatrix}$, &nbsp; $\vec{A}_i = A\vec{e}_i \in \mathbb{R}^m$, where $\vec{e}_i \in \mathbb{R}^n$ is the standard basis of $\mathbb{R}^n$ (only one non-zero entry)
@@ -663,15 +655,15 @@ def _(Arc, BLUE, GREEN, GREY, HALF, LIGHT, RED, arrow, blank, definition, math, 
     If either column is zero, both the area and determinant are zero. Otherwise
 
     $$
-    \begin{aligned}
+    \begin{align*}
     \text{area} &= (\text{base length}) \times (\text{height}) = \lVert \vec{A}_1 \rVert\, \lVert \vec{A}_2 \rVert \sin\!\big(\theta(\vec{A}_1, \vec{A}_2)\big) \qquad (\theta \in [0, \pi]) \\
     &= \lVert \vec{A}_1 \rVert\, \lVert \vec{A}_2 \rVert \Big( 1 - \cos\!\big(\theta(\vec{A}_1, \vec{A}_2)\big)^2 \Big)^{1/2}
     = \lVert \vec{A}_1 \rVert\, \lVert \vec{A}_2 \rVert \left( 1 - \left( \frac{\vec{A}_1 \cdot \vec{A}_2}{\lVert \vec{A}_1 \rVert\, \lVert \vec{A}_2 \rVert} \right)^{\!2} \right)^{1/2} \\
     &= \Big( \lVert \vec{A}_1 \rVert^2 \lVert \vec{A}_2 \rVert^2 - (\vec{A}_1 \cdot \vec{A}_2)^2 \Big)^{1/2}
     = \Big( (a^2 + c^2)(b^2 + d^2) - (ab + cd)^2 \Big)^{1/2} \\
     &= \Big( \cancel{a^2 b^2} + a^2 d^2 + c^2 b^2 + \cancel{c^2 d^2} - \cancel{a^2 b^2} - \cancel{c^2 d^2} - 2abcd \Big)^{1/2} \\
-    &= \big( a^2 d^2 - 2abcd + b^2 c^2 \big)^{1/2} = \big( (ad - bc)^2 \big)^{1/2} = \lvert \det A \rvert \qquad \square
-    \end{aligned}
+    &= \big( a^2 d^2 - 2abcd + b^2 c^2 \big)^{1/2} = \big( (ad - bc)^2 \big)^{1/2} = \lvert \det A \rvert \tag*{$\square$}
+    \end{align*}
     $$
     """
             ),
@@ -683,7 +675,8 @@ def _(Arc, BLUE, GREEN, GREY, HALF, LIGHT, RED, arrow, blank, definition, math, 
 @app.cell(hide_code=True)
 def _(BLUE, GREEN, GREY, LIGHT, ORANGE, RED, definition, mo, np, panel, patch, theorem, turntable):
     # The parallelepiped spanned by the columns: translucent faces, edges, the height of A3 over the base and the two angles
-    _A = [np.array(v) for v in ((2.0, 0.0, 0.0), (0.3, 2.4, 0.0), (0.2, -1.0, 1.5))]
+    # A3 leans over the base, so that its height falls inside the base, as on the page
+    _A = [np.array(v) for v in ((2.0, 0.0, 0.0), (0.3, 2.4, 0.0), (1.0, 0.9, 1.5))]
     _faces, _edges = [], []
     for _k in range(3):
         _p, _q, _r = _A[_k], _A[(_k + 1) % 3], _A[(_k + 2) % 3]
@@ -700,8 +693,8 @@ def _(BLUE, GREEN, GREY, LIGHT, ORANGE, RED, definition, mo, np, panel, patch, t
 
     _theta, _phi = _arc(_A[0], _A[1], 0.5), _arc(_foot, _A[2], 0.8)
     _fig = turntable(
-        -130,
-        30,
+        -60,
+        22,
         "parallelepiped spanned by the columns A1, A2, A3 of A, with the height of A3 over the base, the angle theta between A1 and A2 and the angle phi between A3 and the base",
         [
             panel(
@@ -715,14 +708,9 @@ def _(BLUE, GREEN, GREY, LIGHT, ORANGE, RED, definition, mo, np, panel, patch, t
                     (_phi[:, 0], _phi[:, 1], _phi[:, 2], GREEN, 1.4),
                 ],
                 arrows=[((0, 0, 0), tuple(_v), _c) for _v, _c in zip(_A, (BLUE, RED, ORANGE))],
-                texts=[(tuple(_theta[28]), r"\theta", GREEN, 100, 3), (tuple(_phi[16]), r"\varphi", GREEN, -10, 4)],
+                texts=[(tuple(_theta[20]), r"\theta", GREEN, -20, 5), (tuple(_phi[16]), r"\varphi", GREEN, -10, 4)]
+                + [(tuple(_v), _n, _c, _d, 7) for _v, _n, _c, _d in zip(_A, (r"\vec{A}_1", r"\vec{A}_2", r"\vec{A}_3"), (BLUE, RED, ORANGE), (-60, 150, 180))],
             )
-        ],
-        legend=[
-            ("line", BLUE, r"\vec{A}_1"),
-            ("line", RED, r"\vec{A}_2"),
-            ("line", ORANGE, r"\vec{A}_3"),
-            ("area", LIGHT, r"\text{parallelepiped}", "#000000"),
         ],
         height=320,
         bias=0.15,
@@ -743,7 +731,7 @@ def _(BLUE, GREEN, GREY, LIGHT, ORANGE, RED, definition, mo, np, panel, patch, t
     the **determinant** of $A$ is the real number
 
     $$
-    \det A = a \det \begin{bmatrix} e & f \\ h & i \end{bmatrix} \underbrace{{} - b \det \begin{bmatrix} d & f \\ g & i \end{bmatrix}}_{\text{note the negative sign!}} + c \det \begin{bmatrix} d & e \\ g & h \end{bmatrix}
+    \det A = a \det \begin{bmatrix} e & f \\ h & i \end{bmatrix} \underbrace{{} - b \det \begin{bmatrix} d & f \\ g & i \end{bmatrix}}_{\mathclap{\footnotesize \text{note the negative sign!}}\vphantom{\footnotesize \text{note the negative sign!}}} + c \det \begin{bmatrix} d & e \\ g & h \end{bmatrix}
     $$
     """,
                 r"Determinant of a $3 \times 3$ matrix",
@@ -785,10 +773,10 @@ def _(BLUE, GREEN, GREY, LIGHT, ORANGE, RED, definition, mo, np, panel, patch, t
             mo.md(
                 r"""
     $$
-    \begin{aligned}
+    \begin{align*}
     \text{volume} &= (\text{base area}) \times \text{height} = \lVert \vec{A}_1 \rVert\, \lVert \vec{A}_2 \rVert \sin\theta \times \lVert \vec{A}_3 \rVert \sin\varphi \\
-    &= \lVert \vec{A}_1 \rVert\, \lVert \vec{A}_2 \rVert\, \lVert \vec{A}_3 \rVert \sin\theta \sin\varphi = \cdots = \lvert \det A \rvert \qquad \square
-    \end{aligned}
+    &= \lVert \vec{A}_1 \rVert\, \lVert \vec{A}_2 \rVert\, \lVert \vec{A}_3 \rVert \sin\theta \sin\varphi = \cdots = \lvert \det A \rvert \tag*{$\square$}
+    \end{align*}
     $$
 
     ($\varphi$ = angle between a vector and a plane: we will need to define this more precisely!)
@@ -833,10 +821,10 @@ def _(mo, theorem):
     \Longleftrightarrow \qquad ad - bc \neq 0 \quad \text{and} \quad e = \frac{d}{ad - bc}, \quad f = -\frac{b}{ad - bc}, \quad g = -\frac{c}{ad - bc}, \quad h = \frac{a}{ad - bc}
     $$
 
-    $\therefore$ &nbsp; $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$ admits inverse if and only if $\det A = ad - bc \neq 0$ &nbsp; $\leadsto$ &nbsp; the inverse is
+    $\therefore$ &nbsp; $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$ admits inverse if and only if $\det A = ad - bc \neq 0$ $\leadsto$&nbsp;the inverse is
 
     $$
-    B = A^{-1} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix} \qquad \square
+    B = A^{-1} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix} \tag*{$\square$}
     $$
 
     $\leadsto$ &nbsp; key intuition:
@@ -865,16 +853,23 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, arrow, legend_box, ma, math, mb, mc, md, mo, plane, table, vector):
+def _(Arc, BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, arrow, ma, math, mb, mc, md, mo, plane, table, vector):
     _a, _b, _c, _d = ma.value, mb.value, mc.value, md.value
     _det = _a * _d - _b * _c + 0.0
 
     def _turn(ax, p, q, ccw, radius):
-        """Curved arrow from the direction of p to the direction of q."""
+        """Circular arc from the direction of p to the direction of q (counterclockwise when ccw), with a head
+        at its end."""
         t1, t2 = math.atan2(p[1], p[0]), math.atan2(q[1], q[0])
-        start = (radius * math.cos(t1), radius * math.sin(t1))
+        span = (t2 - t1) % (2 * math.pi) if ccw else -((t1 - t2) % (2 * math.pi))
+        lo, hi = (t1, t1 + span) if ccw else (t1 + span, t1)
+        ax.add_patch(Arc((0, 0), 2 * radius, 2 * radius, theta1=math.degrees(lo), theta2=math.degrees(hi), color=GREEN, lw=1.4))
         end = (radius * math.cos(t2), radius * math.sin(t2))
-        arrow(ax, start, end, GREEN, connectionstyle=f"arc3,rad={0.35 if ccw else -0.35}")
+        step = math.copysign(min(0.35 * abs(span), 0.2), span)
+        back = (radius * math.cos(t2 - step), radius * math.sin(t2 - step))
+        d = (end[0] - back[0], end[1] - back[1])
+        n = math.hypot(*d)  # the head follows the chord of the last part of the arc
+        arrow(ax, (end[0] - 1e-3 * d[0] / n, end[1] - 1e-3 * d[1] / n), end, GREEN)
 
     _fig = Figure(figsize=(FULL, 4.4), layout="constrained")
     _left, _right = _fig.subplots(1, 2)
@@ -884,9 +879,9 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, arrow, legend_box, ma, math, 
     _left.set_yticks(range(-2, 3))
     _left.fill([0, 1, 1, 0], [0, 0, 1, 1], color=LIGHT, lw=0)
     _left.plot([1, 1, 0], [0, 1, 1], color=GREY, lw=1.0, ls=(0, (4, 3)))
-    vector(_left, (0, 0), (1, 0), BLUE)
-    vector(_left, (0, 0), (0, 1), RED)
-    _turn(_left, (1, 0), (0, 1), True, 0.45)
+    vector(_left, (0, 0), (1, 0), BLUE, r"$\vec{e}_1$", turn=-60)
+    vector(_left, (0, 0), (0, 1), RED, r"$\vec{e}_2$", turn=60)
+    _turn(_left, (1, 0), (0, 1), True, 0.6)
 
     _small = max(abs(_a), abs(_b), abs(_c), abs(_d), abs(_a + _b), abs(_c + _d)) <= 3
     plane(_right, 4.4 if _small else 7.6)  # the frame follows the parallelogram: nothing is clipped
@@ -895,35 +890,18 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, arrow, legend_box, ma, math, 
     _right.set_yticks(_ticks)
     _right.fill([0, _a, _a + _b, _b], [0, _c, _c + _d, _d], color=LIGHT, lw=0)
     _right.plot([_a, _a + _b, _b], [_c, _c + _d, _d], color=GREY, lw=1.0, ls=(0, (4, 3)))
-    vector(_right, (0, 0), (_a, _c), BLUE)
-    vector(_right, (0, 0), (_b, _d), RED)
-    legend_box(
-        _fig,
-        [
-            ("line", BLUE, r"$\vec{e}_1$, $\vec{A}_1 = A\vec{e}_1$"),
-            ("line", RED, r"$\vec{e}_2$, $\vec{A}_2 = A\vec{e}_2$"),
-            ("area", LIGHT, r"unit square, $A$ (unit square)", GREY),
-            ("line", GREEN, r"turn from $\vec{e}_1$ to $\vec{e}_2$, from $\vec{A}_1$ to $\vec{A}_2$"),
-        ],
-        loc="outside lower center",
-        ncols=2,
-    )
+    vector(_right, (0, 0), (_a, _c), BLUE, r"$\vec{A}_1$")
+    vector(_right, (0, 0), (_b, _d), RED, r"$\vec{A}_2$")
     if _det != 0:
-        _r = 0.45 * min(math.hypot(_a, _c), math.hypot(_b, _d), 2.0)
+        _r = 0.6 * min(math.hypot(_a, _c), math.hypot(_b, _d), 2.0)
         _turn(_right, (_a, _c), (_b, _d), _det > 0, max(_r, 0.3))
-        _direction = rf"$\textcolor{{{GREEN}}}{{\text{{{'counter-clockwise' if _det > 0 else 'clockwise'}}}}}$"
-    else:
-        _direction = r"need $\det A \neq 0$"
 
     mo.vstack(
         [
             mo.hstack([ma, mb, mc, md], justify="start", gap=2, wrap=True),
             table(
                 [
-                    (r"$A = \begin{bmatrix} \vec{A}_1 & \vec{A}_2 \end{bmatrix}$", rf"$\begin{{bmatrix}} \textcolor{{{BLUE}}}{{{_a:g}}} & \textcolor{{{RED}}}{{{_b:g}}} \\ \textcolor{{{BLUE}}}{{{_c:g}}} & \textcolor{{{RED}}}{{{_d:g}}} \end{{bmatrix}}$"),
-                    (r"$\det A = ad - bc$", rf"$({_a:g})({_d:g}) - ({_b:g})({_c:g}) = {_det:g}$"),
-                    (r"area of $A$ (unit square) $= \lvert \det A \rvert$", rf"${abs(_det):g}$"),
-                    (r"turn from $\vec{A}_1$ to $\vec{A}_2$", _direction),
+                    (r"$\det A = ad - bc$", rf"${_det:g}$"),
                 ]
             ),
             _fig,
@@ -933,21 +911,26 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, RED, arrow, legend_box, ma, math, 
 
 
 @app.cell(hide_code=True)
-def _(GREEN, mo, np, panel, theorem, turntable):
-    # The standard basis of R^3 as axes, with the turn of the fingers from e1 to e2 (right-hand rule)
-    _s = np.radians(np.linspace(12, 78, 40))
+def _(BLUE, GREEN, mo, np, panel, theorem, turntable):
+    # The standard basis of R^3 and, beside it, the right hand: the fingers turn in the direction from e1 to e2,
+    # the thumb points up along e3
+    _s = np.radians(np.linspace(-40, 180, 110))  # the fingers turn in the direction from e1 to e2
+    _tail = (1 + 0.3 * np.cos(_s[0]), 1 + 0.3 * np.sin(_s[0]))  # the thumb rises above the tail of the turn
     _fig = turntable(
         24,
         26,
-        "the standard basis vectors e1, e2, e3 of R^3 as axes, with the turn from e1 to e2",
+        "the standard basis vectors e1, e2, e3 of R^3, with a turn around e3 in the direction from e1 to e2",
         [
             panel(
                 1.0,
-                axes=[((-0.4, 0, 0), (1.5, 0, 0), r"\vec{e}_1", -135), ((0, -0.4, 0), (0, 1.3, 0), r"\vec{e}_2", 0), ((0, 0, -0.4), (0, 0, 1.3), r"\vec{e}_3", 90)],
-                arcs=[(0.75 * np.cos(_s), 0.75 * np.sin(_s), 0 * _s, GREEN)],
+                # each axis is left out from the origin to the tip of e_i, so that the axis never covers the arrow
+                lines=[([-0.4, 0], [0, 0], [0, 0], "#000000", 1.1), ([1, 1.5], [0, 0], [0, 0], "#000000", 1.1), ([0, 0], [-0.4, 0], [0, 0], "#000000", 1.1),
+                       ([0, 0], [1, 1.4], [0, 0], "#000000", 1.1), ([0, 0], [0, 0], [-0.4, 0], "#000000", 1.1), ([0, 0], [0, 0], [1, 1.4], "#000000", 1.1)],
+                arrows=[((0, 0, 0), (1, 0, 0), BLUE), ((0, 0, 0), (0, 1, 0), BLUE), ((0, 0, 0), (0, 0, 1), BLUE), ((_tail[0], _tail[1], 0.95), (_tail[0], _tail[1], 1.65), GREEN)],
+                arcs=[(1 + 0.3 * np.cos(_s), 1 + 0.3 * np.sin(_s), 0.8 + 0 * _s, GREEN)],
+                texts=[((1, 0, 0), r"\vec{e}_1", BLUE, 180, 8), ((0, 1, 0), r"\vec{e}_2", BLUE, -90, 8), ((0, 0, 1), r"\vec{e}_3", BLUE, 180, 8)],
             )
         ],
-        legend=[("line", GREEN, r"\text{turn from } \vec{e}_1 \text{ to } \vec{e}_2")],
         height=260,
     )
 
@@ -1003,19 +986,6 @@ def _(GREEN, mo, np, panel, theorem, turntable):
             _fig,
         ]
     )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Summary
-
-    - for $A \in \mathrm{Mat}(2 \times 2)$, $\det A = ad - bc$ and $\lvert \det A \rvert$ = area of the parallelogram spanned by the columns of $A$ = area of the image of the unit square
-    - for $A \in \mathrm{Mat}(3 \times 3)$, $\det A$ is defined via three $2 \times 2$ determinants (note the negative sign) and $\lvert \det A \rvert$ = volume of the parallelepiped spanned by the columns of $A$
-    - $A \in \mathrm{Mat}(n \times n)$ admits an inverse if and only if $\det A \neq 0$
-    - $\det A > 0$ preserves, and $\det A < 0$ reverses, the direction of rotations ($n = 2$) or the “handedness” of orthogonal frames ($n = 3$)
-    """)
     return
 
 

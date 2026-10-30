@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 10 · Properties and interpretations of differentiable functions", css_file="bs101.css")
+app = marimo.App(width="medium", app_title="BS101 • Lecture 10 • Properties and interpretations of differentiable functions", css_file="bs101.css")
 
 
 @app.cell(hide_code=True)
@@ -26,11 +26,11 @@ def _(mo):
     # Palette with fixed roles (figures only; text carries no colour):
     #   BLUE   the primary object (the point, the chosen vector, the main curve)
     #   RED    the second object it is compared with
-    #   GREEN  a derived quantity (tangent vector, gradient, mean)
-    #   ORANGE a third series, only when three are needed
+    #   GREEN  a result made from them (sum, multiple, angle, tangent vector, gradient)
+    #   ORANGE (ochre) a third object, only when three are needed
     #   GREY   reference geometry (guides, unit circle, reference curves)
     #   LIGHT  fills and grids
-    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#1b458f", "#b3261e", "#2e7d32", "#e65100", "#888888", "#cfe3f5"
+    BLUE, RED, GREEN, ORANGE, GREY, LIGHT = "#3f5f8f", "#a8554c", "#4f7f5c", "#b9853f", "#9a9a9a", "#e3ebf4"
     # Figure widths: FULL spans the page, HALF sits beside text or in a pair
     FULL, HALF = 7.4, 3.6
 
@@ -75,12 +75,13 @@ def _(mo):
 
     def arrow(ax, tail, tip, color, label=None, at_tip=False, lw=1.4, **kw):
         """Draw the vector from `tail` to `tip` on a 2D axis, labelled at its middle or its tip.
-        One head size and one line weight for every figure, so arrows look alike across lectures."""
+        One line weight for every figure; the head is open and sized in points from the line width,
+        so arrows look alike across lectures at any axis range."""
         ax.annotate(
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": "-|>,head_width=0.15,head_length=0.35", "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={3 * lw:g},head_width={1.3 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -121,22 +122,12 @@ def _(mo):
         """Fixed-label readout table: rows are (label, value) pairs of markdown strings."""
         return mo.md("\n".join(["| | |", "|:--|--:|"] + [f"| {k} | {v} |" for k, v in rows]))
 
-    def check(field, answer):
-        """Feedback mark for a numeric answer typed into a text field."""
-        s = field.value.strip().replace(",", ".")
-        if not s:
-            return ""
-        try:
-            return "correct" if abs(float(s) - answer) < 1e-6 else "try again"
-        except ValueError:
-            return "enter a number"
-
-    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, check, corollary, definition, header, note, plane, postulate, proposition, table, theorem
+    return BLUE, FULL, GREEN, GREY, HALF, LIGHT, ORANGE, RED, arrow, blank, blob, corollary, definition, header, note, plane, postulate, proposition, table, theorem
 
 
 @app.cell(hide_code=True)
 def _(header):
-    header("Lecture 10", "Week 05", "Lecture 10 · Properties and interpretations of differentiable functions")
+    header("Lecture 10", "Week 05", "Lecture 10 • Properties and interpretations of differentiable functions")
     return
 
 
@@ -169,25 +160,7 @@ def _(arrow):
         if ylabel:
             ax.annotate(ylabel, (0, ylim[1]), textcoords="offset points", xytext=(6, -2), fontsize=12, ha="left", va="top")
 
-    def legend_box(fig, entries, loc="outside right center", ncols=1):
-        """A legend box for the figure, so that no label covers the drawing: entries (kind, colour, label[, style])
-        with kind "dot", "ring", "line" (style: line style) or "area" (style: edge colour)."""
-        from matplotlib.lines import Line2D
-        from matplotlib.patches import Patch
-
-        handles = []
-        for kind, c, _label, *style in entries:
-            if kind == "dot":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, color=c))
-            elif kind == "ring":
-                handles.append(Line2D([], [], ls="none", marker="o", ms=6, mfc="white", mec=c, mew=1.3))
-            elif kind == "line":
-                handles.append(Line2D([], [], color=c, lw=1.6, ls=style[0] if style else "-"))
-            else:
-                handles.append(Patch(facecolor=c, edgecolor=style[0] if style else c, lw=1.0))
-        fig.legend(handles, [e[2] for e in entries], loc=loc, ncols=ncols, fontsize=12, frameon=True, fancybox=False, edgecolor="#c8c8c8")
-
-    return cross_axes, legend_box
+    return (cross_axes,)
 
 
 @app.cell(hide_code=True)
@@ -215,7 +188,7 @@ def _(mo):
 
         $$
         \Longrightarrow \qquad Df(\vec{a})(\vec{v}) = v^1 \frac{\partial f}{\partial x^1}(\vec{a}) + v^2 \frac{\partial f}{\partial x^2}(\vec{a})
-        = \underbrace{\begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) & \dfrac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix}}_{\text{matrix of partial derivatives}} \begin{bmatrix} v^1 \\ v^2 \end{bmatrix}
+        = \underbrace{\begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) & \dfrac{\partial f}{\partial x^2}(\vec{a}) \end{bmatrix}}_{\mathclap{\footnotesize \text{matrix of partial derivatives}}\vphantom{\footnotesize \text{matrix of partial derivatives}}} \begin{bmatrix} v^1 \\ v^2 \end{bmatrix}
         $$
 
     - (4) $Df(\vec{a})(\vec{x} - \vec{a})$ is a linear approximation to $f(\vec{x}) - f(\vec{a})$ &nbsp; (it is this approximation that allows us to call $Df(\vec{a})$ the derivative)
@@ -283,12 +256,12 @@ def _(definition, mo, theorem):
     $$
 
     $$
-    \begin{aligned}
+    \begin{align*}
     \Longrightarrow \qquad \lim_{\vec{x} \to \vec{a}} \big( f(\vec{x}) - f(\vec{a}) \big)
-    &= \underbrace{\lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert}\, \lVert \vec{x} - \vec{a} \rVert}_{= \,0 \cdot 0}
-    {} + \underbrace{\lim_{\vec{x} \to \vec{a}} Df(\vec{a})(\vec{x} - \vec{a})}_{= \,0 \ (\text{linear maps are continuous})} \\
-    &= 0 \qquad \square
-    \end{aligned}
+    &= \underbrace{\lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert}\, \lVert \vec{x} - \vec{a} \rVert}_{\mathclap{\footnotesize = \,0 \cdot 0}\vphantom{\footnotesize = \,0 \cdot 0}}
+    {} + \underbrace{\lim_{\vec{x} \to \vec{a}} Df(\vec{a})(\vec{x} - \vec{a})}_{\mathclap{\footnotesize \begin{matrix} = \,0 \\ (\text{linear maps are continuous}) \end{matrix}}\vphantom{\footnotesize \begin{matrix} = \,0 \\ (\text{linear maps are continuous}) \end{matrix}}} \\[4em]
+    &= 0 \tag*{$\square$}
+    \end{align*}
     $$
 
     **Example.**
@@ -377,7 +350,7 @@ def _(definition, mo):
     Given $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ differentiable at $\vec{x} = \vec{a}$
 
     $$
-    Df(\vec{a}) = \underbrace{\begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) & \dfrac{\partial f}{\partial x^2}(\vec{a}) & \cdots & \dfrac{\partial f}{\partial x^n}(\vec{a}) \end{bmatrix}}_{\mathrm{Mat}(1 \times n)} : \mathbb{R}^n \longrightarrow \mathbb{R}
+    Df(\vec{a}) = \underbrace{\begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) & \dfrac{\partial f}{\partial x^2}(\vec{a}) & \cdots & \dfrac{\partial f}{\partial x^n}(\vec{a}) \end{bmatrix}}_{\mathclap{\footnotesize \in \mathrm{Mat}(1 \times n)}\vphantom{\footnotesize \in \mathrm{Mat}(1 \times n)}} : \mathbb{R}^n \longrightarrow \mathbb{R}
     $$
 
     is called
@@ -393,7 +366,7 @@ def _(definition, mo):
     We define the **gradient** of $f$ at $\vec{x} = \vec{a}$ as the vector
 
     $$
-    \vec{\nabla} f(\vec{a}) = \underbrace{\begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) \\[8pt] \dfrac{\partial f}{\partial x^2}(\vec{a}) \\ \vdots \\ \dfrac{\partial f}{\partial x^n}(\vec{a}) \end{bmatrix}}_{\mathrm{Mat}(n \times 1) \,\neq\, \mathrm{Mat}(1 \times n)} \in \mathbb{R}^n
+    \vec{\nabla} f(\vec{a}) = \underbrace{\begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) \\[8pt] \dfrac{\partial f}{\partial x^2}(\vec{a}) \\ \vdots \\ \dfrac{\partial f}{\partial x^n}(\vec{a}) \end{bmatrix}}_{\mathclap{\footnotesize \mathrm{Mat}(n \times 1) \,\neq\, \mathrm{Mat}(1 \times n)}\vphantom{\footnotesize \mathrm{Mat}(n \times 1) \,\neq\, \mathrm{Mat}(1 \times n)}} \in \mathbb{R}^n
     $$
     """,
                 "Gradient",
@@ -433,10 +406,10 @@ def _(definition, mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, GREEN, HALF, RED, arrow, blank, cross_axes, math, mo, np, theorem):
-    _R, _r, _phi = 2.4, 0.8, math.radians(30)
-    _fig, _ax = blank(HALF, 2.55, (-2.95, 6.95), (-2.95, 4.05))
-    cross_axes(_ax, (-2.9, 6.9), (-2.9, 4.0), "$x^1$", "$x^2$")
+def _(BLUE, GREEN, RED, arrow, blank, cross_axes, math, mo, np, theorem):
+    _R, _r, _phi = 1.3, 0.45, math.radians(40)
+    _fig, _ax = blank(4.0, 3.3, (-1.75, 3.55), (-1.6, 2.75))
+    cross_axes(_ax, (-1.7, 3.5), (-1.55, 2.7), "$x^1$", "$x^2$")
     _th = np.linspace(0, 2 * np.pi, 200)
     _ax.plot(_R * np.cos(_th), _R * np.sin(_th), color=BLUE, lw=1.4)
     _ax.plot(_r * np.cos(_th), _r * np.sin(_th), color=RED, lw=1.4)
@@ -444,10 +417,10 @@ def _(BLUE, GREEN, HALF, RED, arrow, blank, cross_axes, math, mo, np, theorem):
     arrow(_ax, _a, (3 * _a[0], 3 * _a[1]), GREEN)
     arrow(_ax, (0, 0), _a, "black")
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
-    _ax.text(1.3, 0.75, r"$\vec{a}$", fontsize=13, ha="left", va="top", bbox=_box)
-    _ax.text(4.5, 2.1, r"$\vec{\nabla} f(\vec{a}) = 2\vec{a}$", color=GREEN, fontsize=13, ha="left", va="top")
-    _ax.text(-1.75, 1.9, r"$f^{-1}(R^2)$", color=BLUE, fontsize=12, ha="right", va="bottom")
-    _ax.text(-0.95, -1.2, r"$f^{-1}(r^2)$", color=RED, fontsize=12, ha="center", va="center")
+    _ax.text(0.72, 0.5, r"$\vec{a}$", fontsize=13, ha="left", va="top", bbox=_box)
+    _ax.text(2.0, 1.3, r"$\vec{\nabla} f(\vec{a}) = 2\vec{a}$", color=GREEN, fontsize=13, ha="left", va="top")
+    _ax.text(0.95, -0.95, r"$f^{-1}(R^2)$", color=BLUE, fontsize=12, ha="left", va="top")
+    _ax.text(-0.5, -0.72, r"$f^{-1}(r^2)$", color=RED, fontsize=12, ha="center", va="center")
 
     mo.vstack(
         [
@@ -466,7 +439,7 @@ def _(BLUE, GREEN, HALF, RED, arrow, blank, cross_axes, math, mo, np, theorem):
 
     $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a})$ points in the direction of largest growth of $f$ at $\vec{x} = \vec{a}$
 
-    $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a})$ is the direction of steepest ascent of $f$ at $\vec{x} = \vec{a}$! $\square$
+    $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a})$ is the direction of steepest ascent of $f$ at $\vec{x} = \vec{a}$! <span class=qed>$\square$</span>
 
     **Example.**
 
@@ -500,9 +473,9 @@ def _(BLUE, GREEN, HALF, RED, arrow, blank, cross_axes, math, mo, np, theorem):
     $$
 
     $$
-    \vec{v} = \begin{bmatrix} v^1 \\ v^2 \end{bmatrix} \in \underbrace{\big( \vec{\nabla} f(\vec{a}) \big)^{\perp}}_{\text{orthogonal complement of } \vec{\nabla} f(\vec{a})},
+    \vec{v} = \begin{bmatrix} v^1 \\ v^2 \end{bmatrix} \in \underbrace{\big( \vec{\nabla} f(\vec{a}) \big)^{\perp}}_{\mathclap{\footnotesize \text{orthogonal complement of } \vec{\nabla} f(\vec{a})}\vphantom{\footnotesize \text{orthogonal complement of } \vec{\nabla} f(\vec{a})}},
     \qquad
-    f^{-1}(R^2) = \left\{\, \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \;\middle|\; (x^1)^2 + (x^2)^2 = R^2 \,\right\}
+    f^{-1}(R^2) = \left\{\, \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \mid (x^1)^2 + (x^2)^2 = R^2 \,\right\}
     $$
     """
             ),
@@ -519,50 +492,47 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, ORANGE, cross_axes, ga1, ga2, legend_box, math, mo, np, table, vector):
+def _(BLUE, Figure, GREEN, GREY, LIGHT, RED, cross_axes, ga1, ga2, math, mo, np, vector):
     _a = (round(ga1.value, 10) + 0.0, round(ga2.value, 10) + 0.0)
     _R = math.hypot(*_a)
     _grad = (2 * _a[0], 2 * _a[1])
     _v = (-_a[1] + 0.0, _a[0])  # one vector orthogonal to the gradient
-    _lim = 3.8 if max(abs(_grad[0] + _a[0]), abs(_grad[1] + _a[1])) <= 3 else 5.6  # the frame follows the gradient: nothing is clipped
 
-    _fig = Figure(figsize=(HALF, HALF + 0.7 if _R > 0 else HALF), layout="constrained")  # room for the legend
+    _ext = max(abs(_grad[0] + _a[0]), abs(_grad[1] + _a[1]), abs(_a[0] + _v[0]), abs(_a[1] + _v[1]))
+    _lim = next(_l for _e, _l in ((0.375, 0.475), (0.75, 0.95), (1.5, 1.9), (3, 3.8), (math.inf, 5.6)) if _ext <= _e)  # the frame follows the drawing: nothing is clipped, and near the origin it zooms in so the names keep clear of each other
+
+    _fig = Figure(figsize=(4.6, 4.6), layout="constrained")
     _ax = _fig.subplots()
     _ax.set_xlim(-_lim, _lim)
     _ax.set_ylim(-_lim, _lim)
     _ax.set_aspect("equal")
     _ax.axis("off")
     _th = np.linspace(0, 2 * np.pi, 200)
-    for _r in (1, 2, 3, 4, 5):
+    for _r in np.arange(1, 7) * min(1, _lim / 3.8):  # other level sets, as many across the frame at every zoom
         _ax.plot(_r * np.cos(_th), _r * np.sin(_th), color=LIGHT, lw=0.8)
     cross_axes(_ax, (-_lim, _lim), (-_lim, _lim), "$x^1$", "$x^2$")
     if _R > 0:
         _ax.plot(_R * np.cos(_th), _R * np.sin(_th), color=BLUE, lw=1.4)
-        _t = (-_a[1] / _R, _a[0] / _R)
-        _ax.plot([_a[0] - 2.2 * _t[0], _a[0] + 2.2 * _t[0]], [_a[1] - 2.2 * _t[1], _a[1] + 2.2 * _t[1]], color=GREY, lw=1.0, ls=(0, (4, 3)))
-        vector(_ax, _a, (_a[0] + _grad[0], _a[1] + _grad[1]), GREEN, r"$\vec{\nabla} f(\vec{a})$", 0, r=22)
-        vector(_ax, _a, (_a[0] + _v[0], _a[1] + _v[1]), ORANGE, r"$\vec{v}$", 45, r=16)
-        _crowded = _R < 0.5  # near the origin the label of a would pile up on the others
+        _t, _u = (-_a[1] / _R, _a[0] / _R), (_a[0] / _R, _a[1] / _R)
+        _q = min(0.055 * _lim, 0.3 * _R)  # right-angle mark between v and the gradient
+        _ax.plot([_a[0] + _q * _t[0], _a[0] + _q * (_t[0] + _u[0]), _a[0] + _q * _u[0]], [_a[1] + _q * _t[1], _a[1] + _q * (_t[1] + _u[1]), _a[1] + _q * _u[1]], color=GREY, lw=0.8)
+        vector(_ax, _a, (_a[0] + _grad[0], _a[1] + _grad[1]), GREEN)
+        _gap = 27 * abs(_u[1]) + 9 * abs(_u[0]) + 3  # its name beside the arrow, near its tip, on its left (the side of v)
+        _ax.annotate(r"$\vec{\nabla} f(\vec{a})$", (2.5 * _a[0], 2.5 * _a[1]), textcoords="offset points", xytext=(-_gap * _u[1], _gap * _u[0]), ha="center", va="center",
+                     color=GREEN, fontsize=13, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
+        vector(_ax, _a, (_a[0] + _v[0], _a[1] + _v[1]), RED, r"$\vec{v}$", -35, r=14)  # its name beyond the tip, turned away from the circle
+        _crowded = _R < 0.13 * _lim  # a very short a: its name would pile up on the others
         vector(_ax, (0, 0), _a, "black", None if _crowded else r"$\vec{a}$", -45, r=16)
-        legend_box(_fig, [("line", BLUE, "$f^{-1}(R^2)$"), ("line", GREY, "tangent line to $f^{-1}(R^2)$", (0, (4, 3)))], loc="outside lower center")
-        _perp = rf"$\textcolor{{{ORANGE}}}{{\begin{{bmatrix}} {_v[0]:g} \\ {_v[1]:g} \end{{bmatrix}}}}$"
-        _dot = rf"$({_grad[0]:g})({_v[0]:g}) + ({_grad[1]:g})({_v[1]:g}) = 0$"
+        _c, _s = -_u[0], -_u[1]  # the circle's name on the side opposite a, just outside it
+        _gap = 23 * abs(_c) + 8 * abs(_s) + 4
+        _ax.annotate("$f^{-1}(R^2)$", (_R * _c, _R * _s), textcoords="offset points", xytext=(_gap * _c, _gap * _s), ha="center", va="center",
+                     color=BLUE, fontsize=12, zorder=5, bbox={"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"})
     else:
         vector(_ax, (0, 0), _a, "black", r"$\vec{a}$", 0)
-        _perp = _dot = r"need $\vec{\nabla} f(\vec{a}) \neq \vec{0}$"
 
     mo.vstack(
         [
             mo.hstack([ga1, ga2], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"$\vec{a}$", rf"$\begin{{bmatrix}} {_a[0]:g} \\ {_a[1]:g} \end{{bmatrix}}$"),
-                    (r"$f(\vec{a}) = R^2$", rf"$\textcolor{{{BLUE}}}{{{_R**2:.2f}}}$"),
-                    (r"$\vec{\nabla} f(\vec{a}) = 2\vec{a}$", rf"$\textcolor{{{GREEN}}}{{\begin{{bmatrix}} {_grad[0]:g} \\ {_grad[1]:g} \end{{bmatrix}}}}$"),
-                    (r"$\vec{v} = \begin{bmatrix} -a^2 \\ a^1 \end{bmatrix} \in \big( \vec{\nabla} f(\vec{a}) \big)^{\perp}$", _perp),
-                    (r"$\vec{\nabla} f(\vec{a}) \cdot \vec{v}$", _dot),
-                ]
-            ),
             _fig,
         ]
     )
@@ -570,8 +540,8 @@ def _(BLUE, Figure, GREEN, GREY, HALF, LIGHT, ORANGE, cross_axes, ga1, ga2, lege
 
 
 @app.cell(hide_code=True)
-def _(BLUE, GREEN, GREY, HALF, arrow, blank, definition, legend_box, mo, np, theorem):
-    _fig, _ax = blank(HALF, 2.45, (-2.3, 2.9), (-1.05, 1.85))
+def _(BLUE, GREEN, GREY, arrow, blank, definition, mo, np, theorem):
+    _fig, _ax = blank(4.6, 2.57, (-2.3, 2.9), (-1.05, 1.85))
     _x = np.linspace(-2.1, 2.1, 100)
     _ax.plot(_x, -0.12 * _x**2 - 0.15 * _x, color=BLUE, lw=1.4)
     _n = np.array([0.15, 1.0]) / np.hypot(0.15, 1.0)
@@ -582,7 +552,7 @@ def _(BLUE, GREEN, GREY, HALF, arrow, blank, definition, legend_box, mo, np, the
     _ax.plot(0, 0, "o", color="black", ms=4, zorder=4)
     _ax.text(0.38, 1.4, r"$\vec{\nabla} f(\vec{a})$", color=GREEN, fontsize=13, ha="left", va="center")
     _ax.text(2.0, -0.55, r"$f^{-1}(b)$", color=BLUE, fontsize=13, ha="left", va="bottom")
-    legend_box(_fig, [("dot", "black", r"$\vec{a}$")], loc="outside lower center")
+    _ax.text(-0.08, -0.1, r"$\vec{a}$", fontsize=13, ha="right", va="top")
 
     mo.vstack(
         [
@@ -620,7 +590,7 @@ def _(BLUE, GREEN, GREY, HALF, arrow, blank, definition, legend_box, mo, np, the
 
     $$
     \leadsto \quad \mathrm{graph}(g) = \text{tangent line to } \mathrm{graph}(f) \text{ at } \begin{bmatrix} a \\ f(a) \end{bmatrix}
-    = \left\{\, \begin{bmatrix} x \\ y \end{bmatrix} \;\middle|\; y = f(a) + f'(a)(x - a),\ x \in \mathbb{R} \,\right\}
+    = \left\{\, \begin{bmatrix} x \\ y \end{bmatrix} \mid y = f(a) + f'(a)(x - a),\ x \in \mathbb{R} \,\right\}
     $$
     """
             ),
@@ -631,7 +601,7 @@ def _(BLUE, GREEN, GREY, HALF, arrow, blank, definition, legend_box, mo, np, the
     $$
     \begin{aligned}
     \mathrm{graph}(g) &= \text{plane in } \mathbb{R}^3 = \mathbb{R}^2 \times \mathbb{R} \text{ through } \begin{bmatrix} a^1 \\ a^2 \\ f(\vec{a}) \end{bmatrix} \text{ with normal } \vec{n} = \begin{bmatrix} \dfrac{\partial f}{\partial x^1}(\vec{a}) \\[8pt] \dfrac{\partial f}{\partial x^2}(\vec{a}) \\[8pt] -1 \end{bmatrix} \\[4pt]
-    &= \left\{\, \begin{bmatrix} x^1 \\ x^2 \\ y \end{bmatrix} \;\middle|\; y = f(\vec{a}) + \frac{\partial f}{\partial x^1}(\vec{a})\, (x^1 - a^1) + \frac{\partial f}{\partial x^2}(\vec{a})\, (x^2 - a^2),\ \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \in \mathbb{R}^2 \,\right\}
+    &= \left\{\, \begin{bmatrix} x^1 \\ x^2 \\ y \end{bmatrix} \mid y = f(\vec{a}) + \frac{\partial f}{\partial x^1}(\vec{a})\, (x^1 - a^1) + \frac{\partial f}{\partial x^2}(\vec{a})\, (x^2 - a^2),\ \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \in \mathbb{R}^2 \,\right\}
     \end{aligned}
     $$
 
@@ -650,18 +620,6 @@ def _(BLUE, GREEN, GREY, HALF, arrow, blank, definition, legend_box, mo, np, the
 
 @app.cell(hide_code=True)
 def _(mo):
-    def _field():
-        return mo.ui.text(placeholder="?", debounce=True)
-
-    q_d1, q_d2 = _field(), _field()
-    return q_d1, q_d2
-
-
-@app.cell(hide_code=True)
-def _(check, mo, q_d1, q_d2):
-    def _ask(label, field, answer):
-        return mo.hstack([mo.md(label), field, mo.md(check(field, answer))], justify="start", align="center")
-
     mo.vstack(
         [
             mo.md(
@@ -672,17 +630,12 @@ def _(check, mo, q_d1, q_d2):
     f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = \ln(x^1 x^2)
     $$
 
-    (a) Compute $\dfrac{\partial f}{\partial x^1}$, $\dfrac{\partial f}{\partial x^2}$.
+    (a) Compute $\partial f / \partial x^1$, $\partial f / \partial x^2$.
 
     (b) Where is $f$ $C^1$-smooth?
 
     (c) For $\vec{a} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$, write the derivative of $f$ at $\vec{a}$; write the gradient of $f$ at $\vec{a}$.
-    """
-            ),
-            _ask(r"$\dfrac{\partial f}{\partial x^1}(\vec{a}) =$", q_d1, 1),
-            _ask(r"$\dfrac{\partial f}{\partial x^2}(\vec{a}) =$", q_d2, 0.5),
-            mo.md(
-                r"""
+
     (d) Find all $\vec{v} = \begin{bmatrix} v^1 \\ v^2 \end{bmatrix}$ for which $Df(\vec{a})(\vec{v}) = 0$.
 
     (e) Sketch $f^{-1}(\ln(2))$ and draw $\vec{\nabla} f(\vec{a})$ at $\vec{a}$.
@@ -690,32 +643,6 @@ def _(check, mo, q_d1, q_d2):
             ),
         ]
     )
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Summary
-
-    - differentiable at $\vec{x} = \vec{a}$ $\Longrightarrow$ continuous at $\vec{x} = \vec{a}$
-
-        continuous partials at $\vec{x} = \vec{a}$ ($C^1$-smooth) $\Longrightarrow$ differentiable at $\vec{x} = \vec{a}$ (sufficient, but not necessary)
-    - the derivative $Df(\vec{a}) \in \mathrm{Mat}(1 \times n)$ is the map that calculates directional derivatives; the gradient $\vec{\nabla} f(\vec{a}) \in \mathbb{R}^n$ is a vector, and
-
-        $$
-        Df(\vec{a})(\vec{v}) = \vec{\nabla} f(\vec{a}) \cdot \vec{v}
-        $$
-    - if $\vec{\nabla} f(\vec{a}) \neq \vec{0}$: $\vec{\nabla} f(\vec{a})$ is the direction of steepest ascent, $-\vec{\nabla} f(\vec{a})$ of steepest descent, and $\big( \vec{\nabla} f(\vec{a}) \big)^{\perp}$ the directions with no ascent / descent
-    - $\vec{\nabla} f(\vec{a}) \perp f^{-1}(b)$ for $b = f(\vec{a})$
-    - the affine approximation
-
-        $$
-        g(\vec{x}) = f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a})
-        $$
-
-        for $n = 2$, $\mathrm{graph}(g)$ is the tangent plane to $\mathrm{graph}(f)$
-    """)
     return
 
 
