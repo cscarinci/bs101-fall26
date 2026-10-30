@@ -766,6 +766,7 @@ def _(BLUE, Figure, GREY, HALF, LIGHT, ORANGE, RED, cross_axes, mo, np, panel, s
                     ((0.55, 0.75, 0), "D", BLUE, 90, 0),
                     ((0.75, 0.5625, -0.703), r"f(\gamma(t))", RED, 160, 18),
                     ((0, 1, -2), r"f(\sigma(t))", ORANGE, -100, 60),
+                    ((-1.15, 0.5, -1.65), r"y = f(\vec{x})", "#000000", 150, 22),
                 ],
                 box=((-1.2, 2.2), (-0.3, 1.2), (-2.9, 1.1)),  # sized to D and [2; 0]; the faint box may reach past it
             )
