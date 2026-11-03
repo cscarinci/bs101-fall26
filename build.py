@@ -38,6 +38,7 @@ TITLES = {  # lecture number -> title shown on the index
     15: "Global extrema on closed and bounded domains",
     16: "Method of Lagrange multipliers",
     17: "Differentiation of vector fields",
+    18: "Gradient vector fields and curl",
 }
 
 DRAFTS = set()  # lectures kept in the repo but not published

@@ -54,3 +54,6 @@ a[href="https://github.com/marimo-team/marimo"] { display: none !important; }
 .katex .clap > .katex-inner { transform: translateX(-50%); }
 .katex .clap > .katex-inner > * { margin-left: 0 !important; margin-right: 0 !important; }
 .katex .rlap > .katex-inner:has(> [style*="color: transparent"]) { display: none; }
+.markdown .chain { display: block; text-align: center; line-height: 1.55; margin: 0.9rem 0; }
+.markdown .chain .katex, .markdown .chain marimo-tex { display: inline-block; margin: 0.45em 0.1em; }
+.markdown .nw { white-space: nowrap; }
