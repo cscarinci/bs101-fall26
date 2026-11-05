@@ -39,6 +39,7 @@ TITLES = {  # lecture number -> title shown on the index
     16: "Method of Lagrange multipliers",
     17: "Differentiation of vector fields",
     18: "Gradient vector fields and curl",
+    19: "Integration along paths",
 }
 
 DRAFTS = set()  # lectures kept in the repo but not published
