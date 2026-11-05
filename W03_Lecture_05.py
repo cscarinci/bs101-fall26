@@ -150,8 +150,8 @@ def _(mo, np):
       html, body { margin: 0; padding: 0; background: transparent; overflow: hidden;
                    font-family: KaTeX_Main, "Latin Modern Roman", Georgia, serif; }
       #o { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 16px; }
-      #g { position: relative; flex: 1 1 300px; min-width: 240px; max-width: __MAXW__px; display: grid;
-           grid-template-columns: repeat(__COLS__, minmax(0, 1fr)); gap: 6px 14px; touch-action: none; cursor: grab;
+      #g { position: relative; flex: 1 1 300px; min-width: 240px; max-width: var(--maxw); display: grid;
+           grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 6px 14px; touch-action: none; cursor: grab;
            user-select: none; -webkit-user-select: none; }
       @media (max-width: 520px) { #g { grid-template-columns: minmax(0, 1fr); } }
       #g.drag { cursor: grabbing; }
@@ -166,10 +166,15 @@ def _(mo, np):
       .it svg { flex: 0 0 24px; }
       #hint { position: absolute; right: 0; bottom: 0; color: #888; opacity: 0.7; font: 15px Georgia, serif; }
     </style></head><body>
-    <div id="o"><div id="g" role="img" aria-label="__ALT__"><div id="hint">&#10227;</div></div><div id="lg"></div></div>
+    <div id="o"><div id="g" role="img"><div id="hint">&#10227;</div></div><div id="lg"></div></div>
     <script>
-    (function () {
-      const S = __SCENE__;
+    // the scene is not in this page but in an element of the notebook beside the frame (or, for a figure with a slider,
+    // in the slider's cell), which a slider changes: the page then redraws in place and the frame is never rebuilt
+    const box = window.frameElement.closest(".bs3d"), P = window.parent.document;
+    const find = () => box.querySelector("[data-scene]") || P.querySelector('[data-bs3d="' + window.frameElement.dataset.bs3d + '"]');
+    (function start() { const h = find(); if (h) main(h.dataset.scene); else setTimeout(start, 50); })();
+    function main(shown) {
+      let S = JSON.parse(shown);
       const RAD = Math.PI / 180, L = [0.3, -0.4, 0.87];
       const lit = [247, 251, 255], dark = [201, 223, 244], lit2 = [219, 235, 251], dark2 = [163, 194, 230];
       const rgb = (a, b, k) => "rgb(" + [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * k)).join(",") + ")";
@@ -385,23 +390,34 @@ def _(mo, np):
       }
 
       const grid = document.getElementById("g"), out = document.getElementById("o");
-      const scenes = S.panels.map((p) => new Scene(p, grid));
-      const Rmax = Math.max(...scenes.map((s) => s.R));
       const lg = document.getElementById("lg");
-      for (const e of S.legend) {
-        const it = document.createElement("div"), t = document.createElement("span");
-        it.className = "it";
-        const dash = e.d ? ` stroke-dasharray="${e.d.join(" ")}"` : "";
-        it.innerHTML = {
-          dot: `<svg width="24" height="14"><circle cx="12" cy="7" r="4.2" fill="${e.c}"/></svg>`,
-          ring: `<svg width="24" height="14"><circle cx="12" cy="7" r="3.8" fill="#fff" stroke="${e.c}" stroke-width="1.5"/></svg>`,
-          line: `<svg width="24" height="14"><line x1="1" y1="7" x2="23" y2="7" stroke="${e.c}" stroke-width="${e.w || 2}"${dash}/></svg>`,
-          area: `<svg width="24" height="14"><rect x="2" y="1.5" width="20" height="11" fill="${e.c}" fill-opacity="${e.o || 1}" stroke="${e.e || e.c}" stroke-width="1.2"/></svg>`,
-        }[e.k];
-        tex(t, e.t);
-        it.appendChild(t);
-        lg.appendChild(it);
+      let scenes = [], Rmax = 0;
+      function build() {  // the drawings and the legend of the scene S
+        for (const s of scenes) s.box.remove();
+        texs.length = 0;
+        lg.replaceChildren();
+        grid.style.setProperty("--maxw", S.maxw + "px");
+        grid.style.setProperty("--cols", S.cols);
+        grid.setAttribute("aria-label", S.alt);
+        window.frameElement.title = S.alt;
+        scenes = S.panels.map((p) => new Scene(p, grid));
+        Rmax = Math.max(...scenes.map((s) => s.R));
+        for (const e of S.legend) {
+          const it = document.createElement("div"), t = document.createElement("span");
+          it.className = "it";
+          const dash = e.d ? ` stroke-dasharray="${e.d.join(" ")}"` : "";
+          it.innerHTML = {
+            dot: `<svg width="24" height="14"><circle cx="12" cy="7" r="4.2" fill="${e.c}"/></svg>`,
+            ring: `<svg width="24" height="14"><circle cx="12" cy="7" r="3.8" fill="#fff" stroke="${e.c}" stroke-width="1.5"/></svg>`,
+            line: `<svg width="24" height="14"><line x1="1" y1="7" x2="23" y2="7" stroke="${e.c}" stroke-width="${e.w || 2}"${dash}/></svg>`,
+            area: `<svg width="24" height="14"><rect x="2" y="1.5" width="20" height="11" fill="${e.c}" fill-opacity="${e.o || 1}" stroke="${e.e || e.c}" stroke-width="1.2"/></svg>`,
+          }[e.k];
+          tex(t, e.t);
+          it.appendChild(t);
+          lg.appendChild(it);
+        }
       }
+      build();
 
       // the view, shared by all panels and kept by the page when a slider redraws the figure
       let store = {};
@@ -439,7 +455,15 @@ def _(mo, np):
       grid.addEventListener("dblclick", () => { view = { az: S.az, el: S.el }; if (S.key) delete store[S.key]; redraw(); });
       new ResizeObserver(() => { fit(); draw(); }).observe(out);
       if (window.katex) window.typeset();
-    })();
+      new MutationObserver(() => {
+        const h = find();
+        if (!h || h.dataset.scene === shown) return;
+        shown = h.dataset.scene;
+        S = JSON.parse(shown);
+        build();
+        if (window.katex) window.typeset(); else { fit(); draw(); }
+      }).observe(box.querySelector("[data-scene]") ? box : P.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["data-scene"] });
+    }
     </script></body></html>"""
 
     def _flat(*xyz):
@@ -497,13 +521,16 @@ def _(mo, np):
             p["labels"].append({"p": [float(c) for c in tx[0]], "t": tx[1], "c": tx[2], "a": tx[3], "r": tx[4] if len(tx) > 4 else 5})
         return p
 
-    def turntable(az, el, alt, panels, legend=(), height=360, width=None, cols=1, key=None, shared=True, bias=0.03):
+    def turntable(az, el, alt, panels, legend=(), height=360, width=None, cols=1, key=None, shared=True, bias=0.03, apart=False):
         """An interactive 3D figure of one or more `panels` (made by panel(), in `cols` columns), first seen
         from azimuth `az` and elevation `el` (degrees); each drawing at most `height` pixels high, all together
         at most `width` wide, with a legend box beside them (below them on narrow screens). `key` names the view
         so that it survives a redraw; with `shared`, all panels have one scale.
-        legend: (kind, colour, TeX[, line width / edge colour, dash / opacity]) with kind "dot", "ring", "line" or "area"."""
-        scene = {"az": az, "el": el, "h": height, "bias": bias, "panels": list(panels), "legend": [], "key": key, "shared": shared}
+        legend: (kind, colour, TeX[, line width / edge colour, dash / opacity]) with kind "dot", "ring", "line" or "area".
+        apart: only the scene, for a figure with a slider, whose frame, frame(key, height), is shown by the next cell,
+        so that moving the slider redraws the figure without rebuilding its frame."""
+        scene = {"az": az, "el": el, "h": height, "bias": bias, "panels": list(panels), "legend": [], "key": key, "shared": shared,
+                 "maxw": width or cols * height + (cols - 1) * 14, "cols": cols, "alt": alt}
         for e in legend:
             item = {"k": e[0], "c": e[1], "t": e[2]}
             if len(e) > 3:
@@ -511,11 +538,19 @@ def _(mo, np):
             if len(e) > 4:
                 item["o" if e[0] == "area" else "d"] = e[4]
             scene["legend"].append(item)
-        page = (_PAGE.replace("__MAXW__", str(width or cols * height + (cols - 1) * 14)).replace("__COLS__", str(cols))
-                .replace("__ALT__", _html.escape(alt)).replace("__SCENE__", _json.dumps(scene, separators=(",", ":"))))
-        return mo.Html(f'<iframe srcdoc="{_html.escape(page)}" title="{_html.escape(alt)}" style="display: block; width: 100%; height: {height}px; border: 0;"></iframe>')
+        data = _html.escape(_json.dumps(scene, separators=(",", ":")))
+        if apart:
+            return mo.Html(f'<div hidden data-bs3d="{_html.escape(key)}" data-scene="{data}"></div>')
+        return mo.Html(f'<div class="bs3d">{_frame(height)}<div hidden data-scene="{data}"></div></div>')
 
-    return panel, patch, sheet, turntable
+    def _frame(height, key=""):
+        return f'<iframe srcdoc="{_html.escape(_PAGE)}" data-bs3d="{_html.escape(key)}" style="display: block; width: 100%; height: {height}px; border: 0;"></iframe>'
+
+    def frame(key, height=360):
+        """The frame of the figure turntable(..., key=key, height=height, apart=True) of the cell above."""
+        return mo.Html(f'<div class="bs3d">{_frame(height, key)}</div>')
+
+    return frame, panel, patch, sheet, turntable
 
 
 @app.cell(hide_code=True)
@@ -648,6 +683,7 @@ def _(GREEN, GREY, LIGHT, RED, mo, np, panel, patch, t_line, turntable):
         height=380,
         key="lecture-05-line",
         bias=0.25,
+        apart=True,
     )
 
     mo.vstack(
@@ -656,6 +692,12 @@ def _(GREEN, GREY, LIGHT, RED, mo, np, panel, patch, t_line, turntable):
             _fig,
         ]
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(frame):
+    frame("lecture-05-line", 380)
     return
 
 
@@ -995,6 +1037,7 @@ def _(BLUE, GREEN, GREY, LIGHT, RED, math, mo, np, panel, patch, table, turntabl
         ],
         height=420,
         key="lecture-05-cross",
+        apart=True,
     )
 
     def _col(vec, color):
@@ -1011,6 +1054,12 @@ def _(BLUE, GREEN, GREY, LIGHT, RED, math, mo, np, panel, patch, table, turntabl
             _fig,
         ]
     )
+    return
+
+
+@app.cell(hide_code=True)
+def _(frame):
+    frame("lecture-05-cross", 420)
     return
 
 
