@@ -172,7 +172,17 @@ def _(mo, np):
     // in the slider's cell), which a slider changes: the page then redraws in place and the frame is never rebuilt
     const box = window.frameElement.closest(".bs3d"), P = window.parent.document;
     const find = () => box.querySelector("[data-scene]") || P.querySelector('[data-bs3d="' + window.frameElement.dataset.bs3d + '"]');
-    (function start() { const h = find(); if (h) main(h.dataset.scene); else setTimeout(start, 50); })();
+    // a 2D output beside the figure (turntable(..., beside=...)) travels hidden with the scene; it is copied into the place
+    // data-bs2d of the frame's row, and when the slider moves only its attributes change, so it is redrawn in place
+    function beside() {
+      const h = find(), dst = P.querySelector('[data-bs2d="' + window.frameElement.dataset.bs3d + '"]');
+      const a = h && h.firstElementChild;
+      if (!dst || !a) return;
+      const b = dst.firstElementChild;
+      if (b && b.tagName === a.tagName) { for (const n of a.getAttributeNames()) if (b.getAttribute(n) !== a.getAttribute(n)) b.setAttribute(n, a.getAttribute(n)); }
+      else dst.replaceChildren(a.cloneNode(true));
+    }
+    (function start() { const h = find(); if (h) { beside(); main(h.dataset.scene); } else setTimeout(start, 50); })();
     function main(shown) {
       let S = JSON.parse(shown);
       const RAD = Math.PI / 180, L = [0.3, -0.4, 0.87];
@@ -456,13 +466,14 @@ def _(mo, np):
       new ResizeObserver(() => { fit(); draw(); }).observe(out);
       if (window.katex) window.typeset();
       new MutationObserver(() => {
+        beside();
         const h = find();
         if (!h || h.dataset.scene === shown) return;
         shown = h.dataset.scene;
         S = JSON.parse(shown);
         build();
         if (window.katex) window.typeset(); else { fit(); draw(); }
-      }).observe(box.querySelector("[data-scene]") ? box : P.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["data-scene"] });
+      }).observe(box.querySelector("[data-scene]") ? box : P.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["data-scene", "data-data"] });
     }
     </script></body></html>"""
 
@@ -521,14 +532,15 @@ def _(mo, np):
             p["labels"].append({"p": [float(c) for c in tx[0]], "t": tx[1], "c": tx[2], "a": tx[3], "r": tx[4] if len(tx) > 4 else 5})
         return p
 
-    def turntable(az, el, alt, panels, legend=(), height=360, width=None, cols=1, key=None, shared=True, bias=0.03, apart=False):
+    def turntable(az, el, alt, panels, legend=(), height=360, width=None, cols=1, key=None, shared=True, bias=0.03, apart=False, beside=None):
         """An interactive 3D figure of one or more `panels` (made by panel(), in `cols` columns), first seen
         from azimuth `az` and elevation `el` (degrees); each drawing at most `height` pixels high, all together
         at most `width` wide, with a legend box beside them (below them on narrow screens). `key` names the view
         so that it survives a redraw; with `shared`, all panels have one scale.
         legend: (kind, colour, TeX[, line width / edge colour, dash / opacity]) with kind "dot", "ring", "line" or "area".
         apart: only the scene, for a figure with a slider, whose frame, frame(key, height), is shown by the next cell,
-        so that moving the slider redraws the figure without rebuilding its frame."""
+        so that moving the slider redraws the figure without rebuilding its frame.
+        beside: with apart, a 2D output that the row of the next cell shows beside the frame, in its element data-bs2d="KEY"."""
         scene = {"az": az, "el": el, "h": height, "bias": bias, "panels": list(panels), "legend": [], "key": key, "shared": shared,
                  "maxw": width or cols * height + (cols - 1) * 14, "cols": cols, "alt": alt}
         for e in legend:
@@ -540,7 +552,7 @@ def _(mo, np):
             scene["legend"].append(item)
         data = _html.escape(_json.dumps(scene, separators=(",", ":")))
         if apart:
-            return mo.Html(f'<div hidden data-bs3d="{_html.escape(key)}" data-scene="{data}"></div>')
+            return mo.Html(f'<div hidden data-bs3d="{_html.escape(key)}" data-scene="{data}">{"" if beside is None else mo.as_html(beside).text}</div>')
         return mo.Html(f'<div class="bs3d">{_frame(height)}<div hidden data-scene="{data}"></div></div>')
 
     def _frame(height, key=""):
@@ -976,6 +988,8 @@ def _(BLUE, Figure, HALF, b_level, mo, np, panel, plane, quadric, table, turntab
         ],
         height=380,
         key="lecture-06-quadric",
+        apart=True,
+        beside=_fig,
     )
 
     _flat = "cone" if _b == 0 else "hyperbola"
@@ -990,12 +1004,18 @@ def _(BLUE, Figure, HALF, b_level, mo, np, panel, plane, quadric, table, turntab
                     (r"$g^{-1}(b) \subseteq \mathbb{R}^3$", _solid),
                 ]
             ),
-            mo.Html(
-                '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem 1rem;">'
-                f'<div style="flex: 1 1 240px; min-width: 220px;">{mo.as_html(_fig).text}</div>'
-                f'<div style="flex: 1.5 1 320px; min-width: 260px;">{_graph.text}</div></div>'
-            ),
+            _graph,
         ]
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _(frame, mo):
+    mo.Html(
+        '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem 1rem;">'
+        '<div data-bs2d="lecture-06-quadric" style="flex: 1 1 240px; min-width: 220px;"></div>'
+        f'<div style="flex: 1.5 1 320px; min-width: 260px;">{frame("lecture-06-quadric", 380).text}</div></div>'
     )
     return
 
