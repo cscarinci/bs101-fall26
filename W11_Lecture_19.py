@@ -702,7 +702,7 @@ def _(mo):
 def _(definition):
     definition(
         r"""
-    A **reparameterization** of a path $\gamma : I \subseteq \mathbb{R} \longrightarrow \mathbb{R}^3$ is another path $\sigma = \gamma \circ \varphi : \tilde{I} \subseteq \mathbb{R} \longrightarrow \mathbb{R}^3$ obtained by a change of variables
+    A **reparameterization** of a path $\gamma : I \subseteq \mathbb{R} \longrightarrow \mathbb{R}^3$ is another path $\sigma = \gamma \circ \varphi : \tilde{I} \subseteq \mathbb{R} \longrightarrow \mathbb{R}^3$ obtained by a bijective, differentiable change of variables
 
     $$
     \varphi : \tilde{I} \subseteq \mathbb{R} \longrightarrow I \subseteq \mathbb{R}, \qquad \tilde{t} \longmapsto t = \varphi(\tilde{t})
@@ -741,7 +741,7 @@ def _(theorem):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    $\Longrightarrow$ &nbsp; $\displaystyle \int_C f \, ds$ &nbsp; is independent of the choice of path $\gamma$ parameterizing $C$!
+    $\Longrightarrow$ &nbsp; $\displaystyle \int_C f \, ds$ &nbsp; is independent of the choice of reparameterization of $\gamma$!
     """)
     return
 
@@ -888,7 +888,7 @@ def _(theorem):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    $\Longrightarrow$ &nbsp; $\displaystyle \int_{\vec{C}} \vec{F} \cdot d\vec{s}$ &nbsp; only depends on $C$ and a choice of orientation of $C$!
+    $\Longrightarrow$ &nbsp; $\displaystyle \int_{\vec{C}} \vec{F} \cdot d\vec{s}$ &nbsp; is independent of the choice of reparameterization of $\gamma$, up to the orientation of $C$!
     """)
     return
 
