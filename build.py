@@ -40,9 +40,11 @@ TITLES = {  # lecture number -> title shown on the index
     17: "Differentiation of vector fields",
     18: "Gradient vector fields and curl",
     19: "Integration along paths",
+    20: "Double integrals",
+    21: "Green's theorem",
 }
 
-DRAFTS = set()  # lectures kept in the repo but not published
+DRAFTS = {20, 21}  # lectures kept in the repo but not published
 
 PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
