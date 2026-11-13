@@ -886,7 +886,7 @@ def _(BLUE, Figure, GREEN, HALF, RED, controls, mo, name_tip, np, num, nx, ny, p
             table(
                 [
                     (r"$\lVert\vec{x}+\vec{y}\rVert$", rf"${num(_ns)}$"),
-                    (r"$\lVert\vec{x}\rVert+\lVert\vec{y}\rVert$", rf"${num(round(nx, 2) + round(ny, 2))}$"),
+                    (r"$\lVert\vec{x}\rVert+\lVert\vec{y}\rVert$", rf"${num(nx + ny)}$"),
                 ]
             ),
             _fig,
