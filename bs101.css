@@ -8,7 +8,9 @@
 }
 .markdown, .markdown p, .markdown li, .markdown td, .markdown th { font-size: 1.12rem; line-height: 1.55; }
 .markdown h2, .markdown h3 { font-weight: 700; font-size: 1.25rem; margin-top: 1.6rem; border: none; }
-.markdown .katex { font-size: 1em; }
+/* formulas at the size of the text. marimo draws each formula inside a shadow root, where a selector that starts
+   outside it (.markdown .katex) never matches; this one does, and overrides marimo's own 110% */
+.katex { font-size: 1em !important; }
 
 .bs-head { font-family: var(--marimo-text-font); text-align: center; margin-bottom: 1rem; }
 .bs-head .bs-running { text-align: right; font-style: italic; opacity: 0.65; font-size: 0.95rem; }
