@@ -220,7 +220,7 @@ def _(mo, theorem):
             ),
             theorem(
                 r"""
-    If all partial derivatives $\partial f^i / \partial x^j (\vec{x})$ are well-defined on an open ball around $\vec{a}$ and they are all continuous at $\vec{x} = \vec{a}$, then $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is differentiable at $\vec{x} = \vec{a}$!
+    If all partial derivatives $\partial f^i / \partial x^j (\vec{x})$ are well-defined on an open ball around $\vec{a}$ and they are all continuous at $\vec{x} = \vec{a}$, then $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is differentiable at $\vec{x} = \vec{a}$
     """,
                 "Continuous partial derivatives",
             ),
@@ -274,7 +274,7 @@ def _(mo, theorem):
     \frac{g(t) - g(t_0)}{t - t_0} &= \frac{f(\gamma(t)) - f(\gamma(t_0))}{t - t_0}
     = \frac{f(\gamma(t)) - f(\gamma(t_0))}{\lVert \gamma(t) - \gamma(t_0) \rVert} \cdot \frac{\lVert \gamma(t) - \gamma(t_0) \rVert}{t - t_0} \\[6pt]
     &= \underbrace{\frac{f(\gamma(t)) - f(\gamma(t_0)) - Df(\gamma(t_0))(\gamma(t) - \gamma(t_0))}{\lVert \gamma(t) - \gamma(t_0) \rVert}}_{\mathclap{\footnotesize \to\, 0}\vphantom{\footnotesize \to\, 0}}
-    \; \underbrace{\frac{\lVert \gamma(t) - \gamma(t_0) \rVert}{t - t_0}}_{\mathclap{\footnotesize \to\, \pm \lVert \gamma'(t_0) \rVert \ (\text{not } \pm\infty!)}\vphantom{\footnotesize \to\, \pm \lVert \gamma'(t_0) \rVert \ (\text{not } \pm\infty!)}} \\[30pt]
+    \; \underbrace{\frac{\lVert \gamma(t) - \gamma(t_0) \rVert}{t - t_0}}_{\mathclap{\footnotesize \to\, \pm \lVert \gamma'(t_0) \rVert \ (\text{not } \pm\infty)}\vphantom{\footnotesize \to\, \pm \lVert \gamma'(t_0) \rVert \ (\text{not } \pm\infty)}} \\[30pt]
     &\qquad + \underbrace{Df(\gamma(t_0))}_{\mathclap{\footnotesize \begin{matrix}\text{constant} \\ \text{matrix}\end{matrix}}\vphantom{\footnotesize \begin{matrix}\text{constant} \\ \text{matrix}\end{matrix}}} \underbrace{\left( \frac{\gamma(t) - \gamma(t_0)}{t - t_0} \right)}_{\mathclap{\footnotesize \to\, \gamma'(t_0)}\vphantom{\footnotesize \to\, \gamma'(t_0)}}
     \end{aligned}
     $$
@@ -376,7 +376,7 @@ def _(mo, theorem):
     $\Longrightarrow$ &nbsp; $g \circ f : \mathbb{R}^n \longrightarrow \mathbb{R}^p$ differentiable at $\vec{x} = \vec{a}$ with
 
     $$
-    \underbrace{D(g \circ f)(\vec{a})}_{\mathclap{\footnotesize \in \mathrm{Mat}(p \times n)}\vphantom{\footnotesize \in \mathrm{Mat}(p \times n)}} = \underbrace{Dg(f(\vec{a}))}_{\mathclap{\footnotesize \in \mathrm{Mat}(p \times m)}\vphantom{\footnotesize \in \mathrm{Mat}(p \times m)}} \qquad\; \underbrace{Df(\vec{a})}_{\mathclap{\footnotesize \in \mathrm{Mat}(m \times n)}\vphantom{\footnotesize \in \mathrm{Mat}(m \times n)}} \qquad (\text{matrix multiplication!})
+    \underbrace{D(g \circ f)(\vec{a})}_{\mathclap{\footnotesize \in \mathrm{Mat}(p \times n)}\vphantom{\footnotesize \in \mathrm{Mat}(p \times n)}} = \underbrace{Dg(f(\vec{a}))}_{\mathclap{\footnotesize \in \mathrm{Mat}(p \times m)}\vphantom{\footnotesize \in \mathrm{Mat}(p \times m)}} \qquad\; \underbrace{Df(\vec{a})}_{\mathclap{\footnotesize \in \mathrm{Mat}(m \times n)}\vphantom{\footnotesize \in \mathrm{Mat}(m \times n)}} \qquad (\text{matrix multiplication})
     $$
     """,
                 "Chain rule",
@@ -394,7 +394,7 @@ def _(mo, theorem):
     \end{aligned}
     $$
 
-    (“does not go to $+\infty$”: this needs some care… not here!)
+    (“does not go to $+\infty$”: this needs some care… not here)
 
     $\Longrightarrow$ &nbsp; $D(g \circ f)(\vec{a}) = Dg(f(\vec{a}))\, Df(\vec{a})$ defines a good affine approximation to $g \circ f$ at $\vec{a}$  <span class=qed>$\square$</span>
 
