@@ -248,7 +248,7 @@ def _(definition, mo, theorem):
 
     $\Longrightarrow$ &nbsp; $f$ $C^1$-smooth at $\vec{x} = \vec{a}$ &nbsp; $\Longrightarrow$ &nbsp; $f$ differentiable at $\vec{x} = \vec{a}$ &nbsp; $\Longrightarrow$ &nbsp; $f$ continuous at $\vec{x} = \vec{a}$
 
-    (opposite directions are NOT true!)
+    (opposite directions are NOT true)
     """
             ),
             definition(
@@ -275,7 +275,7 @@ def _(definition, mo, theorem):
     **Remark.** $f$ $C^2$-smooth at $\vec{x} = \vec{a}$ &nbsp; $\Longrightarrow$ &nbsp; $\vec{\nabla} f$ $C^1$-smooth at $\vec{x} = \vec{a}$
 
     $$
-    \leadsto \qquad Hf(\vec{a}) = D(\vec{\nabla} f)(\vec{a}) \qquad (\text{Hessian is the derivative of the gradient!})
+    \leadsto \qquad Hf(\vec{a}) = D(\vec{\nabla} f)(\vec{a}) \qquad (\text{Hessian is the derivative of the gradient})
     $$
     """
             ),
