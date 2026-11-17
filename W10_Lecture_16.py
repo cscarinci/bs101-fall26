@@ -809,7 +809,7 @@ def _(BLUE, Figure, GREY, HALF, LIGHT, ORANGE, RED, cross_axes, mo, np, panel, s
                     (_a, r"f(\vec{a}) = 0, \ \text{global max}", "#000000", 150, 10),
                     (_b, r"\begin{matrix} f(\vec{b}) = -3, \\ \text{global min} \end{matrix}", "#000000", 0, 40),
                     (_c, r"f(\vec{c}) = -1", "#000000", -140, 26),
-                    ((2, 0, 0), r"\begin{matrix} \vec{\nabla} f\left( \begin{bmatrix} 2 \\ 0 \end{bmatrix} \right) = \vec{0}, \\ \text{not a candidate!} \end{matrix}", "#000000", 90, 50),
+                    ((2, 0, 0), r"\begin{matrix} \vec{\nabla} f\left( \begin{bmatrix} 2 \\ 0 \end{bmatrix} \right) = \vec{0}, \\ \text{not a candidate} \end{matrix}", "#000000", 90, 50),
                     ((0.55, 0.75, 0), "D", BLUE, 90, 0),
                     ((0.75, 0.5625, -0.703), r"f(\gamma(t))", RED, 160, 18),
                     ((0, 1, -2), r"f(\sigma(t))", ORANGE, -100, 60),
@@ -871,7 +871,7 @@ def _(mo):
 
     $\leadsto$ &nbsp; parameterizing $\mathrm{Bd}(D)$ is generally hard…
 
-    $\leadsto$ &nbsp; describing $\mathrm{Bd}(D)$ with level sets is much easier!
+    $\leadsto$ &nbsp; describing $\mathrm{Bd}(D)$ with level sets is much easier
 
     **Example.** &nbsp; $D = \left\{\, \vec{x} \mid (x^1)^2 \leq x^2 \leq 1 \,\right\}$
 
@@ -1001,7 +1001,7 @@ def _(mo):
 
     ① &nbsp; find a parameterization $\gamma(t)$ of $g^{-1}(c)$ near $\vec{a}$ such that $\gamma(0) = \vec{a}$ and $\gamma'(0) \neq \vec{0}$
 
-    &emsp;&emsp; $\leadsto$ &nbsp; exists because $\vec{\nabla} g(\vec{a}) \neq \vec{0}$ &nbsp; (big theorem we cannot prove!)
+    &emsp;&emsp; $\leadsto$ &nbsp; exists because $\vec{\nabla} g(\vec{a}) \neq \vec{0}$ &nbsp; (big theorem we cannot prove)
 
     ② &nbsp; evaluate both $f$ and $g$ along $\gamma(t)$ and differentiate at $t = 0$
 
@@ -1023,7 +1023,7 @@ def _(mo):
         \end{aligned}
         $$
 
-    ③ &nbsp; $\vec{\nabla} f(\vec{a})$ and $\vec{\nabla} g(\vec{a})$ are orthogonal to $\gamma'(0) \neq \vec{0}$ in $\mathbb{R}^2$ &nbsp; $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a})$ and $\vec{\nabla} g(\vec{a})$ must be proportional!
+    ③ &nbsp; $\vec{\nabla} f(\vec{a})$ and $\vec{\nabla} g(\vec{a})$ are orthogonal to $\gamma'(0) \neq \vec{0}$ in $\mathbb{R}^2$ &nbsp; $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a})$ and $\vec{\nabla} g(\vec{a})$ must be proportional
 
     $$
     \Longrightarrow \qquad \vec{\nabla} f(\vec{a}) = \lambda \vec{\nabla} g(\vec{a}) \quad \text{for some } \lambda \in \mathbb{R} \tag*{$\square$}
@@ -1199,7 +1199,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    **Remark.** If $\mathrm{Bd}(D)$ has multiple components, use one constraint per component and include the corners!
+    **Remark.** If $\mathrm{Bd}(D)$ has multiple components, use one constraint per component and include the corners
 
     **Example.** &nbsp; $f(\vec{x}) = x^2 (x^1 - 2)$, &nbsp; $D = \left\{\, \vec{x} \mid (x^1)^2 \leq x^2 \leq 1 \,\right\}$
 
@@ -1230,7 +1230,7 @@ def _(mo):
     \begin{cases} \vec{\nabla} f(\vec{x}) = \lambda \vec{\nabla} h(\vec{x}) \\ h(\vec{x}) = 1 \end{cases}
     \qquad \Longleftrightarrow \qquad
     \begin{cases} x^2 = 0 \\ x^1 - 2 = \lambda \\ x^2 = 1 \end{cases}
-    \qquad \text{no solution!}
+    \qquad \text{no solution}
     $$
     """)
     return
