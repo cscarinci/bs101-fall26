@@ -553,7 +553,7 @@ def _(mo):
 
     - points in $n$-space $\mathbb{R}^n \ni \vec{x} = (x^1, x^2, \dots, x^n)$ = $n$-vectors (arrows between points); each entry is a real number, $x^2$ is the 2nd component of $\vec{x}$
     - vector addition ${+} : \mathbb{R}^n \times \mathbb{R}^n \longrightarrow \mathbb{R}^n$ and scalar–vector multiplication $\cdot : \mathbb{R} \times \mathbb{R}^n \longrightarrow \mathbb{R}^n$, both componentwise
-    - $\leadsto$ &nbsp; allow us to do calculations with vectors the same way as with real numbers!
+    - $\leadsto$ &nbsp; allow us to do calculations with vectors the same way as with real numbers
 
     **In this lecture:** extra structure on $\mathbb{R}^n$ (needed for “measurements”)
 
@@ -601,7 +601,7 @@ def _(definition, mo, note, theorem):
             ),
             note(
                 r"""
-    This “$\cdot$” is **not** the same as for scalar–vector multiplication! To avoid confusion, we drop the “$\cdot$” for scalar–vector multiplication and write
+    This “$\cdot$” is **not** the same as for scalar–vector multiplication. To avoid confusion, we drop the “$\cdot$” for scalar–vector multiplication and write
 
     $$
     \alpha \vec{x} = \alpha \begin{bmatrix} x^1 \\ \vdots \\ x^n \end{bmatrix} = \begin{bmatrix} \alpha x^1 \\ \vdots \\ \alpha x^n \end{bmatrix}
@@ -881,7 +881,7 @@ def _(BLUE, Figure, GREEN, HALF, RED, controls, mo, name_tip, np, num, nx, ny, p
     """,
                 "Triangle inequality",
             ),
-            mo.md(r"**Proof.** Direct consequence of the Cauchy–Schwarz inequality! Exercise. <span class=qed>$\square$</span>"),
+            mo.md(r"**Proof.** Direct consequence of the Cauchy–Schwarz inequality. Exercise. <span class=qed>$\square$</span>"),
             controls,
             table(
                 [
@@ -931,7 +931,7 @@ def _(definition, mo, theorem):
     \qquad \Longrightarrow \qquad \text{pairwise orthogonal}
     $$
 
-    (a specific example of $n$ pairwise orthogonal vectors; many other examples exist!)
+    (a specific example of $n$ pairwise orthogonal vectors; many other examples exist)
 
     Take any other non-zero vector
 
@@ -949,7 +949,7 @@ def _(definition, mo, theorem):
 
     If $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n, \vec{x}$ were pairwise orthogonal, then $\vec{x}$ would have to be the zero vector $\vec{0}$. This contradicts our assumption that $\vec{x} \neq \vec{0}$.
 
-    $\leadsto$ &nbsp; here we used the specific vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$, but the argument also works for any set of $n$ non-zero pairwise orthogonal vectors! <span class=qed>$\square$</span>
+    $\leadsto$ &nbsp; here we used the specific vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$, but the argument also works for any set of $n$ non-zero pairwise orthogonal vectors <span class=qed>$\square$</span>
     """
             ),
         ]
@@ -1047,9 +1047,9 @@ def _(BLUE, Figure, arrow, definition, mo, panel, turntable):
             ),
             mo.md(
                 r"""
-    $\leadsto$ &nbsp; the standard basis vectors define the coordinate axes on $\mathbb{R}^n$!
+    $\leadsto$ &nbsp; the standard basis vectors define the coordinate axes on $\mathbb{R}^n$
 
-    $\leadsto$ &nbsp; coordinates/components of a vector are its dot products with the standard basis vectors!
+    $\leadsto$ &nbsp; coordinates/components of a vector are its dot products with the standard basis vectors
     """
             ),
         ]
