@@ -748,7 +748,7 @@ def _(BLUE, GREEN, RED, definition, mo, np, panel, sheet, turntable):
             ),
             mo.md(
                 r"""
-    **Remark.** Local extremum where $f$ is differentiable &nbsp; $\Longrightarrow$ &nbsp; critical point!
+    **Remark.** Local extremum where $f$ is differentiable &nbsp; $\Longrightarrow$ &nbsp; critical point
 
     Critical point &nbsp; $\nRightarrow$ &nbsp; local extremum!
     """
@@ -764,15 +764,15 @@ def _(BLUE, GREEN, RED, definition, mo, np, panel, sheet, turntable):
     **Example.** &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = -(x^1)^2 + (x^2)^2$
 
     $$
-    \vec{\nabla} f(\vec{x}) = \begin{bmatrix} -2x^1 \\ 2x^2 \end{bmatrix} \qquad \Longrightarrow \qquad \vec{x} = \vec{0} \text{ is a critical point!}
+    \vec{\nabla} f(\vec{x}) = \begin{bmatrix} -2x^1 \\ 2x^2 \end{bmatrix} \qquad \Longrightarrow \qquad \vec{x} = \vec{0} \text{ is a critical point}
     $$
 
     $f(\vec{0}) = -0^2 + 0^2 = 0$, but
 
     $$
     \begin{aligned}
-    f(\vec{x}) &= -t^2 < 0 \quad \text{for } \vec{x} = t\vec{e}_1 = \begin{bmatrix} t \\ 0 \end{bmatrix}, \text{ with } t \neq 0 &&\leadsto \quad \vec{0} \text{ not min!} \\[6pt]
-    f(\vec{x}) &= s^2 > 0 \quad \text{for } \vec{x} = s\vec{e}_2 = \begin{bmatrix} 0 \\ s \end{bmatrix}, \text{ with } s \neq 0 &&\leadsto \quad \vec{0} \text{ not max!}
+    f(\vec{x}) &= -t^2 < 0 \quad \text{for } \vec{x} = t\vec{e}_1 = \begin{bmatrix} t \\ 0 \end{bmatrix}, \text{ with } t \neq 0 &&\leadsto \quad \vec{0} \text{ not min} \\[6pt]
+    f(\vec{x}) &= s^2 > 0 \quad \text{for } \vec{x} = s\vec{e}_2 = \begin{bmatrix} 0 \\ s \end{bmatrix}, \text{ with } s \neq 0 &&\leadsto \quad \vec{0} \text{ not max}
     \end{aligned}
     $$
     """
@@ -855,13 +855,13 @@ def _(mo):
 
     Given a critical point, how do we distinguish its type (local max, local min, saddle)?
 
-    $\leadsto$ &nbsp; look at the Hessian matrix!
+    $\leadsto$ &nbsp; look at the Hessian matrix
 
     $\leadsto$ &nbsp; if $\vec{a}$ is a critical point of $f$ ($Df(\vec{a}) = 0 \in \mathrm{Mat}(1 \times n)$)
 
     $$
     \underbrace{f(\vec{x}) \approx f(\vec{a}) + \frac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})}_{\mathclap{\footnotesize \text{near } \vec{x} = \vec{a}}\vphantom{\footnotesize \text{near } \vec{x} = \vec{a}}}
-    \quad \left( \begin{matrix} \dfrac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a}) \\[4pt] \text{determines the behavior} \\ \text{of } f \text{ near } \vec{x} = \vec{a}! \end{matrix} \right)
+    \quad \left( \begin{matrix} \dfrac{1}{2}\, (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a}) \\[4pt] \text{determines the behavior} \\ \text{of } f \text{ near } \vec{x} = \vec{a} \end{matrix} \right)
     $$
 
     **Recall:** $f : \mathbb{R} \longrightarrow \mathbb{R}$ $C^2$-smooth with $f'(a) = 0$
