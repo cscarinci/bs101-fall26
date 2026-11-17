@@ -731,7 +731,7 @@ def _(definition, mo):
     \end{aligned}
     $$
 
-    **Remark.** For any pair of affine parameterizations $\gamma, \tilde{\gamma}$ of a line $L$, the velocity vectors are proportional!
+    **Remark.** For any pair of affine parameterizations $\gamma, \tilde{\gamma}$ of a line $L$, the velocity vectors are proportional
     """
             ),
         ]
@@ -930,7 +930,7 @@ def _(mo, theorem):
 
     $$
     \begin{aligned}
-    \vec{u} \times \vec{v} &= \underbrace{\det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ u^1 & u^2 & u^3 \\ v^1 & v^2 & v^3 \end{bmatrix}}_{\mathclap{\footnotesize \begin{matrix}\text{not an honest determinant!} \\ \text{1st row is made of vectors…}\end{matrix}}\vphantom{\footnotesize \begin{matrix}\text{not an honest determinant!} \\ \text{1st row is made of vectors…}\end{matrix}}}
+    \vec{u} \times \vec{v} &= \underbrace{\det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ u^1 & u^2 & u^3 \\ v^1 & v^2 & v^3 \end{bmatrix}}_{\mathclap{\footnotesize \begin{matrix}\text{not an honest determinant} \\ \text{1st row is made of vectors…}\end{matrix}}\vphantom{\footnotesize \begin{matrix}\text{not an honest determinant} \\ \text{1st row is made of vectors…}\end{matrix}}}
     = \vec{e}_1 \det \begin{bmatrix} u^2 & u^3 \\ v^2 & v^3 \end{bmatrix} - \vec{e}_2 \det \begin{bmatrix} u^1 & u^3 \\ v^1 & v^3 \end{bmatrix} + \vec{e}_3 \det \begin{bmatrix} u^1 & u^2 \\ v^1 & v^2 \end{bmatrix} \\
     &= \vec{e}_1 (u^2 v^3 - u^3 v^2) - \vec{e}_2 (u^1 v^3 - u^3 v^1) + \vec{e}_3 (u^1 v^2 - u^2 v^1)
     = \begin{bmatrix} u^2 v^3 - u^3 v^2 \\ u^3 v^1 - u^1 v^3 \\ u^1 v^2 - u^2 v^1 \end{bmatrix} = \vec{w}
@@ -950,13 +950,13 @@ def _(mo, theorem):
     $$
     \begin{aligned}
     \lVert \vec{w} \rVert^2 &= (u^2 v^3 - u^3 v^2)^2 + (u^3 v^1 - u^1 v^3)^2 + (u^1 v^2 - u^2 v^1)^2 \\
-    &= \big( (u^1)^2 + (u^2)^2 + (u^3)^2 \big) \big( (v^1)^2 + (v^2)^2 + (v^3)^2 \big) - \big( u^1 v^1 + u^2 v^2 + u^3 v^3 \big)^2 \qquad (\text{check!}) \\
+    &= \big( (u^1)^2 + (u^2)^2 + (u^3)^2 \big) \big( (v^1)^2 + (v^2)^2 + (v^3)^2 \big) - \big( u^1 v^1 + u^2 v^2 + u^3 v^3 \big)^2 \qquad (\text{check}) \\
     &= \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2
     \end{aligned}
     $$
 
     $$
-    \det \begin{bmatrix} u^1 & v^1 & (u^2 v^3 - u^3 v^2) \\ u^2 & v^2 & (u^3 v^1 - u^1 v^3) \\ u^3 & v^3 & (u^1 v^2 - u^2 v^1) \end{bmatrix} = \lVert \vec{w} \rVert^2 \geq 0 \qquad (\text{check!})
+    \det \begin{bmatrix} u^1 & v^1 & (u^2 v^3 - u^3 v^2) \\ u^2 & v^2 & (u^3 v^1 - u^1 v^3) \\ u^3 & v^3 & (u^1 v^2 - u^2 v^1) \end{bmatrix} = \lVert \vec{w} \rVert^2 \geq 0 \qquad (\text{check})
     $$
 
     This is strictly positive when $\vec{u}, \vec{v}$ are not proportional; otherwise $\vec{w} = \vec{0}$. <span class=qed>$\square$</span>
@@ -979,7 +979,7 @@ def _(mo, theorem):
 
     $$
     \det \begin{bmatrix} 1 & -1 & 0 \\ 2 & 3 & 0 \\ 0 & 0 & 5 \end{bmatrix}
-    = 1\, (3 \cdot 5 - 0 \cdot 0) - (-1)\, (2 \cdot 5 - 0 \cdot 0) + 0\, (2 \cdot 0 - 3 \cdot 0) = \underbrace{25}_{\mathclap{\footnotesize \lVert \vec{u} \times \vec{v} \rVert^2\,!}\vphantom{\footnotesize \lVert \vec{u} \times \vec{v} \rVert^2\,!}} > 0
+    = 1\, (3 \cdot 5 - 0 \cdot 0) - (-1)\, (2 \cdot 5 - 0 \cdot 0) + 0\, (2 \cdot 0 - 3 \cdot 0) = \underbrace{25}_{\mathclap{\footnotesize \lVert \vec{u} \times \vec{v} \rVert^2}\vphantom{\footnotesize \lVert \vec{u} \times \vec{v} \rVert^2}} > 0
     $$
     """
             ),
@@ -1075,7 +1075,7 @@ def _(mo, theorem):
     \times : \mathbb{R}^3 \times \mathbb{R}^3 \longrightarrow \mathbb{R}^3
     $$
 
-    another extension of multiplication of vectors, now taking values in vectors!
+    another extension of multiplication of vectors, now taking values in vectors
 
     $\leadsto$ &nbsp; this **cannot** be extended to other $\mathbb{R}^n$ with $n \neq 3, 7$
 
