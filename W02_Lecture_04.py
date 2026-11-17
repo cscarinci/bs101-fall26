@@ -731,7 +731,7 @@ def _(BLUE, GREEN, GREY, LIGHT, ORANGE, RED, definition, mo, np, panel, patch, t
     the **determinant** of $A$ is the real number
 
     $$
-    \det A = a \det \begin{bmatrix} e & f \\ h & i \end{bmatrix} \underbrace{{} - b \det \begin{bmatrix} d & f \\ g & i \end{bmatrix}}_{\mathclap{\footnotesize \text{note the negative sign!}}\vphantom{\footnotesize \text{note the negative sign!}}} + c \det \begin{bmatrix} d & e \\ g & h \end{bmatrix}
+    \det A = a \det \begin{bmatrix} e & f \\ h & i \end{bmatrix} \underbrace{{} - b \det \begin{bmatrix} d & f \\ g & i \end{bmatrix}}_{\mathclap{\footnotesize \text{note the negative sign}}\vphantom{\footnotesize \text{note the negative sign}}} + c \det \begin{bmatrix} d & e \\ g & h \end{bmatrix}
     $$
     """,
                 r"Determinant of a $3 \times 3$ matrix",
@@ -779,13 +779,13 @@ def _(BLUE, GREEN, GREY, LIGHT, ORANGE, RED, definition, mo, np, panel, patch, t
     \end{align*}
     $$
 
-    ($\varphi$ = angle between a vector and a plane: we will need to define this more precisely!)
+    ($\varphi$ = angle between a vector and a plane: we will need to define this more precisely)
 
-    **Remark.** We can continue up in dimension!
+    **Remark.** We can continue up in dimension
 
-    - $A \in \mathrm{Mat}(n \times n)$ &nbsp; $\leadsto$ &nbsp; $\det A$ gets complicated quickly, but it can be defined!
-    - $\lvert \det A \rvert = n$-volume of the $n$-parallelepiped spanned by its $n$ columns!
-    - let's not do this explicitly!
+    - $A \in \mathrm{Mat}(n \times n)$ &nbsp; $\leadsto$ &nbsp; $\det A$ gets complicated quickly, but it can be defined
+    - $\lvert \det A \rvert = n$-volume of the $n$-parallelepiped spanned by its $n$ columns
+    - let's not do this explicitly
     """
             ),
         ]
@@ -809,7 +809,7 @@ def _(mo, theorem):
             ),
             mo.md(
                 r"""
-    **Proof** (brute force!). &nbsp; $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}, \quad B = \begin{bmatrix} e & f \\ g & h \end{bmatrix}$
+    **Proof** (brute force). &nbsp; $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}, \quad B = \begin{bmatrix} e & f \\ g & h \end{bmatrix}$
 
     $$
     AB = \begin{bmatrix} ae + bg & af + bh \\ ce + dg & cf + dh \end{bmatrix}
@@ -940,9 +940,9 @@ def _(BLUE, GREEN, mo, np, panel, theorem, turntable):
                 r"""
     If $\det A = 0$ &nbsp; $\Longrightarrow$ &nbsp; $A$ “collapses” the unit square into a line segment (or zero) &nbsp; $\leadsto$ &nbsp; a parallelogram of area zero
 
-    $\Longrightarrow$ &nbsp; $A$ cannot be invertible &nbsp; $\leadsto$ &nbsp; we cannot “recover” the square from a line segment! (not bijective)
+    $\Longrightarrow$ &nbsp; $A$ cannot be invertible &nbsp; $\leadsto$ &nbsp; we cannot “recover” the square from a line segment (not bijective)
 
-    If $\det A \neq 0$ &nbsp; $\Longrightarrow$ &nbsp; $A$ deforms the unit square without “collapse” &nbsp; $\leadsto$ &nbsp; linearity is then enough for us to find the inverse!
+    If $\det A \neq 0$ &nbsp; $\Longrightarrow$ &nbsp; $A$ deforms the unit square without “collapse” &nbsp; $\leadsto$ &nbsp; linearity is then enough for us to find the inverse
     """
             ),
             theorem(
@@ -953,7 +953,7 @@ def _(BLUE, GREEN, mo, np, panel, theorem, turntable):
     A \in \mathrm{Mat}(n \times n) \quad \leftrightsquigarrow \quad A : \mathbb{R}^n \longrightarrow \mathbb{R}^n \ \text{ linear}
     $$
 
-    admits an inverse if and only if $\det A \neq 0$!
+    admits an inverse if and only if $\det A \neq 0$
     """,
                 r"Invertible $n \times n$ matrices",
             ),
