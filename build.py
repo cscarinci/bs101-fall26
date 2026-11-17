@@ -15,7 +15,7 @@ PARTS = [  # (name, first lecture, last lecture)
     ("I. Euclidean Geometry", 1, 5),
     ("II. Differentiation", 6, 13),
     ("III. Applications to Optimization", 14, 16),
-    ("IV. Vector fields and line integrals", 17, 21),
+    ("IV. Line integrals and Green's theorem", 17, 21),
     ("V. Surface integrals, Stokes and Gauss", 22, 27),
 ]
 
