@@ -606,7 +606,7 @@ def _(theorem):
 
     only depends on the (oriented) end points of $\vec{C}$
 
-    (in particular, $\displaystyle \int_{\vec{C}} \vec{F} \cdot d\vec{s} = 0$ over closed curves!)
+    (in particular, $\displaystyle \int_{\vec{C}} \vec{F} \cdot d\vec{s} = 0$ over closed curves)
     """,
         "Line integrals of gradient vector fields",
     )
@@ -717,7 +717,7 @@ def _(mo):
     \iint_R f(x, y) \, dxdy = \lim_{N \to \infty} \sum_{j=1}^N \sum_{i=1}^N f(x_i, y_j) \Delta x \Delta y
     $$
 
-    if the limit exists for every choice $(x_i, y_j)$ and is independent of that choice!
+    if the limit exists for every choice $(x_i, y_j)$ and is independent of that choice
 
     $$
     \Longrightarrow \quad \iint_R f(x, y) \, dxdy = \begin{matrix} \text{signed volume between} \\ \mathrm{graph}(f) \text{ and the } xy\text{-plane} \end{matrix}
@@ -730,7 +730,7 @@ def _(mo):
 def _(theorem):
     theorem(
         r"""
-    If $f : R \subset \mathbb{R}^2 \longrightarrow \mathbb{R}$ is continuous, then $\displaystyle \iint_R f(x, y) \, dxdy$ is well-defined!
+    If $f : R \subset \mathbb{R}^2 \longrightarrow \mathbb{R}$ is continuous, then $\displaystyle \iint_R f(x, y) \, dxdy$ is well-defined
     """,
         "Double integrals of continuous functions",
     )
@@ -831,7 +831,7 @@ def _(mo):
 def _(theorem):
     theorem(
         r"""
-    If $f : R = [a, b] \times [c, d] \longrightarrow \mathbb{R}$ is $\underbrace{\text{continuous}}_{\mathclap{\footnotesize \begin{matrix} \text{also works if discontinuities} \\ \text{are not too bad!} \end{matrix}}\vphantom{\footnotesize \begin{matrix} \text{also works if discontinuities} \\ \text{are not too bad!} \end{matrix}}}$, then
+    If $f : R = [a, b] \times [c, d] \longrightarrow \mathbb{R}$ is $\underbrace{\text{continuous}}_{\mathclap{\footnotesize \begin{matrix} \text{also works if discontinuities} \\ \text{are not too bad} \end{matrix}}\vphantom{\footnotesize \begin{matrix} \text{also works if discontinuities} \\ \text{are not too bad} \end{matrix}}}$, then
 
     $$
     \begin{aligned} \iint_R f(x, y) \, dxdy &= \int_c^d \left( \int_a^b f(x, y) \, dx \right) dy \\ &= \int_a^b \left( \int_c^d f(x, y) \, dy \right) dx \end{aligned}
@@ -968,7 +968,7 @@ def _(mo):
     f^*(x, y) = \begin{cases} f(x, y) & \text{if } (x, y) \in D \\ 0 & \text{if } (x, y) \notin D \end{cases}
     $$
 
-    <span class="chain">$\displaystyle \leadsto \quad \iint_D f(x, y) \, dxdy = \iint_R \underbrace{f^*(x, y)}_{\mathclap{\footnotesize \begin{matrix} \text{discontinuous, but} \\ \text{Fubini still works!} \end{matrix}}} \, dxdy$ $\displaystyle = \int_a^b \left( \int_c^d f^*(x, y) \, dy \right) dx$ $\displaystyle = \int_a^b \left( \int_{\varphi_1(x)}^{\varphi_2(x)} f(x, y) \, dy \right) dx$</span>
+    <span class="chain">$\displaystyle \leadsto \quad \iint_D f(x, y) \, dxdy = \iint_R \underbrace{f^*(x, y)}_{\mathclap{\footnotesize \begin{matrix} \text{discontinuous, but} \\ \text{Fubini still works} \end{matrix}}} \, dxdy$ $\displaystyle = \int_a^b \left( \int_c^d f^*(x, y) \, dy \right) dx$ $\displaystyle = \int_a^b \left( \int_{\varphi_1(x)}^{\varphi_2(x)} f(x, y) \, dy \right) dx$</span>
 
     Similarly, if $f : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}$ is continuous over $D$ $x$-simple
 
@@ -976,7 +976,7 @@ def _(mo):
     \iint_D f(x, y) \, dxdy = \int_c^d \left( \int_{\psi_1(y)}^{\psi_2(y)} f(x, y) \, dx \right) dy
     $$
 
-    **Example.** &nbsp; $D = \left\{ (x, y) \mid x^2 \leq y \leq 1 \right\} = \left\{ (x, y) \mid -1 \leq x \leq 1, \ x^2 \leq y \leq 1 \right\}$ &nbsp; $\leadsto$ &nbsp; $y$-simple!
+    **Example.** &nbsp; $D = \left\{ (x, y) \mid x^2 \leq y \leq 1 \right\} = \left\{ (x, y) \mid -1 \leq x \leq 1, \ x^2 \leq y \leq 1 \right\}$ &nbsp; $\leadsto$ &nbsp; $y$-simple
     """)
     return
 
@@ -1006,7 +1006,7 @@ def _(mo):
     mo.md(r"""
     <span class="chain">$\displaystyle \Longrightarrow \quad \iint_D (xy - 2y) \, dxdy = \int_{-1}^1 \left( \int_{x^2}^1 (xy - 2y) \, dy \right) dx$ $\displaystyle = \int_{-1}^1 \left( x \frac{y^2}{2} - y^2 \right) \bigg|_{y=x^2}^{y=1} dx = \int_{-1}^1 \left( \frac{x}{2} - 1 - \frac{x^5}{2} + x^4 \right) dx$ $\displaystyle = \left( \frac{x^2}{4} - x - \frac{x^6}{12} + \frac{x^5}{5} \right) \bigg|_{x=-1}^{x=1} = -2 + \frac{2}{5} = -\frac{8}{5}$</span>
 
-    Is $D$ $x$-simple? Yes!
+    Is $D$ $x$-simple? Yes
 
     $$
     D = \left\{ (x, y) \mid 0 \leq y \leq 1, \ -\sqrt{y} \leq x \leq \sqrt{y} \right\}
