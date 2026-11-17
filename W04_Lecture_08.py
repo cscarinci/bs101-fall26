@@ -231,7 +231,7 @@ def _(BLUE, FULL, Figure, GREEN, cross_axes, math, mo, np):
                 r"""
     - $\displaystyle \lim_{t \to 0} \begin{bmatrix} \cos(t) \\ \sin(t) \end{bmatrix} = \begin{bmatrix} 1 \\ 0 \end{bmatrix} = \begin{bmatrix} \cos(2\pi) \\ \sin(2\pi) \end{bmatrix} = \begin{bmatrix} \cos(4\pi) \\ \sin(4\pi) \end{bmatrix}$ &nbsp; (also in $\mathrm{Im}(\sigma)$)
     - $\leadsto$ &nbsp; discontinuity is a “jump” in the parameterization of the image, not necessarily a hole in $\mathrm{Im}(\sigma)$
-    - $\leadsto$ &nbsp; discontinuity is a hole in $\mathrm{graph}(\gamma)$!
+    - $\leadsto$ &nbsp; discontinuity is a hole in $\mathrm{graph}(\gamma)$
 
     **In this lecture:** local properties of scalar functions and maps
 
@@ -298,7 +298,7 @@ def _(BLUE, GREEN, GREY, HALF, LIGHT, RED, arrow, blank, definition, mo, np):
             _fig,
             mo.md(
                 r"""
-    **Remark.** The “boundary” is not included! Only “interior” points are part of $B(\vec{a}, \delta)$.
+    **Remark.** The “boundary” is not included. Only “interior” points are part of $B(\vec{a}, \delta)$.
 
     - $\leadsto$ &nbsp; $S(\vec{a}, \delta) = \big\{\, \vec{x} \in \mathbb{R}^n \;\big|\; \lVert \vec{x} - \vec{a} \rVert = \delta \,\big\}$ &nbsp; **sphere** in $\mathbb{R}^n$ centered at $\vec{a}$ with radius $\delta$
     - $\leadsto$ &nbsp; $\overline{B(\vec{a}, \delta)} = B(\vec{a}, \delta) \cup S(\vec{a}, \delta)$ &nbsp; **closed ball** in $\mathbb{R}^n$ centered at $\vec{a}$ with radius $\delta$ &nbsp; ($\lVert \vec{x} - \vec{a} \rVert \leq \delta$)
@@ -774,7 +774,7 @@ def _(BLUE, GREEN, GREY, LIGHT, RED, arrow, blank, definition, mo, np, panel, sh
                 r"""
     Choose $B(\vec{b}, \varepsilon)$. Can we find $B(\vec{a}, \delta)$ such that $f\big( B(\vec{a}, \delta) \setminus \{\vec{a}\} \big) \subseteq B(\vec{b}, \varepsilon)$?
 
-    If yes for every $\varepsilon > 0$ &nbsp; $\Longrightarrow$ &nbsp; $\displaystyle \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b}$!
+    If yes for every $\varepsilon > 0$ &nbsp; $\Longrightarrow$ &nbsp; $\displaystyle \lim_{\vec{x} \to \vec{a}} f(\vec{x}) = \vec{b}$
 
     **Example.** $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$
 
@@ -808,7 +808,7 @@ def _(BLUE, GREEN, GREY, LIGHT, RED, arrow, blank, definition, mo, np, panel, sh
     \Longrightarrow \qquad \lvert f(\vec{x}) - 0 \rvert \leq 2 \lVert \vec{x} \rVert = 2 \lVert \vec{x} - \vec{0} \rVert
     $$
 
-    $\Longrightarrow$ &nbsp; whenever we make $0 < \lVert \vec{x} - \vec{0} \rVert < \dfrac{1}{2} = \delta$ (for $\varepsilon = 1$) we guarantee that $\lvert f(\vec{x}) - 0 \rvert < 1$!
+    $\Longrightarrow$ &nbsp; whenever we make $0 < \lVert \vec{x} - \vec{0} \rVert < \dfrac{1}{2} = \delta$ (for $\varepsilon = 1$) we guarantee that $\lvert f(\vec{x}) - 0 \rvert < 1$
 
     Now repeat the argument for every $\varepsilon > 0$ &nbsp; ($\varepsilon = \dfrac{1}{2} \leadsto \delta = \dfrac{1}{4}$, &nbsp; $\varepsilon = \dfrac{1}{3} \leadsto \delta = \dfrac{1}{6}$, &nbsp; …)
 
@@ -915,7 +915,7 @@ def _(BLUE, FULL, GREEN, GREY, LIGHT, ORANGE, RED, arrow, blank, blob, mo, np, t
             ),
             mo.md(
                 r"""
-    $\leadsto$ &nbsp; limits are unique! (when they exist)
+    $\leadsto$ &nbsp; limits are unique (when they exist)
 
     **Proof.** Given $\vec{b}_1 \neq \vec{b}_2 \in \mathbb{R}^m$ let $\varepsilon = \dfrac{\lVert \vec{b}_2 - \vec{b}_1 \rVert}{2}$
 
@@ -948,7 +948,7 @@ def _(BLUE, FULL, GREEN, GREY, LIGHT, ORANGE, RED, arrow, blank, blob, mo, np, t
     f(\vec{x}) = \frac{(x^1)^2}{\lVert \vec{x} \rVert^2} = \frac{(x^1)^2}{(x^1)^2 + (x^2)^2}
     $$
 
-    Claim: $\displaystyle \lim_{\vec{x} \to \vec{0}} f(\vec{x})$ **does not exist**! (it is not well-defined)
+    Claim: $\displaystyle \lim_{\vec{x} \to \vec{0}} f(\vec{x})$ **does not exist** (it is not well-defined)
 
     **Proof.** Let's consider two different ways $\vec{x}$ can approach $\vec{0}$
 
@@ -964,7 +964,7 @@ def _(BLUE, FULL, GREEN, GREY, LIGHT, ORANGE, RED, arrow, blank, blob, mo, np, t
         0 < \lVert t\vec{e}_1 - \vec{0} \rVert < \delta \qquad \Longrightarrow \qquad \lVert f(t\vec{e}_1) - 1 \rVert = 0 < \varepsilon
         $$
 
-        for every $\delta > 0$! (since $f(t\vec{e}_1) = 1$ is constant)
+        for every $\delta > 0$ (since $f(t\vec{e}_1) = 1$ is constant)
 
         $$
         \therefore \quad \lim_{\substack{\vec{x} \to \vec{0} \\ \vec{x} = t\vec{e}_1}} f(\vec{x}) = 1
@@ -982,13 +982,13 @@ def _(BLUE, FULL, GREEN, GREY, LIGHT, ORANGE, RED, arrow, blank, blob, mo, np, t
         0 < \lVert s\vec{e}_2 - \vec{0} \rVert < \delta \qquad \Longrightarrow \qquad \lVert f(s\vec{e}_2) - 0 \rVert = 0 < \varepsilon
         $$
 
-        for every $\delta > 0$!
+        for every $\delta > 0$
 
         $$
         \therefore \quad \lim_{\substack{\vec{x} \to \vec{0} \\ \vec{x} = s\vec{e}_2}} f(\vec{x}) = 0
         $$
 
-    Two possible values for the limit &nbsp; $\Longrightarrow$ &nbsp; limit is not well-defined! <span class=qed>$\square$</span>
+    Two possible values for the limit &nbsp; $\Longrightarrow$ &nbsp; limit is not well-defined <span class=qed>$\square$</span>
     """
             ),
         ]
