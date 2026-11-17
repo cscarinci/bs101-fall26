@@ -15,9 +15,8 @@ PARTS = [  # (name, first lecture, last lecture)
     ("I. Euclidean Geometry", 1, 5),
     ("II. Differentiation", 6, 13),
     ("III. Applications to Optimization", 14, 16),
-    ("IV. Vector fields and line integrals", 17, 19),
-    ("V. Multiple integrals", 20, 22),
-    ("VI. Surface integrals, Stokes and Gauss", 23, 27),
+    ("IV. Vector fields and line integrals", 17, 21),
+    ("V. Surface integrals, Stokes and Gauss", 22, 27),
 ]
 
 TITLES = {  # lecture number -> title shown on the index
@@ -44,7 +43,7 @@ TITLES = {  # lecture number -> title shown on the index
     21: "Green's theorem",
 }
 
-DRAFTS = {20, 21}  # lectures kept in the repo but not published
+DRAFTS = set()  # lectures kept in the repo but not published
 
 PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
