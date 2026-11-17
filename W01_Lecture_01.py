@@ -672,7 +672,7 @@ def _(mo, spaces_figure):
                 r"""
     $\leadsto$ &nbsp; geometrically, elements in $\mathbb{R}^n$ are points in an “$n$-dimensional” space with $n$ “orthogonal axes” intersecting at a single point (the origin)
 
-    $\leadsto$ &nbsp; to extend the operations $+$ and $\cdot$ to $\mathbb{R}^n$, we need yet another way to think about its elements!
+    $\leadsto$ &nbsp; to extend the operations $+$ and $\cdot$ to $\mathbb{R}^n$, we need yet another way to think about its elements
 
     ### Arrows from the origin
     """
@@ -837,7 +837,7 @@ def _(mo, theorem):
     """,
                 "Properties of the operations",
             ),
-            mo.md(r"**Proof.** Exercise! <span class=qed>$\square$</span>"),
+            mo.md(r"**Proof.** Exercise. <span class=qed>$\square$</span>"),
         ]
     )
     return
