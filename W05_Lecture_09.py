@@ -247,7 +247,7 @@ def _(mo):
     \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a})}{\vec{x} - \vec{a}}
     $$
 
-    Makes NO sense: we cannot divide by $\vec{x} - \vec{a} \in \mathbb{R}^2$!
+    Makes NO sense: we cannot divide by $\vec{x} - \vec{a} \in \mathbb{R}^2$
 
     $\leadsto$ &nbsp; could try instead
 
@@ -255,10 +255,10 @@ def _(mo):
     \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a})}{\lVert \vec{x} - \vec{a} \rVert}
     $$
 
-    This makes sense! But if this limit exists (say equal $m \in \mathbb{R}$)
+    This makes sense. But if this limit exists (say equal $m \in \mathbb{R}$)
 
     $$
-    \Longrightarrow \qquad f(\vec{x}) \approx f(\vec{a}) + m \lVert \vec{x} - \vec{a} \rVert \quad \text{for } \vec{x} \approx \vec{a} \qquad (\text{too restrictive!})
+    \Longrightarrow \qquad f(\vec{x}) \approx f(\vec{a}) + m \lVert \vec{x} - \vec{a} \rVert \quad \text{for } \vec{x} \approx \vec{a} \qquad (\text{too restrictive})
     $$
 
     **Example.**
@@ -276,7 +276,7 @@ def _(mo):
     \begin{cases} = 1 & \text{along } \vec{x} = \vec{a} + t\vec{e}_1,\ t \to 0^+ \\ = 0 & \text{along } \vec{x} = \vec{a} + s\vec{e}_2 \end{cases}
     $$
 
-    We should hope to give a definition of derivatives for which this simple function is differentiable!
+    We should hope to give a definition of derivatives for which this simple function is differentiable
     """)
     return
 
@@ -323,7 +323,7 @@ def _(BLUE, FULL, RED, arrow, blank, definition, mo):
 
     $$
     \leadsto \qquad \frac{\partial f}{\partial x^1}(\vec{a}) = \underbrace{\frac{d}{dt} f(\vec{a} + t\vec{e}_1) \Big|_{t = 0}}_{\mathclap{\footnotesize \begin{matrix}\text{real single variable} \\ \text{differentiation at } t = 0\end{matrix}}\vphantom{\footnotesize \begin{matrix}\text{real single variable} \\ \text{differentiation at } t = 0\end{matrix}}}
-    \qquad \leadsto \qquad \underbrace{t \longmapsto f(\vec{a} + t\vec{e}_1)}_{\mathclap{\footnotesize \begin{matrix}\text{real single variable} \\ \text{real valued function!}\end{matrix}}\vphantom{\footnotesize \begin{matrix}\text{real single variable} \\ \text{real valued function!}\end{matrix}}}
+    \qquad \leadsto \qquad \underbrace{t \longmapsto f(\vec{a} + t\vec{e}_1)}_{\mathclap{\footnotesize \begin{matrix}\text{real single variable} \\ \text{real valued function}\end{matrix}}\vphantom{\footnotesize \begin{matrix}\text{real single variable} \\ \text{real valued function}\end{matrix}}}
     $$
 
     Similarly, the partial derivative of $f$ at $\vec{x} = \vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix}$ in the direction of $\vec{e}_2 = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$ is
@@ -448,7 +448,7 @@ def _(definition, mo):
             ),
             mo.md(
                 r"""
-    $\leadsto$ &nbsp; now NOT a limit over real numbers! (Stronger than just existence + linearity of directional derivatives.)
+    $\leadsto$ &nbsp; now NOT a limit over real numbers (Stronger than just existence + linearity of directional derivatives.)
 
     $$
     \Longrightarrow \qquad f(\vec{x}) \approx f(\vec{a}) + \underbrace{Df(\vec{a})(\vec{x} - \vec{a})}_{\mathclap{\footnotesize \text{more flexible than } m \lVert \vec{x} - \vec{a} \rVert}\vphantom{\footnotesize \text{more flexible than } m \lVert \vec{x} - \vec{a} \rVert}} \quad \text{for } \vec{x} \approx \vec{a}
@@ -478,7 +478,7 @@ def _(definition, mo):
     \Longrightarrow \qquad \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0
     $$
 
-    $\Longrightarrow$ &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = x^1$ is differentiable at $\vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \in \mathbb{R}^2$!
+    $\Longrightarrow$ &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = x^1$ is differentiable at $\vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \in \mathbb{R}^2$
     """
             ),
         ]
