@@ -612,9 +612,9 @@ def _(definition, mo):
             ),
             mo.md(
                 r"""
-    **Remark.** Each component $\gamma^i : A \subseteq \mathbb{R} \longrightarrow \mathbb{R}$ is a usual single variable real valued function!
+    **Remark.** Each component $\gamma^i : A \subseteq \mathbb{R} \longrightarrow \mathbb{R}$ is a usual single variable real valued function
 
-    $\Longrightarrow$ &nbsp; paths are ordered lists of single variable scalar functions, like vectors were ordered lists of scalars!
+    $\Longrightarrow$ &nbsp; paths are ordered lists of single variable scalar functions, like vectors were ordered lists of scalars
 
     **Example.** $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^2$ an affine parameterization of a line
 
@@ -786,7 +786,7 @@ def _(definition, mo, theorem):
     0 < \lvert t - a \rvert < \delta \qquad \Longrightarrow \qquad \lVert \gamma(t) - \vec{b} \rVert < \varepsilon \ ?
     $$
 
-    Can we do this for every $\varepsilon > 0$? If yes, then $\displaystyle \lim_{t \to a} \gamma(t) = \vec{b}$!
+    Can we do this for every $\varepsilon > 0$? If yes, then $\displaystyle \lim_{t \to a} \gamma(t) = \vec{b}$
     """
             ),
             theorem(
@@ -807,7 +807,7 @@ def _(definition, mo, theorem):
     \lim_{t \to \pi/2} \gamma(t) = \begin{bmatrix} \displaystyle \lim_{t \to \pi/2} \cos(t) \\[8pt] \displaystyle \lim_{t \to \pi/2} \sin(t) \end{bmatrix} = \begin{bmatrix} 0 \\ 1 \end{bmatrix}
     $$
 
-    **Remark.** Limits are unique, provided they exist!
+    **Remark.** Limits are unique, provided they exist
     """
             ),
         ]
@@ -1074,7 +1074,7 @@ def _(mo):
 
     (b) Compute $\sigma'(t)$, and find an affine parameterization of the tangent line to $\sigma$ at $t = 0$.
 
-    (c) Is the entire tangent line contained in $f^{-1}(1)$? Justify your answers!
+    (c) Is the entire tangent line contained in $f^{-1}(1)$? Justify your answers
     """
             ),
         ]
