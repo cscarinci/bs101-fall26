@@ -681,7 +681,7 @@ def _(mo):
 
     Why do we multiply by the speed of $\gamma$?
 
-    $\leadsto$ &nbsp; because we want these integrals to only depend on the function $f$ and on the curve $C = \gamma([a, b])$, but not on the $\underbrace{\text{choice of parameterization}}_{\mathclap{\footnotesize \begin{matrix} \text{the specific path } \gamma \\ \text{with } \gamma([a, b]) = C \end{matrix}}\vphantom{\footnotesize \begin{matrix} \text{the specific path } \gamma \\ \text{with } \gamma([a, b]) = C \end{matrix}}}$ of $C$!
+    $\leadsto$ &nbsp; because we want these integrals to only depend on the function $f$ and on the curve $C = \gamma([a, b])$, but not on the $\underbrace{\text{choice of parameterization}}_{\mathclap{\footnotesize \begin{matrix} \text{the specific path } \gamma \\ \text{with } \gamma([a, b]) = C \end{matrix}}\vphantom{\footnotesize \begin{matrix} \text{the specific path } \gamma \\ \text{with } \gamma([a, b]) = C \end{matrix}}}$ of $C$
 
     **Example.** &nbsp; $f(x, y, z) = z$, &nbsp; $\sigma(t) = \begin{bmatrix} \cos(2t) \\ \sin(2t) \\ 2t \end{bmatrix}$ &nbsp; $\Longrightarrow \ \sigma([0, \pi]) = \gamma([0, 2\pi]) = C$
 
@@ -692,7 +692,7 @@ def _(mo):
     $$
 
     $$
-    ② \quad \int_C z \, ds = \underbrace{\int_0^{2\pi} t \lVert \gamma'(t) \rVert \, dt \qquad \overset{\mathclap{\footnotesize \begin{matrix} \text{integration by} \\ \text{substitution} \\ \downarrow \end{matrix}}}{\vphantom{\Bigg|} =} \qquad \int_0^{\pi} 2\tilde{t} \lVert \sigma'(\tilde{t}) \rVert \, d\tilde{t}}_{\footnotesize \begin{matrix} \text{integral of } f \text{ over } C \\ \text{should also be independent!} \end{matrix}}
+    ② \quad \int_C z \, ds = \underbrace{\int_0^{2\pi} t \lVert \gamma'(t) \rVert \, dt \qquad \overset{\mathclap{\footnotesize \begin{matrix} \text{integration by} \\ \text{substitution} \\ \downarrow \end{matrix}}}{\vphantom{\Bigg|} =} \qquad \int_0^{\pi} 2\tilde{t} \lVert \sigma'(\tilde{t}) \rVert \, d\tilde{t}}_{\footnotesize \begin{matrix} \text{integral of } f \text{ over } C \\ \text{should also be independent} \end{matrix}}
     $$
     """)
     return
@@ -888,7 +888,7 @@ def _(theorem):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    $\Longrightarrow$ &nbsp; $\displaystyle \int_{\vec{C}} \vec{F} \cdot d\vec{s}$ &nbsp; is independent of the choice of reparameterization of $\gamma$, up to the orientation of $C$!
+    $\Longrightarrow$ &nbsp; $\displaystyle \int_{\vec{C}} \vec{F} \cdot d\vec{s}$ &nbsp; is independent of the choice of reparameterization of $\gamma$, up to the orientation of $C$
     """)
     return
 
@@ -900,7 +900,7 @@ def _(theorem):
     Given $f : D \subseteq \mathbb{R}^3 \longrightarrow \mathbb{R}$, $C^1$-smooth and $\vec{C} = \gamma([a, b]) \subset D$ from $\gamma(a)$ to $\gamma(b)$, then
 
     $$
-    \int_{\vec{C}} \vec{\nabla} f \cdot d\vec{s} = f(\gamma(b)) - f(\gamma(a)) \ !
+    \int_{\vec{C}} \vec{\nabla} f \cdot d\vec{s} = f(\gamma(b)) - f(\gamma(a))
     $$
     """,
         "Line integrals of gradient vector fields",
@@ -914,7 +914,7 @@ def _(mo):
     $\leadsto$ &nbsp; line integrals of gradient vector fields only depend on their end points!
 
     **Proof.**
-    <span class="chain">$\displaystyle \int_{\vec{C}} \vec{\nabla} f \cdot d\vec{s} = \int_a^b \vec{\nabla} f(\gamma(t)) \cdot \gamma'(t) \, dt$ $\displaystyle \quad \overset{\mathclap{\footnotesize \text{chain rule}}}{\vphantom{\Bigg|} =} \quad \int_a^b \frac{d}{dt}\big( f(\gamma(t)) \big) \, dt$ $\displaystyle \quad \overset{\mathclap{\footnotesize \text{FTC!}}}{\vphantom{\Bigg|} =} \quad f(\gamma(b)) - f(\gamma(a))$ <span class=qed>$\square$</span></span>
+    <span class="chain">$\displaystyle \int_{\vec{C}} \vec{\nabla} f \cdot d\vec{s} = \int_a^b \vec{\nabla} f(\gamma(t)) \cdot \gamma'(t) \, dt$ $\displaystyle \quad \overset{\mathclap{\footnotesize \text{chain rule}}}{\vphantom{\Bigg|} =} \quad \int_a^b \frac{d}{dt}\big( f(\gamma(t)) \big) \, dt$ $\displaystyle \quad \overset{\mathclap{\footnotesize \text{FTC}}}{\vphantom{\Bigg|} =} \quad f(\gamma(b)) - f(\gamma(a))$ <span class=qed>$\square$</span></span>
 
     **Example.** &nbsp; $\vec{G}(x, y, z) = \begin{bmatrix} x \\ y \\ z \end{bmatrix} = \vec{\nabla} g(x, y, z)$, &nbsp; $g(x, y, z) = \dfrac{1}{2}(x^2 + y^2 + z^2)$
 
@@ -938,7 +938,7 @@ def _(mo):
 
     $$
     \begin{aligned} \Longrightarrow \quad \int_{\vec{C}} \vec{H} \cdot d\vec{s} &= \int_0^{2\pi} \begin{bmatrix} -\sin(t) \\ \cos(t) \\ 0 \end{bmatrix} \cdot \begin{bmatrix} -\sin(t) \\ \cos(t) \\ 0 \end{bmatrix} dt \\
-    &= \int_0^{2\pi} dt = 2\pi \neq 0 = \underbrace{h(\gamma(2\pi)) - h(\gamma(0))}_{\mathclap{\footnotesize \forall \, h : \mathrm{Dom}(\vec{H}) \subseteq \mathbb{R}^3 \to \mathbb{R} \,!}} \end{aligned}
+    &= \int_0^{2\pi} dt = 2\pi \neq 0 = \underbrace{h(\gamma(2\pi)) - h(\gamma(0))}_{\mathclap{\footnotesize \forall \, h : \mathrm{Dom}(\vec{H}) \subseteq \mathbb{R}^3 \to \mathbb{R}}} \end{aligned}
     $$
     """)
     return
