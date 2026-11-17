@@ -567,7 +567,7 @@ def _(BLUE, GREEN, GREY, HALF, RED, arrow, blank, mo):
         a = \dfrac{\vec{x} \cdot \vec{u}}{\lVert \vec{u} \rVert^2}, \quad b = \dfrac{\vec{x} \cdot \vec{v}}{\lVert \vec{v} \rVert^2}, \quad c = \dfrac{\vec{x} \cdot \vec{w}}{\lVert \vec{w} \rVert^2}
         $$
     - $a\vec{u} = \dfrac{\vec{x} \cdot \vec{u}}{\lVert \vec{u} \rVert^2}\, \vec{u} = \mathrm{proj}_{\vec{u}}(\vec{x})$ &nbsp; (orthogonal projection of $\vec{x}$ onto the $\vec{u}$ direction)
-    - $\Longrightarrow$ &nbsp; $\vec{x} = \mathrm{proj}_{\vec{u}}(\vec{x}) + \mathrm{proj}_{\vec{v}}(\vec{x}) + \mathrm{proj}_{\vec{w}}(\vec{x})$: any vector in $\mathbb{R}^3$ decomposes as the sum of orthogonal projections onto an orthogonal frame!
+    - $\Longrightarrow$ &nbsp; $\vec{x} = \mathrm{proj}_{\vec{u}}(\vec{x}) + \mathrm{proj}_{\vec{v}}(\vec{x}) + \mathrm{proj}_{\vec{w}}(\vec{x})$: any vector in $\mathbb{R}^3$ decomposes as the sum of orthogonal projections onto an orthogonal frame
     """
             ),
             _fig,
@@ -697,9 +697,9 @@ def _(definition, mo):
                 r"""
     Why are we interested in matrices?
 
-    $\leadsto$ &nbsp; generalization of vectors ($n \times 1$ matrices): can also extend addition and multiplication to matrices!
+    $\leadsto$ &nbsp; generalization of vectors ($n \times 1$ matrices): can also extend addition and multiplication to matrices
 
-    $\leadsto$ &nbsp; will give the simplest examples of multivariable functions!
+    $\leadsto$ &nbsp; will give the simplest examples of multivariable functions
     """
             ),
             definition(
@@ -771,7 +771,7 @@ def _(definition, mo):
 
     - $AB$ can only be defined if $p = q$ $\;\Longrightarrow\; AB \in \mathrm{Mat}(m \times n)$
     - $BA$ can only be defined if $m = n$ $\;\Longrightarrow\; BA \in \mathrm{Mat}(p \times q)$
-    - $p = q$ and $m = n$ $\;\not\Longrightarrow\; AB = BA$! &nbsp; ($AB \in \mathrm{Mat}(n \times n)$, $BA \in \mathrm{Mat}(p \times p)$)
+    - $p = q$ and $m = n$ $\;\not\Longrightarrow\; AB = BA$ &nbsp; ($AB \in \mathrm{Mat}(n \times n)$, $BA \in \mathrm{Mat}(p \times p)$)
     - $p = q = m = n$ $\;\not\Longrightarrow\; AB = BA$!
 
     **Example.**
@@ -792,7 +792,7 @@ def _(definition, mo):
     $$
 
     $$
-    \Longrightarrow \qquad A : \mathbb{R}^n \longrightarrow \mathbb{R}^m \ \text{ is a function on } \mathbb{R}^n \text{ valued in } \mathbb{R}^m \quad (\text{a multivariable function!})
+    \Longrightarrow \qquad A : \mathbb{R}^n \longrightarrow \mathbb{R}^m \ \text{ is a function on } \mathbb{R}^n \text{ valued in } \mathbb{R}^m \quad (\text{a multivariable function})
     $$
 
     **Example.**
@@ -806,7 +806,7 @@ def _(definition, mo):
     \Longrightarrow \qquad A\vec{x} = \begin{bmatrix} 1 + 4 + 9 \\ 4 + 10 + 18 \end{bmatrix} = \begin{bmatrix} 14 \\ 32 \end{bmatrix} \in \mathbb{R}^2 = \mathrm{Mat}(2 \times 1)
     $$
 
-    $\leadsto$ &nbsp; functions defined by matrix multiplication are always linear! (very special property)
+    $\leadsto$ &nbsp; functions defined by matrix multiplication are always linear (very special property)
     """
             ),
         ]
@@ -831,7 +831,7 @@ def _(definition, mo, theorem):
             ),
             theorem(
                 r"""
-    Every function defined by an $m \times n$ matrix via matrix multiplication is linear. Conversely, every linear function $\mathbb{R}^n \longrightarrow \mathbb{R}^m$ is defined by an $m \times n$ matrix!
+    Every function defined by an $m \times n$ matrix via matrix multiplication is linear. Conversely, every linear function $\mathbb{R}^n \longrightarrow \mathbb{R}^m$ is defined by an $m \times n$ matrix
     """,
                 "Linear functions and matrices",
             ),
@@ -898,7 +898,7 @@ def _(definition, mo, theorem):
     \end{aligned}
     $$
 
-    $\leadsto$ &nbsp; another way to get convinced about non-commutativity of matrix multiplication!
+    $\leadsto$ &nbsp; another way to get convinced about non-commutativity of matrix multiplication
     """
             ),
         ]
@@ -1010,7 +1010,7 @@ def _(Arc, BLUE, Figure, GREEN, GREY, HALF, LIGHT, RED, arrow, ma, math, mb, mc,
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    $\leadsto$ &nbsp; it also determines whether or not $A : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ is **invertible**!
+    $\leadsto$ &nbsp; it also determines whether or not $A : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ is **invertible**
 
     $$
     \exists\, A^{-1} : \mathbb{R}^2 \longrightarrow \mathbb{R}^2 \ \text{ such that } \ A \circ A^{-1}(\vec{x}) = A^{-1} \circ A(\vec{x}) = \vec{x} \quad \forall\, \vec{x} \in \mathbb{R}^2
