@@ -683,7 +683,7 @@ def _(BLUE, GREEN, ORANGE, mo, np, panel, sheet, theorem, turntable):
             _fig,
             mo.md(
                 r"""
-    $\leadsto$ &nbsp; global minimum: &nbsp; $f(\vec{0}) = 0 < f(\vec{x}) \quad \forall\, \vec{x} \neq \vec{0}$!
+    $\leadsto$ &nbsp; global minimum: &nbsp; $f(\vec{0}) = 0 < f(\vec{x}) \quad \forall\, \vec{x} \neq \vec{0}$
 
     **In this lecture:** global extrema
 
@@ -720,7 +720,7 @@ def _(definition, mo):
             ),
             mo.md(
                 r"""
-    $\leadsto$ &nbsp; to determine global extrema, we will also need to look at properties of the domain of $f$!
+    $\leadsto$ &nbsp; to determine global extrema, we will also need to look at properties of the domain of $f$
 
     **Example.** &nbsp; $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$, &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = (x^1)^2 + (x^2)^2$
 
@@ -858,12 +858,12 @@ def _(frame, mo):
 
     - can make $g(\vec{x}) < g(\vec{a})$ moving towards $\vec{0}$, but never reach $g(\vec{x}) = 0$ since $\vec{0} \notin D$
 
-        $\Longrightarrow$ &nbsp; no $\vec{a} \in D$ can be a minimum!
+        $\Longrightarrow$ &nbsp; no $\vec{a} \in D$ can be a minimum
 
     - can make $g(\vec{x}) > g(\vec{a})$ moving away from $\vec{0}$, unless $a^1 = 1$ or $a^2 = 1$
     - if $a^2 = 1$, can make $g(\vec{x}) > g(\vec{a})$ moving right, unless $a^1 = 1$ (likewise, if $a^1 = 1$, moving up, unless $a^2 = 1$)
 
-        $\Longrightarrow$ &nbsp; $\vec{a} = \begin{bmatrix} 1 \\ 1 \end{bmatrix} \in D$ is the maximum!
+        $\Longrightarrow$ &nbsp; $\vec{a} = \begin{bmatrix} 1 \\ 1 \end{bmatrix} \in D$ is the maximum
     """
             ),
         ]
@@ -1080,11 +1080,11 @@ def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, mo, np):
             ),
             mo.md(
                 r"""
-    $D = \left\{\, a < x^1 < b,\ c < x^2 < d \,\right\}$ is not closed! &nbsp; $\begin{bmatrix} a \\ c \end{bmatrix} \in \mathrm{Bd}(D)$, but $\begin{bmatrix} a \\ c \end{bmatrix} \notin D$ &nbsp; (one missing point is enough!)
+    $D = \left\{\, a < x^1 < b,\ c < x^2 < d \,\right\}$ is not closed &nbsp; $\begin{bmatrix} a \\ c \end{bmatrix} \in \mathrm{Bd}(D)$, but $\begin{bmatrix} a \\ c \end{bmatrix} \notin D$ &nbsp; (one missing point is enough!
     """
             ),
             _open,
-            mo.md(r"""$D = \left\{\, a \leq x^1 \leq b,\ c \leq x^2 \leq d \,\right\}$ is closed!"""),
+            mo.md(r"""$D = \left\{\, a \leq x^1 \leq b,\ c \leq x^2 \leq d \,\right\}$ is closed"""),
             _closed,
         ]
     )
@@ -1114,7 +1114,7 @@ def _(BLUE, Figure, GREEN, HALF, LIGHT, RED, cross_axes, mo, theorem):
         [
             theorem(
                 r"""
-    If $f : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}$ is continuous over a closed and bounded domain $D$, then $f$ must have both points of global maximum and global minimum!
+    If $f : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}$ is continuous over a closed and bounded domain $D$, then $f$ must have both points of global maximum and global minimum
     """,
                 "Extreme value theorem",
             ),
@@ -1126,7 +1126,7 @@ def _(BLUE, Figure, GREEN, HALF, LIGHT, RED, cross_axes, mo, theorem):
 
     $g\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = (x^1)^2 + (x^2)^2$ over $D = (0, 1] \times (0, 1]$ has no global minimum, which is possible because $D$ is not closed
 
-    $h\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = (x^1)^2 + (x^2)^2$ over $\bar{D} = [0, 1] \times [0, 1]$ has both global extrema!
+    $h\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = (x^1)^2 + (x^2)^2$ over $\bar{D} = [0, 1] \times [0, 1]$ has both global extrema
     """
             ),
             _fig,
@@ -1162,7 +1162,7 @@ def _(mo):
         f(\vec{x}) \geq f(\vec{a}) \quad \forall\, \vec{x} \in B(\vec{a}, r) \qquad (\vec{a} \text{ is local minimum})
         $$
 
-    $\Longrightarrow$ &nbsp; for differentiable functions defined over closed and bounded domains we get a well-defined strategy to find global extrema!
+    $\Longrightarrow$ &nbsp; for differentiable functions defined over closed and bounded domains we get a well-defined strategy to find global extrema
 
     ### Strategy to find global extrema
 
