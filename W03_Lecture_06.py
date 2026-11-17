@@ -657,7 +657,7 @@ def _(definition, mo):
         \qquad \qquad
         \begin{aligned}
         \varphi : \mathbb{R}^2 &\longrightarrow \mathbb{R}^3 \\
-        \underbrace{(s, t)}_{\mathclap{\footnotesize \text{variables}}\vphantom{\footnotesize \text{variables}}} &\longmapsto \underbrace{\begin{bmatrix} x^1 + s u^1 + t v^1 \\ x^2 + s u^2 + t v^2 \\ x^3 + s u^3 + t v^3 \end{bmatrix}}_{\mathclap{\footnotesize \vec{x},\ \vec{u} \text{ and } \vec{v} \text{ fixed here!}}\vphantom{\footnotesize \vec{x},\ \vec{u} \text{ and } \vec{v} \text{ fixed here!}}}
+        \underbrace{(s, t)}_{\mathclap{\footnotesize \text{variables}}\vphantom{\footnotesize \text{variables}}} &\longmapsto \underbrace{\begin{bmatrix} x^1 + s u^1 + t v^1 \\ x^2 + s u^2 + t v^2 \\ x^3 + s u^3 + t v^3 \end{bmatrix}}_{\mathclap{\footnotesize \vec{x},\ \vec{u} \text{ and } \vec{v} \text{ fixed here}}\vphantom{\footnotesize \vec{x},\ \vec{u} \text{ and } \vec{v} \text{ fixed here}}}
         \end{aligned}
         $$
 
@@ -688,7 +688,7 @@ def _(definition, mo):
     - the **image** of $f$ is
 
         $$
-        \mathrm{Im}(f) = \left\{\, \vec{y} \in \mathbb{R}^m \mid \exists\, \vec{x} \in A,\ f(\vec{x}) = \vec{y} \,\right\} \underbrace{\subseteq B}_{\mathclap{\footnotesize \text{not necessarily equal!}}\vphantom{\footnotesize \text{not necessarily equal!}}} \qquad \big(\mathrm{Im}(f) \subseteq \mathrm{Codom}(f)\big)
+        \mathrm{Im}(f) = \left\{\, \vec{y} \in \mathbb{R}^m \mid \exists\, \vec{x} \in A,\ f(\vec{x}) = \vec{y} \,\right\} \underbrace{\subseteq B}_{\mathclap{\footnotesize \text{not necessarily equal}}\vphantom{\footnotesize \text{not necessarily equal}}} \qquad \big(\mathrm{Im}(f) \subseteq \mathrm{Codom}(f)\big)
         $$
 
     - the **graph** of $f$ is
@@ -833,7 +833,7 @@ def _(BLUE, GREY, LIGHT, RED, definition, mo, np, panel, sheet, turntable):
     **Remark.** $\mathrm{Im}(f)$ and $\mathrm{graph}(f)$ help us visualize $f$ as a set of points (very useful in lower dimensions)
 
     - $\leadsto$ &nbsp; we might have many functions with same image
-    - $\leadsto$ &nbsp; graph essentially determines the function completely! (but it lives in higher dimensions)
+    - $\leadsto$ &nbsp; graph essentially determines the function completely (but it lives in higher dimensions)
 
     ### Level sets
     """
@@ -862,7 +862,7 @@ def _(BLUE, GREY, LIGHT, RED, definition, mo, np, panel, sheet, turntable):
                 r"""
     **Remark.** Here $f^{-1}(\vec{b})$ is NOT the value of the inverse function of $f$ (we don't even know if $f$ has an inverse).
 
-    $f^{-1}(\vec{b})$ is the set of points in the domain of $f$ which gives the value “$\vec{b}$” as an output!
+    $f^{-1}(\vec{b})$ is the set of points in the domain of $f$ which gives the value “$\vec{b}$” as an output
 
     $\leadsto$ &nbsp; if $f$ is invertible then, for each $\vec{b} \in B$,
 
@@ -1066,7 +1066,7 @@ def _(definition, mo):
     \qquad (\text{here } a, b, c \neq 0 \text{ and } r > 0)
     $$
 
-    **Remark.** Sometimes level sets of a function can be seen as graphs of another function and vice-versa!
+    **Remark.** Sometimes level sets of a function can be seen as graphs of another function and vice-versa
 
     $\Longrightarrow$ &nbsp; geometry of sets in $\mathbb{R}^n$ or $\mathbb{R}^m$ or $\mathbb{R}^n \times \mathbb{R}^m$ is useful to study properties of various functions
     """
