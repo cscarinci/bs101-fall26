@@ -286,7 +286,7 @@ def _(definition, mo):
     \end{alignedat}
     $$
 
-    $\leadsto$ &nbsp; no more indices!
+    $\leadsto$ &nbsp; no more indices
     """
             ),
             definition(
@@ -471,7 +471,7 @@ def _(BLUE, GREEN, ORANGE, RED, farrow, label, lt, math, mo, np, sketch, vfield)
         [
             mo.hstack([lt], justify="start"),
             mo.hstack([_fig], justify="center"),
-            mo.md(r"at every $t$, the velocity of $\gamma$ agrees with $\vec{F}$ at $\gamma(t)$!"),
+            mo.md(r"at every $t$, the velocity of $\gamma$ agrees with $\vec{F}$ at $\gamma(t)$"),
         ]
     )
     return
@@ -480,7 +480,7 @@ def _(BLUE, GREEN, ORANGE, RED, farrow, label, lt, math, mo, np, sketch, vfield)
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    **Remark.** $\gamma'(t) = \vec{F}(\gamma(t))$ is nothing but a 1st order system of ODEs!
+    **Remark.** $\gamma'(t) = \vec{F}(\gamma(t))$ is nothing but a 1st order system of ODEs
 
     $\leadsto$ &nbsp; write $\gamma(t) = \begin{bmatrix} x(t) \\ y(t) \end{bmatrix}$, &nbsp; $\vec{F}(\gamma(t)) = \begin{bmatrix} P(x(t), y(t)) \\ Q(x(t), y(t)) \end{bmatrix}$
 
@@ -493,7 +493,7 @@ def _(mo):
     $$
     \begin{aligned}
     & \begin{bmatrix} x'(t) \\ y'(t) \end{bmatrix} = \frac{1}{2}\begin{bmatrix} -y(t) \\ x(t) \end{bmatrix}, \qquad \gamma(0) = \begin{bmatrix} x_0 \\ y_0 \end{bmatrix} \\[10pt]
-    \Longrightarrow \quad & \gamma(t) = \begin{bmatrix} x_0 \cos(t/2) - y_0 \sin(t/2) \\ x_0 \sin(t/2) + y_0 \cos(t/2) \end{bmatrix} \qquad \text{circular paths!}
+    \Longrightarrow \quad & \gamma(t) = \begin{bmatrix} x_0 \cos(t/2) - y_0 \sin(t/2) \\ x_0 \sin(t/2) + y_0 \cos(t/2) \end{bmatrix} \qquad \text{circular paths}
     \end{aligned}
     $$
     """)
@@ -610,7 +610,7 @@ def _(definition, mo):
             ),
             mo.md(
                 r"""
-    $\leadsto$ &nbsp; $\vec{\nabla} \cdot \vec{F}(\vec{x}) = \begin{bmatrix} \partial / \partial x \\ \partial / \partial y \end{bmatrix} \cdot \begin{bmatrix} P(\vec{x}) \\ Q(\vec{x}) \end{bmatrix}$ &nbsp; useful abuse of notation!
+    $\leadsto$ &nbsp; $\vec{\nabla} \cdot \vec{F}(\vec{x}) = \begin{bmatrix} \partial / \partial x \\ \partial / \partial y \end{bmatrix} \cdot \begin{bmatrix} P(\vec{x}) \\ Q(\vec{x}) \end{bmatrix}$ &nbsp; useful abuse of notation
     """
             ),
         ]
