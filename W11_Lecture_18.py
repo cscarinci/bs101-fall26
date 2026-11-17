@@ -634,11 +634,11 @@ def _(definition, mo):
     \vec{\nabla} f(\vec{x}) = \begin{bmatrix} \dfrac{\partial f}{\partial x}(\vec{x}) \\[10pt] \dfrac{\partial f}{\partial y}(\vec{x}) \\[10pt] \dfrac{\partial f}{\partial z}(\vec{x}) \end{bmatrix}
     $$
 
-    If $f : D \subseteq \mathbb{R}^3 \longrightarrow \mathbb{R}$ is differentiable $\forall\, \vec{x} \in D$, then $\vec{\nabla} f : D \subseteq \mathbb{R}^3 \longrightarrow \mathbb{R}^3$ is a vector field!
+    If $f : D \subseteq \mathbb{R}^3 \longrightarrow \mathbb{R}$ is differentiable $\forall\, \vec{x} \in D$, then $\vec{\nabla} f : D \subseteq \mathbb{R}^3 \longrightarrow \mathbb{R}^3$ is a vector field
 
     $\leadsto$ &nbsp; note that $\vec{\nabla} f(\vec{x}) = \begin{bmatrix} \partial / \partial x \\ \partial / \partial y \\ \partial / \partial z \end{bmatrix} f(\vec{x})$
 
-    useful to think of $\vec{\nabla}$ as a vector of partial derivatives for gradients as well!
+    useful to think of $\vec{\nabla}$ as a vector of partial derivatives for gradients as well
     """
             ),
             definition(
@@ -693,7 +693,7 @@ def _(mo):
     mo.md(r"""
     $\vec{F}(\vec{x}) = \begin{bmatrix} -y \\ x \\ 1 \end{bmatrix}$ &nbsp; is not a gradient vector field!
 
-    $\leadsto$ &nbsp; there is no function $f : \mathbb{R}^3 \longrightarrow \mathbb{R}$ such that $\vec{\nabla} f = \vec{F}$!
+    $\leadsto$ &nbsp; there is no function $f : \mathbb{R}^3 \longrightarrow \mathbb{R}$ such that $\vec{\nabla} f = \vec{F}$
 
     How to decide if a vector field is a gradient or not?
     """)
@@ -706,7 +706,7 @@ def _(definition):
         r"""
     Given $\vec{F} : D \subseteq \mathbb{R}^3 \longrightarrow \mathbb{R}^3$ differentiable, &nbsp; $\vec{F}(\vec{x}) = \begin{bmatrix} P(\vec{x}) \\ Q(\vec{x}) \\ R(\vec{x}) \end{bmatrix}$, &nbsp; the **curl** of $\vec{F}$ is the vector field
 
-    <span class="chain">$\displaystyle \mathrm{Curl}(\vec{F})(\vec{x}) = (\vec{\nabla} \times \vec{F})(\vec{x}) = \begin{bmatrix} \dfrac{\partial R}{\partial y}(\vec{x}) - \dfrac{\partial Q}{\partial z}(\vec{x}) \\[10pt] \dfrac{\partial P}{\partial z}(\vec{x}) - \dfrac{\partial R}{\partial x}(\vec{x}) \\[10pt] \dfrac{\partial Q}{\partial x}(\vec{x}) - \dfrac{\partial P}{\partial y}(\vec{x}) \end{bmatrix}$ $\displaystyle = \det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ \partial / \partial x & \partial / \partial y & \partial / \partial z \\ P(\vec{x}) & Q(\vec{x}) & R(\vec{x}) \end{bmatrix}$ $\displaystyle \quad \text{cross-product of } \vec{\nabla} \text{ and } \vec{F}(\vec{x})\,\text{!}$</span>
+    <span class="chain">$\displaystyle \mathrm{Curl}(\vec{F})(\vec{x}) = (\vec{\nabla} \times \vec{F})(\vec{x}) = \begin{bmatrix} \dfrac{\partial R}{\partial y}(\vec{x}) - \dfrac{\partial Q}{\partial z}(\vec{x}) \\[10pt] \dfrac{\partial P}{\partial z}(\vec{x}) - \dfrac{\partial R}{\partial x}(\vec{x}) \\[10pt] \dfrac{\partial Q}{\partial x}(\vec{x}) - \dfrac{\partial P}{\partial y}(\vec{x}) \end{bmatrix}$ $\displaystyle = \det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ \partial / \partial x & \partial / \partial y & \partial / \partial z \\ P(\vec{x}) & Q(\vec{x}) & R(\vec{x}) \end{bmatrix}$ $\displaystyle \quad \text{cross-product of } \vec{\nabla} \text{ and } \vec{F}(\vec{x})$</span>
     """,
         "Curl",
     )
@@ -863,7 +863,7 @@ def _(mo):
     mo.md(r"""
     $\leadsto$ &nbsp; $\mathrm{Curl}(\vec{F})(\vec{x})$ determines the axis of rotation and the rotation speed of the flow around $\vec{x}$.
 
-    **Remark.** Curl is only defined for vector fields in $\mathbb{R}^3$!
+    **Remark.** Curl is only defined for vector fields in $\mathbb{R}^3$
 
     For $\vec{F} : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$, we can define the “scalar curl” of $\vec{F}(x, y) = \begin{bmatrix} P(x, y) \\ Q(x, y) \end{bmatrix}$ as the scalar function $\dfrac{\partial Q}{\partial x}(x, y) - \dfrac{\partial P}{\partial y}(x, y)$, obtained from
 
@@ -880,7 +880,7 @@ def _(corollary, mo, theorem):
         [
             theorem(
                 r"""
-    Gradient vector fields in $\mathbb{R}^3$ have zero curl!
+    Gradient vector fields in $\mathbb{R}^3$ have zero curl
 
     $$
     \mathrm{Curl}(\vec{\nabla} f) = \vec{\nabla} \times (\vec{\nabla} f) = \vec{0} \quad \longleftarrow \ \text{constant vector field}
@@ -895,7 +895,7 @@ def _(corollary, mo, theorem):
     assuming $f$ is $C^2$-smooth… <span class=qed>$\square$</span>
     """
             ),
-            corollary(r"""Gradient vector fields in $\mathbb{R}^2$ have zero scalar curl!""", "Scalar curl of a gradient"),
+            corollary(r"""Gradient vector fields in $\mathbb{R}^2$ have zero scalar curl""", "Scalar curl of a gradient"),
             corollary(r"""If a vector field $\vec{F}$ has non-zero curl (scalar curl for $n = 2$), it cannot be a gradient!""", "Non-zero curl"),
         ]
     )
@@ -910,7 +910,7 @@ def _(mo, theorem):
                 r"""
     **Example.** &nbsp; $\vec{F}(\vec{x}) = \begin{bmatrix} -y \\ x \\ 1 \end{bmatrix}$ &nbsp; $\leadsto$ &nbsp; $\vec{\nabla} \times \vec{F}(\vec{x}) = \begin{bmatrix} 0 \\ 0 \\ 2 \end{bmatrix}$
 
-    $\Longrightarrow$ &nbsp; there cannot exist any potential function $f : \mathbb{R}^3 \longrightarrow \mathbb{R}$ such that $\vec{F} = \vec{\nabla} f$!
+    $\Longrightarrow$ &nbsp; there cannot exist any potential function $f : \mathbb{R}^3 \longrightarrow \mathbb{R}$ such that $\vec{F} = \vec{\nabla} f$
     """
             ),
             theorem(
