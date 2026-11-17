@@ -207,7 +207,7 @@ def _(mo):
         = \lim_{t \to 0} \frac{\dfrac{t^3 (v^1)^2 v^2}{t^2 \lVert \vec{v} \rVert^2} - 0}{t} = \frac{(v^1)^2 v^2}{\lVert \vec{v} \rVert^2} \qquad (\vec{v} \neq \vec{0})
         $$
 
-        $Df(\vec{0})(\vec{v})$ defined $\forall\, \vec{v}$, but not linear &nbsp; $\Longrightarrow$ &nbsp; $f$ is NOT differentiable at $\vec{x} = \vec{0}$!
+        $Df(\vec{0})(\vec{v})$ defined $\forall\, \vec{v}$, but not linear &nbsp; $\Longrightarrow$ &nbsp; $f$ is NOT differentiable at $\vec{x} = \vec{0}$
 
     - generalization for $n > 2$ (still $m = 1$): $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ is differentiable at $\vec{x} = \vec{a}$ if the matrix of partial derivatives is well-defined (in particular, it is linear) and $Df(\vec{a})(\vec{x} - \vec{a})$ is a linear approximation to $f(\vec{x}) - f(\vec{a})$
 
@@ -243,7 +243,7 @@ def _(definition, mo, theorem):
     \lim_{\vec{x} \to \vec{a}} \big( f(\vec{x}) - f(\vec{a}) \big) = 0
     $$
 
-    $\leadsto$ &nbsp; $f$ is continuous at $\vec{x} = \vec{a}$!
+    $\leadsto$ &nbsp; $f$ is continuous at $\vec{x} = \vec{a}$
     """,
                 "Differentiable implies continuous",
             ),
@@ -279,20 +279,20 @@ def _(definition, mo, theorem):
     \lim_{t \to 0} f\!\left( \begin{bmatrix} t \\ 0 \end{bmatrix} \right) = 1, \qquad \lim_{t \to 0} f\!\left( \begin{bmatrix} 0 \\ t \end{bmatrix} \right) = 0
     $$
 
-    $\Longrightarrow$ &nbsp; $f$ cannot be continuous &nbsp; $\Longrightarrow$ &nbsp; $f$ cannot be differentiable!
+    $\Longrightarrow$ &nbsp; $f$ cannot be continuous &nbsp; $\Longrightarrow$ &nbsp; $f$ cannot be differentiable
 
     ### $C^1$-smooth functions
     """
             ),
             theorem(
                 r"""
-    If $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ has partial derivatives on an open ball around $\vec{x} = \vec{a}$ and they are continuous at $\vec{x} = \vec{a}$, then $f$ is differentiable at $\vec{x} = \vec{a}$!
+    If $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ has partial derivatives on an open ball around $\vec{x} = \vec{a}$ and they are continuous at $\vec{x} = \vec{a}$, then $f$ is differentiable at $\vec{x} = \vec{a}$
     """,
                 "Continuous partials imply differentiable",
             ),
             mo.md(
                 r"""
-    $\leadsto$ &nbsp; gives an easier criterion for differentiability (sufficient, but not necessary!)
+    $\leadsto$ &nbsp; gives an easier criterion for differentiability (sufficient, but not necessary)
 
     1. compute partial derivatives for all points nearby $\vec{x} = \vec{a}$
     2. check for continuity at $\vec{x} = \vec{a}$
@@ -312,7 +312,7 @@ def _(definition, mo, theorem):
     C^1\text{-smooth} \qquad \Longrightarrow \qquad \text{differentiable} \qquad \Longrightarrow \qquad \text{continuous}
     $$
 
-    **Example.** Any function $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ given by linear combination of products, quotients and compositions of elementary functions (powers, roots, exponentials, logarithms, trigonometric functions) of $x^i$'s is $C^1$-smooth where the formula and its derivatives are well-defined!
+    **Example.** Any function $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ given by linear combination of products, quotients and compositions of elementary functions (powers, roots, exponentials, logarithms, trigonometric functions) of $x^i$'s is $C^1$-smooth where the formula and its derivatives are well-defined
 
     **Example.**
 
@@ -375,7 +375,7 @@ def _(definition, mo):
                 r"""
     $\leadsto$ &nbsp; the derivative is the map that calculates directional derivatives &nbsp; $Df(\vec{a}) : \vec{v} \longmapsto Df(\vec{a})(\vec{v})$
 
-    $\leadsto$ &nbsp; the gradient is **a vector** (carrying equivalent information but in a very different way!)
+    $\leadsto$ &nbsp; the gradient is **a vector** (carrying equivalent information but in a very different way)
 
     **Example.** &nbsp; $f\!\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = \lVert \vec{x} \rVert^2 = (x^1)^2 + (x^2)^2, \quad \vec{a} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$
 
@@ -439,7 +439,7 @@ def _(BLUE, GREEN, RED, arrow, blank, cross_axes, math, mo, np, theorem):
 
     $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a})$ points in the direction of largest growth of $f$ at $\vec{x} = \vec{a}$
 
-    $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a})$ is the direction of steepest ascent of $f$ at $\vec{x} = \vec{a}$! <span class=qed>$\square$</span>
+    $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a})$ is the direction of steepest ascent of $f$ at $\vec{x} = \vec{a}$ <span class=qed>$\square$</span>
 
     **Example.**
 
