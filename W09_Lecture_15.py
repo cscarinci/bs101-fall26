@@ -1080,7 +1080,7 @@ def _(BLUE, Figure, HALF, LIGHT, RED, cross_axes, definition, mo, np):
             ),
             mo.md(
                 r"""
-    $D = \left\{\, a < x^1 < b,\ c < x^2 < d \,\right\}$ is not closed &nbsp; $\begin{bmatrix} a \\ c \end{bmatrix} \in \mathrm{Bd}(D)$, but $\begin{bmatrix} a \\ c \end{bmatrix} \notin D$ &nbsp; (one missing point is enough!
+    $D = \left\{\, a < x^1 < b,\ c < x^2 < d \,\right\}$ is not closed &nbsp; $\begin{bmatrix} a \\ c \end{bmatrix} \in \mathrm{Bd}(D)$, but $\begin{bmatrix} a \\ c \end{bmatrix} \notin D$ &nbsp; (one missing point is enough)
     """
             ),
             _open,
