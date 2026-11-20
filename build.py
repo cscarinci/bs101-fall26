@@ -41,6 +41,8 @@ TITLES = {  # lecture number -> title shown on the index
     19: "Integration along paths",
     20: "Double integrals",
     21: "Green's theorem",
+    22: "Surface integrals",
+    23: "Surface integrals of vector fields",
 }
 
 DRAFTS = set()  # lectures kept in the repo but not published
