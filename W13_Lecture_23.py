@@ -621,7 +621,7 @@ def _(BLUE, LIGHT, mo, np, panel, plane, row, sheet, turntable):
         _ad.plot(_s, _y, color=BLUE, lw=1.8)
     for _i in (0, -1):
         _ad.plot([_s[_i], _s[_i]], [_lo[_i], _hi[_i]], color=BLUE, lw=1.8)
-    _ad.text(2.3, 1.85, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ad.text(2.9, 2.45, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _ad.plot(1.3, 1.2, "o", color=BLUE, ms=4.5, zorder=6)
     _ad.text(1.4, 1.2, "$(s, t)$", color="black", fontsize=13, ha="left", va="center")
 
