@@ -736,7 +736,7 @@ def _(BLUE, LIGHT, ORANGE, RED, arrow, beside, mo, np, plane, ps, pt, sketch):
     beside(_ad, (0, 2), 180, r"$2\pi$", "black", 20, 14)
     beside(_ad, (_s0, 2), 90, "$s$", RED, 8, 12)
     beside(_ad, (2, _t0 / np.pi), 0, "$t$", ORANGE, 8, 12)
-    _ad.text(2.2, 2.2, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ad.text(2.55, 2.5, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _fx, _ax = sketch((-2.6, 3.2), (-2.6, 3.2), 2.8)
     arrow(_ax, (-2.5, 0), (2.75, 0), "black", lw=0.9)
     arrow(_ax, (0, -2.5), (0, 2.75), "black", lw=0.9)
@@ -757,7 +757,7 @@ def _(BLUE, LIGHT, ORANGE, RED, arrow, beside, mo, np, plane, ps, pt, sketch):
     _ax.plot(*_p, "o", color="black", ms=4.5, zorder=6)
     _c, _n = np.cos(_t0 - np.pi / 3), np.sin(_t0 - np.pi / 3)
     _ax.text(_p[0] + 0.18 * _c, _p[1] + 0.18 * _n, r"$\Phi(s, t)$", color="black", fontsize=13, ha="center" if abs(_c) < 0.3 else ("left" if _c > 0 else "right"), va="center" if abs(_n) < 0.3 else ("bottom" if _n > 0 else "top"), zorder=8)
-    beside(_ax, (2, 0), -45, "$R$", "black", 12, 14)
+    beside(_ax, (0, 2), 135, "$R$", "black", 12, 14)
     _ax.text(-1.85, 1.85, "$S$", color=BLUE, fontsize=13, ha="center", va="center")
     mo.vstack([mo.hstack([ps, pt], justify="start", gap=2), mo.hstack([mo.as_html(_fd), mo.as_html(_fx)], justify="center", gap=2, wrap=True)])
     return
@@ -813,7 +813,7 @@ def _(BLUE, GREY, LIGHT, ORANGE, RED, beside, mo, np, panel, plane, sheet, ss, s
     beside(_ax, (0, 2), 180, r"$2\pi$", "black", 20, 14)
     beside(_ax, (_x0, 2), 90, "$s$", RED, 8, 12)
     beside(_ax, (1.5, _y0), 0, "$t$", ORANGE, 8, 12)
-    _ax.text(1.7, 2.2, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ax.text(2.05, 2.5, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _s, _t = np.meshgrid(np.linspace(0, np.pi, 25), np.linspace(0, 2 * np.pi, 97), indexing="ij")
     _T = np.linspace(0, 2 * np.pi, 121)
     _S = np.linspace(0, np.pi, 61)
@@ -968,15 +968,15 @@ def _(BLUE, GREY, ORANGE, RED, np, panel, sheet, turntable):
     # the surface element (p. 4), as lecture 22's tangent-plane figure (lecture 11's) without the plane: a graph S (chosen
     # for the drawing only), Phi(s, t) = (s, t, f(s, t)), the point Phi(s, t) (black) with its tangent vectors Phi_s and
     # Phi_t (orange), the two coordinate curves through it (grey) with the points Phi(s + Delta s, t) and
-    # Phi(s, t + Delta t) (black), and the normal, about Phi_s x Phi_t Delta s Delta t (red); no guides and no
-    # axes (as the sketch of the notes), so that the drawing is large and the names have room
+    # Phi(s, t + Delta t) (black), and the normal, about Phi_s x Phi_t Delta s Delta t (red); no guides, so that
+    # the names have room; axes from the origin, just past the surface, as lecture 19
     def _f(x1, x2):
         return 2.4 - 0.2 * ((x1 - 1.9) ** 2 + (x2 - 1.7) ** 2)
 
     _a = (1.3, 1.6)
     _d1, _d2 = -0.4 * (_a[0] - 1.9), -0.4 * (_a[1] - 1.7)
     _fa = float(_f(*_a))
-    _lo, _hi, _vv, _D = 0.5, 3.1, 1.3, 0.8
+    _lo, _hi, _vv, _D = 0.5, 3.1, 1.5, 1.1
     _x1, _x2 = np.meshgrid(np.linspace(_lo, _hi, 25), np.linspace(_lo, _hi, 25), indexing="ij")
     _w = np.linspace(_lo, _hi, 25)
     _rim = [(_c + 0 * _w, _w) for _c in (_lo, _hi)] + [(_w, _c + 0 * _w) for _c in (_lo, _hi)]
@@ -1003,17 +1003,18 @@ def _(BLUE, GREY, ORANGE, RED, np, panel, sheet, turntable):
                 arrows=[(_P, _P + _fs, ORANGE), (_P, _P + _ft, ORANGE), (_P, _P + _n, RED)],
                 texts=[
                     ((_hi, _lo, _f(_hi, _lo)), "S", BLUE, 200, 8),
-                    (tuple(_P), r"\Phi(s, t)", "#000000", 150, 8),
+                    (tuple(_P), r"\Phi(s, t)", "#000000", 135, 14),
                     (tuple(_P + _n), r"\Delta\vec{A} \approx \Phi_s(s, t) \times \Phi_t(s, t) \, \Delta s \, \Delta t", RED, 0, 6),
-                    (tuple(_P + _fs), r"\Phi_s(s, t)", ORANGE, 150, 10),
-                    (tuple(_P + _ft), r"\Phi_t(s, t)", ORANGE, -20, 10),
-                    (_Ps, r"\Phi(s + \Delta s, t)", "#000000", -120, 8),
-                    (_Pt, r"\Phi(s, t + \Delta t)", "#000000", -135, 8),
+                    (tuple(_P + _fs), r"\Phi_s(s, t)", ORANGE, 120, 10),
+                    (tuple(_P + _ft), r"\Phi_t(s, t)", ORANGE, 50, 12),
+                    (_Ps, r"\Phi(s + \Delta s, t)", "#000000", 200, 8),
+                    (_Pt, r"\Phi(s, t + \Delta t)", "#000000", -70, 8),
                 ],
-                box=((_lo, _hi), (_lo, _hi), (1.7, _fa + 1.1)),
+                axes=[((0, 0, 0), (3.4, 0, 0), "x", -150), ((0, 0, 0), (0, 3.4, 0), "y", -20), ((0, 0, 0), (0, 0, _fa + 1.3), "z", 90)],
+                box=((0, 3.4), (0, 3.4), (0, _fa + 1.3)),
             )
         ],
-        height=460,
+        height=500,
         key="L23-surface-element",
     )
     _scene
@@ -1053,7 +1054,7 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(BLUE, RED, np, panel, sheet, turntable):
-    # orientations (p. 5), three drawings side by side as lecture 18's: the disk with the normal vectors n pointing up, the
+    # orientations (p. 5), three drawings side by side as lecture 18's, each with its axes: the disk with the normal vectors n pointing up, the
     # sphere with n pointing out, the sphere with -n pointing in (red, the normal of lecture 11), every vector of length 1/2,
     # at the centre of the disk and on two circles, and at points on three circles of latitude of the sphere and its poles.
     # The sphere is drawn translucent, so that the vectors pointing in can be seen
@@ -1070,9 +1071,9 @@ def _(BLUE, RED, np, panel, sheet, turntable):
         24,
         "the disk with the normal vectors n pointing up; the sphere with the normal vectors n pointing out; the sphere with the normal vectors -n pointing in",
         [
-            panel(1.0, surfaces=[_disk], arrows=[(_p, _p + np.array([0, 0, 0.5]), RED, 1.3) for _p in _dp], caption=r"\vec{n} \ \text{pointing ``up''}", box=((-1, 1), (-1, 1), (0, 0.5))),
-            panel(1.0, surfaces=[_sphere], arrows=[(_p, 1.5 * _p, RED, 1.3) for _p in _sp], caption=r"\vec{n} \ \text{pointing ``out''}", box=((-1.5, 1.5), (-1.5, 1.5), (-1.5, 1.5))),
-            panel(1.0, surfaces=[_sphere], arrows=[(_p, 0.5 * _p, RED, 1.3) for _p in _sp], caption=r"-\vec{n} \ \text{pointing ``in''}", box=((-1.5, 1.5), (-1.5, 1.5), (-1.5, 1.5))),
+            panel(1.0, surfaces=[_disk], axes=[((0, 0, 0), (1.4, 0, 0), "x", -150), ((0, 0, 0), (0, 1.4, 0), "y", -20), ((0, 0, 0), (0, 0, 1.0), "z", 90)], arrows=[(_p, _p + np.array([0, 0, 0.5]), RED, 1.3) for _p in _dp], caption=r"\vec{n} \ \text{pointing ``up''}", box=((-1, 1.4), (-1, 1.4), (0, 1.0))),
+            panel(1.0, surfaces=[_sphere], axes=[((0, 0, 0), (1.8, 0, 0), "x", -150), ((0, 0, 0), (0, 1.8, 0), "y", -20), ((0, 0, 0), (0, 0, 1.8), "z", 90)], arrows=[(_p, 1.5 * _p, RED, 1.3) for _p in _sp], caption=r"\vec{n} \ \text{pointing ``out''}", box=((-1.5, 1.8), (-1.5, 1.8), (-1.5, 1.8))),
+            panel(1.0, surfaces=[_sphere], axes=[((0, 0, 0), (1.8, 0, 0), "x", -150), ((0, 0, 0), (0, 1.8, 0), "y", -20), ((0, 0, 0), (0, 0, 1.8), "z", 90)], arrows=[(_p, 0.5 * _p, RED, 1.3) for _p in _sp], caption=r"-\vec{n} \ \text{pointing ``in''}", box=((-1.5, 1.8), (-1.5, 1.8), (-1.5, 1.8))),
         ],
         height=300,
         cols=3,
