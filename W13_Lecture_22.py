@@ -66,7 +66,7 @@ def _(mo):
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": f"->,head_length={2 * lw:g},head_width={0.87 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={4.5 * lw:g},head_width={2 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
@@ -404,7 +404,7 @@ def _(mo, np):
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
               vx /= len; vy /= len;
-              const hl = Math.max(3.5 * o.w, 6), hw = Math.max(1.5 * o.w, 2.6), bx = X[o.i] - hl * vx, by = Y[o.i] - hl * vy;  // open head, as on the page
+              const hl = 4.5 * o.w, hw = 2 * o.w, bx = X[o.i] - hl * vx, by = Y[o.i] - hl * vy;  // open head, as on the page
               g.strokeStyle = o.c;
               g.lineWidth = o.w;
               g.setLineDash([]);
@@ -549,8 +549,8 @@ def _(mo, np):
         for tail, tip, label, d in axes:
             a, b = np.asarray(tail, float), np.asarray(tip, float)
             seg = a + np.linspace(0, 0.96, 60)[:, None] * (b - a)
-            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.1, "d": None, "b": 1})
-            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000", "w": 1.1})
+            p["lines"].append({"p": _flat(*seg.T), "c": "#000000", "w": 1.35, "d": None, "b": 1})
+            p["heads"].append({"p": b.tolist(), "q": (a + 0.9 * (b - a)).tolist(), "c": "#000000", "w": 1.35})
             p["labels"].append({"p": b.tolist(), "t": label, "c": "#000000", "a": d, "r": 5})
         for q in points:
             p["points"].append({"p": [float(c) for c in q[0]], "c": q[1], "r": q[2] if len(q) > 2 else 4.0, "h": bool(q[3]) if len(q) > 3 else False})
