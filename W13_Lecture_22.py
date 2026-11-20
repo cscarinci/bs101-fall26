@@ -741,28 +741,27 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     cs = mo.ui.slider(-1, 1, 0.25, value=0, label="$s$", show_value=True)
-    ct = mo.ui.slider(0, 24, 1, value=3, label=r"$t \;\; (\times \frac{\pi}{12})$", show_value=True)
+    ct = mo.ui.slider(0, 6.28, 0.04, value=0.8, label="$t$", show_value=True)
     return cs, ct
 
 
 @app.cell(hide_code=True)
-def _(BLUE, LIGHT, ORANGE, RED, beside, cs, ct, mo, np, panel, pi_tex, plane, sheet, turntable):
+def _(BLUE, LIGHT, ORANGE, RED, beside, cs, ct, mo, np, panel, plane, sheet, turntable):
     # the cylinder (p. 2), in the layout of lecture 16: the segment s = s0 of D (red) is mapped to the circle at height s0,
     # the segment t = t0 (orange) to the vertical segment at the angle t0; s0 and t0 move with the sliders (in the notes
     # s = 0 and t = pi/4). D is drawn with t / pi on its vertical axis; it stands beside the cylinder, in the row of the
     # next cell. The cylinder as the surfaces of lecture 16: light wire, the curves on it at width 2.4
-    _s0, _k = float(cs.value), int(ct.value)
-    _t0 = _k * np.pi / 12
+    _s0, _t0 = float(cs.value), float(ct.value)
     _fig, _ax = plane((-1.8, 2.6), (-0.55, 2.75), 2.8, names=("$s$", "$t$"))
     _ax.fill([-1, 1, 1, -1], [0, 0, 2, 2], color=LIGHT, lw=0, zorder=0)
     _ax.plot([-1, 1, 1, -1, -1], [0, 0, 2, 2, 0], color=BLUE, lw=1.8)
     _ax.plot([_s0, _s0], [0, 2], color=RED, lw=1.8, zorder=3)
-    _ax.plot([-1, 1], [_k / 12, _k / 12], color=ORANGE, lw=1.8, zorder=3)
+    _ax.plot([-1, 1], [_t0 / np.pi, _t0 / np.pi], color=ORANGE, lw=1.8, zorder=3)
     for _e in (-1, 1):
         beside(_ax, (_e, 0), -90, f"${_e}$", "black", 14, 14, gap=6)
     beside(_ax, (-1, 2), 180, r"$2\pi$", "black", 20, 14)
-    beside(_ax, (_s0, 2), 25, f"$s = {_s0:g}$", RED, 50, 14)
-    beside(_ax, (1, _k / 12), 0, f"$t = {pi_tex(_k)}$", ORANGE, 44, 20)
+    beside(_ax, (_s0, 2), 90, "$s$", RED, 8, 12)
+    beside(_ax, (1, _t0 / np.pi), 0, "$t$", ORANGE, 8, 12)
     _ax.text(0.75, 1.75, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _s, _t = np.meshgrid(np.linspace(-1, 1, 9), np.linspace(0, 2 * np.pi, 97), indexing="ij")
     _T = np.linspace(0, 2 * np.pi, 121)
@@ -809,28 +808,27 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    ss = mo.ui.slider(0, 12, 1, value=6, label=r"$s \;\; (\times \frac{\pi}{12})$", show_value=True)
-    st = mo.ui.slider(0, 24, 1, value=4, label=r"$t \;\; (\times \frac{\pi}{12})$", show_value=True)
+    ss = mo.ui.slider(0, 3.14, 0.04, value=1.56, label="$s$", show_value=True)
+    st = mo.ui.slider(0, 6.28, 0.04, value=1.04, label="$t$", show_value=True)
     return ss, st
 
 
 @app.cell(hide_code=True)
-def _(BLUE, LIGHT, ORANGE, RED, beside, mo, np, panel, pi_tex, plane, sheet, ss, st, turntable):
+def _(BLUE, LIGHT, ORANGE, RED, beside, mo, np, panel, plane, sheet, ss, st, turntable):
     # the sphere (p. 2), in the layout of lecture 16: the segment s = s0 of D (red) is mapped to a circle of latitude (the
     # equator for s0 = pi/2), the segment t = t0 (orange) to a meridian; s0 and t0 move with the sliders (in the notes
     # s = pi/2 and t = pi/3). D is drawn with 1.5 s / pi and t / pi on its axes; it stands beside the sphere, in the row of
     # the next cell. The sphere as the surfaces of lecture 16: light wire, the curves on it at width 2.4
-    _j, _k = int(ss.value), int(st.value)
-    _s0, _t0 = _j * np.pi / 12, _k * np.pi / 12
+    _s0, _t0 = float(ss.value), float(st.value)
     _fig, _ax = plane((-0.7, 2.9), (-0.55, 2.75), 2.8, names=("$s$", "$t$"))
     _ax.fill([0, 1.5, 1.5, 0], [0, 0, 2, 2], color=LIGHT, lw=0, zorder=0)
     _ax.plot([0, 1.5, 1.5, 0, 0], [0, 0, 2, 2, 0], color=BLUE, lw=1.8)
-    _ax.plot([1.5 * _j / 12] * 2, [0, 2], color=RED, lw=1.8, zorder=3)
-    _ax.plot([0, 1.5], [_k / 12, _k / 12], color=ORANGE, lw=1.8, zorder=3)
+    _ax.plot([1.5 * _s0 / np.pi] * 2, [0, 2], color=RED, lw=1.8, zorder=3)
+    _ax.plot([0, 1.5], [_t0 / np.pi, _t0 / np.pi], color=ORANGE, lw=1.8, zorder=3)
     beside(_ax, (1.5, 0), -90, r"$\pi$", "black", 12, 14, gap=6)
     beside(_ax, (0, 2), 180, r"$2\pi$", "black", 20, 14)
-    beside(_ax, (1.5 * _j / 12, 2), 25, f"$s = {pi_tex(_j)}$", RED, 44, 20)
-    beside(_ax, (1.5, _k / 12), 0, f"$t = {pi_tex(_k)}$", ORANGE, 44, 20)
+    beside(_ax, (1.5 * _s0 / np.pi, 2), 90, "$s$", RED, 8, 12)
+    beside(_ax, (1.5, _t0 / np.pi), 0, "$t$", ORANGE, 8, 12)
     _ax.text(1.3, 1.8, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _s, _t = np.meshgrid(np.linspace(0, np.pi, 25), np.linspace(0, 2 * np.pi, 97), indexing="ij")
     _T = np.linspace(0, 2 * np.pi, 121)
