@@ -679,7 +679,7 @@ def _(BLUE, LIGHT, RED, arrow, beside, bracket, curve, curve_side, mo, np, panel
         _ad.plot(_s, _y, color=BLUE, lw=1.8)
     for _i in (0, -1):
         _ad.plot([_s[_i], _s[_i]], [_lo[_i], _hi[_i]], color=BLUE, lw=1.8)
-    _ad.text(2.3, 1.85, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ad.text(2.9, 2.45, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _ad.plot(1.3, 1.2, "o", color=BLUE, ms=4.5, zorder=6)
     _ad.text(1.4, 1.2, "$(s, t)$", color="black", fontsize=13, ha="left", va="center")
 
@@ -762,7 +762,7 @@ def _(BLUE, LIGHT, ORANGE, RED, beside, cs, ct, mo, np, panel, plane, sheet, tur
     beside(_ax, (-1, 2), 180, r"$2\pi$", "black", 20, 14)
     beside(_ax, (_s0, 2), 90, "$s$", RED, 8, 12)
     beside(_ax, (1, _t0 / np.pi), 0, "$t$", ORANGE, 8, 12)
-    _ax.text(0.75, 1.75, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ax.text(1.55, 2.5, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _s, _t = np.meshgrid(np.linspace(-1, 1, 9), np.linspace(0, 2 * np.pi, 97), indexing="ij")
     _T = np.linspace(0, 2 * np.pi, 121)
     _scene = turntable(
@@ -829,7 +829,7 @@ def _(BLUE, LIGHT, ORANGE, RED, beside, mo, np, panel, plane, sheet, ss, st, tur
     beside(_ax, (0, 2), 180, r"$2\pi$", "black", 20, 14)
     beside(_ax, (1.5 * _s0 / np.pi, 2), 90, "$s$", RED, 8, 12)
     beside(_ax, (1.5, _t0 / np.pi), 0, "$t$", ORANGE, 8, 12)
-    _ax.text(1.3, 1.8, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ax.text(2.05, 2.5, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _s, _t = np.meshgrid(np.linspace(0, np.pi, 25), np.linspace(0, 2 * np.pi, 97), indexing="ij")
     _T = np.linspace(0, 2 * np.pi, 121)
     _S = np.linspace(0, np.pi, 61)
@@ -890,7 +890,7 @@ def _(BLUE, GREY, LIGHT, mo, np, panel, plane, row, sheet, turntable):
     _fig, _ax = plane((-0.5, 3.8), (-0.5, 3.6), 2.8, names=("$s$", "$t$"))
     _ax.fill([_a, _b, _b, _a], [_c, _c, _d, _d], color=LIGHT, lw=0, zorder=0)
     _ax.plot([_a, _b, _b, _a, _a], [_c, _c, _d, _d, _c], color=BLUE, lw=1.8)
-    _ax.text(_b - 0.25, _d - 0.25, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ax.text(_b + 0.3, _d + 0.3, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _x1, _x2 = np.meshgrid(np.linspace(_a, _b, 25), np.linspace(_c, _d, 25), indexing="ij")
     _w = np.linspace(_a, _b, 25)
     _rim = [(_q + 0 * _w, _w, _f(_q + 0 * _w, _w), BLUE, 1.2) for _q in (_a, _b)] + [(_w, _q + 0 * _w, _f(_w, _q + 0 * _w), BLUE, 1.2) for _q in (_c, _d)]
