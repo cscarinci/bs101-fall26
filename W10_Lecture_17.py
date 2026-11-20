@@ -64,7 +64,7 @@ def _(mo):
             "",
             xy=tip,
             xytext=tail,
-            arrowprops={"arrowstyle": f"->,head_length={2 * lw:g},head_width={0.87 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
+            arrowprops={"arrowstyle": f"->,head_length={4.5 * lw:g},head_width={2 * lw:g}", "mutation_scale": 1, "color": color, "lw": lw, "shrinkA": 0, "shrinkB": 0, **kw},
         )
         if label:
             pos = tip if at_tip else ((tail[0] + tip[0]) / 2, (tail[1] + tip[1]) / 2)
