@@ -146,12 +146,18 @@ def _(Figure, arrow, math, mo, np):
         """The box ((lo, hi), (lo, hi), (lo, hi)) of the points (x, y, z), with a margin `pad`."""
         return tuple((float(np.nanmin(a)) - pad, float(np.nanmax(a)) + pad) for a in arrays)
 
-    def row(left, right):
-        """A 2D figure beside a 3D one, as in lecture 16 (one above the other on narrow screens); both given as HTML."""
+    def row(left, right, by=None):
+        """A 2D figure beside a 3D one, as in lecture 16 (one above the other on narrow screens); both given as HTML.
+        `by` (TeX) names a map from the left object to the right one, drawn as an arrow between them."""
+        # the map as a curved arrow, as in the notes, with the head of the arrows of the figures (4.5 x 2 line widths)
+        arc = ('<svg width="84" height="34" viewBox="0 0 84 34"><path d="M4 30 Q42 2 80 28" fill="none" stroke="black" stroke-width="1.3"/>'
+               '<path d="M73.6 26.8 L80 28 L76.5 22.5" fill="none" stroke="black" stroke-width="1.3" stroke-linejoin="round"/></svg>')
+        mid = "" if by is None else '<div style="flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; position: relative; top: -45px; left: 20px; line-height: 1;">' + mo.md(f"${by}$").text + arc + "</div>"
+        grow = "1 1 400px" if by is None else "1 1 300px"
         return mo.Html(
             '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem 1rem;">'
-            f'<div style="flex: 0 1 280px; min-width: 240px; max-width: 300px;">{left}</div>'
-            f'<div style="flex: 1 1 440px; min-width: 300px;">{right}</div></div>'
+            f'<div style="flex: 1 1 240px; min-width: 240px; max-width: 300px;">{left}</div>{mid}'
+            f'<div style="flex: {grow}; min-width: 300px; max-width: 400px;">{right}</div></div>'
         )
 
     return beside, curve, curve_side, curve_velocity, pi_tex, plane, row, sketch, span
@@ -232,13 +238,16 @@ def _(mo, np):
             tex(c, spec.caption);
             this.box.appendChild(c);
           }
-          const pts = (this.pts = []), quads = (this.quads = []), segs = (this.segs = []);
+          const pts = (this.pts = []), quads = (this.quads = []), segs = (this.segs = []), spans = (this.spans = []);
           this.dots = []; this.heads = []; this.labs = [];
           const add = (x, y, z) => (pts.push(x, y, z), pts.length / 3 - 1);
           for (const s of spec.surfaces) {
             const base = pts.length / 3, n = s.n, m = s.m, id = (i, j) => base + i * m + j;
             for (const v of s.v) pts.push(v);
             const P = (k) => [pts[3 * k], pts[3 * k + 1], pts[3 * k + 2]];
+            // on a translucent surface the wire behind is drawn fainter than the wire in front (depth range of the surface)
+            const span = s.alpha < 1 ? { lo: base, hi: base + n * m } : null;
+            if (span) spans.push(span);
             const inTint = (x1, x2) => s.tint && x1 > s.tint[0] && x1 <= s.tint[1] && x2 > s.tint[2] && x2 <= s.tint[3];
             const sLit = s.tone ? s.tone.map((c) => Math.round(0.06 * c + 0.94 * 255)) : lit;
             const sDark = s.tone ? s.tone.map((c) => Math.round(0.3 * c + 0.7 * 255)) : dark;
@@ -266,7 +275,7 @@ def _(mo, np):
                   const pa = P(a), pb = P(b);
                   if (pa.concat(pb).some(isNaN)) continue;
                   if (s.clear && inTint((pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2)) continue;
-                  segs.push({ a, b, c, lw, line: null });
+                  segs.push({ a, b, c, lw, line: null, span });
                 }
               }
             }
@@ -344,6 +353,11 @@ def _(mo, np):
               ln.cum[k] = ln.cum[k - 1] + (isNaN(X[p] + X[q]) ? 0 : Math.hypot(X[q] - X[p], Y[q] - Y[p]));
             }
           }
+          for (const sp of this.spans) {
+            let lo = Infinity, hi = -Infinity;
+            for (let k = sp.lo; k < sp.hi; k++) if (!isNaN(Z[k])) { lo = Math.min(lo, Z[k]); hi = Math.max(hi, Z[k]); }
+            sp.zlo = lo; sp.zhi = hi;
+          }
           const items = [], bias = S.bias;
           for (const q of this.quads) items.push([(Z[q[0][0]] + Z[q[0][1]] + Z[q[0][2]] + Z[q[0][3]]) / 4, 0, q]);
           for (const s of this.segs) items.push([(Z[s.a] + Z[s.b]) / 2 + bias + (s.e || 0), 1, s]);
@@ -389,7 +403,12 @@ def _(mo, np):
               g.lineCap = dash || o.flat ? "butt" : "round";
               g.setLineDash(dash || []);
               g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
+              if (o.span) {  // back (far) half faint, front half full, a smooth step between
+                const u = Math.min(1, Math.max(0, (((Z[o.a] + Z[o.b]) / 2 - o.span.zlo) / ((o.span.zhi - o.span.zlo) || 1) - 0.35) / 0.3));
+                g.globalAlpha = 0.2 + 0.8 * u * u * (3 - 2 * u);
+              }
               g.stroke();
+              g.globalAlpha = 1;
             } else if (kind === 2) {
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
@@ -610,9 +629,9 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(BLUE, LIGHT, mo, np, panel, plane, row, sheet, turntable):
-    # a parameterized surface (p. 1): the region D with a point (s, t) (blue) beside the surface S = Im(Phi) with Phi(s, t)
-    # (black), as the second drawing of lecture 22's first figure (the graph of lecture 11). D and S are chosen for the
-    # drawing only
+    # a parameterized surface (p. 1), as the second pair of lecture 22's first figure: the region D with a point (s, t)
+    # (blue), the map Phi, and the surface S = Phi(D), the graph of a function over D drawn as lecture 11's, with Phi(s, t)
+    # (blue). D and S are chosen for the drawing only
     _fd, _ad = plane((-0.5, 3.4), (-0.4, 2.8), 2.8, names=("$s$", "$t$"))
     _s = np.linspace(0.5, 2.6, 100)
     _lo, _hi = 0.5 + 0.12 * np.sin(4 * (_s - 0.5)), 2.1 + 0.12 * np.sin(3.5 * (_s - 0.5) + 1)
@@ -622,34 +641,37 @@ def _(BLUE, LIGHT, mo, np, panel, plane, row, sheet, turntable):
     for _i in (0, -1):
         _ad.plot([_s[_i], _s[_i]], [_lo[_i], _hi[_i]], color=BLUE, lw=1.8)
     _ad.text(2.9, 2.45, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
-    _ad.plot(1.3, 1.2, "o", color=BLUE, ms=4.5, zorder=6)
-    _ad.text(1.4, 1.2, "$(s, t)$", color="black", fontsize=13, ha="left", va="center")
+    _p = (1.3, 1.2)
+    _ad.plot(*_p, "o", color=BLUE, ms=4.5, zorder=6)
+    _ad.text(_p[0] + 0.1, _p[1], "$(s, t)$", color="black", fontsize=13, ha="left", va="center")
 
     def _h(x, y):
-        return 2.4 - 0.2 * ((x - 1.9) ** 2 + (y - 1.7) ** 2)
+        return 2.4 - 0.25 * ((x - 1.55) ** 2 + (y - 1.3) ** 2)
 
-    _x1, _x2 = np.meshgrid(np.linspace(0.5, 3.1, 25), np.linspace(0.5, 3.1, 25), indexing="ij")
-    _w = np.linspace(0.5, 3.1, 25)
-    _rim = [(_c + 0 * _w, _w, _h(_c + 0 * _w, _w), BLUE, 1.2) for _c in (0.5, 3.1)] + [(_w, _c + 0 * _w, _h(_w, _c + 0 * _w), BLUE, 1.2) for _c in (0.5, 3.1)]
-    _q = (2.4, 1.3, float(_h(2.4, 1.3)))
+    # S = Phi(D) for Phi(s, t) = (s, t, h(s, t)): the graph of h over the same region D, with lecture 11's wire and rim
+    _u, _v = np.meshgrid(np.linspace(0.5, 2.6, 25), np.linspace(0, 1, 25), indexing="ij")
+    _L, _H = 0.5 + 0.12 * np.sin(4 * (_u - 0.5)), 2.1 + 0.12 * np.sin(3.5 * (_u - 0.5) + 1)
+    _x1, _x2 = _u, _L + _v * (_H - _L)
+    _rim = [(_s, _y, _h(_s, _y), BLUE, 1.2) for _y in (_lo, _hi)] + [([_s[_i]] * 30, np.linspace(_lo[_i], _hi[_i], 30), _h(_s[_i], np.linspace(_lo[_i], _hi[_i], 30)), BLUE, 1.2) for _i in (0, -1)]
+    _q = (_p[0], _p[1], float(_h(*_p)))
     _surface = turntable(
         28,
         32,
-        "a surface S = Im(Phi) in R^3, the graph of a function over a rectangle, and its point Phi(s, t)",
+        "the surface S = Im(Phi), the graph of a function over the region D, and the point Phi(s, t), the image of the point (s, t) of D",
         [
             panel(
                 1.0,
                 surfaces=[sheet(_x1, _x2, _h(_x1, _x2), wire=[(0, 4, BLUE, 0.5), (1, 4, BLUE, 0.5)])],
                 lines=_rim,
-                points=[(_q, "#000000")],
-                axes=[((0, 0, 0), (3.6, 0, 0), "x", -150), ((0, 0, 0), (0, 3.6, 0), "y", -20), ((0, 0, 0), (0, 0, 3.6), "z", 90)],
-                texts=[(_q, r"\Phi(s, t)", "#000000", -60, 6), ((3.1, 0.5, float(_h(3.1, 0.5))), r"S = \mathrm{Im}(\Phi)", BLUE, 200, 8)],
+                points=[(_q, BLUE)],
+                axes=[((0, 0, 0), (2.9, 0, 0), "x", -150), ((0, 0, 0), (0, 2.6, 0), "y", -20), ((0, 0, 0), (0, 0, 2.8), "z", 90)],
+                texts=[(_q, r"\Phi(s, t)", "#000000", 60, 8), ((2.6, float(_lo[-1]), float(_h(2.6, _lo[-1]))), r"S = \mathrm{Im}(\Phi)", BLUE, 230, 16)],
             )
         ],
         height=400,
         key="L23-surface",
     )
-    row(mo.as_html(_fd).text, _surface.text)
+    row(mo.as_html(_fd).text, _surface.text, r"\Phi")
     return
 
 
@@ -719,14 +741,14 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, LIGHT, ORANGE, RED, arrow, beside, mo, np, plane, ps, pt, sketch):
+def _(BLUE, LIGHT, ORANGE, RED, arrow, beside, mo, np, plane, ps, pt, row, sketch):
     # the polar parameterization of the disk (p. 2), in the layout of lecture 22's cylinder and sphere: the segment s = s0
     # of D (red) is mapped to the circle of radius s0, the segment t = t0 (orange) to the radius at the angle t0; the point
     # (s0, t0) to Phi(s0, t0) (black); s0 and t0 move with the sliders. R is drawn as 2; D is drawn with t / pi on its
     # vertical axis. The disk lies in the xy-plane, so it is drawn from above (a 2D figure) beside D. The names D and S sit
     # outside their regions
     _s0, _t0 = float(ps.value), float(pt.value)
-    _fd, _ad = plane((-0.7, 3.0), (-0.55, 2.75), 2.8, names=("$s$", "$t$"))
+    _fd, _ad = plane((-0.7, 3.0), (-0.55, 3.1), 2.8, names=("$s$", "$t$"))
     _ad.fill([0, 2, 2, 0], [0, 0, 2, 2], color=LIGHT, lw=0, zorder=0)
     _ad.plot([0, 2, 2, 0, 0], [0, 0, 2, 2, 0], color=BLUE, lw=1.8)
     _ad.plot([_s0, _s0], [0, 2], color=RED, lw=1.8, zorder=3)
@@ -734,9 +756,9 @@ def _(BLUE, LIGHT, ORANGE, RED, arrow, beside, mo, np, plane, ps, pt, sketch):
     _ad.plot(_s0, _t0 / np.pi, "o", color="black", ms=4.5, zorder=6)
     beside(_ad, (2, 0), -90, "$R$", "black", 12, 14, gap=6)
     beside(_ad, (0, 2), 180, r"$2\pi$", "black", 20, 14)
-    beside(_ad, (_s0, 2), 90, "$s$", RED, 8, 12)
+    beside(_ad, (_s0, 2), 120, "$s$", RED, 8, 12, gap=12)
     beside(_ad, (2, _t0 / np.pi), 0, "$t$", ORANGE, 8, 12)
-    _ad.text(2.55, 2.5, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ad.text(2.12, 2.32, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _fx, _ax = sketch((-2.6, 3.2), (-2.6, 3.2), 2.8)
     arrow(_ax, (-2.5, 0), (2.75, 0), "black", lw=0.9)
     arrow(_ax, (0, -2.5), (0, 2.75), "black", lw=0.9)
@@ -756,10 +778,10 @@ def _(BLUE, LIGHT, ORANGE, RED, arrow, beside, mo, np, plane, ps, pt, sketch):
         _ax.text((_ra + 0.23) * np.cos(_t0 / 2), (_ra + 0.23) * np.sin(_t0 / 2), "$t$", color=ORANGE, fontsize=13, ha="center", va="center", zorder=8)
     _ax.plot(*_p, "o", color="black", ms=4.5, zorder=6)
     _c, _n = np.cos(_t0 - np.pi / 3), np.sin(_t0 - np.pi / 3)
-    _ax.text(_p[0] + 0.18 * _c, _p[1] + 0.18 * _n, r"$\Phi(s, t)$", color="black", fontsize=13, ha="center" if abs(_c) < 0.3 else ("left" if _c > 0 else "right"), va="center" if abs(_n) < 0.3 else ("bottom" if _n > 0 else "top"), zorder=8)
+    _ax.text(_p[0] + 0.3 * _c, _p[1] + 0.3 * _n, r"$\Phi(s, t)$", color="black", fontsize=13, ha="center" if abs(_c) < 0.3 else ("left" if _c > 0 else "right"), va="center" if abs(_n) < 0.3 else ("bottom" if _n > 0 else "top"), zorder=8)
     beside(_ax, (0, 2), 135, "$R$", "black", 12, 14)
     _ax.text(-1.85, 1.85, "$S$", color=BLUE, fontsize=13, ha="center", va="center")
-    mo.vstack([mo.hstack([ps, pt], justify="start", gap=2), mo.hstack([mo.as_html(_fd), mo.as_html(_fx)], justify="center", gap=2, wrap=True)])
+    mo.vstack([mo.hstack([ps, pt], justify="start", gap=2), row(mo.as_html(_fd).text, mo.as_html(_fx).text, r"\Phi")])
     return
 
 
@@ -803,7 +825,7 @@ def _(BLUE, GREY, LIGHT, ORANGE, RED, beside, mo, np, panel, plane, sheet, ss, s
     # translucent, so that the guides and the angles inside it show; D and S are named outside their regions
     _s0, _t0 = float(ss.value), float(st.value)
     _x0, _y0 = 1.5 * _s0 / np.pi, _t0 / np.pi
-    _fig, _ax = plane((-0.7, 2.9), (-0.55, 2.75), 2.8, names=("$s$", "$t$"))
+    _fig, _ax = plane((-0.7, 2.9), (-0.55, 3.1), 2.8, names=("$s$", "$t$"))
     _ax.fill([0, 1.5, 1.5, 0], [0, 0, 2, 2], color=LIGHT, lw=0, zorder=0)
     _ax.plot([0, 1.5, 1.5, 0, 0], [0, 0, 2, 2, 0], color=BLUE, lw=1.8)
     _ax.plot([_x0] * 2, [0, 2], color=RED, lw=1.8, zorder=3)
@@ -811,9 +833,9 @@ def _(BLUE, GREY, LIGHT, ORANGE, RED, beside, mo, np, panel, plane, sheet, ss, s
     _ax.plot(_x0, _y0, "o", color="black", ms=4.5, zorder=6)
     beside(_ax, (1.5, 0), -90, r"$\pi$", "black", 12, 14, gap=6)
     beside(_ax, (0, 2), 180, r"$2\pi$", "black", 20, 14)
-    beside(_ax, (_x0, 2), 90, "$s$", RED, 8, 12)
+    beside(_ax, (_x0, 2), 120, "$s$", RED, 8, 12, gap=12)
     beside(_ax, (1.5, _y0), 0, "$t$", ORANGE, 8, 12)
-    _ax.text(2.05, 2.5, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ax.text(1.62, 2.32, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _s, _t = np.meshgrid(np.linspace(0, np.pi, 25), np.linspace(0, 2 * np.pi, 97), indexing="ij")
     _T = np.linspace(0, 2 * np.pi, 121)
     _S = np.linspace(0, np.pi, 61)
@@ -824,15 +846,15 @@ def _(BLUE, GREY, LIGHT, ORANGE, RED, beside, mo, np, panel, plane, sheet, ss, s
         (_P[0] * _g, _P[1] * _g, 0 * _g, GREY, 1.0, [4, 3]),
         (_P[0] + 0 * _g, _P[1] + 0 * _g, _P[2] * _g, GREY, 1.0, [4, 3]),
     ]
-    _arcs, _texts = [], [((0, -2.2, 1.9), "S", BLUE, 0, 0), (tuple(_P), r"\Phi(s, t)", "#000000", 40, 14)]
+    _arcs, _texts = [], [((0, -2.2, 1.9), "S", BLUE, 0, 0), (tuple(1.15 * _P), r"\Phi(s, t)", "#000000", -40, 12)]
     if _s0 > 0.05:
         _U = np.linspace(0, _s0, 40)
-        _arcs.append((0.7 * np.sin(_U) * np.cos(_t0), 0.7 * np.sin(_U) * np.sin(_t0), 0.7 * np.cos(_U), RED, 1.4))
-        _texts.append(((0.95 * np.sin(_s0 / 2) * np.cos(_t0), 0.95 * np.sin(_s0 / 2) * np.sin(_t0), 0.95 * np.cos(_s0 / 2)), "s", RED, 0, 0))
+        _arcs.append((0.8 * np.sin(_U) * np.cos(_t0), 0.8 * np.sin(_U) * np.sin(_t0), 0.8 * np.cos(_U), RED, 2.0))
+        _texts.append(((1.15 * np.sin(_s0 / 2) * np.cos(_t0), 1.15 * np.sin(_s0 / 2) * np.sin(_t0), 1.15 * np.cos(_s0 / 2)), "s", RED, 0, 0))
     if 0.05 < _t0 < 6.24:
         _V = np.linspace(0, _t0, 60)
-        _arcs.append((0.7 * np.cos(_V), 0.7 * np.sin(_V), 0 * _V, ORANGE, 1.4))
-        _texts.append(((0.95 * np.cos(_t0 / 2), 0.95 * np.sin(_t0 / 2), 0), "t", ORANGE, 0, 0))
+        _arcs.append((0.8 * np.cos(_V), 0.8 * np.sin(_V), 0 * _V, ORANGE, 2.0))
+        _texts.append(((1.15 * np.cos(_t0 / 2), 1.15 * np.sin(_t0 / 2), 0), "t", ORANGE, 0, 0))
     _scene = turntable(
         30,
         22,
@@ -840,20 +862,20 @@ def _(BLUE, GREY, LIGHT, ORANGE, RED, beside, mo, np, panel, plane, sheet, ss, s
         [
             panel(
                 1.0,
-                surfaces=[sheet(2 * np.sin(_s) * np.cos(_t), 2 * np.sin(_s) * np.sin(_t), 2 * np.cos(_s), wire=[(0, 4, BLUE, 0.4), (1, 8, BLUE, 0.4)], alpha=0.45)],
+                surfaces=[sheet(2 * np.sin(_s) * np.cos(_t), 2 * np.sin(_s) * np.sin(_t), 2 * np.cos(_s), wire=[(0, 4, BLUE, 0.4), (1, 8, BLUE, 0.4)], alpha=0.15)],
                 lines=[
                     (2 * np.sin(_s0) * np.cos(_T), 2 * np.sin(_s0) * np.sin(_T), 2 * np.cos(_s0) + 0 * _T, RED, 2.4),
                     (2 * np.sin(_S) * np.cos(_t0), 2 * np.sin(_S) * np.sin(_t0), 2 * np.cos(_S), ORANGE, 2.4),
                 ]
-                + _guides,
+                + _guides
+                + _arcs,  # the angles s and t: plain arcs without heads, as the angle in the 2D figures
                 points=[(tuple(_P), "#000000")],
                 axes=[((0, 0, 0), (2.5, 0, 0), "x", -150), ((0, 0, 0), (0, 2.5, 0), "y", -20), ((0, 0, 0), (0, 0, 2.5), "z", 90)],
-                arcs=_arcs,
                 texts=_texts,
-                box=((-2.0, 2.5), (-2.0, 2.5), (-2.0, 2.5)),
+                box=((-2.0, 2.0), (-2.0, 2.0), (-2.0, 2.0)),
             )
         ],
-        height=420,
+        height=460,
         key="L23-sphere",
         apart=True,
         beside=_fig,
@@ -864,7 +886,7 @@ def _(BLUE, GREY, LIGHT, ORANGE, RED, beside, mo, np, panel, plane, sheet, ss, s
 
 @app.cell(hide_code=True)
 def _(frame, row):
-    row('<div data-bs2d="L23-sphere"></div>', frame("L23-sphere", 420).text)
+    row('<div data-bs2d="L23-sphere"></div>', frame("L23-sphere", 460).text, r"\Phi")
     return
 
 
@@ -1071,11 +1093,11 @@ def _(BLUE, RED, np, panel, sheet, turntable):
         24,
         "the disk with the normal vectors n pointing up; the sphere with the normal vectors n pointing out; the sphere with the normal vectors -n pointing in",
         [
-            panel(1.0, surfaces=[_disk], axes=[((0, 0, 0), (1.4, 0, 0), "x", -150), ((0, 0, 0), (0, 1.4, 0), "y", -20), ((0, 0, 0), (0, 0, 1.0), "z", 90)], arrows=[(_p, _p + np.array([0, 0, 0.5]), RED, 1.3) for _p in _dp], caption=r"\vec{n} \ \text{pointing ``up''}", box=((-1, 1.4), (-1, 1.4), (0, 1.0))),
-            panel(1.0, surfaces=[_sphere], axes=[((0, 0, 0), (1.8, 0, 0), "x", -150), ((0, 0, 0), (0, 1.8, 0), "y", -20), ((0, 0, 0), (0, 0, 1.8), "z", 90)], arrows=[(_p, 1.5 * _p, RED, 1.3) for _p in _sp], caption=r"\vec{n} \ \text{pointing ``out''}", box=((-1.5, 1.8), (-1.5, 1.8), (-1.5, 1.8))),
-            panel(1.0, surfaces=[_sphere], axes=[((0, 0, 0), (1.8, 0, 0), "x", -150), ((0, 0, 0), (0, 1.8, 0), "y", -20), ((0, 0, 0), (0, 0, 1.8), "z", 90)], arrows=[(_p, 0.5 * _p, RED, 1.3) for _p in _sp], caption=r"-\vec{n} \ \text{pointing ``in''}", box=((-1.5, 1.8), (-1.5, 1.8), (-1.5, 1.8))),
+            panel(1.0, surfaces=[_disk], axes=[((0, 0, 0), (1.4, 0, 0), "x", -150), ((0, 0, 0), (0, 1.4, 0), "y", -20), ((0, 0, 0), (0, 0, 1.0), "z", 90)], arrows=[(_p, _p + np.array([0, 0, 0.5]), RED, 1.3) for _p in _dp], caption=r"\vec{n} \ \text{pointing ``up''}", box=((-1.16, 1.56), (-1.16, 1.56), (-0.07, 1.07))),
+            panel(1.0, surfaces=[_sphere], axes=[((0, 0, 0), (1.8, 0, 0), "x", -150), ((0, 0, 0), (0, 1.8, 0), "y", -20), ((0, 0, 0), (0, 0, 1.8), "z", 90)], arrows=[(_p, 1.5 * _p, RED, 1.3) for _p in _sp], caption=r"\vec{n} \ \text{pointing ``out''}", box=((-1.2, 1.2), (-1.2, 1.2), (-1.2, 1.2))),
+            panel(1.0, surfaces=[_sphere], axes=[((0, 0, 0), (1.8, 0, 0), "x", -150), ((0, 0, 0), (0, 1.8, 0), "y", -20), ((0, 0, 0), (0, 0, 1.8), "z", 90)], arrows=[(_p, 0.5 * _p, RED, 1.3) for _p in _sp], caption=r"-\vec{n} \ \text{pointing ``in''}", box=((-1.2, 1.2), (-1.2, 1.2), (-1.2, 1.2))),
         ],
-        height=300,
+        height=340,
         cols=3,
         key="L23-orientations",
         shared=False,
@@ -1141,30 +1163,43 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(BLUE, GREEN, np, panel, sheet, turntable):
-    # the vector field F(x, y, z) = (x, y, 0) on the sphere (p. 6), as the fields of lecture 18 (green, every arrow at 1/2 of
-    # its vector) at points on five circles of latitude (eight per circle, every other circle turned by half a step); the
-    # sphere as lecture 22's. R is drawn as 2. F is named once, in the free corner above
+    # the vector fields F(x, y, z) = (x, y, 0) and G(x, y, z) = (x, y, z) on the sphere (p. 6), side by side as the fields
+    # of lecture 18 (green, every arrow at 1/2 of its vector, at the same points in both drawings: five circles of
+    # latitude, eight per circle, every other circle turned by half a step, and the poles, where F is 0); the sphere as
+    # lecture 22's. R is drawn as 2. Each field is named once, in the free corner above
     _s, _t = np.meshgrid(np.linspace(0, np.pi, 25), np.linspace(0, 2 * np.pi, 97), indexing="ij")
     _pts = [
         2 * np.array([np.sin(_u) * np.cos(_v), np.sin(_u) * np.sin(_v), np.cos(_u)])
         for _i, _u in enumerate(np.pi * np.arange(1, 6) / 6)
         for _v in (_i % 2) * np.pi / 8 + 2 * np.pi * np.arange(8) / 8
-    ]
+    ] + [np.array([0, 0, 2.0]), np.array([0, 0, -2.0])]
+    _sphere = sheet(2 * np.sin(_s) * np.cos(_t), 2 * np.sin(_s) * np.sin(_t), 2 * np.cos(_s), wire=[(0, 4, BLUE, 0.4), (1, 8, BLUE, 0.4)], alpha=0.85)
+    _axes = [((0, 0, 0), (5.0, 0, 0), "x", -150), ((0, 0, 0), (0, 5.0, 0), "y", -20), ((0, 0, 0), (0, 0, 5.0), "z", 90)]  # long enough for the x name to clear the sphere and the arrows
+    _box = ((-3.0, 3.0), (-3.0, 3.0), (-3.0, 3.0))
     _scene = turntable(
         30,
         22,
-        "the sphere of radius R with the vector field F(x, y, z) = (x, y, 0) at points on five circles of latitude",
+        "the sphere of radius R with the vector field F(x, y, z) = (x, y, 0), and beside it with the vector field G(x, y, z) = (x, y, z), at the same points",
         [
             panel(
                 1.0,
-                surfaces=[sheet(2 * np.sin(_s) * np.cos(_t), 2 * np.sin(_s) * np.sin(_t), 2 * np.cos(_s), wire=[(0, 4, BLUE, 0.4), (1, 8, BLUE, 0.4)], alpha=0.85)],
-                arrows=[(_p, _p + 0.5 * np.array([_p[0], _p[1], 0.0]), GREEN, 1.3) for _p in _pts],
-                axes=[((0, 0, 0), (3.4, 0, 0), "x", -150), ((0, 0, 0), (0, 3.4, 0), "y", -20), ((0, 0, 0), (0, 0, 2.8), "z", 90)],
-                texts=[((0, -3.0, 2.6), r"\vec{F} = \begin{bmatrix} x \\ y \\ 0 \end{bmatrix}", GREEN, 180, 0)],
-                box=((-3.0, 3.0), (-3.0, 3.0), (-2.0, 2.8)),
-            )
+                surfaces=[_sphere],
+                arrows=[(_p, _p + 0.5 * np.array([_p[0], _p[1], 0.0]), GREEN, 1.3) for _p in _pts if abs(_p[2]) < 1.99],
+                axes=_axes,
+                texts=[((0, -3.0, 3.0), r"\vec{F} = \begin{bmatrix} x \\ y \\ 0 \end{bmatrix}", GREEN, 180, 0)],
+                box=_box,
+            ),
+            panel(
+                1.0,
+                surfaces=[_sphere],
+                arrows=[(_p, 1.5 * _p, GREEN, 1.3) for _p in _pts],
+                axes=_axes,
+                texts=[((0, -3.0, 3.0), r"\vec{G} = \begin{bmatrix} x \\ y \\ z \end{bmatrix}", GREEN, 180, 0)],
+                box=_box,
+            ),
         ],
-        height=440,
+        height=500,
+        cols=2,
         key="L23-field",
     )
     _scene
