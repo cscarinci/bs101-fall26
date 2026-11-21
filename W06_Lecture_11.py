@@ -274,13 +274,16 @@ def _(mo, np):
             tex(c, spec.caption);
             this.box.appendChild(c);
           }
-          const pts = (this.pts = []), quads = (this.quads = []), segs = (this.segs = []);
+          const pts = (this.pts = []), quads = (this.quads = []), segs = (this.segs = []), spans = (this.spans = []);
           this.dots = []; this.heads = []; this.labs = [];
           const add = (x, y, z) => (pts.push(x, y, z), pts.length / 3 - 1);
           for (const s of spec.surfaces) {
             const base = pts.length / 3, n = s.n, m = s.m, id = (i, j) => base + i * m + j;
             for (const v of s.v) pts.push(v);
             const P = (k) => [pts[3 * k], pts[3 * k + 1], pts[3 * k + 2]];
+            // on a translucent surface the wire behind is drawn fainter than the wire in front (depth range of the surface)
+            const span = s.alpha < 1 ? { lo: base, hi: base + n * m } : null;
+            if (span) spans.push(span);
             const inTint = (x1, x2) => s.tint && x1 > s.tint[0] && x1 <= s.tint[1] && x2 > s.tint[2] && x2 <= s.tint[3];
             const sLit = s.tone ? s.tone.map((c) => Math.round(0.06 * c + 0.94 * 255)) : lit;
             const sDark = s.tone ? s.tone.map((c) => Math.round(0.3 * c + 0.7 * 255)) : dark;
@@ -308,7 +311,7 @@ def _(mo, np):
                   const pa = P(a), pb = P(b);
                   if (pa.concat(pb).some(isNaN)) continue;
                   if (s.clear && inTint((pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2)) continue;
-                  segs.push({ a, b, c, lw, line: null });
+                  segs.push({ a, b, c, lw, line: null, span });
                 }
               }
             }
@@ -386,6 +389,11 @@ def _(mo, np):
               ln.cum[k] = ln.cum[k - 1] + (isNaN(X[p] + X[q]) ? 0 : Math.hypot(X[q] - X[p], Y[q] - Y[p]));
             }
           }
+          for (const sp of this.spans) {
+            let lo = Infinity, hi = -Infinity;
+            for (let k = sp.lo; k < sp.hi; k++) if (!isNaN(Z[k])) { lo = Math.min(lo, Z[k]); hi = Math.max(hi, Z[k]); }
+            sp.zlo = lo; sp.zhi = hi;
+          }
           const items = [], bias = S.bias;
           for (const q of this.quads) items.push([(Z[q[0][0]] + Z[q[0][1]] + Z[q[0][2]] + Z[q[0][3]]) / 4, 0, q]);
           for (const s of this.segs) items.push([(Z[s.a] + Z[s.b]) / 2 + bias + (s.e || 0), 1, s]);
@@ -431,7 +439,12 @@ def _(mo, np):
               g.lineCap = dash || o.flat ? "butt" : "round";
               g.setLineDash(dash || []);
               g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
+              if (o.span) {  // back (far) half faint, front half full, a smooth step between
+                const u = Math.min(1, Math.max(0, (((Z[o.a] + Z[o.b]) / 2 - o.span.zlo) / ((o.span.zhi - o.span.zlo) || 1) - 0.35) / 0.3));
+                g.globalAlpha = 0.2 + 0.8 * u * u * (3 - 2 * u);
+              }
               g.stroke();
+              g.globalAlpha = 1;
             } else if (kind === 2) {
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
@@ -607,7 +620,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, GREEN, arrow, blank, cross_axes, math, mo, np, num, phi, table, tip_label):
+def _(BLUE, FULL, GREEN, arrow, blank, cross_axes, math, mo, np, phi, tip_label):
     _p = math.radians(phi.value)
     _a = (3 * math.cos(_p), 2 * math.sin(_p))
     _grad = (2 * _a[0] / 9, 2 * _a[1] / 4)
@@ -659,11 +672,6 @@ def _(BLUE, FULL, GREEN, arrow, blank, cross_axes, math, mo, np, num, phi, table
     """
             ),
             mo.hstack([phi], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"$\vec{a} = \begin{bmatrix} 3\cos\varphi \\ 2\sin\varphi \end{bmatrix}$", rf"$\begin{{bmatrix}} {num(_a[0])} \\ {num(_a[1])} \end{{bmatrix}}$"),
-                ]
-            ),
             _fig,
             mo.md(
                 r"""
@@ -997,18 +1005,14 @@ def _(definition, mo, theorem):
 
 @app.cell(hide_code=True)
 def _(mo):
-    pa1 = mo.ui.slider(0.5, 2.5, 0.25, value=2, label="$a^1$", show_value=True)
+    pa1 = mo.ui.slider(1, 2.5, 0.25, value=2, label="$a^1$", show_value=True)
     pk = mo.ui.slider(0, 12, 1, value=4, label=r"$k$", show_value=True)
     return pa1, pk
 
 
 @app.cell(hide_code=True)
-def _(Arc, BLUE, FULL, Figure, GREEN, GREY, RED, arrow, cross_axes, math, mo, num, pa1, pk, table, tip_label):
-    from fractions import Fraction as _Fraction
-
+def _(Arc, BLUE, FULL, Figure, GREEN, GREY, RED, arrow, cross_axes, math, mo, pa1, pk, tip_label):
     _a1, _a2 = pa1.value, pk.value * math.pi / 12
-    _k = _Fraction(pk.value, 12)  # a^2 = k pi / 12, written in lowest terms
-    _frac = "0" if _k == 0 else (r"\pi" if _k.numerator == 1 else rf"{_k.numerator}\pi") + ("" if _k.denominator == 1 else rf"/{_k.denominator}")
     _c, _s = math.cos(_a2), math.sin(_a2)
     _fa = (_a1 * _c, _a1 * _s)
     _deg = math.degrees(_a2)
@@ -1028,7 +1032,7 @@ def _(Arc, BLUE, FULL, Figure, GREEN, GREY, RED, arrow, cross_axes, math, mo, nu
     arrow(_left, (0, 0), (_a1, _a2), "black")
     arrow(_left, (_a1, _a2), (_a1 + 1, _a2), BLUE)
     arrow(_left, (_a1, _a2), (_a1, _a2 + 1), RED)
-    tip_label(_left, (_a1 + 1, _a2), 0, r"$\vec{e}_1$", BLUE)
+    tip_label(_left, (_a1 + 1, _a2), 30 if pk.value == 0 else 0, r"$\vec{e}_1$", BLUE)  # off the x^1 axis when the arrow lies on it
     tip_label(_left, (_a1, _a2 + 1), 90, r"$\vec{e}_2$", RED)
     _left.plot(_a1, _a2, "o", color="black", ms=4, zorder=4)
 
@@ -1043,7 +1047,7 @@ def _(Arc, BLUE, FULL, Figure, GREEN, GREY, RED, arrow, cross_axes, math, mo, nu
     _t2 = (_fa[0] - _a1 * _s, _fa[1] + _a1 * _c)
     arrow(_right, _fa, _t1, BLUE)
     arrow(_right, _fa, _t2, RED)
-    tip_label(_right, _t1, _deg, r"$Df(\vec{a})(\vec{e}_1)$", BLUE, fontsize=12)
+    tip_label(_right, _t1, _deg + 30 if pk.value % 6 == 0 else _deg, r"$Df(\vec{a})(\vec{e}_1)$", BLUE, fontsize=12)  # off the axis when the arrow lies on one
     tip_label(_right, _t2, _deg + 90, r"$Df(\vec{a})(\vec{e}_2)$", RED, fontsize=12)
     _right.plot(*_fa, "o", color="black", ms=4, zorder=4)
 
@@ -1063,15 +1067,6 @@ def _(Arc, BLUE, FULL, Figure, GREEN, GREY, RED, arrow, cross_axes, math, mo, nu
     mo.vstack(
         [
             mo.hstack([pa1, pk], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"$\vec{a} = \begin{bmatrix} a^1 \\ k\pi/12 \end{bmatrix}$", rf"$\begin{{bmatrix}} {num(_a1)} \\ {_frac} \end{{bmatrix}}$"),
-                    (
-                        r"$Df(\vec{a}) = \begin{bmatrix} Df(\vec{a})(\vec{e}_1) & Df(\vec{a})(\vec{e}_2) \end{bmatrix}$",
-                        rf"$\begin{{bmatrix}} {num(_c)} & {num(-_a1 * _s)} \\ {num(_s)} & {num(_a1 * _c)} \end{{bmatrix}}$",
-                    ),
-                ]
-            ),
             _fig,
         ]
     )
