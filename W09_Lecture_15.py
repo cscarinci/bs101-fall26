@@ -236,13 +236,16 @@ def _(mo, np):
             tex(c, spec.caption);
             this.box.appendChild(c);
           }
-          const pts = (this.pts = []), quads = (this.quads = []), segs = (this.segs = []);
+          const pts = (this.pts = []), quads = (this.quads = []), segs = (this.segs = []), spans = (this.spans = []);
           this.dots = []; this.heads = []; this.labs = [];
           const add = (x, y, z) => (pts.push(x, y, z), pts.length / 3 - 1);
           for (const s of spec.surfaces) {
             const base = pts.length / 3, n = s.n, m = s.m, id = (i, j) => base + i * m + j;
             for (const v of s.v) pts.push(v);
             const P = (k) => [pts[3 * k], pts[3 * k + 1], pts[3 * k + 2]];
+            // on a translucent surface the wire behind is drawn fainter than the wire in front (depth range of the surface)
+            const span = s.alpha < 1 ? { lo: base, hi: base + n * m } : null;
+            if (span) spans.push(span);
             const inTint = (x1, x2) => s.tint && x1 > s.tint[0] && x1 <= s.tint[1] && x2 > s.tint[2] && x2 <= s.tint[3];
             const sLit = s.tone ? s.tone.map((c) => Math.round(0.06 * c + 0.94 * 255)) : lit;
             const sDark = s.tone ? s.tone.map((c) => Math.round(0.3 * c + 0.7 * 255)) : dark;
@@ -270,7 +273,7 @@ def _(mo, np):
                   const pa = P(a), pb = P(b);
                   if (pa.concat(pb).some(isNaN)) continue;
                   if (s.clear && inTint((pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2)) continue;
-                  segs.push({ a, b, c, lw, line: null });
+                  segs.push({ a, b, c, lw, line: null, span });
                 }
               }
             }
@@ -348,6 +351,11 @@ def _(mo, np):
               ln.cum[k] = ln.cum[k - 1] + (isNaN(X[p] + X[q]) ? 0 : Math.hypot(X[q] - X[p], Y[q] - Y[p]));
             }
           }
+          for (const sp of this.spans) {
+            let lo = Infinity, hi = -Infinity;
+            for (let k = sp.lo; k < sp.hi; k++) if (!isNaN(Z[k])) { lo = Math.min(lo, Z[k]); hi = Math.max(hi, Z[k]); }
+            sp.zlo = lo; sp.zhi = hi;
+          }
           const items = [], bias = S.bias;
           for (const q of this.quads) items.push([(Z[q[0][0]] + Z[q[0][1]] + Z[q[0][2]] + Z[q[0][3]]) / 4, 0, q]);
           for (const s of this.segs) items.push([(Z[s.a] + Z[s.b]) / 2 + bias + (s.e || 0), 1, s]);
@@ -393,7 +401,12 @@ def _(mo, np):
               g.lineCap = dash || o.flat ? "butt" : "round";
               g.setLineDash(dash || []);
               g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
+              if (o.span) {  // back (far) half faint, front half full, a smooth step between
+                const u = Math.min(1, Math.max(0, (((Z[o.a] + Z[o.b]) / 2 - o.span.zlo) / ((o.span.zhi - o.span.zlo) || 1) - 0.35) / 0.3));
+                g.globalAlpha = 0.2 + 0.8 * u * u * (3 - 2 * u);
+              }
               g.stroke();
+              g.globalAlpha = 1;
             } else if (kind === 2) {
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
@@ -1221,9 +1234,8 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, ORANGE, RED, cross_axes, math, mo, np, num, st, table, tip_label):
+def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, ORANGE, RED, cross_axes, math, mo, np, st, tip_label):
     _t = st.value * math.pi / 12
-    _frac = "0" if st.value == 0 else (r"\pi" if st.value == 1 else rf"{st.value}\pi") + "/12"  # t = k pi / 12, not simplified
     _pt = (2 * math.cos(_t), 2 * math.sin(_t))
     _box = {"boxstyle": "round,pad=0.1", "facecolor": "white", "edgecolor": "none"}
 
@@ -1281,13 +1293,6 @@ def _(BLUE, FULL, Figure, GREEN, GREY, LIGHT, ORANGE, RED, cross_axes, math, mo,
     mo.vstack(
         [
             mo.hstack([st], justify="start", gap=2, wrap=True),
-            table(
-                [
-                    (r"$t = k\pi/12$", rf"${_frac}$"),
-                    (r"$g(t)$", rf"${num(4 - 4 * math.cos(_t))}$"),
-                    (r"$g'(t)$", rf"${num(4 * math.sin(_t))}$"),
-                ]
-            ),
             _fig,
         ]
     )
