@@ -156,12 +156,18 @@ def _(Figure, arrow, math, mo, np):
         for e, d in ((lo, 1), (hi, -1)):
             line([e + d * 0.6 * h, e, e, e + d * 0.6 * h], [h, h, -h, -h])
 
-    def row(left, right):
-        """A 2D figure beside a 3D one, as in lecture 16 (one above the other on narrow screens); both given as HTML."""
+    def row(left, right, by=None):
+        """A 2D figure beside a 3D one, as in lecture 16 (one above the other on narrow screens); both given as HTML.
+        `by` (TeX) names a map from the left object to the right one, drawn as an arrow between them."""
+        # the map as a curved arrow, as in the notes, with the head of the arrows of the figures (4.5 x 2 line widths)
+        arc = ('<svg width="84" height="34" viewBox="0 0 84 34"><path d="M4 30 Q42 2 80 28" fill="none" stroke="black" stroke-width="1.3"/>'
+               '<path d="M73.6 26.8 L80 28 L76.5 22.5" fill="none" stroke="black" stroke-width="1.3" stroke-linejoin="round"/></svg>')
+        mid = "" if by is None else '<div style="flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; position: relative; top: -45px; left: 20px; line-height: 1;">' + mo.md(f"${by}$").text + arc + "</div>"
+        grow = "1 1 400px" if by is None else "1 1 300px"
         return mo.Html(
             '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem 1rem;">'
-            f'<div style="flex: 0 1 280px; min-width: 240px; max-width: 300px;">{left}</div>'
-            f'<div style="flex: 1 1 440px; min-width: 300px;">{right}</div></div>'
+            f'<div style="flex: 1 1 240px; min-width: 240px; max-width: 300px;">{left}</div>{mid}'
+            f'<div style="flex: {grow}; min-width: 300px; max-width: 400px;">{right}</div></div>'
         )
 
     return beside, bracket, curve, curve_side, curve_velocity, pi_tex, plane, row, sketch, span
@@ -242,13 +248,16 @@ def _(mo, np):
             tex(c, spec.caption);
             this.box.appendChild(c);
           }
-          const pts = (this.pts = []), quads = (this.quads = []), segs = (this.segs = []);
+          const pts = (this.pts = []), quads = (this.quads = []), segs = (this.segs = []), spans = (this.spans = []);
           this.dots = []; this.heads = []; this.labs = [];
           const add = (x, y, z) => (pts.push(x, y, z), pts.length / 3 - 1);
           for (const s of spec.surfaces) {
             const base = pts.length / 3, n = s.n, m = s.m, id = (i, j) => base + i * m + j;
             for (const v of s.v) pts.push(v);
             const P = (k) => [pts[3 * k], pts[3 * k + 1], pts[3 * k + 2]];
+            // on a translucent surface the wire behind is drawn fainter than the wire in front (depth range of the surface)
+            const span = s.alpha < 1 ? { lo: base, hi: base + n * m } : null;
+            if (span) spans.push(span);
             const inTint = (x1, x2) => s.tint && x1 > s.tint[0] && x1 <= s.tint[1] && x2 > s.tint[2] && x2 <= s.tint[3];
             const sLit = s.tone ? s.tone.map((c) => Math.round(0.06 * c + 0.94 * 255)) : lit;
             const sDark = s.tone ? s.tone.map((c) => Math.round(0.3 * c + 0.7 * 255)) : dark;
@@ -276,7 +285,7 @@ def _(mo, np):
                   const pa = P(a), pb = P(b);
                   if (pa.concat(pb).some(isNaN)) continue;
                   if (s.clear && inTint((pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2)) continue;
-                  segs.push({ a, b, c, lw, line: null });
+                  segs.push({ a, b, c, lw, line: null, span });
                 }
               }
             }
@@ -354,6 +363,11 @@ def _(mo, np):
               ln.cum[k] = ln.cum[k - 1] + (isNaN(X[p] + X[q]) ? 0 : Math.hypot(X[q] - X[p], Y[q] - Y[p]));
             }
           }
+          for (const sp of this.spans) {
+            let lo = Infinity, hi = -Infinity;
+            for (let k = sp.lo; k < sp.hi; k++) if (!isNaN(Z[k])) { lo = Math.min(lo, Z[k]); hi = Math.max(hi, Z[k]); }
+            sp.zlo = lo; sp.zhi = hi;
+          }
           const items = [], bias = S.bias;
           for (const q of this.quads) items.push([(Z[q[0][0]] + Z[q[0][1]] + Z[q[0][2]] + Z[q[0][3]]) / 4, 0, q]);
           for (const s of this.segs) items.push([(Z[s.a] + Z[s.b]) / 2 + bias + (s.e || 0), 1, s]);
@@ -399,7 +413,12 @@ def _(mo, np):
               g.lineCap = dash || o.flat ? "butt" : "round";
               g.setLineDash(dash || []);
               g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
+              if (o.span) {  // back (far) half faint, front half full, a smooth step between
+                const u = Math.min(1, Math.max(0, (((Z[o.a] + Z[o.b]) / 2 - o.span.zlo) / ((o.span.zhi - o.span.zlo) || 1) - 0.35) / 0.3));
+                g.globalAlpha = 0.2 + 0.8 * u * u * (3 - 2 * u);
+              }
               g.stroke();
+              g.globalAlpha = 1;
             } else if (kind === 2) {
               let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
               const len = Math.hypot(vx, vy) || 1;
@@ -643,29 +662,32 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(BLUE, LIGHT, RED, arrow, beside, bracket, curve, curve_side, mo, np, panel, plane, row, sheet, sketch, turntable):
-    # a path and a parameterized surface (p. 1), each as a 2D domain beside its 3D image (the layout of lecture 16):
-    # the interval I with a point t (blue) and the curve C = Im(gamma) (red) with gamma(t) (blue), drawn as the curves of
-    # lecture 19; the region D with a point (s, t) (blue) and the surface S = Im(Phi) with Phi(s, t) (black), drawn as
-    # the graph of lecture 11. Curve and surface are chosen for the drawing only
+    # a path and a parameterized surface (p. 1), each as a 2D domain beside its 3D image (the layout of lecture 16), with
+    # the map between them: the interval I with a point t (blue) and the curve C = gamma(I) (red) with gamma(t) (blue), drawn
+    # as the curves of lecture 19 (I = [0.6, 2.6] is mapped onto the drawn curve, u = 3.6 (t - 0.6) - 3.6, so that the
+    # point t is mapped to the point gamma(t)); the region D with a point (s, t) (blue) and the surface S = Phi(D), the
+    # graph of a function over D drawn as lecture 11's, with Phi(s, t) (blue). Curve and surface are chosen for the drawing only
     _fi, _ai = sketch((-0.5, 3.6), (-0.6, 0.6), 2.8)
-    arrow(_ai, (-0.4, 0), (3.5, 0), "black", lw=0.9)
+    arrow(_ai, (-0.4, 0), (3.25, 0), "black", lw=0.9)
+    beside(_ai, (3.25, 0), 0, "$t$", "black", 8, 12)
     bracket(_ai, 0.6, 2.6, "black")
-    _ai.plot(1.5, 0, "o", color=BLUE, ms=4.5, zorder=6)
-    beside(_ai, (1.5, 0.09), 90, "$t$", "black", 8, 12)
-    beside(_ai, (1.6, -0.09), -90, "$I$", "black", 10, 14)
     _u0 = 2.4
+    _t0 = 0.6 + (_u0 + 3.6) / 3.6
+    _ai.plot(_t0, 0, "o", color=BLUE, ms=4.5, zorder=6)
+    beside(_ai, (_t0, 0.09), 90, "$t$", "black", 8, 12)
+    beside(_ai, (1.6, -0.09), -90, "$I$", "black", 10, 14)
     _pt = np.array(curve(_u0))
     _curve = turntable(
         30,
         20,
-        "a curve C = Im(gamma) in R^3 with a loop, and its point gamma(t)",
+        "the curve C = gamma(I) in R^3 with a loop, and its point gamma(t), the image of the point t of I",
         [
             panel(
                 1.0,
                 lines=[(*curve(np.linspace(-3.6, 3.6, 400)), RED, 1.8)],
                 points=[(tuple(_pt), BLUE, 4.0)],
                 axes=[((0, 0, 0), (3.0, 0, 0), "x", -150), ((0, 0, 0), (0, 3.0, 0), "y", 0), ((0, 0, 0), (0, 0, 3.0), "z", 90)],
-                texts=[(tuple(_pt + 0.4 * curve_side(_u0)), r"\gamma(t)", "#000000", 0, 0), (tuple(np.array(curve(3.6))), r"C = \mathrm{Im}(\gamma)", RED, 0, 8)],
+                texts=[(tuple(_pt + 0.4 * curve_side(_u0)), r"\gamma(t)", "#000000", 0, 0), (tuple(np.array(curve(3.6))), r"C = \gamma(I)", RED, 0, 8)],
             )
         ],
         height=400,
@@ -680,34 +702,37 @@ def _(BLUE, LIGHT, RED, arrow, beside, bracket, curve, curve_side, mo, np, panel
     for _i in (0, -1):
         _ad.plot([_s[_i], _s[_i]], [_lo[_i], _hi[_i]], color=BLUE, lw=1.8)
     _ad.text(2.9, 2.45, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
-    _ad.plot(1.3, 1.2, "o", color=BLUE, ms=4.5, zorder=6)
-    _ad.text(1.4, 1.2, "$(s, t)$", color="black", fontsize=13, ha="left", va="center")
+    _p = (1.3, 1.2)
+    _ad.plot(*_p, "o", color=BLUE, ms=4.5, zorder=6)
+    _ad.text(_p[0] + 0.1, _p[1], "$(s, t)$", color="black", fontsize=13, ha="left", va="center")
 
     def _h(x, y):
-        return 2.4 - 0.2 * ((x - 1.9) ** 2 + (y - 1.7) ** 2)
+        return 2.4 - 0.25 * ((x - 1.55) ** 2 + (y - 1.3) ** 2)
 
-    _x1, _x2 = np.meshgrid(np.linspace(0.5, 3.1, 25), np.linspace(0.5, 3.1, 25), indexing="ij")
-    _w = np.linspace(0.5, 3.1, 25)
-    _rim = [(_c + 0 * _w, _w, _h(_c + 0 * _w, _w), BLUE, 1.2) for _c in (0.5, 3.1)] + [(_w, _c + 0 * _w, _h(_w, _c + 0 * _w), BLUE, 1.2) for _c in (0.5, 3.1)]
-    _q = (2.4, 1.3, float(_h(2.4, 1.3)))
+    # S = Phi(D) for Phi(s, t) = (s, t, h(s, t)): the graph of h over the same region D, with lecture 11's wire and rim
+    _u, _v = np.meshgrid(np.linspace(0.5, 2.6, 25), np.linspace(0, 1, 25), indexing="ij")
+    _L, _H = 0.5 + 0.12 * np.sin(4 * (_u - 0.5)), 2.1 + 0.12 * np.sin(3.5 * (_u - 0.5) + 1)
+    _x1, _x2 = _u, _L + _v * (_H - _L)
+    _rim = [(_s, _y, _h(_s, _y), BLUE, 1.2) for _y in (_lo, _hi)] + [([_s[_i]] * 30, np.linspace(_lo[_i], _hi[_i], 30), _h(_s[_i], np.linspace(_lo[_i], _hi[_i], 30)), BLUE, 1.2) for _i in (0, -1)]
+    _q = (_p[0], _p[1], float(_h(*_p)))
     _surface = turntable(
         28,
         32,
-        "a surface S = Im(Phi) in R^3, the graph of a function over a rectangle, and its point Phi(s, t)",
+        "the surface S = Im(Phi), the graph of a function over the region D, and the point Phi(s, t), the image of the point (s, t) of D",
         [
             panel(
                 1.0,
                 surfaces=[sheet(_x1, _x2, _h(_x1, _x2), wire=[(0, 4, BLUE, 0.5), (1, 4, BLUE, 0.5)])],
                 lines=_rim,
-                points=[(_q, "#000000")],
-                axes=[((0, 0, 0), (3.6, 0, 0), "x", -150), ((0, 0, 0), (0, 3.6, 0), "y", -20), ((0, 0, 0), (0, 0, 3.6), "z", 90)],
-                texts=[(_q, r"\Phi(s, t)", "#000000", -60, 6), ((3.1, 0.5, float(_h(3.1, 0.5))), r"S = \mathrm{Im}(\Phi)", BLUE, 200, 8)],
+                points=[(_q, BLUE)],
+                axes=[((0, 0, 0), (2.9, 0, 0), "x", -150), ((0, 0, 0), (0, 2.6, 0), "y", -20), ((0, 0, 0), (0, 0, 2.8), "z", 90)],
+                texts=[(_q, r"\Phi(s, t)", "#000000", 60, 8), ((2.6, float(_lo[-1]), float(_h(2.6, _lo[-1]))), r"S = \mathrm{Im}(\Phi)", BLUE, 230, 16)],
             )
         ],
         height=400,
         key="L22-surface",
     )
-    mo.vstack([row(mo.as_html(_fi).text, _curve.text), row(mo.as_html(_fd).text, _surface.text)])
+    mo.vstack([row(mo.as_html(_fi).text, _curve.text, r"\gamma"), row(mo.as_html(_fd).text, _surface.text, r"\Phi")])
     return
 
 
@@ -731,9 +756,9 @@ def _(definition):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    **Example.** &nbsp; $\Phi(s, t) = \begin{bmatrix} 2\cos(t) \\ 2\sin(t) \\ s \end{bmatrix}$, &nbsp; $(s, t) \in [-1, 1] \times [0, 2\pi]$
+    **Example.** &nbsp; $\Phi(s, t) = \begin{bmatrix} \cos(t) \\ \sin(t) \\ s \end{bmatrix}$, &nbsp; $(s, t) \in [-1, 1] \times [0, 2\pi]$
 
-    <span class="chain">$\displaystyle \Longrightarrow \quad \mathrm{Im}(\Phi) = \left\{ (x, y, z) \mid x^2 + y^2 = 4, \ -1 \leq z \leq 1 \right\}$ $\displaystyle = \text{cylinder of radius } 2 \text{ and height } 2$</span>
+    <span class="chain">$\displaystyle \Longrightarrow \quad \mathrm{Im}(\Phi) = \left\{ (x, y, z) \mid x^2 + y^2 = 1, \ -1 \leq z \leq 1 \right\}$ $\displaystyle = \text{cylinder of radius } 1 \text{ and height } 2$</span>
     """)
     return
 
@@ -752,7 +777,7 @@ def _(BLUE, LIGHT, ORANGE, RED, beside, cs, ct, mo, np, panel, plane, sheet, tur
     # s = 0 and t = pi/4). D is drawn with t / pi on its vertical axis; it stands beside the cylinder, in the row of the
     # next cell. The cylinder as the surfaces of lecture 16: light wire, the curves on it at width 2.4
     _s0, _t0 = float(cs.value), float(ct.value)
-    _fig, _ax = plane((-1.8, 2.6), (-0.55, 2.75), 2.8, names=("$s$", "$t$"))
+    _fig, _ax = plane((-1.8, 2.6), (-0.55, 3.3), 2.8, names=("$s$", "$t$"))
     _ax.fill([-1, 1, 1, -1], [0, 0, 2, 2], color=LIGHT, lw=0, zorder=0)
     _ax.plot([-1, 1, 1, -1, -1], [0, 0, 2, 2, 0], color=BLUE, lw=1.8)
     _ax.plot([_s0, _s0], [0, 2], color=RED, lw=1.8, zorder=3)
@@ -760,23 +785,23 @@ def _(BLUE, LIGHT, ORANGE, RED, beside, cs, ct, mo, np, panel, plane, sheet, tur
     for _e in (-1, 1):
         beside(_ax, (_e, 0), -90, f"${_e}$", "black", 14, 14, gap=6)
     beside(_ax, (-1, 2), 180, r"$2\pi$", "black", 20, 14)
-    beside(_ax, (_s0, 2), 90, "$s$", RED, 8, 12)
+    beside(_ax, (_s0, 2), 120, "$s$", RED, 8, 12, gap=12)
     beside(_ax, (1, _t0 / np.pi), 0, "$t$", ORANGE, 8, 12)
-    _ax.text(1.55, 2.5, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ax.text(1.12, 2.32, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _s, _t = np.meshgrid(np.linspace(-1, 1, 9), np.linspace(0, 2 * np.pi, 97), indexing="ij")
     _T = np.linspace(0, 2 * np.pi, 121)
     _scene = turntable(
         30,
         22,
-        "the cylinder of radius 2 and height 2, with the circle at height s and the vertical segment at the angle t",
+        "the cylinder of radius 1 and height 2, with the circle at height s and the vertical segment at the angle t",
         [
             panel(
                 1.0,
-                surfaces=[sheet(2 * np.cos(_t), 2 * np.sin(_t), _s, wire=[(0, 2, BLUE, 0.4), (1, 8, BLUE, 0.4)], alpha=0.85)],
-                lines=[(2 * np.cos(_T), 2 * np.sin(_T), _s0 + 0 * _T, RED, 2.4), ([2 * np.cos(_t0)] * 2, [2 * np.sin(_t0)] * 2, [-1, 1], ORANGE, 2.4)],
-                axes=[((0, 0, 0), (3.3, 0, 0), "x", -150), ((0, 0, 0), (0, 3.3, 0), "y", -20), ((0, 0, 0), (0, 0, 2.3), "z", 90)],
-                texts=[((2 * np.cos(1.9), 2 * np.sin(1.9), 1.0), "S", BLUE, 90, 6)],
-                box=((-2.0, 3.3), (-2.0, 3.3), (-1.0, 2.3)),
+                surfaces=[sheet(np.cos(_t), np.sin(_t), _s, wire=[(0, 2, BLUE, 0.4), (1, 8, BLUE, 0.4)], alpha=0.85)],
+                lines=[(np.cos(_T), np.sin(_T), _s0 + 0 * _T, RED, 2.4), ([np.cos(_t0)] * 2, [np.sin(_t0)] * 2, [-1, 1], ORANGE, 2.4)],
+                axes=[((0, 0, 0), (2.0, 0, 0), "x", -150), ((0, 0, 0), (0, 2.0, 0), "y", -20), ((0, 0, 0), (0, 0, 2.3), "z", 90)],
+                texts=[((np.cos(1.9), np.sin(1.9), 1.0), "S", BLUE, 90, 6)],
+                box=((-1.0, 2.0), (-1.0, 2.0), (-1.0, 2.3)),
             )
         ],
         height=420,
@@ -790,7 +815,7 @@ def _(BLUE, LIGHT, ORANGE, RED, beside, cs, ct, mo, np, panel, plane, sheet, tur
 
 @app.cell(hide_code=True)
 def _(frame, row):
-    row('<div data-bs2d="L22-cylinder"></div>', frame("L22-cylinder", 420).text)
+    row('<div data-bs2d="L22-cylinder"></div>', frame("L22-cylinder", 420).text, r"\Phi")
     return
 
 
@@ -820,16 +845,16 @@ def _(BLUE, LIGHT, ORANGE, RED, beside, mo, np, panel, plane, sheet, ss, st, tur
     # s = pi/2 and t = pi/3). D is drawn with 1.5 s / pi and t / pi on its axes; it stands beside the sphere, in the row of
     # the next cell. The sphere as the surfaces of lecture 16: light wire, the curves on it at width 2.4
     _s0, _t0 = float(ss.value), float(st.value)
-    _fig, _ax = plane((-0.7, 2.9), (-0.55, 2.75), 2.8, names=("$s$", "$t$"))
+    _fig, _ax = plane((-0.7, 2.9), (-0.55, 3.1), 2.8, names=("$s$", "$t$"))
     _ax.fill([0, 1.5, 1.5, 0], [0, 0, 2, 2], color=LIGHT, lw=0, zorder=0)
     _ax.plot([0, 1.5, 1.5, 0, 0], [0, 0, 2, 2, 0], color=BLUE, lw=1.8)
     _ax.plot([1.5 * _s0 / np.pi] * 2, [0, 2], color=RED, lw=1.8, zorder=3)
     _ax.plot([0, 1.5], [_t0 / np.pi, _t0 / np.pi], color=ORANGE, lw=1.8, zorder=3)
     beside(_ax, (1.5, 0), -90, r"$\pi$", "black", 12, 14, gap=6)
     beside(_ax, (0, 2), 180, r"$2\pi$", "black", 20, 14)
-    beside(_ax, (1.5 * _s0 / np.pi, 2), 90, "$s$", RED, 8, 12)
+    beside(_ax, (1.5 * _s0 / np.pi, 2), 120, "$s$", RED, 8, 12, gap=12)
     beside(_ax, (1.5, _t0 / np.pi), 0, "$t$", ORANGE, 8, 12)
-    _ax.text(2.05, 2.5, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
+    _ax.text(1.62, 2.32, "$D$", color=BLUE, fontsize=13, ha="center", va="center")
     _s, _t = np.meshgrid(np.linspace(0, np.pi, 25), np.linspace(0, 2 * np.pi, 97), indexing="ij")
     _T = np.linspace(0, 2 * np.pi, 121)
     _S = np.linspace(0, np.pi, 61)
@@ -861,7 +886,7 @@ def _(BLUE, LIGHT, ORANGE, RED, beside, mo, np, panel, plane, sheet, ss, st, tur
 
 @app.cell(hide_code=True)
 def _(frame, row):
-    row('<div data-bs2d="L22-sphere"></div>', frame("L22-sphere", 420).text)
+    row('<div data-bs2d="L22-sphere"></div>', frame("L22-sphere", 420).text, r"\Phi")
     return
 
 
@@ -912,7 +937,7 @@ def _(BLUE, GREY, LIGHT, mo, np, panel, plane, row, sheet, turntable):
         height=420,
         key="L22-graph",
     )
-    row(mo.as_html(_fig).text, _scene.text)
+    row(mo.as_html(_fig).text, _scene.text, r"\Phi")
     return
 
 
@@ -1229,7 +1254,7 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    dd = mo.ui.slider(0.3, 1.4, 0.1, value=1.0, label=r"$\Delta s = \Delta t$", show_value=True)
+    dd = mo.ui.slider(0.6, 1.2, 0.1, value=1.0, label=r"$\Delta s = \Delta t$", show_value=True)
     return (dd,)
 
 
@@ -1240,15 +1265,17 @@ def _(BLUE, LIGHT, ORANGE, RED, arrow, beside, dd, mo, np, panel, plane, sheet, 
     # (orange), and the area of the patch is about the length of u x v (red); Delta s = Delta t moves with the slider
     _h = round(float(dd.value), 10)
     _s0 = _t0 = 1.0
-    _fig, _ax = plane((-0.4, 3.4), (-0.4, 2.9), 2.8, names=("$s$", "$t$"))
-    _ax.fill([_s0, _s0 + _h, _s0 + _h, _s0], [_t0, _t0, _t0 + _h, _t0 + _h], color=LIGHT, lw=0, zorder=0)
-    _ax.plot([_s0 + _h, _s0 + _h, _s0], [_t0, _t0 + _h, _t0 + _h], color=BLUE, lw=1.8)
-    arrow(_ax, (_s0, _t0), (_s0 + _h, _t0), ORANGE, lw=1.6)
-    arrow(_ax, (_s0, _t0), (_s0, _t0 + _h), ORANGE, lw=1.6)
-    for _c, _name, _ang in (((0, 0), "$(s, t)$", -135), ((1, 0), r"$(s + \Delta s, t)$", -45), ((0, 1), r"$(s, t + \Delta t)$", 135), ((1, 1), r"$(s + \Delta s, t + \Delta t)$", 45)):
-        _r = (_s0 + _c[0] * _h, _t0 + _c[1] * _h)
+    _d0 = 1.8  # the square in the drawing of the domain: far enough from the t axis for the names on its left
+    _fig, _ax = plane((-0.4, 4.8), (-0.4, 2.9), 3.8, names=("$s$", "$t$"))
+    _ax.fill([_d0, _d0 + _h, _d0 + _h, _d0], [_t0, _t0, _t0 + _h, _t0 + _h], color=LIGHT, lw=0, zorder=0)
+    _ax.plot([_d0 + _h, _d0 + _h, _d0], [_t0, _t0 + _h, _t0 + _h], color=BLUE, lw=1.8)
+    arrow(_ax, (_d0, _t0), (_d0 + _h, _t0), ORANGE, lw=1.6)
+    arrow(_ax, (_d0, _t0), (_d0, _t0 + _h), ORANGE, lw=1.6)
+    # each name beside its corner, left or right of the square (w: its width in points), so that none crosses the square
+    for _c, _name, _ang, _wn in (((0, 0), "$(s, t)$", 180, 30), ((1, 0), r"$(s + \Delta s, t)$", 0, 55), ((0, 1), r"$(s, t + \Delta t)$", 180, 55), ((1, 1), r"$(s + \Delta s, t + \Delta t)$", 0, 85)):
+        _r = (_d0 + _c[0] * _h, _t0 + _c[1] * _h)
         _ax.plot(*_r, "o", color="black", ms=4, zorder=6)
-        beside(_ax, _r, _ang, _name, "black", 30, 12, gap=0, fontsize=11)
+        beside(_ax, _r, _ang, _name, "black", _wn, 12, gap=3, fontsize=11)
 
     # a surface curving upwards (a bowl), so that u and v, which join points of the surface, lie above it and are seen
     def _g(x, y):
@@ -1299,7 +1326,7 @@ def _(BLUE, LIGHT, ORANGE, RED, arrow, beside, dd, mo, np, panel, plane, sheet, 
 
 @app.cell(hide_code=True)
 def _(frame, row):
-    row('<div data-bs2d="L22-patch"></div>', frame("L22-patch", 440).text)
+    row('<div data-bs2d="L22-patch"></div>', frame("L22-patch", 440).text, r"\Phi")
     return
 
 
