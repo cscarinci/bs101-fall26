@@ -78,6 +78,7 @@ div.fixed[class*="top-[25vh]"][class*="right-8"] { display: none !important; }  
 .lk-lecture { font-family: var(--lk-font); margin: 0 0 1.4rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--lk-accent); }
 .lk-meta { color: var(--lk-muted); font-size: 1rem; letter-spacing: 0.02em; }
 .lk-lecture-title { color: var(--lk-accent); font-weight: 700; font-size: 1.85rem; margin: 0.15rem 0 0; border: none; }
+.lk-lecture-title .markdown, .lk-section .markdown { font-size: inherit; line-height: inherit; }  /* math in a heading: the heading's size */
 
 /* sections and modules */
 .lk-section { font-family: var(--lk-font); color: var(--lk-accent); font-size: 1.45rem; font-weight: 700; margin: 1.6rem 0 0.4rem; border: none; }
@@ -187,6 +188,10 @@ details.lk-block:not([open]) { min-height: 1.9em; }
   .lk-note-lines > .lk-note-eq { padding-left: 2.4em; text-indent: -1.2em; }
 }
 .lk-aside-note, .lk-gloss-note { text-wrap: balance; }  /* a comment of two lines: two lines of about the same length */
+@media (min-width: 1280px) {  /* a comment that fits on one line stays on one line, past the comment column if needed */
+  .lk-aside-note:not(.lk-note-lines), .lk-gloss-note { width: max-content; max-width: min(24rem, calc(50vw - 25.25rem)); }
+}
+.lk-prose .paragraph, .lk-block .paragraph { text-wrap: balance; }  /* a wrapped paragraph: lines of about equal length, no short last line */
 .lk-aside-note .markdown, .lk-aside-note .paragraph, .lk-gloss-note .markdown, .lk-gloss-note .paragraph,
 .markdown .lk-aside-note .paragraph, .markdown .lk-gloss-note .paragraph { font-size: 0.95rem !important; line-height: 1.3 !important; }
 .lk-aside-note .lk-chain { font-style: italic; }
