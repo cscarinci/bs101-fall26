@@ -10,6 +10,8 @@ async def _():
 
     import marimo as mo
 
+    import matplotlib  # noqa: F401  (named here so the browser fetches it while Python starts)
+
     if sys.platform == "emscripten":
         import micropip
 
