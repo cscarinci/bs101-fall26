@@ -67,28 +67,22 @@ def _(lk):
     # module: recap
     # recap
     lk.recap(
-        r"""
-        Existence of global extrema on closed and bounded domains
-
-        If $f : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}$ is continuous over a $\underbrace{\text{closed}}_{\footnotesize \begin{array}{c} \text{contains its} \\ \text{boundary} \end{array}}$ and $\underbrace{\text{bounded}}_{\footnotesize \begin{array}{c} \text{doesn't run off} \\ \text{to infinity} \end{array}}$ domain $D \subseteq \mathbb{R}^2$, then<br>$f$ has both global extrema in $D$
-        """,
+        "Existence of global extrema on closed and bounded domains",
+        lk.aside(
+            r"If $f : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}$ is continuous over a <span class='lk-mark'>closed</span> and <span class='lk-mark'>bounded</span> domain $D \subseteq \mathbb{R}^2$,<br>then $f$ has both global extrema in $D$.",
+            "closed = contains its boundary<br>bounded = doesn't run off to infinity",
+        ),
         lk.gap(),
         r"""
         Strategy: find all candidates and compare them
 
-        > 1\. &nbsp; in $D - \mathrm{Bd}(D)$ &nbsp; $\leadsto$ &nbsp; local extrema &nbsp; $\Longrightarrow$ &nbsp; critical points of $f$
+        1. in $D - \mathrm{Bd}(D)$ &nbsp; $\leadsto$ &nbsp; local extrema &nbsp; $\Longrightarrow$ &nbsp; critical points of $f$:
 
-        > <span class="lk-ghost">1\. &nbsp; in $D - \mathrm{Bd}(D)$ &nbsp; $\leadsto$ &nbsp; local extrema &nbsp;</span>$\Longrightarrow$ &nbsp; $\vec{x} \in D - \mathrm{Bd}(D)$ such that $\vec{\nabla} f(\vec{x}) = \vec{0}$
+            > $\vec{x} \in D - \mathrm{Bd}(D)$ such that $\vec{\nabla} f(\vec{x}) = \vec{0}$
 
-        > 2\. &nbsp; in $\mathrm{Bd}(D)$ &nbsp; $\leadsto$ &nbsp; global extrema of $f \circ \gamma$ on $[a, b]$ for some parameterization of $\mathrm{Bd}(D)$
+        2. in $\mathrm{Bd}(D)$ &nbsp; $\leadsto$ &nbsp; global extrema of $f \circ \gamma$ on $[a, b]$<br>for some parameterization $\gamma : [a, b] \longrightarrow \mathbb{R}^2$ of $\mathrm{Bd}(D)$
 
-        > <span class="lk-ghost">2\. &nbsp; in $\mathrm{Bd}(D)$ &nbsp; $\leadsto$ &nbsp;</span>&emsp;&emsp;$\gamma : [a, b] \longrightarrow \mathbb{R}^2$ such that $\mathrm{Im}(\gamma) = \mathrm{Bd}(D)$
-
-        > <span class="lk-ghost">2\. &nbsp; in $\mathrm{Bd}(D)$ &nbsp; $\leadsto$ &nbsp;</span>$\Longrightarrow$ &nbsp; $\gamma(t) \in \mathrm{Bd}(D)$ with
-
-        > <span class="lk-ghost">2\. &nbsp; in $\mathrm{Bd}(D)$ &nbsp; $\leadsto$ &nbsp; $\Longrightarrow$ &nbsp; or &nbsp;</span>• &nbsp; $t \in (a, b)$, &nbsp; $(f \circ \gamma)'(t) = 0$
-
-        > <span class="lk-ghost">2\. &nbsp; in $\mathrm{Bd}(D)$ &nbsp; $\leadsto$ &nbsp; $\Longrightarrow$ &nbsp;</span>or &nbsp; • &nbsp; $t = a, b$
+            > $\Longrightarrow$ &nbsp; $\gamma(t) \in \mathrm{Bd}(D)$ with $t \in (a, b)$ and $(f \circ \gamma)'(t) = 0$, or $t = a, b$
         """,
         title="Last time",
     )
@@ -143,12 +137,8 @@ def _(lk):
             $D = \left\{ \vec{x} \;\middle|\; (x^1)^2 \leqslant x^2 \leqslant 1 \right\}$
             """,
             lk.aside(
-                r"> $\Longrightarrow$ &nbsp; $\mathrm{Bd}(D) = \Big\{ \vec{x} \;\Big|\; \mk{\overbrace{(x^1)^2 = x^2}^{\footnotesize (x^1)^2 - x^2 = 0}}, \ x^2 \leqslant 1 \Big\}$",
-                r"level set of $g(\vec{x}) = (x^1)^2 - x^2$",
-            ),
-            lk.aside(
-                r'> <span class="lk-ghost">$\Longrightarrow$ &nbsp; $\mathrm{Bd}(D) =$</span> $\cup \Big\{ \vec{x} \;\Big|\; \mk{x^2 = 1}, \ -1 \leqslant x^1 \leqslant 1 \Big\}$',
-                r"level set of $h(\vec{x}) = x^2 - 1$",
+                r"> $\Longrightarrow$ &nbsp; $\mathrm{Bd}(D) = \left\{ \vec{x} \;\middle|\; \mk{(x^1)^2 = x^2}, \ x^2 \leqslant 1 \right\} \cup \left\{ \vec{x} \;\middle|\; \mk{x^2 = 1}, \ -1 \leqslant x^1 \leqslant 1 \right\}$",
+                r"level set of $g(\vec{x}) = (x^1)^2 - x^2$<br>and of $h(\vec{x}) = x^2 - 1$",
             ),
         ],
         label="ex-level-sets",
@@ -162,7 +152,7 @@ def _(lk):
     # prose: what Lagrange multipliers do
     lk.prose(
         r"""
-        $\leadsto$ &nbsp; Lagrange multipliers allow us to find extrema of one function on the level sets of another
+        $\leadsto$ &nbsp; Lagrange multipliers find extrema of one function on the level sets of another
 
         > $\Longrightarrow$ &nbsp; no parameterizations needed!
         """
@@ -176,7 +166,7 @@ def _(lk):
     # definition: constraint
     lk.definition(
         r"""
-        A **constraint** is an $\underbrace{\text{equation } g(\vec{x}) = c}_{\footnotesize \text{constraint equation}}$, restricting the allowed values of $\vec{x}$ to the $\underbrace{\text{level set } g^{-1}(c)}_{\footnotesize \text{constraint curve}}$ of some $\underbrace{\text{function } g : \mathbb{R}^2 \longrightarrow \mathbb{R}}_{\footnotesize \text{constraint function}}$.
+        A **constraint** is an equation $g(\vec{x}) = c$ (**constraint equation**), restricting $\vec{x}$ to the level set $g^{-1}(c)$ (**constraint curve**) of some function $g : \mathbb{R}^2 \longrightarrow \mathbb{R}$ (**constraint function**).
         """,
         label="def-constraint",
     )
@@ -189,7 +179,7 @@ def _(lk):
     # prose: the problem
     lk.prose(
         r"""
-        Problem: &nbsp; Given a function $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$ and a constraint $g(\vec{x}) = c$, how to find max / min of $f$ restricted to the constraint curve $g^{-1}(c)$?
+        Problem: &nbsp; Given a function $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$ and a constraint $g(\vec{x}) = c$, how to find max&nbsp;/&nbsp;min of $f$ restricted to the constraint curve $g^{-1}(c)$?
         """
     )
     return
@@ -215,10 +205,11 @@ def _(Figure, fx, lk):
     lk.example(
         [
             r"Suppose you want to build a fence around some rectangular region. The fence must have perimeter $100\,$m. How to maximize the area?",
+            lk.aside(
+                r"> $\leadsto$ &nbsp; $\begin{cases} f(\vec{x}) = \text{area} = x^1 x^2 \\ g(\vec{x}) = \text{perimeter} = \mk{2x^1 + 2x^2 = 100} \end{cases}$",
+                "$2x^1 + 2x^2 = 100$ is the constraint",
+            ),
             lk.interactive(_fig, controls=[fx]),
-            r"""
-            > $\leadsto$ &nbsp; $\begin{cases} f(\vec{x}) = \text{area} = x^1 x^2 \\[6pt] g(\vec{x}) = \text{perimeter} = \underbrace{2x^1 + 2x^2 = 100}_{\footnotesize \text{constraint}} \end{cases}$
-            """,
         ],
         label="ex-fence",
     )
@@ -247,15 +238,17 @@ def _(lk):
     # module: lagrange
     # theorem: Lagrange multipliers
     lk.theorem(
-        r"""
-        Given $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$ and $g : \mathbb{R}^2 \longrightarrow \mathbb{R}$ $C^1$-smooth
+        [
+            r"""
+            Given $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$ and $g : \mathbb{R}^2 \longrightarrow \mathbb{R}$ $C^1$-smooth
 
-        If $\vec{a}$ is a global maximum of $f$ restricted to $g^{-1}(c)$ with $\vec{\nabla} g(\vec{a}) \neq \vec{0}$, then
-
-        $$
-        \underbrace{\text{there exists } \lambda \in \mathbb{R} \text{ such that } \vec{\nabla} f(\vec{a}) = \lambda \vec{\nabla} g(\vec{a})}_{\footnotesize \vec{\nabla} f(\vec{a}) \text{ is proportional to } \vec{\nabla} g(\vec{a})}
-        $$
-        """,
+            If $\vec{a}$ is a global maximum of $f$ restricted to $g^{-1}(c)$ with $\vec{\nabla} g(\vec{a}) \neq \vec{0}$, then
+            """,
+            lk.aside(
+                r"$$ \text{there exists } \lambda \in \mathbb{R} \text{ such that } \vec{\nabla} f(\vec{a}) = \lambda \vec{\nabla} g(\vec{a}) $$",
+                r"$\vec{\nabla} f(\vec{a})$ is proportional to $\vec{\nabla} g(\vec{a})$",
+            ),
+        ],
         title="Lagrange multipliers",
         label="thm-lagrange",
     )
@@ -265,8 +258,8 @@ def _(lk):
 @app.cell(hide_code=True)
 def _(lk):
     # module: lagrange
-    # prose: the name
-    lk.prose(r"$\leadsto$ &nbsp; $\lambda$ is called a **Lagrange multiplier**")
+    # notation: Lagrange multiplier
+    lk.notation(r"$\lambda$ is called a **Lagrange multiplier**.")
     return
 
 
@@ -279,32 +272,29 @@ def _(lk):
             r"""
             Given $\vec{a} \in g^{-1}(c)$ with $\vec{\nabla} g(\vec{a}) \neq \vec{0}$, we can
 
-            find a parameterization $\gamma(t)$ of $g^{-1}(c)$ near $\vec{a}$ such that $\gamma(0) = \vec{a}$ and $\gamma'(0) \neq \vec{0}$
+            1. find a parameterization $\gamma(t)$ of $g^{-1}(c)$ near $\vec{a}$ such that $\gamma(0) = \vec{a}$ and $\gamma'(0) \neq \vec{0}$
             """,
-            lk.aside(r"> $\leadsto$ &nbsp; exists because $\vec{\nabla} g(\vec{a}) \neq \vec{0}$", "big theorem we cannot prove!"),
-            lk.gap(),
+            lk.aside(r"> > $\leadsto$ &nbsp; exists because $\vec{\nabla} g(\vec{a}) \neq \vec{0}$", "big theorem we cannot prove!"),
             r"""
-            evaluate both $f$ and $g$ along $\gamma(t)$ and differentiate at $t = 0$
+            2. evaluate both $f$ and $g$ along $\gamma(t)$ and differentiate at $t = 0$
 
-            > • &nbsp; $\vec{a}$ is max of $f$ restricted to $g^{-1}(c)$
+                > • &nbsp; $\vec{a}$ is max of $f$ restricted to $g^{-1}(c)$
 
-            > > $\Longrightarrow$ &nbsp; $0$ is max of $f \circ \gamma$
+                > > $\Longrightarrow$ &nbsp; $0$ is max of $f \circ \gamma$
 
-            > > $\Longrightarrow$ &nbsp; $\left. \dfrac{d}{dt} \right|_{t = 0} f(\gamma(t)) = \vec{\nabla} f(\vec{a}) \cdot \gamma'(0) = 0$
+                > > $\Longrightarrow$ &nbsp; $\left. \dfrac{d}{dt} \right|_{t = 0} f(\gamma(t)) = \vec{\nabla} f(\vec{a}) \cdot \gamma'(0) = 0$
 
-            > • &nbsp; $\gamma$ is parameterization of $g^{-1}(c)$
+                > • &nbsp; $\gamma$ is parameterization of $g^{-1}(c)$
 
-            > > $\Longrightarrow$ &nbsp; $g \circ \gamma = c$ is constant
+                > > $\Longrightarrow$ &nbsp; $g \circ \gamma = c$ is constant
 
-            > > $\Longrightarrow$ &nbsp; $\left. \dfrac{d}{dt} \right|_{t = 0} g(\gamma(t)) = \vec{\nabla} g(\vec{a}) \cdot \gamma'(0) = 0$
-            """,
-            lk.gap(),
-            r"""
-            $\vec{\nabla} f(\vec{a})$ and $\vec{\nabla} g(\vec{a})$ orthogonal to $\gamma'(0) \neq \vec{0}$ in $\mathbb{R}^2$
+                > > $\Longrightarrow$ &nbsp; $\left. \dfrac{d}{dt} \right|_{t = 0} g(\gamma(t)) = \vec{\nabla} g(\vec{a}) \cdot \gamma'(0) = 0$
 
-            > $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a})$ and $\vec{\nabla} g(\vec{a})$ must be proportional!
+            3. $\vec{\nabla} f(\vec{a})$ and $\vec{\nabla} g(\vec{a})$ orthogonal to $\gamma'(0) \neq \vec{0}$ in $\mathbb{R}^2$
 
-            > $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a}) = \lambda \vec{\nabla} g(\vec{a})$ for some $\lambda \in \mathbb{R}$
+                > $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a})$ and $\vec{\nabla} g(\vec{a})$ must be proportional!
+
+                > $\Longrightarrow$ &nbsp; $\vec{\nabla} f(\vec{a}) = \lambda \vec{\nabla} g(\vec{a})$ for some $\lambda \in \mathbb{R}$
             """,
         ]
     )
@@ -420,7 +410,6 @@ def _(Figure, cross_axes, kc, lk, math, mo, np, tip_label):
 
             > > $\vec{\nabla} g(\vec{x}) \neq \vec{0}$ &nbsp; $\forall \, \vec{x} \neq \vec{0} \notin g^{-1}(3)$
             """,
-            lk.interactive(mo.Html('<div class="lk-pair">' f'<div>{mo.as_html(_fig).text}</div><div class="lk-pair-3d">{lk.frame("L16-c", lk.H3D, width=500).text}</div></div>'), controls=[kc]),
             r"""
             $$
             \begin{aligned}
@@ -430,6 +419,7 @@ def _(Figure, cross_axes, kc, lk, math, mo, np, tip_label):
             \end{aligned}
             $$
             """,
+            lk.interactive(mo.Html('<div class="lk-pair">' f'<div>{mo.as_html(_fig).text}</div><div class="lk-pair-3d">{lk.frame("L16-c", lk.H3D, width=500).text}</div></div>'), controls=[kc]),
         ],
         label="ex-ellipse",
     )
@@ -445,9 +435,9 @@ def _(lk):
         r"""
         > 2$'$. &nbsp; $\leadsto$ &nbsp; constrained extrema
 
-        > <span class="lk-ghost">2$'$. &nbsp; $\leadsto$ &nbsp;</span>$\Longrightarrow$ &nbsp; $\vec{x} \in \mathrm{Bd}(D)$ such that $\begin{cases} \vec{\nabla} f(\vec{x}) = \lambda \vec{\nabla} g(\vec{x}) \\ g(\vec{x}) = c \end{cases}$
+        > > $\Longrightarrow$ &nbsp; $\vec{x} \in \mathrm{Bd}(D)$ such that $\begin{cases} \vec{\nabla} f(\vec{x}) = \lambda \vec{\nabla} g(\vec{x}) \\ g(\vec{x}) = c \end{cases}$
 
-        > <span class="lk-ghost">2$'$. &nbsp; $\leadsto$ &nbsp; $\Longrightarrow$ &nbsp;</span>$\leadsto$ &nbsp; solve for $\vec{x}$ and $\lambda$
+        > > > $\leadsto$ &nbsp; solve for $\vec{x}$ and $\lambda$
         """,
     )
     return
@@ -457,7 +447,7 @@ def _(lk):
 def _(lk):
     # module: corners
     # remark: several components
-    lk.remark(r"If $\mathrm{Bd}(D)$ has multiple components, use one constraint per component and include the corners!")
+    lk.remark(r"If $\mathrm{Bd}(D)$ has multiple components, use one constraint each and include the corners!")
     return
 
 
@@ -477,21 +467,20 @@ def _(lk):
             r"""
             > $\vec{\nabla} f(\vec{x}) = \begin{bmatrix} x^2 \\ x^1 - 2 \end{bmatrix}$, &nbsp; $\vec{\nabla} g(\vec{x}) = \begin{bmatrix} 2x^1 \\ -1 \end{bmatrix}$, &nbsp; $\vec{\nabla} h(\vec{x}) = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$
 
-            $$
-            \begin{aligned}
-            \begin{cases} \vec{\nabla} f(\vec{x}) = \lambda \vec{\nabla} g(\vec{x}) \\[4pt] g(\vec{x}) = 0 \end{cases} \quad & \Longleftrightarrow \quad \begin{cases} x^2 = 2 \lambda x^1 \\ x^1 - 2 = -\lambda \\ (x^1)^2 - x^2 = 0 \end{cases}\\[14pt]
-            & \Longleftrightarrow \quad \lambda = 2, \ x^1 = 0, \ x^2 = 0\\[4pt]
-            & \phantom{\Longleftrightarrow} \quad \text{or } \lambda = {\large\tfrac{2}{3}}, \ \underbrace{x^1 = {\large\tfrac{4}{3}}, \ x^2 = {\large\tfrac{16}{9}}}_{\footnotesize \text{not on } \mathrm{Bd}(D)}
-            \end{aligned}
-            $$
             """,
             lk.aside(
                 r"""
                 $$
-                \begin{cases} \vec{\nabla} f(\vec{x}) = \lambda \vec{\nabla} h(\vec{x}) \\[4pt] h(\vec{x}) = 1 \end{cases} \quad \Longleftrightarrow \quad \begin{cases} x^2 = 0 \\ x^1 - 2 = \lambda \\ x^2 = 1 \end{cases}
+                \begin{aligned}
+                \begin{cases} \vec{\nabla} f(\vec{x}) = \lambda \vec{\nabla} g(\vec{x}) \\[4pt] g(\vec{x}) = 0 \end{cases} \quad & \Longleftrightarrow \quad \begin{cases} x^2 = 2 \lambda x^1 \\ x^1 - 2 = -\lambda \\ (x^1)^2 - x^2 = 0 \end{cases}\\[14pt]
+                & \Longleftrightarrow \quad \lambda = 2, \ x^1 = 0, \ x^2 = 0\\[4pt]
+                & \phantom{\Longleftrightarrow} \quad \text{or } \lambda = {\large\tfrac{2}{3}}, \ \underbrace{x^1 = {\large\tfrac{4}{3}}, \ x^2 = {\large\tfrac{16}{9}}}_{\footnotesize \text{not on } \mathrm{Bd}(D)}\\[24pt]
+                \begin{cases} \vec{\nabla} f(\vec{x}) = \lambda \vec{\nabla} h(\vec{x}) \\[4pt] h(\vec{x}) = 1 \end{cases} \quad & \Longleftrightarrow \quad \begin{cases} x^2 = 0 \\ x^1 - 2 = \lambda \\ x^2 = 1 \end{cases}
+                \end{aligned}
                 $$
                 """,
                 "no solution!",
+                at="last",
             ),
         ],
         label="ex-two-constraints",
