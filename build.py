@@ -3,13 +3,20 @@
 Usage:  python build.py        (writes ./site)
 Preview: python -m http.server --directory site
 """
+import base64
+import hashlib
+import os
 import re
+import shutil
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 HERE = Path(__file__).parent
 SITE = HERE / "site"
+PACKAGE = HERE / "lecturekit"
+WHEEL = "lecturekit-0.1.0-py3-none-any.whl"
 
 PARTS = [  # (name, first lecture, last lecture)
     ("I. Euclidean Geometry", 1, 5),
@@ -147,6 +154,31 @@ COUNTER = (
 )
 
 
+def wheel(out):
+    """The lecturekit wheel that each lecturekit page installs in the browser, with course.toml baked in."""
+    out.mkdir(parents=True, exist_ok=True)
+    path = out / WHEEL
+    dist = "lecturekit-0.1.0.dist-info"
+    files = {f"lecturekit/{p.relative_to(PACKAGE).as_posix()}": p.read_bytes()
+             for p in PACKAGE.rglob("*") if p.is_file() and "__pycache__" not in p.parts and "katex" not in p.parts and p.name != "_course.toml"}  # katex: site files, not Python
+    files["lecturekit/_course.toml"] = (HERE / "course.toml").read_bytes()
+    files[f"{dist}/METADATA"] = b"Metadata-Version: 2.1\nName: lecturekit\nVersion: 0.1.0\n"
+    files[f"{dist}/WHEEL"] = b"Wheel-Version: 1.0\nGenerator: lecturekit-build\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
+    record = []
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
+        for name, data in files.items():
+            z.writestr(name, data)
+            digest = base64.urlsafe_b64encode(hashlib.sha256(data).digest()).rstrip(b"=").decode()
+            record.append(f"{name},sha256={digest},{len(data)}")
+        record.append(f"{dist}/RECORD,,")
+        z.writestr(f"{dist}/RECORD", "\n".join(record) + "\n")
+    return path
+
+
+def uses_lecturekit(path):
+    return "import lecturekit" in path.read_text(encoding="utf-8")
+
+
 def main():
     notebooks = {}
     for path in sorted(HERE.glob("W*_Lecture_*.py")):
@@ -154,19 +186,31 @@ def main():
         if number not in DRAFTS:
             notebooks[number] = path
 
+    whl = wheel(HERE / "_wheel")
+    env = os.environ | {"PYTHONPATH": os.pathsep.join(filter(None, [str(HERE), os.environ.get("PYTHONPATH")]))}
     for number, path in notebooks.items():
         print(f"exporting {path.name}")
         subprocess.run(
             ["marimo", "export", "html-wasm", str(path), "-o", str(SITE / f"Lecture_{number:02d}"), "--mode", "run", "-f", *SNAPSHOT],
             check=True,
             cwd=HERE,
+            env=env,
         )
+        if uses_lecturekit(path):
+            (SITE / f"Lecture_{number:02d}" / "public").mkdir(exist_ok=True)
+            shutil.copy(whl, SITE / f"Lecture_{number:02d}" / "public" / WHEEL)
+    shutil.rmtree(HERE / "_wheel")
+    shutil.copytree(PACKAGE / "katex", SITE / "katex", dirs_exist_ok=True)  # labels of the 3D figures, offline
+    style = f"<style>{(PACKAGE / 'style.css').read_text(encoding='utf-8')}</style>"
+    site_class = '<script>document.documentElement.classList.add("lk-site")</script>'  # style.css: dims the controls until Python runs
 
     for number in notebooks:  # previous / next navigation, injected into each exported page
         page = SITE / f"Lecture_{number:02d}" / "index.html"
         html = re.sub(r'<nav class="bs-nav">.*?</nav>(<a class="bs-ask".*?</a>)?', "", page.read_text(encoding="utf-8"), flags=re.S)
         html = html.replace("</body>", nav_html(number, notebooks) + "</body>", 1)
         html = re.sub(r"<script data-goatcounter=.*?</script>", "", html, flags=re.S).replace("</head>", COUNTER + "</head>", 1)
+        if uses_lecturekit(notebooks[number]):
+            html = html.replace("</head>", style + site_class + "</head>", 1)
         page.write_text(html, encoding="utf-8")
 
     covered = {n for _, first, last in PARTS for n in range(first, last + 1)}

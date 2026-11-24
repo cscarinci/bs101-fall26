@@ -1,0 +1,410 @@
+<!doctype html><html><head><meta charset="utf-8">
+<script>
+/* KaTeX for the labels: the copy build.py puts next to the lectures (works offline), else the CDN (marimo edit). */
+(function load(bases) {
+  if (!bases.length) return;
+  var css = document.createElement("link"); css.rel = "stylesheet"; css.href = bases[0] + "katex.min.css";
+  var js = document.createElement("script"); js.src = bases[0] + "katex.min.js";
+  js.onload = function () { window.typeset && typeset(); };
+  js.onerror = function () { css.remove(); js.remove(); load(bases.slice(1)); };
+  document.head.append(css, js);
+})(["../katex/", "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/"]);
+</script>
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; overflow: hidden;
+               font-family: KaTeX_Main, "Latin Modern Roman", Georgia, serif; }
+  #o { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 16px; }
+  #g { position: relative; flex: 1 1 300px; min-width: 240px; max-width: var(--maxw); display: grid;
+       grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 6px 56px; touch-action: none; cursor: grab;
+       user-select: none; -webkit-user-select: none; }
+  @media (max-width: 520px) { #g { grid-template-columns: minmax(0, 1fr); } }
+  #g.drag { cursor: grabbing; }
+  .p { position: relative; }
+  .p canvas { display: block; width: 100%; }
+  .cap { text-align: center; font-size: 14px; }
+  .lab { position: absolute; left: 0; top: 0; white-space: nowrap; line-height: 1.1; pointer-events: none; font-size: 15px; }
+  .katex { font-size: 1em; }
+  #lg { flex: 0 0 auto; border: 1px solid #c8c8c8; border-radius: 4px; padding: 4px 10px; background: #fff; font-size: 14px; }
+  #lg:empty { display: none; }
+  .it { display: flex; align-items: center; gap: 8px; margin: 4px 0; white-space: nowrap; }
+  .it svg { flex: 0 0 24px; }
+  #hint { position: absolute; right: 0; bottom: 0; color: #888; opacity: 0.7; font: 15px Georgia, serif; }
+</style></head><body>
+<div id="o"><div id="g" role="img"><div id="hint">&#10227;</div></div><div id="lg"></div></div>
+<script>
+// the scene is not in this page but in an element of the notebook beside the frame (or, for a figure with a slider,
+// in the scene's own cell), which a slider changes: the page then redraws in place and the frame is never rebuilt
+const box = window.frameElement.closest(".bs3d"), P = window.parent.document;
+const find = () => box.querySelector("[data-scene]") || P.querySelector('[data-bs3d="' + window.frameElement.dataset.bs3d + '"][data-scene]');
+(function start() { const h = find(); if (h) main(h.dataset.scene); else setTimeout(start, 50); })();
+function main(shown) {
+  let S = JSON.parse(shown);
+  const RAD = Math.PI / 180, L = [0.3, -0.4, 0.87];
+  const lit = [247, 251, 255], dark = [201, 223, 244], lit2 = [219, 235, 251], dark2 = [163, 194, 230];
+  const rgb = (a, b, k) => "rgb(" + [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * k)).join(",") + ")";
+  const texs = [];
+  const tex = (el, t) => { el.dataset.tex = t; el.textContent = t.replace(/\\[a-z]+\{?|[{}$^_]/gi, ""); texs.push(el); };
+  const dot3 = (u, p) => u[0] * p[0] + u[1] * p[1] + u[2] * p[2];
+
+  class Scene {
+    constructor(spec, host) {
+      const ys = (this.ys = spec.ys);
+      this.box = document.createElement("div");
+      this.box.className = "p";
+      this.cv = document.createElement("canvas");
+      this.box.appendChild(this.cv);
+      this.g = this.cv.getContext("2d");
+      host.appendChild(this.box);
+      if (spec.caption) {
+        const c = document.createElement("div");
+        c.className = "cap";
+        tex(c, spec.caption);
+        this.box.appendChild(c);
+      }
+      const pts = (this.pts = []), quads = (this.quads = []), segs = (this.segs = []), spans = (this.spans = []);
+      this.dots = []; this.heads = []; this.labs = []; this.outl = spec.outlines || [];
+      const add = (x, y, z) => (pts.push(x, y, z), pts.length / 3 - 1);
+      for (const s of spec.surfaces) {
+        const base = pts.length / 3, n = s.n, m = s.m, id = (i, j) => base + i * m + j;
+        for (const v of s.v) pts.push(v);
+        const P = (k) => [pts[3 * k], pts[3 * k + 1], pts[3 * k + 2]];
+        // on a translucent surface the wire behind is drawn fainter than the wire in front (depth range of the surface)
+        const span = s.alpha < 1 ? { lo: base, hi: base + n * m } : null;
+        if (span) spans.push(span);
+        const inTint = (x1, x2) => s.tint && x1 > s.tint[0] && x1 <= s.tint[1] && x2 > s.tint[2] && x2 <= s.tint[3];
+        const sLit = s.tone ? s.tone.map((c) => Math.round(0.06 * c + 0.94 * 255)) : lit;
+        const sDark = s.tone ? s.tone.map((c) => Math.round(0.3 * c + 0.7 * 255)) : dark;
+        for (let i = 0; i < n - 1; i++) for (let j = 0; j < m - 1; j++) {
+          const q = [id(i, j), id(i + 1, j), id(i + 1, j + 1), id(i, j + 1)];
+          const v = q.map(P);
+          if (v.some((p) => p.some(isNaN))) continue;
+          const deep = inTint((v[0][0] + v[2][0]) / 2, (v[0][1] + v[2][1]) / 2);
+          let col = s.flat;
+          if (!col) {
+            const a = [0, 1, 2].map((t) => v[2][t] - v[0][t]), b = [0, 1, 2].map((t) => v[3][t] - v[1][t]);
+            const nn = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+            const len = Math.hypot(...nn) || 1;
+            const k = Math.min(1, Math.abs((nn[0] * L[0] + nn[1] * L[1] + nn[2] * L[2]) / len) / 1.0034);
+            col = deep ? rgb(dark2, lit2, k) : rgb(sDark, sLit, k);
+          }
+          quads.push([q, col, deep ? 1 : s.alpha]);
+        }
+        for (const [axis, every, c, lw] of s.wire || []) {
+          const rows = axis === 0 ? n : m, cols = axis === 0 ? m : n;
+          for (let r = 0; r < rows; r++) {
+            if (r % every !== 0 && r !== rows - 1) continue;
+            for (let t = 0; t < cols - 1; t++) {
+              const a = axis === 0 ? id(r, t) : id(t, r), b = axis === 0 ? id(r, t + 1) : id(t + 1, r);
+              const pa = P(a), pb = P(b);
+              if (pa.concat(pb).some(isNaN)) continue;
+              if (s.clear && inTint((pa[0] + pb[0]) / 2, (pa[1] + pb[1]) / 2)) continue;
+              segs.push({ a, b, c, lw, line: null, span });
+            }
+          }
+        }
+      }
+      this.lines = spec.lines.map((ln) => {
+        const idx = [];
+        for (let k = 0; k < ln.p.length; k += 3) idx.push(add(ln.p[k], ln.p[k + 1], ln.p[k + 2]));
+        const line = { idx, dash: ln.d, cum: new Float64Array(idx.length) };
+        for (let k = 0; k < idx.length - 1; k++)
+          if (![ln.p[3 * k], ln.p[3 * k + 3]].some(isNaN)) segs.push({ a: idx[k], b: idx[k + 1], c: ln.c, lw: ln.w, line, k, e: ln.e || 0, flat: ln.b });
+        return line;
+      });
+      for (const d of spec.points) this.dots.push({ i: add(...d.p), c: d.c, r: d.r, h: d.h });
+      for (const h of spec.heads) this.heads.push({ i: add(...h.p), j: add(...h.q), c: h.c, w: h.w, d: h.d });
+      // the centre of the scene and the radius of a ball holding it, heights at their drawing scale
+      let src = pts;
+      if (spec.box) {
+        src = [];
+        for (const p of [0, 1]) for (const q of [0, 1]) for (const t of [0, 1]) src.push(spec.box[0][p], spec.box[1][q], spec.box[2][t]);
+      }
+      const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+      for (let k = 0; k < src.length; k++) {
+        const t = k % 3, v = src[k] * (t === 2 ? ys : 1);
+        if (!isNaN(v)) { lo[t] = Math.min(lo[t], v); hi[t] = Math.max(hi[t], v); }
+      }
+      const C = [0, 1, 2].map((t) => (lo[t] + hi[t]) / 2);
+      let R = 0;
+      for (let k = 0; k < src.length; k += 3) {
+        const d = Math.hypot(src[k] - C[0], src[k + 1] - C[1], src[k + 2] * ys - C[2]);
+        if (!isNaN(d)) R = Math.max(R, d);
+      }
+      C[2] /= ys;
+      this.C = C;
+      this.R = R;
+      for (const l of spec.labels) {
+        const el = document.createElement("div");
+        el.className = "lab";
+        el.style.color = l.c;
+        tex(el, l.t);
+        this.box.appendChild(el);
+        this.labs.push({ el, i: add(...l.p), a: l.a * RAD, r: l.r });
+      }
+      const M = pts.length / 3;
+      this.X = new Float64Array(M); this.Y = new Float64Array(M); this.Z = new Float64Array(M);
+    }
+
+    size(W, H, R) {
+      this.W = W; this.H = H;
+      this.sc = 0.94 * Math.min(W, H) / (2 * R);
+      const dpr = window.devicePixelRatio || 1;
+      this.cv.width = Math.round(W * dpr);
+      this.cv.height = Math.round(H * dpr);
+      this.cv.style.height = H + "px";
+      this.g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    draw(az, el) {
+      const { g, pts, X, Y, Z, W, H, sc, ys } = this;
+      if (!W) return;
+      const a = az * RAD, e = el * RAD;
+      const r = [-Math.sin(a), Math.cos(a), 0];
+      const u = [-Math.sin(e) * Math.cos(a), -Math.sin(e) * Math.sin(a), Math.cos(e) * ys];
+      const d = [Math.cos(e) * Math.cos(a), Math.cos(e) * Math.sin(a), Math.sin(e) * ys];
+      const tx = W / 2 - dot3(r, this.C) * sc, ty = H / 2 + dot3(u, this.C) * sc;
+      for (let k = 0; k < X.length; k++) {
+        const x = pts[3 * k], y = pts[3 * k + 1], z = pts[3 * k + 2];
+        X[k] = (x * r[0] + y * r[1] + z * r[2]) * sc + tx;
+        Y[k] = ty - (x * u[0] + y * u[1] + z * u[2]) * sc;
+        Z[k] = x * d[0] + y * d[1] + z * d[2];
+      }
+      for (const ln of this.lines) {  // screen length along each line, so that dashes run on across segments
+        ln.cum[0] = 0;
+        for (let k = 1; k < ln.idx.length; k++) {
+          const p = ln.idx[k - 1], q = ln.idx[k];
+          ln.cum[k] = ln.cum[k - 1] + (isNaN(X[p] + X[q]) ? 0 : Math.hypot(X[q] - X[p], Y[q] - Y[p]));
+        }
+      }
+      const shells = [];  // translucent closed surfaces (round outline, as deep as wide): what is inside or behind them is faded
+      for (const sp of this.spans) {
+        let lo = Infinity, hi = -Infinity, xl = Infinity, xh = -Infinity, yl = Infinity, yh = -Infinity;
+        for (let k = sp.lo; k < sp.hi; k++) if (!isNaN(Z[k])) {
+          lo = Math.min(lo, Z[k]); hi = Math.max(hi, Z[k]);
+          xl = Math.min(xl, X[k]); xh = Math.max(xh, X[k]); yl = Math.min(yl, Y[k]); yh = Math.max(yh, Y[k]);
+        }
+        sp.zlo = lo; sp.zhi = hi;
+        const rx = (xh - xl) / 2, ry = (yh - yl) / 2, rz = (hi - lo) / 2;
+        if (rx > 0 && ry / rx > 0.8 && (rz * sc) / rx > 0.8) shells.push({ cx: (xl + xh) / 2, cy: (yl + yh) / 2, rx, ry, zc: (lo + hi) / 2, rz });
+      }
+      const fade = (x, y, z) => {  // 1 in front of every shell; down to 0.35 inside or behind one
+        let a = 1;
+        for (const h of shells) {
+          const r2 = ((x - h.cx) / h.rx) ** 2 + ((y - h.cy) / h.ry) ** 2;
+          if (r2 >= 1) continue;
+          const front = h.zc + h.rz * Math.sqrt(1 - r2);
+          const t = Math.min(1, Math.max(0, (front - z) / (0.15 * h.rz)));
+          a = Math.min(a, 1 - 0.65 * t);
+        }
+        return a;
+      };
+      const items = [], bias = S.bias;
+      for (const q of this.quads) items.push([(Z[q[0][0]] + Z[q[0][1]] + Z[q[0][2]] + Z[q[0][3]]) / 4, 0, q]);
+      for (const s of this.segs) items.push([(Z[s.a] + Z[s.b]) / 2 + bias + (s.e || 0), 1, s]);
+      for (const h of this.heads) items.push([Z[h.i] + bias, 2, h]);
+      for (const p of this.dots) items.push([Z[p.i] + 2 * bias, 3, p]);
+      // outlines of round surfaces as seen from this view: a sphere's rim circle,
+      // a vertical cylinder's two side lines; each cut into short segments drawn among the other items
+      const P = (p) => [(p[0] * r[0] + p[1] * r[1] + p[2] * r[2]) * sc + tx, ty - (p[0] * u[0] + p[1] * u[1] + p[2] * u[2]) * sc, p[0] * d[0] + p[1] * d[1] + p[2] * d[2]];
+      const R3 = [-Math.sin(a), Math.cos(a), 0], U3 = [-Math.sin(e) * Math.cos(a), -Math.sin(e) * Math.sin(a), Math.cos(e)];
+      for (const o of this.outl) {
+        if (o.k === "sphere") {
+          const c = o.p, z = P(c)[2] + o.r + bias;
+          for (let k = 0; k < 96; k++) {
+            const t0 = (k / 96) * 2 * Math.PI, t1 = ((k + 1) / 96) * 2 * Math.PI;
+            const p0 = P(c.map((v, i) => v + o.r * (Math.cos(t0) * R3[i] + Math.sin(t0) * U3[i]))), p1 = P(c.map((v, i) => v + o.r * (Math.cos(t1) * R3[i] + Math.sin(t1) * U3[i])));
+            items.push([z, 4, [p0[0], p0[1], p1[0], p1[1], o.c, o.w]]);
+          }
+        } else if (o.k === "cone") {
+          // a vertical double cone of slope 1 (light cone): its side lines as seen from this view
+          const te = Math.tan(e);
+          for (const [up, cs] of [[1, te], [-1, -te]]) {
+            if (Math.abs(cs) >= 1) continue;
+            for (const sg of [-1, 1]) {
+              const al = a + sg * Math.acos(cs), B = [o.p[0] + o.h * Math.cos(al), o.p[1] + o.h * Math.sin(al), o.p[2] + up * o.h];
+              for (let k = 0; k < 16; k++) {
+                const p0 = P(o.p.map((v, i) => v + (B[i] - v) * k / 16)), p1 = P(o.p.map((v, i) => v + (B[i] - v) * (k + 1) / 16));
+                items.push([(p0[2] + p1[2]) / 2 + bias + 0.02, 4, [p0[0], p0[1], p1[0], p1[1], o.c, o.w]]);
+              }
+            }
+          }
+        } else if (o.k === "cylinder") {
+          for (const sg of [-1, 1]) {
+            const x = o.p[0] + sg * o.r * R3[0], y = o.p[1] + sg * o.r * R3[1];
+            for (let k = 0; k < 16; k++) {
+              const p0 = P([x, y, o.z[0] + ((o.z[1] - o.z[0]) * k) / 16]), p1 = P([x, y, o.z[0] + ((o.z[1] - o.z[0]) * (k + 1)) / 16]);
+              items.push([(p0[2] + p1[2]) / 2 + bias + 0.02, 4, [p0[0], p0[1], p1[0], p1[1], o.c, o.w]]);
+            }
+          }
+        }
+      }
+      items.sort((p, q) => p[0] - q[0]);
+      g.clearRect(0, 0, W, H);
+      g.lineJoin = "round";
+      for (let n = 0; n < items.length; n++) {
+        const [, kind, o] = items[n];
+        if (kind === 0) {
+          const q = o[0];
+          g.beginPath();
+          g.moveTo(X[q[0]], Y[q[0]]);
+          for (let t = 1; t < 4; t++) g.lineTo(X[q[t]], Y[q[t]]);
+          g.closePath();
+          g.fillStyle = g.strokeStyle = o[1];
+          g.globalAlpha = o[2];
+          g.fill();
+          if (o[2] === 1) { g.lineWidth = 0.6; g.setLineDash([]); g.stroke(); }
+          g.globalAlpha = 1;
+        } else if (kind === 1) {
+          if (o.done) { o.done = false; continue; }
+          let p0 = o, p1 = o;
+          if (o.flat) {  // the pieces of a straight line up to the next surface go in one stroke, so no seams show
+            let grew = true;
+            while (grew) {
+              grew = false;
+              for (let m = n + 1; m < items.length && items[m][1] !== 0; m++) {
+                const q = items[m][2];
+                if (items[m][1] !== 1 || q.line !== o.line || q.done) continue;
+                if (q.k === p1.k + 1) { p1 = q; q.done = true; grew = true; }
+                else if (q.k === p0.k - 1) { p0 = q; q.done = true; grew = true; }
+              }
+            }
+          }
+          g.beginPath();
+          g.moveTo(X[p0.a], Y[p0.a]);
+          g.lineTo(X[p1.b], Y[p1.b]);
+          g.strokeStyle = o.c;
+          g.lineWidth = o.lw;
+          const dash = o.line && o.line.dash;
+          g.lineCap = dash || o.flat ? "butt" : "round";
+          g.setLineDash(dash || []);
+          g.lineDashOffset = dash ? -o.line.cum[p0.k] : 0;
+          if (o.span) {  // back (far) half faint, front half full, a smooth step between
+            const u = Math.min(1, Math.max(0, (((Z[o.a] + Z[o.b]) / 2 - o.span.zlo) / ((o.span.zhi - o.span.zlo) || 1) - 0.35) / 0.3));
+            g.globalAlpha = 0.2 + 0.8 * u * u * (3 - 2 * u);
+          } else if (shells.length) {
+            g.globalAlpha = fade((X[p0.a] + X[p1.b]) / 2, (Y[p0.a] + Y[p1.b]) / 2, (Z[p0.a] + Z[p1.b]) / 2);
+          }
+          g.stroke();
+          g.globalAlpha = 1;
+        } else if (kind === 2) {
+          let vx = X[o.i] - X[o.j], vy = Y[o.i] - Y[o.j];
+          const len = Math.hypot(vx, vy) || 1;
+          vx /= len; vy /= len;
+          const hl = 4.5 * o.w, hw = 2 * o.w, bx = X[o.i] - hl * vx, by = Y[o.i] - hl * vy;  // open head, as on the page
+          g.strokeStyle = o.c;
+          g.lineWidth = o.w;
+          g.setLineDash([]);
+          g.lineCap = "round";
+          if (shells.length) g.globalAlpha = fade(X[o.i], Y[o.i], Z[o.i]);
+          if (!o.d) { g.beginPath(); g.moveTo(X[o.j], Y[o.j]); g.lineTo(X[o.i], Y[o.i]); g.stroke(); }
+          g.beginPath();
+          g.moveTo(bx - hw * vy, by + hw * vx);
+          g.lineTo(X[o.i], Y[o.i]);
+          g.lineTo(bx + hw * vy, by - hw * vx);
+          g.stroke();
+        } else if (kind === 4) {
+          g.beginPath();
+          g.moveTo(o[0], o[1]);
+          g.lineTo(o[2], o[3]);
+          g.strokeStyle = o[4];
+          g.lineWidth = o[5];
+          g.setLineDash([]);
+          g.lineCap = "round";
+          g.stroke();
+        } else {
+          if (shells.length) g.globalAlpha = fade(X[o.i], Y[o.i], Z[o.i]);
+          g.beginPath();
+          g.arc(X[o.i], Y[o.i], o.r, 0, 2 * Math.PI);
+          g.setLineDash([]);
+          g.fillStyle = o.h ? "#fff" : o.c;
+          g.fill();
+          g.strokeStyle = o.h ? o.c : "#fff";
+          g.lineWidth = o.h ? 1.5 : 1;
+          g.stroke();
+        }
+        g.globalAlpha = 1;
+      }
+      for (const l of this.labs) {  // beside its point, on the side given by its direction
+        const c = Math.cos(l.a), s = Math.sin(l.a);
+        const hx = c > 0.35 ? 0 : c < -0.35 ? -100 : -50, vy = s > 0.35 ? -100 : s < -0.35 ? 0 : -50;
+        l.el.style.transform = `translate(${X[l.i] + l.r * c}px, ${Y[l.i] - l.r * s}px) translate(${hx}%, ${vy}%)`;
+      }
+    }
+  }
+
+  const grid = document.getElementById("g"), out = document.getElementById("o");
+  const lg = document.getElementById("lg");
+  let scenes = [], Rmax = 0;
+  function build() {  // the drawings and the legend of the scene S
+    for (const s of scenes) s.box.remove();
+    texs.length = 0;
+    lg.replaceChildren();
+    grid.style.setProperty("--maxw", S.maxw + "px");
+    grid.style.setProperty("--cols", S.cols);
+    grid.setAttribute("aria-label", S.alt);
+    window.frameElement.title = S.alt;
+    scenes = S.panels.map((p) => new Scene(p, grid));
+    Rmax = Math.max(...scenes.map((s) => s.R));
+    for (const e of S.legend) {
+      const it = document.createElement("div"), t = document.createElement("span");
+      it.className = "it";
+      const dash = e.d ? ` stroke-dasharray="${e.d.join(" ")}"` : "";
+      it.innerHTML = {
+        dot: `<svg width="24" height="14"><circle cx="12" cy="7" r="4.2" fill="${e.c}"/></svg>`,
+        ring: `<svg width="24" height="14"><circle cx="12" cy="7" r="3.8" fill="#fff" stroke="${e.c}" stroke-width="1.5"/></svg>`,
+        line: `<svg width="24" height="14"><line x1="1" y1="7" x2="23" y2="7" stroke="${e.c}" stroke-width="${e.w || 2}"${dash}/></svg>`,
+        area: `<svg width="24" height="14"><rect x="2" y="1.5" width="20" height="11" fill="${e.c}" fill-opacity="${e.o || 1}" stroke="${e.e || e.c}" stroke-width="1.2"/></svg>`,
+      }[e.k];
+      tex(t, e.t);
+      it.appendChild(t);
+      lg.appendChild(it);
+    }
+  }
+  build();
+
+  // the view, shared by all panels and kept by the page when a slider redraws the figure
+  let store = {};
+  try { store = window.parent.__bs3d || (window.parent.__bs3d = {}); } catch (e) {}
+  let view = S.key && store[S.key] ? { ...store[S.key] } : { az: S.az, el: S.el };
+  const keep = () => { if (S.key) store[S.key] = { ...view }; };
+
+  function fit() {  // square-ish canvases holding their balls, so that the scale never changes while turning
+    for (const s of scenes) {
+      const W = s.box.clientWidth;
+      s.size(W, Math.min(S.h, W), (S.shared ? Rmax : s.R) / (S.zoom || 1));
+    }
+    if (window.frameElement) window.frameElement.style.height = out.offsetHeight + "px";
+  }
+  const draw = () => { for (const s of scenes) s.draw(view.az, view.el); };
+  window.typeset = () => {
+    for (const el of texs) try { katex.render(el.dataset.tex, el, { throwOnError: false }); } catch (e) {}
+    fit();
+    draw();
+  };
+
+  let pending = false;
+  const redraw = () => { if (!pending) { pending = true; requestAnimationFrame(() => { pending = false; draw(); }); } };
+  let grab = null;
+  grid.addEventListener("pointerdown", (e) => { grab = { x: e.clientX, y: e.clientY, ...view }; grid.setPointerCapture(e.pointerId); grid.classList.add("drag"); });
+  grid.addEventListener("pointermove", (e) => {
+    if (!grab) return;
+    view = { az: grab.az - (e.clientX - grab.x) * 0.45, el: Math.max(-89, Math.min(89, grab.el + (e.clientY - grab.y) * 0.45)) };
+    keep();
+    redraw();
+  });
+  const drop = () => { grab = null; grid.classList.remove("drag"); };
+  grid.addEventListener("pointerup", drop);
+  grid.addEventListener("pointercancel", drop);
+  grid.addEventListener("dblclick", () => { view = { az: S.az, el: S.el }; if (S.key) delete store[S.key]; redraw(); });
+  new ResizeObserver(() => { fit(); draw(); }).observe(out);
+  if (window.katex) window.typeset();
+  new MutationObserver(() => {
+    const h = find();
+    if (!h || h.dataset.scene === shown) return;
+    shown = h.dataset.scene;
+    S = JSON.parse(shown);
+    build();
+    if (window.katex) window.typeset(); else { fit(); draw(); }
+  }).observe(box.querySelector("[data-scene]") ? box : P.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["data-scene", "data-data"] });
+}
+</script></body></html>
