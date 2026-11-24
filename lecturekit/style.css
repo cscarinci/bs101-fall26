@@ -122,7 +122,7 @@ details.lk-block:not([open]) { min-height: 1.9em; }
 .lk-frame { font-family: var(--lk-font); position: relative; padding: 0.3rem 0 0.3rem 0.9rem; margin: 0.2rem 0 1rem;
   border-left: 2px solid var(--lk-rule); }
 .lk-under { margin-left: var(--lk-step); }
-.lk-frame-head { font-weight: 700; color: var(--lk-muted); font-size: 0.95rem; }
+.lk-frame-head { font-weight: 700; color: var(--lk-muted); font-size: var(--lk-size); }
 /* references: one line, the name in the left margin level with it, set apart from the goals above */
 .lk-refs { display: flex; align-items: baseline; margin-top: 1.6rem; }
 .lk-refs > .lk-frame-head { flex: 0 0 calc(var(--lk-gutter) + 0.8rem + 1px); }
@@ -191,7 +191,7 @@ details.lk-block:not([open]) { min-height: 1.9em; }
 @media (min-width: 1280px) {  /* a comment that fits on one line stays on one line, past the comment column if needed */
   .lk-aside-note:not(.lk-note-lines), .lk-gloss-note { width: max-content; max-width: min(24rem, calc(50vw - 25.25rem)); }
 }
-.lk-prose .paragraph, .lk-block .paragraph { text-wrap: balance; }  /* a wrapped paragraph: lines of about equal length, no short last line */
+.lk-prose .paragraph, .lk-block .paragraph { text-wrap: wrap; }  /* a wrapped paragraph fills each line to the edge, as in a book; a short last line is fixed in the wording */
 .lk-aside-note .markdown, .lk-aside-note .paragraph, .lk-gloss-note .markdown, .lk-gloss-note .paragraph,
 .markdown .lk-aside-note .paragraph, .markdown .lk-gloss-note .paragraph { font-size: 0.95rem !important; line-height: 1.3 !important; }
 .lk-aside-note .lk-chain { font-style: italic; }
