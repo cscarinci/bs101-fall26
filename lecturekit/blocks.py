@@ -171,14 +171,8 @@ class Block:
         if self.cls == "argument" and isinstance(parts[-1], _Aside) and isinstance(parts[-1].content, str) and parts[-1].content.rstrip().endswith("$$"):
             # the argument ends with a display that has a margin comment: the end mark sits at the right end of the
             # display's line, never in the comment column
-            a = parts[-1]
-            if r"\square" not in a.content:
-                c = a.content.rstrip()
-                k = c.rfind(r"\end{aligned}")
-                if k >= 0:  # a display of several lines: the end mark goes at the end of its last line, not its middle
-                    a.content = c[:k] + r" \qquad \square" + "\n" + c[k:]
-                else:
-                    a.content = c[:-2] + r" \qquad \square$$"
+            if r"\square" not in parts[-1].content:
+                return self._titled(_end_mark(as_html_all(parts), aside=True))
             return self._titled(as_html_all(parts))
         if self.cls == "argument" and isinstance(parts[-1], str) and parts[-1].rstrip().endswith("$$"):
             # the argument ends with a display: the end mark sits at the right end of the display's line
@@ -265,10 +259,11 @@ def _paragraph_end(html_text):
     return -1
 
 
-def _end_mark(body):
-    """Put the end mark □ in the last display of `body`, at its right edge, level with its last line."""
+def _end_mark(body, aside=False):
+    """Put the end mark □ in the last display of `body`, at its right edge, level with its last line.
+    `aside`: the display has a margin comment after it, so the mark goes inside the display, not after the comment."""
     k = body.rfind('<div class="lk-display">')
-    end = body.rfind("</div>")
+    end = body.find("</div>", k) if aside else body.rfind("</div>")
     if k < 0 or end < k:
         return body + '<span class="lk-qed">&#9633;</span>'
     return body[:end] + '<span class="lk-qed lk-qed-end">&#9633;</span>' + body[end:]
