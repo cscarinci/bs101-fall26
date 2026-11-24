@@ -598,9 +598,10 @@ def _(Figure, b_level, lk, mo, np):
 def _(lk):
     # module: quadratic surfaces
     # definition: affine and quadratic scalar functions
-    lk.definition(
-        [
-            r"""
+    lk.module(
+        lk.definition(
+            [
+                r"""
             For $p : \mathbb{R}^3 \longrightarrow \mathbb{R}$ an **affine scalar function**
 
             $$
@@ -611,7 +612,10 @@ def _(lk):
                 r"> $p^{-1}(r)$ is a <span class='lk-mark'>plane in $\mathbb{R}^3$</span>",
                 r"starting point $\begin{bmatrix} {\large\tfrac{r - d}{a}} \\ 0 \\ 0 \end{bmatrix}$ if $a \neq 0$<br>normal vector $\begin{bmatrix} a \\ b \\ c \end{bmatrix}$",
             ),
-            lk.gap(),
+            ],
+            label="def-affine",
+        ),
+        lk.definition(
             r"""
             For $q : \mathbb{R}^3 \longrightarrow \mathbb{R}$ a **quadratic scalar function**
 
@@ -625,7 +629,11 @@ def _(lk):
             $$
 
             > $q^{-1}(r)$ is called a **quadratic surface**
-
+            """,
+            label="def-quadratic-surface",
+        ),
+        lk.example(
+            r"""
             $$
             \begin{array}{lll}
             \bullet & \dfrac{(x^1)^2}{a^2} + \dfrac{(x^2)^2}{b^2} + \dfrac{(x^3)^2}{c^2} = r^2 & \quad \text{ellipsoids}\\[14pt]
@@ -635,8 +643,8 @@ def _(lk):
             \end{array}
             $$
             """,
-        ],
-        label="def-affine-quadratic",
+            label="ex-quadrics",
+        ),
     )
     return
 

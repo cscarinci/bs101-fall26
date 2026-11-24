@@ -344,22 +344,30 @@ def _(Figure, a_taylor, lk, math, np):
     _xe = min(2.4, _a - 1 + 5.2 / _fa)  # where the tangent line leaves the picture: its right end, or the top
     _ax.text(_xe + 0.08, min(_fa + _fa * (_xe - _a), 4.75), "$y = f(a)$\n$\\;\\; + f'(a)(x - a)$", color=lk.GREEN, fontsize=12, ha="left", va="center")
     _ax.set_ylim(-0.85, 5.3)
-    lk.definition(
-        [
-            r"""
+    lk.module(
+        lk.definition(
+            [
+                r"""
             $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ $C^2$-smooth at $\vec{x} = \vec{a}$
 
             $$
             f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) + \frac{1}{2} (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})
             $$
             """,
-            lk.aside(
-                r"is the <span class='lk-mark'>**quadratic approximation**</span> of $f$ at $\vec{a}$",
-                "2nd order Taylor approximation",
-            ),
-            lk.interactive(_fig, controls=[a_taylor]),
-        ],
-        label="def-quadratic",
+                lk.aside(
+                    r"is the <span class='lk-mark'>**quadratic approximation**</span> of $f$ at $\vec{a}$",
+                    "2nd order Taylor approximation",
+                ),
+            ],
+            label="def-quadratic",
+        ),
+        lk.example(
+            [
+                r"$n = 1$, &nbsp; $f(x) = e^x$",
+                lk.interactive(_fig, controls=[a_taylor]),
+            ],
+            label="ex-quadratic-exp",
+        ),
     )
     return
 

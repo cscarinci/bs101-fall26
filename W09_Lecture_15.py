@@ -90,7 +90,7 @@ def _(lk):
         ),
         lk.aside(
             r"> • &nbsp; if $Hf(\vec{a})$ is <span class='lk-mark'>degenerate</span>, we <span class='lk-mark'>need more info</span>",
-            r"$\det Hf(\vec{a}) = 0$<br>could be local max, local min, or saddle…",
+            r"$\det Hf(\vec{a}) = 0$",
         ),
         title="Last time",
     )
@@ -148,17 +148,14 @@ def _(lk):
             > > $\Longleftrightarrow$ &nbsp; $x^2 = 0$, &nbsp; $x^1 \in \{ -1, 0, 1 \}$
 
             > $Hf(\vec{x}) = \begin{bmatrix} \big( 4(x^1)^4 - 10(x^1)^2 + 2 \big) e^{-(x^1)^2} & 0 \\ 0 & 2 \end{bmatrix}$
-
-            > at $\vec{a} = \begin{bmatrix} -1 \\ 0 \end{bmatrix}$ and $\vec{b} = \begin{bmatrix} 1 \\ 0 \end{bmatrix}$
             """,
             lk.aside(
-                r"> > $Hf(\vec{a}) = Hf(\vec{b}) = \begin{bmatrix} -4e^{-1} & 0 \\ 0 & 2 \end{bmatrix}$",
-                r"indefinite<br>$\Longrightarrow$ saddle",
+                r"> at $\vec{a} = \begin{bmatrix} -1 \\ 0 \end{bmatrix}$ and $\vec{b} = \begin{bmatrix} 1 \\ 0 \end{bmatrix}$: &nbsp; $Hf(\vec{a}) = Hf(\vec{b}) = \begin{bmatrix} -4e^{-1} & 0 \\ 0 & 2 \end{bmatrix}$",
+                r"indefinite $\Longrightarrow$ saddle",
             ),
-            r"> at $\vec{0} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$",
             lk.aside(
-                r"> > $Hf(\vec{0}) = \begin{bmatrix} 2 & 0 \\ 0 & 2 \end{bmatrix}$",
-                r"positive definite<br>$\Longrightarrow$ minimum",
+                r"> at $\vec{0} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$: &nbsp; $Hf(\vec{0}) = \begin{bmatrix} 2 & 0 \\ 0 & 2 \end{bmatrix}$",
+                r"positive definite $\Longrightarrow$ minimum",
             ),
             r"""
             $\leadsto$ &nbsp; global minimum: &nbsp; $f(\vec{0}) = 0 < f(\vec{x}) \quad \forall \, \vec{x} \neq \vec{0}$
@@ -391,8 +388,8 @@ def _(BOX, Figure, cross_axes, lk, np):
     _right.text(-0.06, _b, "$b$", ha="right", va="bottom", fontsize=12, bbox=BOX)
     _right.text(-2.0, (_a + _b) / 2 - 0.08, "$D$", color=lk.BLUE, fontsize=13, ha="center", va="center")
     _right.text(_r * np.cos(-0.7) + 0.05, _r * np.sin(-0.7) - 0.05, r"$B(\vec{0}, r)$", color=lk.RED, fontsize=12, ha="left", va="top")
-    lk.definition(
-        [
+    lk.module(
+        lk.definition(
             r"""
             $D \subseteq \mathbb{R}^2$ is called **bounded** if “we cannot take its points to infinity”
 
@@ -402,15 +399,19 @@ def _(BOX, Figure, cross_axes, lk, np):
 
             $D \subseteq \mathbb{R}^2$ is **unbounded** if it cannot be contained in any ball of finite radius
             """,
-            lk.gap(),
-            r"""
+            label="def-bounded",
+        ),
+        lk.example(
+            [
+                r"""
             $D = \{ 0 \leqslant x^1 \leqslant a, \ 0 \leqslant x^2 \leqslant b \}$ is bounded: &nbsp; $B(\vec{0}, r) \supseteq D$ for $r^2 > a^2 + b^2$
 
             $D = \{ -\infty < x^1 < +\infty, \ a \leqslant x^2 \leqslant b \}$ is unbounded
             """,
-            lk.figure(_fig),
-        ],
-        label="def-bounded",
+                lk.figure(_fig),
+            ],
+            label="ex-bounded",
+        ),
     )
     return
 
@@ -457,37 +458,41 @@ def _(Figure, bp1, bp2, br, cross_axes, lk, math, np, tip_label):
     _ax.plot(*_p, "o", color="black", ms=4, zorder=7)
     tip_label(_ax, (_p[0] + _r * math.sqrt(0.5), _p[1] + _r * math.sqrt(0.5)), 45, r"$B(\vec{p}, r)$", lk.RED, r=2, fontsize=12)
     tip_label(_ax, _p, 225, r"$\vec{p}$", "black", r=3, fontsize=12)
-    lk.definition(
-        [
+    lk.module(
+        lk.definition(
             r"""
             Given $D \subseteq \mathbb{R}^2$, the **boundary** of $D$ is the set $\mathrm{Bd}(D)$ of points $\vec{a} \in \mathbb{R}^2$ such that
 
             > any ball centered at $\vec{a}$ contains both points in $D$ *and* points not in $D$
             """,
-            lk.gap(),
-            r"""
-            $D = \{ -\infty < x^1 < +\infty, \ a \leqslant x^2 \leqslant b \}$
+            label="def-boundary",
+        ),
+        lk.example(
+            [
+                r"""
+                $D = \{ -\infty < x^1 < +\infty, \ a \leqslant x^2 \leqslant b \}$
 
-            > $\Longrightarrow$ &nbsp; $\mathrm{Bd}(D) = \{ x^2 = a \} \cup \{ x^2 = b \}$
+                > $\Longrightarrow$ &nbsp; $\mathrm{Bd}(D) = \{ x^2 = a \} \cup \{ x^2 = b \}$
 
-            $D = \{ x^1 \geqslant 0, \ x^2 \geqslant 0, \ (x^1)^2 + (x^2)^2 < 1 \}$
+                $D = \{ x^1 \geqslant 0, \ x^2 \geqslant 0, \ (x^1)^2 + (x^2)^2 < 1 \}$
 
-            > $\Longrightarrow$ &nbsp; $\mathrm{Bd}(D) = \{ x^1 \geqslant 0, \ x^2 \geqslant 0, \ (x^1)^2 + (x^2)^2 = 1 \} \cup \{ 0 \leqslant x^1 \leqslant 1, \ x^2 = 0 \} \cup \{ x^1 = 0, \ 0 \leqslant x^2 \leqslant 1 \}$
-            """,
-            lk.interactive(
-                _fig,
-                controls=[bp1, bp2, br],
-                readout=lk.table(
-                    [
-                        (r"$B(\vec{p}, r)$ contains points in $D$", _yes(_meets_D)),
-                        (r"$B(\vec{p}, r)$ contains points not in $D$", _yes(_meets_out)),
-                        (r"$\vec{p} \in D$", _yes(_in_D)),
-                        (r"$\vec{p} \in \mathrm{Bd}(D)$", _yes(_on_Bd)),
-                    ]
+                > $\Longrightarrow$ &nbsp; $\mathrm{Bd}(D) = \{ x^1 \geqslant 0, \ x^2 \geqslant 0, \ (x^1)^2 + (x^2)^2 = 1 \} \cup \{ 0 \leqslant x^1 \leqslant 1, \ x^2 = 0 \} \cup \{ x^1 = 0, \ 0 \leqslant x^2 \leqslant 1 \}$
+                """,
+                lk.interactive(
+                    _fig,
+                    controls=[bp1, bp2, br],
+                    readout=lk.table(
+                        [
+                            (r"$B(\vec{p}, r)$ contains points in $D$", _yes(_meets_D)),
+                            (r"$B(\vec{p}, r)$ contains points not in $D$", _yes(_meets_out)),
+                            (r"$\vec{p} \in D$", _yes(_in_D)),
+                            (r"$\vec{p} \in \mathrm{Bd}(D)$", _yes(_on_Bd)),
+                        ]
+                    ),
                 ),
-            ),
-        ],
-        label="def-boundary",
+            ],
+            label="ex-boundary",
+        ),
     )
     return
 
@@ -522,20 +527,24 @@ def _(BOX, Figure, cross_axes, lk, np):
     _t = np.linspace(0, 2 * np.pi, 120)
     _panels[0].fill(_a + 0.16 * np.cos(_t), _c + 0.16 * np.sin(_t), color=lk.RED, alpha=0.12, lw=0, zorder=2)
     _panels[0].plot(_a + 0.16 * np.cos(_t), _c + 0.16 * np.sin(_t), color=lk.RED, lw=1.0, zorder=2)
-    lk.definition(
-        [
+    lk.module(
+        lk.definition(
             r"A set $D \subseteq \mathbb{R}^2$ is called **closed** if it contains all of its boundary &nbsp; $\mathrm{Bd}(D) \subset D$",
-            lk.gap(),
-            r"""
+            label="def-closed",
+        ),
+        lk.example(
+            [
+                r"""
             $D = \{ a < x^1 < b, \ c < x^2 < d \}$ is not closed!
 
             > $\begin{bmatrix} a \\ c \end{bmatrix} \in \mathrm{Bd}(D)$, but $\begin{bmatrix} a \\ c \end{bmatrix} \notin D$ &nbsp; (one missing point is enough!)
 
             $D = \{ a \leqslant x^1 \leqslant b, \ c \leqslant x^2 \leqslant d \}$ is closed!
             """,
-            lk.figure(_fig),
-        ],
-        label="def-closed",
+                lk.figure(_fig),
+            ],
+            label="ex-closed",
+        ),
     )
     return
 
@@ -557,7 +566,7 @@ def _(lk):
 def _(lk):
     # module: existence
     # prose: might not admit
-    lk.prose(r"$\leadsto$ &nbsp; functions defined on unbounded domains or on non-closed domains<br>might not admit any global extrema!")
+    lk.prose(r"$\leadsto$ &nbsp; functions defined on unbounded domains or on non-closed domains might not admit any global extrema!")
     return
 
 
@@ -624,7 +633,7 @@ def _(lk):
         lk.aside(r"> > > $f(\vec{x}) \leqslant f(\vec{a}) \quad \forall \, \vec{x} \in B(\vec{a}, r)$", r"$\vec{a}$ is local maximum"),
         r"> > or",
         lk.aside(r"> > > $f(\vec{x}) \geqslant f(\vec{a}) \quad \forall \, \vec{x} \in B(\vec{a}, r)$", r"$\vec{a}$ is local minimum"),
-        r"$\Longrightarrow$ &nbsp; for differentiable functions defined over closed and bounded domains<br>we get a well-defined strategy to find global extrema!",
+        r"$\Longrightarrow$ &nbsp; for differentiable functions defined over closed and bounded domains we get a well-defined strategy to find global extrema!",
     )
     return
 
@@ -645,7 +654,7 @@ def _(lk):
         lk.aside(r"1\. &nbsp; find critical points on the <span class='lk-mark'>interior</span> $D - \mathrm{Bd}(D)$", "not on the boundary"),
         lk.aside(
             r"2\. &nbsp; find <span class='lk-mark'>global extrema in $\mathrm{Bd}(D)$</span>",
-            r"optimization problem in lower dimension<br>$\Longrightarrow$ easier once we have<br><span class='lk-ghost'>$\Longrightarrow$ </span>a parameterization of the boundary",
+            r"optimization problem in lower dimension<br>$\Longrightarrow$ easier once the boundary is parameterized",
         ),
         r"3\. &nbsp; compare the values of all candidate points",
     )
@@ -762,7 +771,7 @@ def _(BOX, Figure, cross_axes, lk, math, np, st, tip_label):
             "1\\. &nbsp; Critical points in $D - \\mathrm{Bd}(D)$",
             lk.aside(
                 r"> $\vec{\nabla} f(\vec{x}) = \begin{bmatrix} 2x^1 - 2 \\ 2x^2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$ &nbsp; $\Longleftrightarrow$ &nbsp; $\begin{bmatrix} x^1 \\ x^2 \end{bmatrix} = \begin{bmatrix} 1 \\ 0 \end{bmatrix} = \mk{\vec{a}}$",
-                "interior candidate<br>for global extremum",
+                "interior candidate for global extremum",
             ),
             lk.gap(),
             r"""
