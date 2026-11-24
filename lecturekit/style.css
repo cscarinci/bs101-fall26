@@ -57,6 +57,7 @@
 .katex { font-size: 1em !important; white-space: nowrap; }
 .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.1rem 0.5em 0.5em; }
 .lk-body .paragraph, .lk-prose .paragraph { margin: 0.35em 0; }
+.lk-body .markdown .paragraph, .lk-prose .markdown .paragraph { margin: 0.3em 0; }  /* space between steps (lines), more than between the wrapped lines of one step */
 /* every outer piece of the page ends at the right edge of the text column, so every line (indented or not, in a block,
    a frame or plain text) ends there, and every comment starts at the same place right of it */
 :is(.lk-block, .lk-frame, .lk-prose, .lk-prose-group, .lk-module):not(:is(.lk-block, .lk-frame, .lk-prose, .lk-prose-group, .lk-module, .lk-asides, .lk-side, .lk-maps, .lk-figure) *) {
@@ -228,6 +229,10 @@ details.lk-block:not([open]) { min-height: 1.9em; }
 .lk-figure figcaption .paragraph { display: inline; }
 .lk-controls { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 0.6rem 2.2rem; margin: 0.3rem 0 0.2rem; }
 .lk-controls .lk-table .markdown table { margin: 0; }
+.lk-controls-rows { flex-direction: column; gap: 0.3rem; }
+.lk-controls-row { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 0.3rem 2.2rem; }
+.lk-columns { display: flex; justify-content: center; align-items: flex-start; flex-wrap: wrap; gap: 1rem 3rem; }
+.lk-column { display: flex; flex-direction: column; align-items: center; }
 
 /* two columns: a line of text on the left, the formula it introduces on the right */
 .lk-side { display: flex; flex-wrap: wrap; gap: 0 0.4rem; align-items: center; }  /* formula right after its line, not in a far column */

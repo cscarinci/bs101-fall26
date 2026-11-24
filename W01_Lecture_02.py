@@ -240,7 +240,7 @@ def _(angle, lk, plane, vector, x, x1, x2, y, y1, y2):
     vector(_ax, (0, 0), tuple(y), lk.RED, r"$\vec{y}$", away=tuple(x))
     if x.any() and y.any():
         angle(_ax, x, y, 0.8)
-    lk.prose(lk.interactive(_fig, controls=[x1, x2, y1, y2]))
+    lk.prose(lk.interactive(_fig, controls=[(x1, x2), (y1, y2)]))
     return
 
 
@@ -330,8 +330,12 @@ def _(lk):
             r"> ii) &nbsp; $\lVert t\vec{x} + \vec{y} \rVert^2 = (t\vec{x} + \vec{y}) \cdot (t\vec{x} + \vec{y})$",
             r"> " + _g + r" $= t^2 \, \vec{x} \cdot \vec{x} + t \, \vec{x} \cdot \vec{y} + t \, \vec{y} \cdot \vec{x} + \vec{y} \cdot \vec{y}$",
             lk.aside(r"> " + _g + r" $= \mk{t^2 \lVert \vec{x} \rVert^2 + 2t \, \vec{x} \cdot \vec{y} + \lVert \vec{y} \rVert^2}$", r"quadratic polynomial in $t$"),
-            r"> $\Longrightarrow$ &nbsp; $t^2 \lVert \vec{x} \rVert^2 + 2t \, (\vec{x} \cdot \vec{y}) + \lVert \vec{y} \rVert^2 \geq 0$, &nbsp; with “$=$” iff $\vec{x}, \vec{y}$ are proportional",
-            r"> $\Longrightarrow$ &nbsp; discriminant: &nbsp; $\big( 2 (\vec{x} \cdot \vec{y}) \big)^2 - 4 \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2 \leq 0$, &nbsp; with “$=$” iff $\vec{x}, \vec{y}$ are proportional",
+            r"> > $\Longrightarrow$ &nbsp; $t^2 \lVert \vec{x} \rVert^2 + 2t \, (\vec{x} \cdot \vec{y}) + \lVert \vec{y} \rVert^2 \geq 0$",
+            r"> > > $\Longrightarrow$ &nbsp; discriminant: &nbsp; $\big( 2 (\vec{x} \cdot \vec{y}) \big)^2 - 4 \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2 \leq 0$",
+            lk.aside(
+                r"> > > > $\Longleftrightarrow$ &nbsp; $(\vec{x} \cdot \vec{y})^2 \leq \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2$",
+                r"“$=$” iff $\vec{x}, \vec{y}$ proportional",
+            ),
         ]
     )
     return
@@ -359,7 +363,7 @@ def _(Figure, lk, np, x, x1, x2, y, y1, y2):
     _ax.set_ylabel(r"$\Vert t\vec{x} + \vec{y} \Vert^2$")  # mathtext has no \lVert
     for _s in ("top", "right"):
         _ax.spines[_s].set_visible(False)
-    lk.prose(lk.interactive(_fig, controls=[x1, x2, y1, y2]))
+    lk.prose(lk.interactive(_fig, controls=[(x1, x2), (y1, y2)]))
     return
 
 
@@ -397,7 +401,7 @@ def _(lk, np, plane, vector, x, x1, x2, y, y1, y2):
                      ha="left" if _n[0] > 0.3 else "right" if _n[0] < -0.3 else "center", va="bottom" if _n[1] > 0.3 else "top" if _n[1] < -0.3 else "center")
     lk.prose(
         r"$\leadsto$ &nbsp; proof is direct consequence of the Cauchy-Schwarz! &nbsp; (exercise)",
-        lk.interactive(_fig, controls=[x1, x2, y1, y2]),
+        lk.interactive(_fig, controls=[(x1, x2), (y1, y2)]),
     )
     return
 

@@ -228,6 +228,24 @@ function main(shown) {
               }
             }
           }
+        } else if (o.k === "surface") {
+          // a smooth surface on a grid: the curve where its normal is square to the view (n . view = 0),
+          // traced through each grid cell between the corners where n . view changes sign
+          const v = o.v, q = o.q, m = o.m, dv = [d[0], d[1], d[2] / (ys * ys)];
+          const f = (k) => q[3 * k] === null ? NaN : q[3 * k] * dv[0] + q[3 * k + 1] * dv[1] + q[3 * k + 2] * dv[2];
+          const at = (i, j, t) => [v[3 * i] + t * (v[3 * j] - v[3 * i]), v[3 * i + 1] + t * (v[3 * j + 1] - v[3 * i + 1]), v[3 * i + 2] + t * (v[3 * j + 2] - v[3 * i + 2])];
+          for (let i = 0; i < o.n - 1; i++) for (let j = 0; j < m - 1; j++) {
+            const c = [i * m + j, i * m + j + 1, (i + 1) * m + j + 1, (i + 1) * m + j], fc = c.map(f), cut = [];
+            if (fc.some(isNaN)) continue;  // a cell left out (NaN normal), such as one spanning a hole
+            for (let s = 0; s < 4; s++) {
+              const A = c[s], B = c[(s + 1) % 4], fa = fc[s], fb = fc[(s + 1) % 4];
+              if ((fa < 0) !== (fb < 0)) cut.push(at(A, B, fa / (fa - fb)));
+            }
+            for (let s = 0; s + 1 < cut.length; s += 2) {
+              const p0 = P(cut[s]), p1 = P(cut[s + 1]);
+              items.push([(p0[2] + p1[2]) / 2 + bias + 0.02, 4, [p0[0], p0[1], p1[0], p1[1], o.c, o.w]]);
+            }
+          }
         } else if (o.k === "cylinder") {
           for (const sg of [-1, 1]) {
             const x = o.p[0] + sg * o.r * R3[0], y = o.p[1] + sg * o.r * R3[1];

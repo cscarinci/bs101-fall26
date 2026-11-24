@@ -45,6 +45,7 @@ def _(Figure, lk, mo):
         """R^1 and R^2 (drawn flat) beside R^3 (a rotatable view), with a point (arrows=False) or the arrow from
         the origin to it (arrows=True)."""
         fig = Figure(figsize=(4.6, 3.1 if not arrows else 2.5), layout="constrained")
+        fig.get_layout_engine().set(wspace=0.2)  # space between the sketches of R^1 and R^2
         a1, a2 = fig.subplots(1, 2)
         lo = -1.25 if not arrows else -0.6
         for ax in (a1, a2):
@@ -197,7 +198,7 @@ def _(lk):
 def _(lk):
     # module: Cartesian n-space
     # motivation: the first goal
-    lk.prose(r"$\leadsto$ &nbsp; our first goal is to extend these operations from real numbers to collections of real numbers")
+    lk.prose(r"$\leadsto$ &nbsp; our first goal is to extend $+$ and $\cdot$ from real numbers to collections of real numbers")
     return
 
 
@@ -207,9 +208,10 @@ def _(lk):
     # definition: the Cartesian n-space
     lk.definition(
         [
-            lk.aside(r"For each $n \in \mk{\mathbb{Z}_{>0}} = \{1, 2, 3, \dots\}$, we define", r"$\mathbb{Z}_{>0}$ = positive integers"),
-            r"the **Cartesian $n$-space** $\mathbb{R}^n$ as the set of all",
-            lk.aside(r"<span class='lk-mark'>ordered lists of $n$ real numbers</span>", r"= $n$-tuples of real numbers"),
+            lk.aside(
+                r"For each $n \in \mk{\mathbb{Z}_{>0}} = \{1, 2, 3, \dots\}$, we define the **Cartesian $n$-space** $\mathbb{R}^n$ as the set of all <span class='lk-mark'>ordered lists of $n$ real numbers</span>",
+                r"$\mathbb{Z}_{>0}$ = positive integers<br>ordered lists = $n$-tuples of real numbers",
+            ),
             r"$$ \mathbb{R}^n = \left\{\, \vec{x} = (x^1, x^2, \dots, x^n) \;\middle|\; x^i \in \mathbb{R}, \ \forall\, i = 1, 2, \dots, n \,\right\} $$",
         ],
         label="def-cartesian",
@@ -229,7 +231,7 @@ def _(lk, spaces):
                 r"order matters!<br>$(x^1, x^2) \neq (x^2, x^1)$ unless $x^1 = x^2$",
             ),
             r"$n = 3$ &nbsp; $\leadsto$ &nbsp; $\mathbb{R}^3 \ni \vec{x} = (x^1, x^2, x^3)$ &nbsp; (ordered triples)",
-            r"<span class='lk-ghost'>$n = 3$ &nbsp; $\leadsto$ &nbsp;</span>$\vdots$",
+            r"$\vdots$",
             lk.figure(spaces(False)),
         ]
     )
@@ -242,18 +244,7 @@ def _(lk):
     # comments: points in n-space, and the need for another way to think about them
     lk.prose(
         r"$\leadsto$ &nbsp; geometrically, elements in $\mathbb{R}^n$ are points in an “$n$-dimensional” space with $n$ “orthogonal axes” intersecting at a single point (the origin)",
-        r"$\leadsto$ &nbsp; to extend the operations $+$ and $\cdot$ to $\mathbb{R}^n$, we need yet another way to think about its elements!",
-    )
-    return
-
-
-@app.cell(hide_code=True)
-def _(lk):
-    # module: Cartesian n-space
-    # theorem: points as arrows from the origin
-    lk.theorem(
-        r"Every element $\vec{x} = (x^1, \dots, x^n) \in \mathbb{R}^n$ can be realized as a unique arrow from the origin $\vec{0} = (0, \dots, 0)$.",
-        label="thm-arrows",
+        r"$\leadsto$ &nbsp; to extend $+$ and $\cdot$ to $\mathbb{R}^n$, we need yet another way to think about its elements!",
     )
     return
 
@@ -261,8 +252,13 @@ def _(lk):
 @app.cell(hide_code=True)
 def _(lk, spaces):
     # module: Cartesian n-space
-    # proof: the sketch of the arrows
-    lk.proof(lk.figure(spaces(True)))
+    # remark: points as arrows from the origin, with the sketch of the arrows
+    lk.remark(
+        [
+            r"Every element $\vec{x} \in \mathbb{R}^n$ can be realized as a unique arrow from the origin $\vec{0} = (0, \dots, 0)$.",
+            lk.figure(spaces(True)),
+        ]
+    )
     return
 
 
@@ -274,7 +270,7 @@ def _(lk):
         lk.aside(r"we will denote this arrow by an <span class='lk-mark'>**$n$-vector**</span>", r"= an $n \times 1$ array<br>= column matrix size $n$"),
         r"""
         $$
-        \vec{x} = \begin{bmatrix} x^1 \\ \vdots \\ x^n \end{bmatrix} \in \mathrm{Mat}(\underset{\substack{\uparrow \\ \mathclap{n \text{ rows}}}}{n} \times \underset{\substack{\uparrow \\ \mathclap{1 \text{ column}}}}{1})
+        \vec{x} = \begin{bmatrix} x^1 \\ \vdots \\ x^n \end{bmatrix} \in \mathrm{Mat}(\overset{\substack{\mathclap{n \text{ rows}} \\ \downarrow \\ \rule{0pt}{2pt}}}{n} \times \underset{\substack{\rule{0pt}{4pt} \\ \uparrow \\ \mathclap{1 \text{ column}}}}{1})
         $$
         """,
         r"$\leadsto$ &nbsp; in this course there is no fundamental difference between “points in space” and “arrows from the origin”",
@@ -342,8 +338,9 @@ def _(Figure, alpha, lk, plane, vector, x1, x2, y1, y2):
     _s = (_x[0] + _y[0], _x[1] + _y[1])
     _ax_ = (alpha.value * _x[0], alpha.value * _x[1])
 
-    _fig = Figure(figsize=(lk.FULL, 3.6), layout="constrained")
-    _left, _right = _fig.subplots(1, 2)
+    # two plots of the same size, each with its own sliders under it
+    _fig_l, _fig_r = Figure(figsize=(3.2, 3.2)), Figure(figsize=(3.2, 3.2))
+    _left, _right = _fig_l.add_axes((0.1, 0.1, 0.85, 0.85)), _fig_r.add_axes((0.1, 0.1, 0.85, 0.85))
     # range 6 either way (the vectors fill the plane); wider only when a vector would leave it
     _far = max(abs(c) for v in (_x, _y, _s, _ax_) for c in v)
     _lim = max(7, int(_far) + 1)
@@ -356,7 +353,7 @@ def _(Figure, alpha, lk, plane, vector, x1, x2, y1, y2):
     vector(_right, _ax_, lk.GREEN, r"$\alpha \cdot \vec{x}$")
     vector(_right, _x, lk.BLUE, r"$\vec{x}$", away=(_x[1], -_x[0]))
 
-    lk.prose(lk.interactive(_fig, controls=[x1, x2, y1, y2, alpha]))
+    lk.prose(lk.interactive([(_fig_l, [(x1, x2), (y1, y2)]), (_fig_r, [alpha])]))
     return
 
 
@@ -365,7 +362,7 @@ def _(lk):
     # module: Cartesian n-space
     # comments: arrows, and the properties they carry
     lk.prose(
-        r"$\leadsto$ &nbsp; we can interpret the operations in terms of arrows from the origin, not in terms of points",
+        r"$\leadsto$ &nbsp; we can interpret the operations in terms of arrows from the origin, not points",
         r"$\leadsto$ &nbsp; these carry most of the properties of the usual addition and multiplication in $\mathbb{R}$",
     )
     return

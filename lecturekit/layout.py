@@ -95,12 +95,29 @@ def figure(content, caption="", label=None, width=None):
 
 def interactive(content, controls=(), readout=None, caption="", label=None):
     """A numbered figure with one row under it: its controls (sliders, ...) and a readout (e.g. lk.table) side by side.
-    `content` may be a list."""
+    `content` may be a list. A list of pairs (plot, controls) puts the plots side by side, each with its own
+    controls under it: lk.interactive([(fig_a, [(x1, x2)]), (fig_b, [alpha])])."""
     number = numbering.claim("interactive")
-    row = [mo.as_html(c).text for c in controls] + ([as_html(readout)] if readout is not None else [])
     parts = content if isinstance(content, (list, tuple)) else [content]
-    body = "".join(as_html(p) for p in parts) + (f'<div class="lk-controls">{"".join(f"<div>{r}</div>" for r in row)}</div>' if row else "")
+    if parts and all(isinstance(p, tuple) and len(p) == 2 for p in parts):
+        cols = "".join(f'<div class="lk-column">{as_html(p)}{_controls_html(c)}</div>' for p, c in parts)
+        body = f'<div class="lk-columns">{cols}</div>' + _controls_html(controls, readout)
+    else:
+        body = "".join(as_html(p) for p in parts) + _controls_html(controls, readout)
     return _figure(_Html(body), caption, label, number, None, extra="lk-interactive", live=True)
+
+
+def _controls_html(controls, readout=None):
+    """The controls under a plot: in one row, or, when some are given as tuples, each tuple on a row of its own
+    (e.g. the components of one vector: controls=[(x1, x2), (y1, y2)])."""
+    if any(isinstance(c, (list, tuple)) for c in controls):
+        rows = [c if isinstance(c, (list, tuple)) else [c] for c in controls]
+        inner = "".join('<div class="lk-controls-row">' + "".join(f"<div>{mo.as_html(c).text}</div>" for c in r) + "</div>" for r in rows)
+        if readout is not None:
+            inner += f'<div class="lk-controls-row"><div>{as_html(readout)}</div></div>'
+        return f'<div class="lk-controls lk-controls-rows">{inner}</div>'
+    row = [mo.as_html(c).text for c in controls] + ([as_html(readout)] if readout is not None else [])
+    return f'<div class="lk-controls">{"".join(f"<div>{r}</div>" for r in row)}</div>' if row else ""
 
 
 def _figure(content, caption, label, number, width, extra="", live=False):

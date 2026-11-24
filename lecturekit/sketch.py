@@ -4,7 +4,15 @@ One style for every such sketch in every lecture:
 - the drawing is made at a fixed scale (inches per unit), so labels and lines have the same size in every sketch;
 - shapes are smooth, gently rounded closed curves (no wobbly outlines);
 - a manifold is black, an open set is drawn in its colour with a faint tint of it, an overlap in LIGHT;
-- every label has the same size; names take the colour of what they name, everything else is black.
+- every label has the same size; names take the colour of what they name, everything else is black;
+- shapes look drawn by hand, not like ellipses: gentle `waves` (2, 0.06, phase) and (3, 0.03, phase);
+  stronger waves flatten or kink the outline;
+- balance: a figure with two sides is a mirror image (maps of the same kind equally long, names on the outer
+  sides); a manifold and its chart side by side sit at one height, the map between them level and centred;
+- an arrow never touches a region: it starts and stops a little away from the shapes (use `rim(curve, angle, gap)`);
+- a name sits at the edge of what it names (`rim`), a point's name right under or over it;
+- a chart's image is an open set of R^m drawn over the axes of R^m (`axes`), the image of an overlap
+  tinted LIGHT and cut by the other set's edge (`cut`).
 
     fig, ax = lk.sketch((0, 10), (0, 6))
     M = lk.shape(5, 4, 2.2, 1.6, egg=0.08)
@@ -35,12 +43,14 @@ def sketch(xlim, ylim, scale=SCALE):
     return fig, ax
 
 
-def shape(cx, cy, rx, ry, egg=0.0, bean=0.0, tilt=0.0, n=360):
+def shape(cx, cy, rx, ry, egg=0.0, bean=0.0, tilt=0.0, n=360, waves=()):
     """A smooth closed curve around (cx, cy): an ellipse with radii rx, ry, made a little egg-shaped
     (egg > 0: wider on the right, < 0: on the left) or bean-shaped (bean > 0: a soft dent at the top),
-    and turned by `tilt` degrees. Returns an (n, 2) array."""
+    given gentle `waves` ((k, amplitude, phase): r *= 1 + amplitude cos(k t + phase); k = 2, 3 and
+    amplitudes 0.06 for k = 2 and 0.03 for k = 3 keep the outline smooth), and turned by `tilt` degrees. Returns an (n, 2) array."""
     t = np.linspace(0, 2 * np.pi, n, endpoint=False)
     r = 1 + egg * np.cos(t) - bean * np.exp(-((t - np.pi / 2) ** 2) / 0.35)
+    r = r + sum(a * np.cos(k * t + ph) for k, a, ph in waves)
     x, y = rx * r * np.cos(t), ry * r * np.sin(t)
     a = np.radians(tilt)
     return np.column_stack([cx + x * np.cos(a) - y * np.sin(a), cy + x * np.sin(a) + y * np.cos(a)])
@@ -63,6 +73,31 @@ def outline(ax, curve, color=INK, name=None, at=None, tint=None, lw=None, **kw):
     if name:
         label(ax, at, name, color=color, **kw)
     return curve
+
+
+def rim(curve, deg, gap=0.0):
+    """The point of a closed curve seen from its centre in the direction `deg` (degrees), moved `gap`
+    further out: where an arrow starts or stops (gap > 0, so that it does not touch) or a name sits."""
+    c = curve.mean(0)
+    d = np.array([np.cos(np.radians(deg)), np.sin(np.radians(deg))])
+    rel = curve - c
+    ang = np.abs(np.angle((rel[:, 0] + 1j * rel[:, 1]) * np.exp(-1j * np.radians(deg))))
+    return curve[np.argmin(ang)] + gap * d
+
+
+def axes(ax, x0, y0, w, h, name=r"$\mathbb{R}^m$"):
+    """The two axes of R^m from (x0, y0), `w` and `h` long, the name at the end of the horizontal one."""
+    for tip in ((x0 + w, y0), (x0, y0 + h)):
+        maps(ax, (x0, y0), tip, lw=1.1)
+    if name:
+        label(ax, (x0 + w + 0.12, y0), name, ha="left", va="center")
+
+
+def cut(ax, curve, inside, color):
+    """The edge of `curve` where it runs inside the shape `inside`: the other set's edge across an image."""
+    p = Polygon(curve, closed=True, fill=False, edgecolor=color, lw=LW, zorder=3)
+    ax.add_patch(p)
+    p.set_clip_path(Polygon(inside, closed=True, transform=ax.transData))
 
 
 def overlap(ax, a, b, color=LIGHT):

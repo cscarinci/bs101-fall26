@@ -59,7 +59,9 @@ def panel(ys, surfaces=(), lines=(), points=(), axes=(), arrows=(), arcs=(), tex
     box: ((x^1 lo, hi), (x^2 lo, hi), (y lo, hi)) to size the drawing by, instead of its own points;
     outlines: the edge of a round surface as seen from the current view, redrawn as the figure turns (ys = 1):
     ("sphere", centre, radius, colour, width), ("cylinder", (x^1, x^2) of the vertical axis, radius, (y lo, y hi), colour, width),
-    ("cone", vertex, height, colour, width) for the vertical double cone of slope 1 (a light cone)."""
+    ("cone", vertex, height, colour, width) for the vertical double cone of slope 1 (a light cone),
+    ("surface", (x1, x2, y), (n1, n2, n3), colour, width) for any smooth surface given on a grid (2D arrays) with its
+    unit normals at the grid points (NaN leaves a grid cell out): the curve where the surface turns away from the viewer (a torus, a genus 2 surface)."""
     p = {"ys": ys, "surfaces": list(surfaces), "lines": [], "points": [], "heads": [], "labels": [], "caption": caption, "box": box, "outlines": []}
     for o in outlines:
         if o[0] == "sphere":
@@ -68,6 +70,9 @@ def panel(ys, surfaces=(), lines=(), points=(), axes=(), arrows=(), arcs=(), tex
             p["outlines"].append({"k": "cylinder", "p": [float(c) for c in o[1]], "r": float(o[2]), "z": [float(c) for c in o[3]], "c": o[4], "w": o[5]})
         elif o[0] == "cone":
             p["outlines"].append({"k": "cone", "p": [float(c) for c in o[1]], "h": float(o[2]), "c": o[3], "w": o[4]})
+        elif o[0] == "surface":
+            n, m = np.shape(o[1][0])
+            p["outlines"].append({"k": "surface", "n": n, "m": m, "v": _flat(*o[1]), "q": [None if c != c else c for c in _flat(*o[2])], "c": o[3], "w": o[4]})
     for ln in lines:
         p["lines"].append({"p": _flat(*ln[:3]), "c": ln[3], "w": ln[4], "d": ln[5] if len(ln) > 5 else None, "e": ln[6] if len(ln) > 6 else 0})
     for tail, tip, label, d in axes:
