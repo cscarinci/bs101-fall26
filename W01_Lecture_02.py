@@ -127,7 +127,7 @@ def _(lk):
         \end{array}
         $$
         """,
-        r"$\leadsto$ &nbsp; allows us to do calculations with vectors the same way as with real numbers!",
+        r"$\leadsto$ &nbsp; we can calculate with vectors the same way as with real numbers!",
         topic=r"$\mathbb{R}^n \ni \vec{x} = (x^1, x^2, \dots, x^n)$ &nbsp; points in $n$-space",
     )
     return
@@ -177,9 +177,10 @@ def _(lk):
     # module: dot product
     # consequences: a new multiplication, and the dot dropped for scalar-vector multiplication
     lk.prose(
-        r"$\leadsto$ &nbsp; another extension of multiplication of real numbers, now to pairs of vectors, and taking scalar values",
+        r"$\leadsto$ &nbsp; extends multiplication of real numbers to pairs of vectors, with scalar values",
         lk.aside(r"$$ \mk{\cdot} : \mathbb{R}^n \times \mathbb{R}^n \longrightarrow \mathbb{R} $$", "not same as for scalar-vector multiplication!"),
-        r"to avoid confusion, we drop “$\cdot$” for scalar-vector multiplication and write: &nbsp; $\alpha \vec{x} = \alpha \begin{bmatrix} x^1 \\ \vdots \\ x^n \end{bmatrix} = \begin{bmatrix} \alpha x^1 \\ \vdots \\ \alpha x^n \end{bmatrix}$",
+        r"to avoid confusion, we drop “$\cdot$” for scalar-vector multiplication and write:",
+        r"$$ \alpha \vec{x} = \alpha \begin{bmatrix} x^1 \\ \vdots \\ x^n \end{bmatrix} = \begin{bmatrix} \alpha x^1 \\ \vdots \\ \alpha x^n \end{bmatrix} $$",
     )
     return
 
@@ -292,7 +293,7 @@ def _(lk):
         [
             r"For every $\vec{x}, \vec{y} \in \mathbb{R}^n$",
             r"$$ (\vec{x} \cdot \vec{y})^2 \leq \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2 $$",
-            r"with “$=$” iff $\vec{x}, \vec{y}$ are proportional",
+            r"with “$=$” iff $\vec{x}, \vec{y}$ are proportional.",
         ],
         title="Cauchy-Schwarz inequality",
         label="thm-cauchy-schwarz",
@@ -330,12 +331,10 @@ def _(lk):
             r"> ii) &nbsp; $\lVert t\vec{x} + \vec{y} \rVert^2 = (t\vec{x} + \vec{y}) \cdot (t\vec{x} + \vec{y})$",
             r"> " + _g + r" $= t^2 \, \vec{x} \cdot \vec{x} + t \, \vec{x} \cdot \vec{y} + t \, \vec{y} \cdot \vec{x} + \vec{y} \cdot \vec{y}$",
             lk.aside(r"> " + _g + r" $= \mk{t^2 \lVert \vec{x} \rVert^2 + 2t \, \vec{x} \cdot \vec{y} + \lVert \vec{y} \rVert^2}$", r"quadratic polynomial in $t$"),
-            r"> > $\Longrightarrow$ &nbsp; $t^2 \lVert \vec{x} \rVert^2 + 2t \, (\vec{x} \cdot \vec{y}) + \lVert \vec{y} \rVert^2 \geq 0$",
-            r"> > > $\Longrightarrow$ &nbsp; discriminant: &nbsp; $\big( 2 (\vec{x} \cdot \vec{y}) \big)^2 - 4 \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2 \leq 0$",
-            lk.aside(
-                r"> > > > $\Longleftrightarrow$ &nbsp; $(\vec{x} \cdot \vec{y})^2 \leq \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2$",
-                r"“$=$” iff $\vec{x}, \vec{y}$ proportional",
-            ),
+            lk.gap(),
+            r"> $\Longrightarrow$ &nbsp; $t^2 \lVert \vec{x} \rVert^2 + 2t \, (\vec{x} \cdot \vec{y}) + \lVert \vec{y} \rVert^2 \geq 0$",
+            r"> $\Longrightarrow$ &nbsp; discriminant: &nbsp; $\big( 2 (\vec{x} \cdot \vec{y}) \big)^2 - 4 \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2 \leq 0$",
+            r"> > $\Longleftrightarrow$ &nbsp; $(\vec{x} \cdot \vec{y})^2 \leq \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2$, &nbsp; with “$=$” iff $\vec{x}, \vec{y}$ proportional",
         ]
     )
     return
@@ -412,8 +411,8 @@ def _(lk):
     # definition: orthogonal vectors
     lk.definition(
         [
-            r"$\vec{x}, \vec{y} \in \mathbb{R}^n$ are called **orthogonal** ($\vec{x} \perp \vec{y}$)",
-            r"when &nbsp; $\vec{x} \cdot \vec{y} = 0$ &nbsp; $\Longrightarrow$ &nbsp; $\theta(\vec{x}, \vec{y}) = \arccos(0) = \pi/2 = 90^\circ$",
+            r"$\vec{x}, \vec{y} \in \mathbb{R}^n$ are called **orthogonal** ($\vec{x} \perp \vec{y}$) when $\vec{x} \cdot \vec{y} = 0$",
+            r"> $\Longrightarrow$ &nbsp; $\theta(\vec{x}, \vec{y}) = \arccos(0) = \pi/2 = 90^\circ$",
         ],
         label="def-orthogonal",
     )
@@ -426,7 +425,7 @@ def _(lk):
     # theorem: at most n pairwise orthogonal vectors
     lk.theorem(
         [
-            r"In $\mathbb{R}^n$, we can find at most $n$ non-zero vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$ which are pairwise orthogonal",
+            r"In $\mathbb{R}^n$, we can find at most $n$ non-zero pairwise orthogonal vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$",
             r"$$ \vec{e}_i \cdot \vec{e}_j = 0 \quad \forall\, i \neq j $$",
         ],
         label="thm-at-most-n",
@@ -445,12 +444,12 @@ def _(lk):
                 r"a specific example of $n$ pairwise orthogonal vectors<br>many other examples exist!",
             ),
             r"> $\Longrightarrow$ &nbsp; pairwise orthogonal",
-            r"Take any other non-zero vector &nbsp; $\vec{x} = \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix} \neq \vec{0}$",
+            r"Take any other non-zero vector &nbsp; $\vec{x} = \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix} \neq \vec{0}$.",
             r"Note that",
             r"$$ \vec{x} \cdot \vec{e}_1 = x^1, \ \ \vec{x} \cdot \vec{e}_2 = x^2, \ \ \dots, \ \ \vec{x} \cdot \vec{e}_n = x^n, $$",
-            r"so $\vec{x} \perp \vec{e}_i$ iff $x^i = 0$",
+            r"so $\vec{x} \perp \vec{e}_i$ iff $x^i = 0$.",
             r"If $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n, \vec{x}$ were pairwise orthogonal then $\vec{x}$ would have to be the zero vector $\vec{0}$.",
-            r"This contradicts our assumption that $\vec{x} \neq \vec{0}$",
+            r"This contradicts our assumption that $\vec{x} \neq \vec{0}$.",
         ]
     )
     return
@@ -473,11 +472,11 @@ def _(lk):
     lk.definition(
         [
             r"A set of $n$ non-zero pairwise orthogonal vectors is called an **orthogonal basis** of $\mathbb{R}^n$.",
-            r"The vectors $\vec{e}_1 = \begin{bmatrix} 1 \\ 0 \\ \vdots \\ 0 \end{bmatrix}, \ \vec{e}_2 = \begin{bmatrix} 0 \\ 1 \\ \vdots \\ 0 \end{bmatrix}, \ \dots, \ \vec{e}_n = \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 1 \end{bmatrix}$ used above",
             lk.aside(
-                r"are called the <span class='lk-mark'>**standard basis vectors**</span> of $\mathbb{R}^n$.",
-                r"they have the additional property of having unit length<br>$\leadsto$ unit vectors",
+                r"The <span class='lk-mark'>**standard basis vectors**</span> of $\mathbb{R}^n$ are",
+                r"they also have unit length<br>$\leadsto$ unit vectors",
             ),
+            r"$$ \vec{e}_1 = \begin{bmatrix} 1 \\ 0 \\ \vdots \\ 0 \end{bmatrix}, \ \vec{e}_2 = \begin{bmatrix} 0 \\ 1 \\ \vdots \\ 0 \end{bmatrix}, \ \dots, \ \vec{e}_n = \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 1 \end{bmatrix}. $$",
         ],
         label="def-standard-basis",
     )
@@ -550,7 +549,7 @@ def _(lk):
     # consequences: coordinate axes and components
     lk.prose(
         r"$\leadsto$ &nbsp; the standard basis vectors define the coordinate axes on $\mathbb{R}^n$!",
-        r"$\leadsto$ &nbsp; coordinates / components of a vector are its dot products with the standard basis vectors!",
+        r"$\leadsto$ &nbsp; coordinates / components of a vector are its dot products with the standard basis!",
     )
     return
 
@@ -560,7 +559,7 @@ def _(lk):
     # module: standard basis
     # theorem: components as coefficients
     lk.theorem(
-        r"Every $\vec{x} \in \mathbb{R}^n$ is a linear combination of the standard basis vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$, with coefficients $x^1 = \vec{x} \cdot \vec{e}_1, \ x^2 = \vec{x} \cdot \vec{e}_2, \ \dots, \ x^n = \vec{x} \cdot \vec{e}_n$",
+        r"Every $\vec{x} \in \mathbb{R}^n$ is a linear combination of the standard basis vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$, with coefficients $x^1 = \vec{x} \cdot \vec{e}_1, \ x^2 = \vec{x} \cdot \vec{e}_2, \ \dots, \ x^n = \vec{x} \cdot \vec{e}_n$.",
         label="thm-components",
     )
     return
@@ -635,7 +634,7 @@ def _(lk):
             r"a) Show that $\vec{u}, \vec{v}, \vec{w}$ are pairwise orthogonal",
             r"b) Write $\vec{x} = \begin{bmatrix} 3 \\ 1 \\ 4 \end{bmatrix}$ in the form $\vec{x} = a\vec{u} + b\vec{v} + c\vec{w}$",
             r"c) Show that $a = \dfrac{\vec{x} \cdot \vec{u}}{\vec{u} \cdot \vec{u}}, \ b = \dfrac{\vec{x} \cdot \vec{v}}{\vec{v} \cdot \vec{v}}, \ c = \dfrac{\vec{x} \cdot \vec{w}}{\vec{w} \cdot \vec{w}}$",
-            r"d) Show that there is no non-zero vector $\vec{y} = \begin{bmatrix} p \\ q \\ r \end{bmatrix}$ orthogonal to $\vec{u}$, $\vec{v}$ and $\vec{w}$ at the same time.",
+            r"d) Show that no non-zero vector $\vec{y} = \begin{bmatrix} p \\ q \\ r \end{bmatrix}$ is orthogonal to all of $\vec{u}$, $\vec{v}$, $\vec{w}$",
         ],
         label="ex-practice-3",
     )
