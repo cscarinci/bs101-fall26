@@ -99,7 +99,6 @@ def _(lk):
     # recap: matrices as linear transformations, their columns as images of the standard basis
     _A = r"\begin{bmatrix} a & b \\ c & d \\ e & f \end{bmatrix}"
     lk.recap(
-        r"> $\leadsto$ &nbsp; $A : \mathbb{R}^n \longrightarrow \mathbb{R}^m$, &nbsp; $\vec{x} \longmapsto A\vec{x}$ &nbsp; linear transformation via matrix multiplication",
         lk.gap(),
         r"$A = " + _A + r" \in \mathrm{Mat}(3 \times 2), \qquad \vec{x} = \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \in \mathbb{R}^2$",
         r"> $\Longrightarrow$ &nbsp; $A\vec{x} = " + _A + r" \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} = \begin{bmatrix} a x^1 + b x^2 \\ c x^1 + d x^2 \\ e x^1 + f x^2 \end{bmatrix} = \begin{bmatrix} y^1 \\ y^2 \\ y^3 \end{bmatrix} \in \mathbb{R}^3$",
@@ -114,11 +113,11 @@ def _(lk):
             r"$\vec{A}_i = \begin{bmatrix} A^1{}_i \\ \vdots \\ A^m{}_i \end{bmatrix}$",
         ),
         lk.aside(
-            r"> where $\vec{e}_i \in \mathbb{R}^n$ standard basis of $\mathbb{R}^n$: &nbsp; $\mk{\vec{e}_1} = \begin{bmatrix} 1 \\ 0 \\ \vdots \\ 0 \end{bmatrix}, \ \vec{e}_2 = \begin{bmatrix} 0 \\ 1 \\ \vdots \\ 0 \end{bmatrix}, \ \dots, \ \vec{e}_n = \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 1 \end{bmatrix}$",
+            r"> > where $\vec{e}_i \in \mathbb{R}^n$ standard basis of $\mathbb{R}^n$: &nbsp; $\mk{\vec{e}_1} = \begin{bmatrix} 1 \\ 0 \\ \vdots \\ 0 \end{bmatrix}, \ \vec{e}_2 = \begin{bmatrix} 0 \\ 1 \\ \vdots \\ 0 \end{bmatrix}, \ \dots, \ \vec{e}_n = \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 1 \end{bmatrix}$",
             "only one non-zero entry",
         ),
-        r"> $\leadsto$ &nbsp; columns of $A$ are the images of the standard basis vectors via $A$!",
-        topic=r"Matrices $A \in \mathrm{Mat}(m \times n)$",
+        r"$\leadsto$ &nbsp; columns of $A$ are the images of the standard basis vectors via $A$!",
+        topic=r"Matrices $A \in \mathrm{Mat}(m \times n)$ &nbsp; $\leftrightsquigarrow$ &nbsp; linear transformation $A : \mathbb{R}^n \longrightarrow \mathbb{R}^m$, &nbsp; $\vec{x} \longmapsto A\vec{x}$",
     )
     return
 
@@ -159,9 +158,7 @@ def _(lk):
     # definition: determinant of a 2 x 2 matrix
     lk.definition(
         r"""
-        Given a $2 \times 2$ matrix $A = \begin{bmatrix} A^1{}_1 & A^1{}_2 \\ A^2{}_1 & A^2{}_2 \end{bmatrix} = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \in \mathrm{Mat}(2 \times 2)$
-
-        the **determinant** of $A$ is the real number
+        Given a $2 \times 2$ matrix $A = \begin{bmatrix} A^1{}_1 & A^1{}_2 \\ A^2{}_1 & A^2{}_2 \end{bmatrix} = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \in \mathrm{Mat}(2 \times 2)$, the **determinant** of $A$ is the real number
 
         $$
         \det A = A^1{}_1 A^2{}_2 - A^1{}_2 A^2{}_1 = ad - bc
@@ -246,7 +243,8 @@ def _(Arc, blank, lk, math):
                 \begin{aligned}
                 \text{area} &= \lVert \vec{A}_1 \rVert \lVert \vec{A}_2 \rVert \sin\big(\mk{\theta(\vec{A}_1, \vec{A}_2)}\big)\\[4pt]
                 &= \lVert \vec{A}_1 \rVert \lVert \vec{A}_2 \rVert \Big( 1 - \cos\big(\theta(\vec{A}_1, \vec{A}_2)\big)^2 \Big)^{1/2}\\[4pt]
-                &= \lVert \vec{A}_1 \rVert \lVert \vec{A}_2 \rVert \left( 1 - \left( \frac{\vec{A}_1 \cdot \vec{A}_2}{\lVert \vec{A}_1 \rVert \lVert \vec{A}_2 \rVert} \right)^2 \right)^{1/2} = \Big( \lVert \vec{A}_1 \rVert^2 \lVert \vec{A}_2 \rVert^2 - (\vec{A}_1 \cdot \vec{A}_2)^2 \Big)^{1/2}\\[4pt]
+                &= \lVert \vec{A}_1 \rVert \lVert \vec{A}_2 \rVert \left( 1 - \left( \frac{\vec{A}_1 \cdot \vec{A}_2}{\lVert \vec{A}_1 \rVert \lVert \vec{A}_2 \rVert} \right)^2 \right)^{1/2}\\[4pt]
+                &= \Big( \lVert \vec{A}_1 \rVert^2 \lVert \vec{A}_2 \rVert^2 - (\vec{A}_1 \cdot \vec{A}_2)^2 \Big)^{1/2}\\[4pt]
                 &= \Big( (a^2 + c^2)(b^2 + d^2) - (ab + cd)^2 \Big)^{1/2}\\[4pt]
                 &= \Big( \cancel{a^2 b^2} + a^2 d^2 + c^2 b^2 + \cancel{c^2 d^2} - \cancel{a^2 b^2} - \cancel{c^2 d^2} - 2abcd \Big)^{1/2}\\[4pt]
                 &= \big( a^2 d^2 - 2abcd + b^2 c^2 \big)^{1/2} = \big( (ad - bc)^2 \big)^{1/2} = \lvert \det A \rvert
@@ -255,7 +253,7 @@ def _(Arc, blank, lk, math):
                 """,
                 r"$\theta \in [0, \pi]$",
                 at=1,
-                rows=6,
+                rows=7,
             ),
         ]
     )
@@ -403,15 +401,17 @@ def _(lk):
 @app.cell(hide_code=True)
 def _(lk):
     # module: inverses
-    # theorem: invertible 2 x 2 matrices, with what "inverse" means as a function and as a matrix
+    # theorem: invertible 2 x 2 matrices, with what "inverse" means as a matrix and as a function
     _f = r"$\leadsto$ &nbsp; as a function &nbsp; $\leadsto$ &nbsp; $\exists \, B : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ such that "
     lk.theorem(
         [
-            r"$A \in \mathrm{Mat}(2 \times 2)$ &nbsp; $\leftrightsquigarrow$ &nbsp; $A : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ linear",
-            r"admits an **inverse** iff $\det A \neq 0$",
-            "> " + _f + r"$A \circ B = B \circ A = \mathrm{id}_{\mathbb{R}^2}$",
-            "> <span class='lk-ghost'>" + _f + r"</span>$A \circ B(\vec{x}) = B \circ A(\vec{x}) = \vec{x} \quad \forall \, \vec{x} \in \mathbb{R}^2$",
+            lk.aside(
+                r"$A \in \mathrm{Mat}(2 \times 2)$ admits an **inverse** iff $\det A \neq 0$",
+                r"$A \in \mathrm{Mat}(2 \times 2) \ \leftrightsquigarrow \ A : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ linear",
+            ),
             r"> $\leadsto$ &nbsp; as a matrix &nbsp; $\leadsto$ &nbsp; $\exists \, B \in \mathrm{Mat}(2 \times 2)$ such that $AB = BA = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}$",
+            "> " + _f + r"$A \circ B = B \circ A = \mathrm{id}_{\mathbb{R}^2}$",
+            r"> > $A \circ B(\vec{x}) = B \circ A(\vec{x}) = \vec{x} \quad \forall \, \vec{x} \in \mathbb{R}^2$",
         ],
         label="thm-inverse2",
     )
@@ -497,15 +497,12 @@ def _(lk):
     # module: inverses
     # theorem: invertible n x n matrices
     lk.theorem(
-        r"""
-        For every $n \in \mathbb{Z}_{>0}$
-
-        $$
-        A \in \mathrm{Mat}(n \times n) \quad \leftrightsquigarrow \quad A : \mathbb{R}^n \longrightarrow \mathbb{R}^n \ \text{linear}
-        $$
-
-        admits an inverse iff $\det A \neq 0$
-        """,
+        [
+            lk.aside(
+                r"For every $n \in \mathbb{Z}_{>0}$, $A \in \mathrm{Mat}(n \times n)$ admits an inverse iff $\det A \neq 0$",
+                r"$A \in \mathrm{Mat}(n \times n) \ \leftrightsquigarrow \ A : \mathbb{R}^n \longrightarrow \mathbb{R}^n$ linear",
+            ),
+        ],
         label="thm-inverse-n",
     )
     return

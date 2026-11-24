@@ -66,10 +66,9 @@ def _(lk):
         r"$\hphantom{" + _A2 + r"} = \text{signed area of parallelogram spanned by } \vec{A}_1 = \begin{bmatrix} a \\ c \end{bmatrix}, \ \vec{A}_2 = \begin{bmatrix} b \\ d \end{bmatrix}$",
         lk.gap(),
         "$" + _A3 + r" = a(ei - fh) - b(di - fg) + c(dh - eg)$",
-        lk.aside(
-            r"$\hphantom{" + _A3 + r"} = \mk{\text{signed volume}}$",
-            r"$\leadsto$ need to interpret sign<br>$\leadsto$ need to understand angle between vectors and planes",
-        ),
+        r"$\hphantom{" + _A3 + r"} = \text{signed volume}$",
+        r"> $\leadsto$ &nbsp; need to interpret sign",
+        r"> $\leadsto$ &nbsp; need to understand angle between vectors and planes",
         topic="Determinants",
     )
     return
@@ -114,16 +113,14 @@ def _(blank, lk):
     lk.definition(
         [
             r"""
-            Given vectors $\vec{x}$ and $\vec{v}$ in $\mathbb{R}^3$, with $\vec{v}$ non-zero, the **line** through $\vec{x}$ in the direction of $\vec{v}$ is the set
+            Given $\vec{x}, \vec{v} \in \mathbb{R}^3$ with $\vec{v} \neq \vec{0}$, the **line** through $\vec{x}$ in the direction of $\vec{v}$ is the set
 
             $$
             L = \{ \gamma(t) = \vec{x} + t\vec{v} \in \mathbb{R}^3 \mid t \in \mathbb{R} \}
             $$
-
-            We call the function &nbsp; $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^3$, &nbsp; $t \longmapsto \gamma(t) = \vec{x} + t\vec{v}$
             """,
             lk.aside(
-                r"an <span class='lk-mark'>**affine**</span> **parameterization** of the line $L$",
+                r"We call $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^3$, $t \longmapsto \gamma(t) = \vec{x} + t\vec{v}$ an <span class='lk-mark'>**affine**</span> **parameterization** of the line $L$",
                 r"just a name for “linear plus constant”",
             ),
             lk.figure(_fig),
@@ -366,7 +363,7 @@ def _(lk, np):
     _area = r"\begin{array}{c} \scriptstyle \text{area of parallelogram} \\ \scriptstyle \text{spanned by } \vec{u} \text{ and } \vec{v} \end{array}"
     lk.definition(
         [
-            r"Given two vectors $\vec{u} = \begin{bmatrix} u^1 \\ u^2 \\ u^3 \end{bmatrix}, \ \vec{v} = \begin{bmatrix} v^1 \\ v^2 \\ v^3 \end{bmatrix} \in \mathbb{R}^3$, the **cross-product** of $\vec{u}$ and $\vec{v}$ is the unique vector $\vec{w} = \vec{u} \times \vec{v} \in \mathbb{R}^3$ such that",
+            r"Given two vectors $\vec{u} = \begin{bmatrix} u^1 \\ u^2 \\ u^3 \end{bmatrix}, \ \vec{v} = \begin{bmatrix} v^1 \\ v^2 \\ v^3 \end{bmatrix} \in \mathbb{R}^3$, the **cross&#8209;product** of $\vec{u}$ and $\vec{v}$ is the unique vector $\vec{w} = \vec{u} \times \vec{v} \in \mathbb{R}^3$ such that",
             lk.aside(r"$$ \vec{u} \cdot \vec{w} = 0, \quad \vec{v} \cdot \vec{w} = 0 $$", r"orthogonal to both $\vec{u}, \vec{v}$"),
             r"""
             $$
@@ -562,8 +559,16 @@ def _(lk, v1, v2, v3):
             r"$\vec{u} \cdot (\vec{u} \times \vec{v}) = 1 \cdot 0 + 2 \cdot 0 + 0 \cdot 5 = 0$",
             r"$\vec{v} \cdot (\vec{u} \times \vec{v}) = (-1) \cdot 0 + 3 \cdot 0 + 0 \cdot 5 = 0$",
             lk.gap(),
-            r"$\lVert \vec{u} \times \vec{v} \rVert^2 = 25 = \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2 = (1 + 4)(1 + 9) - (-1 + 6)^2$",
-            r"$\phantom{\lVert \vec{u} \times \vec{v} \rVert^2 = 25 = \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2} = 50 - 25$",
+            r"""
+            $$
+            \begin{aligned}
+            \lVert \vec{u} \times \vec{v} \rVert^2 &= 25\\[4pt]
+            &= \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2\\[4pt]
+            &= (1 + 4)(1 + 9) - (-1 + 6)^2\\[4pt]
+            &= 50 - 25
+            \end{aligned}
+            $$
+            """,
             lk.gap(),
             lk.aside(
                 r"$\det \begin{bmatrix} 1 & -1 & 0 \\ 2 & 3 & 0 \\ 0 & 0 & 5 \end{bmatrix} = 1 \, (3 \cdot 5 - 0 \cdot 0) - (-1) \, (2 \cdot 5 - 0 \cdot 0) + 0 \, (2 \cdot 0 - 3 \cdot 0) = \mk{25} > 0$",
