@@ -277,7 +277,7 @@ def _(blank, lk):
             \frac{\partial f}{\partial x^1}(\vec{a}) = \lim_{t \to 0} \frac{f(\vec{a} + t\vec{e}_1) - f(\vec{a})}{t}
             $$
 
-            provided that the limit exists
+            provided that the limit exists.
             """,
             lk.aside(
                 r"> $\leadsto$ &nbsp; $\dfrac{\partial f}{\partial x^1}(\vec{a}) = \mk{\dfrac{d}{dt}} f(\vec{a} + t\vec{e}_1) \Big|_{t=0}$",
@@ -295,7 +295,7 @@ def _(blank, lk):
             \frac{\partial f}{\partial x^2}(\vec{a}) = \lim_{s \to 0} \frac{f(\vec{a} + s\vec{e}_2) - f(\vec{a})}{s}
             $$
 
-            provided that the limit exists
+            provided that the limit exists.
 
             > $\leadsto$ &nbsp; $\dfrac{\partial f}{\partial x^2}(\vec{a}) = \dfrac{d}{ds} f(\vec{a} + s\vec{e}_2) \Big|_{s=0}$
             """,
@@ -385,7 +385,7 @@ def _(lk):
         \end{aligned}
         $$
 
-        provided the derivative exists
+        provided the derivative exists.
         """,
         label="def-directional",
     )
