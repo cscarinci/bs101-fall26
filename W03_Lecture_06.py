@@ -121,7 +121,7 @@ def _(lk):
         f : A \subseteq \mathbb{R}^n \longrightarrow B \subseteq \mathbb{R}^m
         $$
 
-        that assigns to each element $\vec{x}$ in a set $A \subseteq \mathbb{R}^n$ a unique element $\vec{y} = f(\vec{x})$ in another set $B \subseteq \mathbb{R}^m$
+        that assigns to each element $\vec{x} \in A$ a unique element $\vec{y} = f(\vec{x}) \in B$
         """,
         label="def-function",
     )
@@ -357,13 +357,14 @@ def _(lk):
     # module: image and graph
     # remark: image and graph help us visualize
     lk.remark(
-        r"""
-        $\mathrm{Im}(f)$ and $\mathrm{graph}(f)$ help us visualize $f$ as a set of points (very useful in lower dimensions)
-
-        > $\leadsto$ &nbsp; we might have many functions with same image
-
-        > $\leadsto$ &nbsp; graph essentially determines the function completely! (but it lives in higher dimensions)
-        """
+        [
+            r"$\mathrm{Im}(f)$ and $\mathrm{graph}(f)$ let us see $f$ as a set of points (very useful in low dimensions)",
+            r"> $\leadsto$ &nbsp; we might have many functions with same image",
+            lk.aside(
+                r"> $\leadsto$ &nbsp; graph determines the function <span class='lk-mark'>completely</span>! (but it lives in higher dimensions)",
+                "except for the codomain",
+            ),
+        ]
     )
     return
 
@@ -445,7 +446,7 @@ def _(lk):
     lk.remark(
         [
             r"""
-            Here $f^{-1}(\vec{b})$ is NOT the value of the inverse function of $f$ (we don't even know if $f$ has inverse)
+            Here $f^{-1}(\vec{b})$ is NOT the value of the inverse function of $f$ ($f$ may not even have one)
 
             $f^{-1}(\vec{b})$ is the set of points in the domain of $f$ which gives the value “$\vec{b}$” as an output!
 
@@ -453,7 +454,7 @@ def _(lk):
             """,
             lk.aside(
                 r"> > $f^{-1}(\vec{b}) = \big\{ \vec{x} \in A \;\big|\; f(\vec{x}) = \vec{b} \big\}$ <span class='lk-mark'>has a single element</span>",
-                r"which we call “$f^{-1}(\vec{b})$”",
+                r"which we also call “$f^{-1}(\vec{b})$”",
             ),
         ]
     )
@@ -655,9 +656,9 @@ def _(lk):
     # remark: level sets and graphs
     lk.remark(
         r"""
-        Sometimes level sets of a function can be seen as graphs of another function and vice-versa!
+        Sometimes level sets of one function are graphs of another function and vice-versa!
 
-        > $\Longrightarrow$ &nbsp; geometry of sets in $\mathbb{R}^n$ or $\mathbb{R}^m$ or $\mathbb{R}^n \times \mathbb{R}^m$ is useful to study properties of various functions!
+        > $\Longrightarrow$ &nbsp; geometry of sets in $\mathbb{R}^n$, $\mathbb{R}^m$ or $\mathbb{R}^n \times \mathbb{R}^m$ helps to study properties of functions!
         """
     )
     return
