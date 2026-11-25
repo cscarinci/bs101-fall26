@@ -512,7 +512,7 @@ def _(AXES, dome, dome_grid, lk, np):
         > $\Longrightarrow$ &nbsp; $\left\lbrace \begin{aligned}
         \Phi_s(s, t) &= \frac{\partial \Phi}{\partial s}(s, t) = \begin{bmatrix} \frac{\partial x}{\partial s}(s, t) \\[0.3em] \frac{\partial y}{\partial s}(s, t) \\[0.3em] \frac{\partial z}{\partial s}(s, t) \end{bmatrix} \in \mathbb{R}^3 \\[0.6em]
         \Phi_t(s, t) &= \frac{\partial \Phi}{\partial t}(s, t) = \begin{bmatrix} \frac{\partial x}{\partial t}(s, t) \\[0.3em] \frac{\partial y}{\partial t}(s, t) \\[0.3em] \frac{\partial z}{\partial t}(s, t) \end{bmatrix} \in \mathbb{R}^3
-        \end{aligned} \right.$ &nbsp; are the tangent vectors of $\Phi$ at $\Phi(s, t)$
+        \end{aligned} \right.$ &nbsp; are the tangent vectors at $\Phi(s, t)$
         """,
         lk.aside(
             r"> $\Longrightarrow$ &nbsp; $\mk{\Phi_s(s, t) \times \Phi_t(s, t)}$ is normal to $\Phi_s(s, t)$ and $\Phi_t(s, t)$",
@@ -611,9 +611,9 @@ def _(lk):
     # remark: boundary
     lk.remark(
         r"""
-        To be precise $\Phi_s(s, t)$ and $\Phi_t(s, t)$ are not really well-defined along $s = 0, \pi$ and $t = 0, 2\pi$…
+        To be precise $\Phi_s(s, t)$ and $\Phi_t(s, t)$ are not well-defined along $s = 0, \pi$ and $t = 0, 2\pi$…
 
-        $\leadsto$ &nbsp; but we can extend $\Phi_s(s, t) \times \Phi_t(s, t)$ continuously to the boundary of $[0, \pi] \times [0, 2\pi]$
+        $\leadsto$ &nbsp; but $\Phi_s(s, t) \times \Phi_t(s, t)$ extends continuously to the boundary of $[0, \pi] \times [0, 2\pi]$
         """
     )
     return
