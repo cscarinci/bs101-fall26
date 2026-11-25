@@ -220,7 +220,7 @@ def _(lk):
 def _(lk):
     # module: global extrema
     # prose: the domain matters
-    lk.prose(r"$\leadsto$ &nbsp; to determine global extrema, we will also need to look at properties of the domain of $f$!")
+    lk.prose(r"$\leadsto$ &nbsp; to determine global extrema, we also need to look at properties of the domain of $f$!")
     return
 
 

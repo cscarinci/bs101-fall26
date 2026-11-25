@@ -155,7 +155,7 @@ def _(lk):
     lk.theorem(
         [
             lk.aside(
-                r"If $f$ is differentiable at $\vec{x} = \vec{a}$ and $\vec{x} = \vec{a}$ is <span class='lk-mark'>a local maximum or a local minimum of $f$</span>",
+                r"If $f$ is differentiable at $\vec{a}$ and $\vec{a}$ is <span class='lk-mark'>a local maximum or a local minimum of $f$</span>",
                 r"a local extremum of $f$",
             ),
             lk.aside(
@@ -566,7 +566,7 @@ def _(lk, np):
     )
     lk.prose(
         r"""
-        For $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$ $C^2$-smooth at critical point $\vec{x} = \vec{a}$
+        For $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$, $C^2$-smooth at a critical point $\vec{a}$
 
         > $\displaystyle f(\vec{x}) \approx f(\vec{a}) + \frac{1}{2} (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a}) = q(\vec{x})$
         """,
@@ -660,7 +660,7 @@ def _(lk):
     # theorem: second derivative test
     lk.theorem(
         r"""
-        $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$ $C^2$-smooth at a critical point $\vec{x} = \vec{a}$
+        $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$, $C^2$-smooth at a critical point $\vec{a}$
 
         > • &nbsp; <span class="lk-tab" style="--lk-tab: 15em">if $Hf(\vec{a})$ is negative definite</span>$\Longrightarrow$ &nbsp; $\vec{a}$ is local max
 
