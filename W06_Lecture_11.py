@@ -455,7 +455,7 @@ def _(lk):
     # definition: differentiable maps, derivative and Jacobian matrix
     lk.definition(
         r"""
-        $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is **differentiable** at $\vec{x} = \vec{a} = \begin{bmatrix} a^1 \\ \vdots \\ a^n \end{bmatrix}$ if each component $f^j : \mathbb{R}^n \longrightarrow \mathbb{R}$ is differentiable at $\vec{a}$
+        $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is **differentiable** at $\vec{a} = \begin{bmatrix} a^1 \\ \vdots \\ a^n \end{bmatrix}$ if each component $f^j$ is differentiable at $\vec{a}$
 
         > $\Longrightarrow$ &nbsp; $Df(\vec{a}) = \begin{bmatrix} Df^1(\vec{a}) \\ \vdots \\ Df^m(\vec{a}) \end{bmatrix} = \begin{bmatrix} {\large\tfrac{\partial f^1}{\partial x^1}}(\vec{a}) & \cdots & {\large\tfrac{\partial f^1}{\partial x^n}}(\vec{a}) \\ \vdots & \ddots & \vdots \\ {\large\tfrac{\partial f^m}{\partial x^1}}(\vec{a}) & \cdots & {\large\tfrac{\partial f^m}{\partial x^n}}(\vec{a}) \end{bmatrix} \in \mathrm{Mat}(m \times n)$
 
@@ -499,9 +499,9 @@ def _(lk):
     # module: general maps
     # theorem: continuous partial derivatives imply differentiable
     lk.theorem(
-        r"If all components $f^j : \mathbb{R}^n \longrightarrow \mathbb{R}$ of $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ have "
-        + lk.gloss(r"well-defined partial derivatives in an open ball centered at $\vec{a}$, and they are all continuous at $\vec{x} = \vec{a}$", r"$f$ is $C^1$-smooth at $\vec{a}$")
-        + r", then $f$ is differentiable at $\vec{x} = \vec{a}$",
+        r"If all components $f^j$ of $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ have "
+        + lk.gloss(r"well-defined partial derivatives in an open ball centered at $\vec{a}$, all continuous at $\vec{a}$", r"$f$ is $C^1$-smooth at $\vec{a}$")
+        + r", then $f$ is differentiable at $\vec{a}$",
         label="thm-c1",
     )
     return
