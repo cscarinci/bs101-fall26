@@ -212,7 +212,7 @@ def _(blank, lk, np):
                 r"$$ B(\vec{a}, \delta) = \big\{ \vec{x} \in \mathbb{R}^n \;\big|\; \mk{\lVert \vec{x} - \vec{a} \rVert < \delta} \big\} $$",
                 r"distance of $\vec{x}$ from $\vec{a}$<br>is smaller than $\delta$",
             ),
-            r"is the **open ball** in $\mathbb{R}^n$ centered at $\vec{a}$ with radius $\delta$",
+            r"is the **open ball** in $\mathbb{R}^n$ centered at $\vec{a}$ with radius $\delta$.",
             lk.figure(_fig),
         ],
         label="def-open-ball",
@@ -231,10 +231,10 @@ def _(lk):
 
             > Only “interior” points are part of $B(\vec{a}, \delta)$
 
-            > $\leadsto$ &nbsp; $S(\vec{a}, \delta) = \big\{ \vec{x} \in \mathbb{R}^n \;\big|\; \lVert \vec{x} - \vec{a} \rVert = \delta \big\}$ &nbsp; (**sphere** in $\mathbb{R}^n$ centered at $\vec{a}$ with radius $\delta$)
+            > $\leadsto$ &nbsp; $S(\vec{a}, \delta) = \big\{ \vec{x} \in \mathbb{R}^n \;\big|\; \lVert \vec{x} - \vec{a} \rVert = \delta \big\}$ &nbsp; (**sphere** centered at $\vec{a}$ with radius $\delta$)
             """,
             lk.aside(
-                r"> $\leadsto$ &nbsp; $\mk{\overline{B(\vec{a}, \delta)}} = B(\vec{a}, \delta) \cup S(\vec{a}, \delta)$ &nbsp; (**closed ball** in $\mathbb{R}^n$ centered at $\vec{a}$ with radius $\delta$)",
+                r"> $\leadsto$ &nbsp; $\mk{\overline{B(\vec{a}, \delta)}} = B(\vec{a}, \delta) \cup S(\vec{a}, \delta)$ &nbsp; (**closed ball** centered at $\vec{a}$ with radius $\delta$)",
                 r"$\lVert \vec{x} - \vec{a} \rVert \leq \delta$",
             ),
         ]
@@ -417,7 +417,7 @@ def _(lk):
 
             > $\Longrightarrow$ &nbsp; $\lvert f(\vec{x}) - 0 \rvert \leq 2 \lVert \vec{x} \rVert = 2 \lVert \vec{x} - \vec{0} \rVert$
 
-            > $\Longrightarrow$ &nbsp; whenever we make $0 < \lVert \vec{x} - \vec{0} \rVert < 1/2 = \delta$ &nbsp; (for $\varepsilon = 1$) we guarantee that $\lvert f(\vec{x}) - 0 \rvert < 1$
+            > $\Longrightarrow$ &nbsp; making $0 < \lVert \vec{x} - \vec{0} \rVert < 1/2 = \delta$ &nbsp; (for $\varepsilon = 1$) guarantees $\lvert f(\vec{x}) - 0 \rvert < 1$
             """,
             lk.aside(
                 r"now repeat the argument for every $\varepsilon > 0$",
