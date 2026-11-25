@@ -550,7 +550,7 @@ def _(lk):
         r"""
         What does $\mathrm{div}(\vec{F})$ tell us about $\vec{F}$?
 
-        > $\leadsto$ &nbsp; $\mathrm{div}(\vec{F})(\vec{x})$ = rate of compression/expansion of “area at $\vec{x}$” under the “flow of $\vec{F}$”
+        > $\leadsto$ &nbsp; $\mathrm{div}(\vec{F})(\vec{x})$ = rate of expansion of “area at $\vec{x}$” under the flow of $\vec{F}$
         """
     )
     return
