@@ -241,8 +241,8 @@ def _(lk, np):
         $$
         """,
         lk.figure(_fig),
-        r"$\leadsto$ &nbsp; any vector can be written uniquely as a linear combination of the standard basis vectors",
-        r"$\leadsto$ &nbsp; the component $x^i$ of a vector $\vec{x} = \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix}$ is the signed length of the projection of $\vec{x}$ along $\vec{e}_i$",
+        r"$\leadsto$ &nbsp; any vector is a unique linear combination of the standard basis vectors",
+        r"$\leadsto$ &nbsp; the component $x^i$ of $\vec{x} = \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix}$ is the signed length of its projection along $\vec{e}_i$",
     )
     return
 
@@ -261,7 +261,7 @@ def _(lk):
     # definition: m x n matrix
     lk.definition(
         [
-            r"Given $m, n \in \mathbb{Z}_{>0}$, an $m \times n$ **matrix** is an array of real numbers with $m$ rows and $n$ columns",
+            r"Given $m, n \in \mathbb{Z}_{>0}$, an $m \times n$ **matrix** is an array of numbers with $m$ rows and $n$ columns",
             lk.aside(
                 r"$$ A = \begin{bmatrix} A^1{}_1 & A^1{}_2 & \cdots & A^1{}_n \\ A^2{}_1 & A^2{}_2 & \cdots & A^2{}_n \\ \vdots & & & \\ A^m{}_1 & A^m{}_2 & \cdots & A^m{}_n \end{bmatrix}, \qquad \mk{A^i{}_j} \in \mathbb{R} \quad \forall \ \begin{matrix} i = 1, \dots, m \\ j = 1, \dots, n \end{matrix} $$",
                 r"(ij) component of the matrix $A$<br>superscript $i$ denotes the row<br>subscript $j$ denotes the column",
@@ -280,7 +280,7 @@ def _(lk):
     lk.prose(
         "Why are we interested in matrices?",
         lk.aside(
-            r"> $\leadsto$ &nbsp; generalization of <span class='lk-mark'>vectors</span> (can also extend addition and multiplication to matrices!)",
+            r"> $\leadsto$ &nbsp; generalization of <span class='lk-mark'>vectors</span> (addition and multiplication extend to matrices!)",
             r"$n \times 1$ matrices",
         ),
         r"> $\leadsto$ &nbsp; will give the simplest examples of multivariable functions!",
@@ -431,7 +431,7 @@ def _(lk):
 
         > > $\Longrightarrow$ &nbsp; $A\vec{x} \in \mathrm{Mat}(m \times 1) \approx \mathbb{R}^m$
 
-        > > $\Longrightarrow$ &nbsp; $A : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is a function on $\mathbb{R}^n$ valued in $\mathbb{R}^m$ (a multivariable function!)
+        > > $\Longrightarrow$ &nbsp; $A : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is a multivariable function!
         """
     )
     return
@@ -458,7 +458,7 @@ def _(lk):
 def _(lk):
     # module: linear
     # motivation: matrix functions are linear
-    lk.prose(r"$\leadsto$ &nbsp; functions defined by matrix multiplication are always linear! (very special property)")
+    lk.prose(r"$\leadsto$ &nbsp; matrix multiplication always defines linear functions! (very special property)")
     return
 
 
@@ -572,7 +572,7 @@ def _(lk):
             \end{aligned}
             $$
             """,
-            r"> $\leadsto$ &nbsp; another way to get convinced about non-commutativity of matrix multiplication!",
+            r"> $\leadsto$ &nbsp; another way to see that matrix multiplication is non-commutative!",
         ]
     )
     return
@@ -591,11 +591,10 @@ def _(lk):
     # module: determinants
     # definition: determinant of a 2 x 2 matrix
     lk.definition(
-        r"""
-        For $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \in \mathrm{Mat}(2 \times 2)$ &nbsp; $\leftrightsquigarrow$ &nbsp; $A : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$
-
-        define &nbsp; $\det(A) = ad - bc \in \mathbb{R}$ &nbsp; the **determinant** of $A$
-        """,
+        lk.aside(
+            r"For $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \in \mathrm{Mat}(2 \times 2)$, the **determinant** of $A$ is $\det(A) = ad - bc \in \mathbb{R}$.",
+            r"$A \in \mathrm{Mat}(2 \times 2) \ \leftrightsquigarrow \ A : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ linear",
+        ),
         label="def-det",
     )
     return
@@ -658,7 +657,7 @@ def _(lk):
         r"> > $\exists \, A^{-1} : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ such that $A \circ A^{-1}(\vec{x}) = A^{-1} \circ A(\vec{x}) = \vec{x} \quad \forall \, \vec{x} \in \mathbb{R}^2$",
         r"> > > $\iff$ &nbsp; $\det(A) \neq 0$",
         lk.gap(),
-        r"$\leadsto$ &nbsp; in fact, for $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$ the inverse can be calculated explicitly when $\det(A) = ad - bc \neq 0$",
+        r"$\leadsto$ &nbsp; in fact, for $A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$ with $\det(A) = ad - bc \neq 0$, the inverse is",
         r"$$ A^{-1} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix} $$",
     )
     return
