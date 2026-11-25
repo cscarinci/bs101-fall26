@@ -211,7 +211,7 @@ def _(lk):
     # remark: notation
     lk.remark(
         r"""
-        For the rest of the course we will work mostly with $n = 1, 2, 3$ &nbsp; $\leadsto$ &nbsp; we will simplify the notation
+        For the rest of the course we work mostly with $n = 1, 2, 3$ &nbsp; $\leadsto$ &nbsp; we simplify the notation
 
         > $$
         > \begin{alignedat}{3}

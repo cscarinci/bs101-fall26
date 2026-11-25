@@ -498,7 +498,7 @@ def _(lk, tf):
 def _(lk):
     # module: curl
     # consequence: what the curl determines
-    lk.prose(r"$\leadsto$ &nbsp; $\mathrm{Curl}(\vec{F})(\vec{x})$ determines the axis of rotation and the rotation speed of the flow around $\vec{x}$.")
+    lk.prose(r"$\leadsto$ &nbsp; $\mathrm{Curl}(\vec{F})(\vec{x})$ determines the axis and speed of rotation of the flow around $\vec{x}$.")
     return
 
 
