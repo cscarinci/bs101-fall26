@@ -448,10 +448,10 @@ def _(lk):
         [
             r"Given $f : \mathbb{R}^n \longrightarrow \mathbb{R}$, a point $\vec{a} \in \mathbb{R}^n$ is",
             lk.aside(
-                r"> • &nbsp; <span class='lk-mark'>**local**</span> **maximum** of $f$ if there is an open ball $B$ around $\vec{a}$ such that $f(\vec{x}) \leq f(\vec{a})$ $\forall \, \vec{x} \in B$",
+                r"> • &nbsp; <span class='lk-mark'>**local**</span> **maximum** of $f$ if $f(\vec{x}) \leq f(\vec{a}) \quad \forall \, \vec{x} \in B$, for some open ball $B$ around $\vec{a}$",
                 "only around nearby points",
             ),
-            r"> • &nbsp; **local minimum** of $f$ if there is an open ball $B$ around $\vec{a}$ such that $f(\vec{x}) \geq f(\vec{a})$ $\forall \, \vec{x} \in B$",
+            r"> • &nbsp; **local minimum** of $f$ if $f(\vec{x}) \geq f(\vec{a}) \quad \forall \, \vec{x} \in B$, for some open ball $B$ around $\vec{a}$",
         ],
         label="def-local-extrema",
     )
@@ -538,7 +538,7 @@ def _(lk):
     # theorem: second derivative test with v . Hv
     lk.theorem(
         r"""
-        If $f$ is $C^2$-smooth at a critical point $\vec{a}$, let $H = Hf(\vec{a}) \in \mathrm{Mat}(n \times n)$ be the Hessian matrix, then
+        If $f$ is $C^2$-smooth at a critical point $\vec{a}$, and $H = Hf(\vec{a})$ is the Hessian matrix, then
 
         > • &nbsp; <span class="lk-tab" style="--lk-tab: 12em">$\vec{a}$ is a local maximum if</span>$\vec{v} \cdot H\vec{v} < 0 \quad \forall \, \vec{v} \neq \vec{0}$
 
