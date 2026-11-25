@@ -45,7 +45,7 @@ def _(lk):
             "single variable vector valued (path)",
         ),
         lk.aside(
-            r"> is differentiable at $x = a$ if each component $f^i : \mathbb{R} \longrightarrow \mathbb{R}$ <span class='lk-mark'>is differentiable at $x = a$</span>",
+            r"> is differentiable at $x = a$ if each component $f^i$ <span class='lk-mark'>is differentiable at $x = a$</span>",
             "as a single variable scalar function",
         ),
         lk.aside(
@@ -68,7 +68,7 @@ def _(lk):
             "multivariable vector valued",
         ),
         lk.aside(
-            r"> is differentiable at $\vec{x} = \vec{a} = \begin{bmatrix} a^1 \\ a^2 \\ \vdots \\ a^n \end{bmatrix}$ if each component $f^i : \mathbb{R}^n \longrightarrow \mathbb{R}$ <span class='lk-mark'>is differentiable at $\vec{x} = \vec{a}$</span>",
+            r"> is differentiable at $\vec{a} = \begin{bmatrix} a^1 \\ a^2 \\ \vdots \\ a^n \end{bmatrix}$ if each component $f^i$ <span class='lk-mark'>is differentiable at $\vec{a}$</span>",
             "as a multivariable scalar valued function",
         ),
         r"""
@@ -90,7 +90,7 @@ def _(lk):
             r"derivative of $f$ at $\vec{a}$<br>(Jacobian matrix of $f$ at $\vec{a}$)",
         ),
         r"""
-        > > $\Longleftrightarrow$ &nbsp; $g(\vec{x}) = f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a})$ is a good affine approximation to $f(\vec{x})$ near $\vec{a}$
+        > > $\Longleftrightarrow$ &nbsp; $g(\vec{x}) = f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a})$ is the affine approximation of $f$ at $\vec{a}$
         """,
         lk.gap(),
         r"""
@@ -143,7 +143,7 @@ def _(lk):
     # prose: what we want to generalize, and where we start
     lk.prose(
         r"""
-        $\leadsto$ &nbsp; we want to generalize this to vector valued multivariable functions $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$, $g : \mathbb{R}^m \longrightarrow \mathbb{R}^p$
+        $\leadsto$ &nbsp; we want to generalize this to multivariable maps $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$, $g : \mathbb{R}^m \longrightarrow \mathbb{R}^p$
         """,
         lk.aside(
             r"$\leadsto$ &nbsp; start with $\mk{\gamma : \mathbb{R} \longrightarrow \mathbb{R}^n}$ and $\mk{f : \mathbb{R}^n \longrightarrow \mathbb{R}}$",
