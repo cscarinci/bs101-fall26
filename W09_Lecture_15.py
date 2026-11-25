@@ -593,13 +593,15 @@ def _(Figure, cross_axes, lk):
     _ax.text(1.06, 1.04, r"$h\left(\genfrac{[}{]}{0}{0}{1}{1}\right) = 2$", color="black", fontsize=12, ha="left", va="bottom")
     lk.remark(
         [
-            r"""
-            $f\Big( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \Big) = (x^1)^2 + (x^2)^2$ over $\mathbb{R}^2$ has no global maximum because $\mathbb{R}^2$ is unbounded
-
-            $g\Big( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \Big) = (x^1)^2 + (x^2)^2$ over $D = (0, 1] \times (0, 1]$ has no global minimum because $D$ is not closed
-
-            $h\Big( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \Big) = (x^1)^2 + (x^2)^2$ over $\bar{D} = [0, 1] \times [0, 1]$ has both global extrema!
-            """,
+            lk.aside(
+                r"$f\Big( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \Big) = (x^1)^2 + (x^2)^2$ over $\mathbb{R}^2$ has no global maximum",
+                r"$\mathbb{R}^2$ is unbounded",
+            ),
+            lk.aside(
+                r"$g\Big( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \Big) = (x^1)^2 + (x^2)^2$ over $D = (0, 1] \times (0, 1]$ has no global minimum",
+                r"$D$ is not closed",
+            ),
+            r"$h\Big( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \Big) = (x^1)^2 + (x^2)^2$ over $\bar{D} = [0, 1] \times [0, 1]$ has both global extrema!",
             lk.figure(_fig),
         ]
     )
