@@ -51,7 +51,7 @@ TITLES = {  # lecture number -> title shown on the index
     22: "Surface integrals",
     23: "Surface integrals of vector fields",
     24: "Stokes' theorem",
-    25: "Stokes' theorem, change of coordinates and triple integrals",
+    25: "Triple integrals",
 }
 
 DRAFTS = set()  # lectures kept in the repo but not published

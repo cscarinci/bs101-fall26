@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.25.1"
-app = marimo.App(width="medium", app_title="BS101 · Lecture 25 · Stokes' theorem, change of coordinates and triple integrals", css_file="lecturekit/style.css")
+app = marimo.App(width="medium", app_title="BS101 · Lecture 25 · Triple integrals", css_file="lecturekit/style.css")
 
 
 @app.cell(hide_code=True)
@@ -26,7 +26,7 @@ async def _():
 
 @app.cell(hide_code=True)
 def _(lk):
-    lk.lecture(25, "Stokes' theorem, change of coordinates and triple integrals")
+    lk.lecture(25, "Triple integrals")
     return
 
 
