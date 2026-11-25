@@ -141,7 +141,7 @@ def _(lk):
         r"""
         Each component $\gamma^i : A \subseteq \mathbb{R} \longrightarrow \mathbb{R}$ is a usual single variable real valued function!
 
-        > $\Longrightarrow$ &nbsp; paths are ordered lists of single variable scalar functions, like vectors were ordered lists of scalars!
+        > $\Longrightarrow$ &nbsp; paths are lists of single variable functions, like vectors are lists of scalars!
         """
     )
     return
@@ -505,13 +505,11 @@ def _(lk):
     # module: differentiability
     # definition: derivative of a path
     lk.definition(
-        r"""
-        A path $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^m$ is **differentiable** at $t = a$
-
-        > if $\displaystyle\lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a}$ exists.
-
-        > > $\leadsto$ &nbsp; if it exists we call it the **derivative** of $\gamma$ at $t = a$ and denote it $\gamma'(a)$
-        """,
+        [
+            r"A path $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^m$ is **differentiable** at $t = a$ if the following limit exists",
+            r"$$ \lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a} $$",
+            r"> $\leadsto$ &nbsp; we call it the **derivative** of $\gamma$ at $t = a$ and denote it $\gamma'(a)$",
+        ],
         label="def-derivative",
     )
     return
@@ -596,7 +594,7 @@ def _(lk):
     # definition: tangent line
     lk.definition(
         r"""
-        If $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^m$ is differentiable at $t = a$ with velocity vector $\gamma'(a) \neq \vec{0}$, we call the line through $\vec{x} = \gamma(a)$ in the direction of $\vec{v} = \gamma'(a)$ the **tangent line** to $\gamma$ at $t = a$
+        If $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^m$ is differentiable at $t = a$ with velocity vector $\gamma'(a) \neq \vec{0}$, we call the line through $\vec{x} = \gamma(a)$ in the direction of $\vec{v} = \gamma'(a)$ the **tangent line** to $\gamma$ at $t = a$.
 
         $$
         T_a\gamma = \big\{ \vec{y} = \gamma(a) + s \, \gamma'(a) \;\big|\; s \in \mathbb{R} \big\}
