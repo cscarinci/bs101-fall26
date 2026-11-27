@@ -91,14 +91,14 @@ def _(lk):
         $$
         \begin{aligned}
         \frac{\partial f}{\partial x^1}(\vec{a}) &= \lim_{t \to 0} \frac{f\left( \begin{bmatrix} a^1 + t \\ a^2 \end{bmatrix} \right) - f\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right)}{t} = \frac{d}{dt} \Big|_{t=0} f(\vec{a} + t\vec{e}_1)\\[6pt]
-        \frac{\partial f}{\partial x^2}(\vec{a}) &= \lim_{t \to 0} \frac{f\left( \begin{bmatrix} a^1 \\ a^2 + t \end{bmatrix} \right) - f\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right)}{t} = \frac{d}{dt} \Big|_{t=0} f(\vec{a} + t\vec{e}_2)
+        \frac{\partial f}{\partial x^2}(\vec{a}) &= \lim_{t \to 0} \frac{f\left( \begin{bmatrix} a^1 \\ a^2 + t \end{bmatrix} \right) - f\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right)}{t} = \frac{d}{dt} \Big|_{t=0} f(\vec{a} + t\vec{e}_2).
         \end{aligned}
         $$
 
         > 2\. &nbsp; has well-defined directional derivatives $\forall \, \vec{v} = \begin{bmatrix} v^1 \\ v^2 \end{bmatrix}$
 
         $$
-        Df(\vec{a})(\vec{v}) = \lim_{t \to 0} \frac{f\left( \begin{bmatrix} a^1 + t v^1 \\ a^2 + t v^2 \end{bmatrix} \right) - f\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right)}{t} = \frac{d}{dt} \Big|_{t=0} f(\vec{a} + t\vec{v})
+        Df(\vec{a})(\vec{v}) = \lim_{t \to 0} \frac{f\left( \begin{bmatrix} a^1 + t v^1 \\ a^2 + t v^2 \end{bmatrix} \right) - f\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right)}{t} = \frac{d}{dt} \Big|_{t=0} f(\vec{a} + t\vec{v}).
         $$
 
         > 3\. &nbsp; the map $Df(\vec{a}) : \mathbb{R}^2 \longrightarrow \mathbb{R}$, $\vec{v} \longmapsto Df(\vec{a})(\vec{v})$ is linear
@@ -113,7 +113,7 @@ def _(lk):
         lk.aside(
             r"""
             $$
-            \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0
+            \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0.
             $$
             """,
             r"it is this approximation that allows<br>us to call $Df(\vec{a})$ the derivative",
@@ -160,7 +160,7 @@ def _(lk):
     # example: directional derivatives at 0 that are not linear
     lk.example(
         r"""
-        $f\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = \begin{cases} \dfrac{(x^1)^2 x^2}{\lVert \vec{x} \rVert^2}, & \vec{x} \neq \vec{0}\\[8pt] 0, & \vec{x} = \vec{0} \end{cases}$
+        $f\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = \begin{cases} \dfrac{(x^1)^2 x^2}{\lVert \vec{x} \rVert^2}, & \vec{x} \neq \vec{0},\\[8pt] 0, & \vec{x} = \vec{0} \end{cases}$
 
         $$
         \begin{aligned}
@@ -173,7 +173,7 @@ def _(lk):
 
         > • &nbsp; not linear!
 
-        > > $\Longrightarrow$ &nbsp; $f$ is NOT differentiable at $\vec{x} = \vec{0}$!
+        > > $\Longrightarrow$ &nbsp; $f$ is not differentiable at $\vec{x} = \vec{0}$.
         """,
         label="ex-not-linear",
     )
@@ -206,7 +206,7 @@ def _(lk):
             > > • &nbsp; $Df(\vec{a})(\vec{x} - \vec{a})$ is a linear approximation to $f(\vec{x}) - f(\vec{a})$
 
             $$
-            \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0
+            \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0.
             $$
             """,
         ]
@@ -270,7 +270,7 @@ def _(lk):
     # example: not continuous, so not differentiable
     lk.example(
         [
-            r"$f\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = \begin{cases} \dfrac{(x^1)^2}{\lVert \vec{x} \rVert^2}, & \vec{x} \neq \vec{0}\\[8pt] b, & \vec{x} = \vec{0} \end{cases}$",
+            r"$f\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = \begin{cases} \dfrac{(x^1)^2}{\lVert \vec{x} \rVert^2}, & \vec{x} \neq \vec{0},\\[8pt] b, & \vec{x} = \vec{0} \end{cases}$",
             lk.aside(
                 r"> is not differentiable at $\vec{x} = \vec{0}$",
                 r"no matter the value of $b \in \mathbb{R}$",
@@ -361,7 +361,7 @@ def _(lk):
                 $$
                 \begin{aligned}
                 \frac{\partial f}{\partial x^1} &= \frac{e^{x^1} \sin(x^1) - (e^{x^1} + \sqrt{x^2}) \cos(x^1)}{(\sin(x^1))^2}\\[6pt]
-                \frac{\partial f}{\partial x^2} &= \frac{1}{2} \, \frac{1}{\sqrt{x^2} \, \sin(x^1)}
+                \frac{\partial f}{\partial x^2} &= \frac{1}{2} \, \frac{1}{\sqrt{x^2} \, \sin(x^1)}.
                 \end{aligned}
                 $$
                 """,
@@ -396,7 +396,7 @@ def _(lk):
             lk.aside(
                 r"""
                 $$
-                Df(\vec{a}) = \mk{\begin{bmatrix} {\large\tfrac{\partial f}{\partial x^1}}(\vec{a}) & {\large\tfrac{\partial f}{\partial x^2}}(\vec{a}) & \cdots & {\large\tfrac{\partial f}{\partial x^n}}(\vec{a}) \end{bmatrix}} : \mathbb{R}^n \longrightarrow \mathbb{R}
+                Df(\vec{a}) = \mk{\begin{bmatrix} {\large\tfrac{\partial f}{\partial x^1}}(\vec{a}) & {\large\tfrac{\partial f}{\partial x^2}}(\vec{a}) & \cdots & {\large\tfrac{\partial f}{\partial x^n}}(\vec{a}) \end{bmatrix}} : \mathbb{R}^n \longrightarrow \mathbb{R},
                 $$
                 """,
                 r"$\mathrm{Mat}(1 \times n)$",
@@ -424,7 +424,7 @@ def _(lk):
             lk.aside(
                 r"""
                 $$
-                \vec{\nabla} f(\vec{a}) = \mk{\begin{bmatrix} {\large\tfrac{\partial f}{\partial x^1}}(\vec{a}) \\[4pt] {\large\tfrac{\partial f}{\partial x^2}}(\vec{a}) \\ \vdots \\ {\large\tfrac{\partial f}{\partial x^n}}(\vec{a}) \end{bmatrix}} \in \mathbb{R}^n
+                \vec{\nabla} f(\vec{a}) = \mk{\begin{bmatrix} {\large\tfrac{\partial f}{\partial x^1}}(\vec{a}) \\[4pt] {\large\tfrac{\partial f}{\partial x^2}}(\vec{a}) \\ \vdots \\ {\large\tfrac{\partial f}{\partial x^n}}(\vec{a}) \end{bmatrix}} \in \mathbb{R}^n.
                 $$
                 """,
                 r"$\mathrm{Mat}(n \times 1) \neq \mathrm{Mat}(1 \times n)$",
@@ -471,7 +471,7 @@ def _(lk):
         \begin{aligned}
         Df(\vec{a})(\vec{v}) &= v^1 \frac{\partial f}{\partial x^1}(\vec{a}) + v^2 \frac{\partial f}{\partial x^2}(\vec{a}) + \dots + v^n \frac{\partial f}{\partial x^n}(\vec{a})\\[4pt]
         &= \big( \vec{\nabla} f(\vec{a}) \big) \cdot \vec{v}\\[4pt]
-        &= \lVert \vec{\nabla} f(\vec{a}) \rVert \, \lVert \vec{v} \rVert \cos\big( \theta(\vec{\nabla} f(\vec{a}), \vec{v}) \big)
+        &= \lVert \vec{\nabla} f(\vec{a}) \rVert \, \lVert \vec{v} \rVert \cos\big( \theta(\vec{\nabla} f(\vec{a}), \vec{v}) \big).
         \end{aligned}
         $$
         """
@@ -661,7 +661,7 @@ def _(lk):
         $$
         \begin{aligned}
         g(\vec{x}) &= f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a})\\[4pt]
-        &= f(\vec{a}) + \frac{\partial f}{\partial x^1}(\vec{a})(x^1 - a^1) + \frac{\partial f}{\partial x^2}(\vec{a})(x^2 - a^2) + \dots + \frac{\partial f}{\partial x^n}(\vec{a})(x^n - a^n)
+        &= f(\vec{a}) + \frac{\partial f}{\partial x^1}(\vec{a})(x^1 - a^1) + \frac{\partial f}{\partial x^2}(\vec{a})(x^2 - a^2) + \dots + \frac{\partial f}{\partial x^n}(\vec{a})(x^n - a^n),
         \end{aligned}
         $$
 

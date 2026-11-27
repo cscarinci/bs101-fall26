@@ -60,7 +60,7 @@ def _(lk):
         r"Chain rule for maps $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$, $g : \mathbb{R}^m \longrightarrow \mathbb{R}^p$",
         r"""
         $$
-        D(g \circ f)(\vec{x}) = Dg(f(\vec{x})) \cdot Df(\vec{x})
+        D(g \circ f)(\vec{x}) = Dg(f(\vec{x})) \cdot Df(\vec{x}).
         $$
 
         > $\leadsto$ &nbsp; assuming $f$ differentiable at $\vec{x} \in \mathbb{R}^n$
@@ -170,7 +170,7 @@ def _(lk):
         [
             r"$f : \mathbb{R}^n \longrightarrow \mathbb{R}$ is called **$C^2$-smooth** at $\vec{x} = \vec{a}$ if all partial derivatives ${\large\tfrac{\partial f}{\partial x^i}}(\vec{x})$ are well-defined around $\vec{x} = \vec{a}$, their partial derivatives ${\large\tfrac{\partial}{\partial x^j} \tfrac{\partial f}{\partial x^i}}(\vec{x})$ are also all well-defined around $\vec{x} = \vec{a}$, and are all continuous at $\vec{x} = \vec{a}$",
             lk.aside(
-                r"$$ \frac{\partial}{\partial x^j} \frac{\partial f}{\partial x^i}(\vec{x}) = \mk{\frac{\partial^2 f}{\partial x^j \partial x^i}(\vec{x})} $$",
+                r"$$ \frac{\partial}{\partial x^j} \frac{\partial f}{\partial x^i}(\vec{x}) = \mk{\frac{\partial^2 f}{\partial x^j \partial x^i}(\vec{x})}. $$",
                 r"second order partial derivative<br>of $f$ with respect to $x^i$ and $x^j$",
             ),
         ],
@@ -190,7 +190,7 @@ def _(lk):
 
             > $\Longrightarrow$ &nbsp; $f$ $C^1$-smooth at $\vec{x} = \vec{a}$
             """,
-            lk.aside(r"> $\Longrightarrow$ &nbsp; $f$ differentiable at $\vec{x} = \vec{a}$", "opposite directions are NOT true!"),
+            lk.aside(r"> $\Longrightarrow$ &nbsp; $f$ differentiable at $\vec{x} = \vec{a}$", "opposite directions are not true!"),
             r"> $\Longrightarrow$ &nbsp; $f$ continuous at $\vec{x} = \vec{a}$",
         ]
     )
@@ -210,7 +210,7 @@ def _(lk):
         {\large\tfrac{\partial^2 f}{\partial x^1 \partial x^1}}(\vec{a}) & {\large\tfrac{\partial^2 f}{\partial x^1 \partial x^2}}(\vec{a}) & \cdots & {\large\tfrac{\partial^2 f}{\partial x^1 \partial x^n}}(\vec{a})\\[6pt]
         {\large\tfrac{\partial^2 f}{\partial x^2 \partial x^1}}(\vec{a}) & {\large\tfrac{\partial^2 f}{\partial x^2 \partial x^2}}(\vec{a}) & \cdots & {\large\tfrac{\partial^2 f}{\partial x^2 \partial x^n}}(\vec{a})\\
         \vdots & \vdots & \ddots & \vdots\\
-        {\large\tfrac{\partial^2 f}{\partial x^n \partial x^1}}(\vec{a}) & {\large\tfrac{\partial^2 f}{\partial x^n \partial x^2}}(\vec{a}) & \cdots & {\large\tfrac{\partial^2 f}{\partial x^n \partial x^n}}(\vec{a})
+        {\large\tfrac{\partial^2 f}{\partial x^n \partial x^1}}(\vec{a}) & {\large\tfrac{\partial^2 f}{\partial x^n \partial x^2}}(\vec{a}) & \cdots & {\large\tfrac{\partial^2 f}{\partial x^n \partial x^n}}(\vec{a}),
         \end{bmatrix} \in \mathrm{Mat}(n \times n)
         $$
 
@@ -351,7 +351,7 @@ def _(Figure, a_taylor, lk, math, np):
             $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ $C^2$-smooth at $\vec{x} = \vec{a}$
 
             $$
-            f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) + \frac{1}{2} (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})
+            f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) + \frac{1}{2} (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a}),
             $$
             """,
                 lk.aside(
@@ -382,7 +382,7 @@ def _(lk):
             lk.aside(
                 r"""
                 $$
-                \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a}) - \frac{1}{2} (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})}{\mk{\lVert \vec{x} - \vec{a} \rVert^2}} = 0
+                \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a}) - \frac{1}{2} (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})}{\mk{\lVert \vec{x} - \vec{a} \rVert^2}} = 0.
                 $$
                 """,
                 r"error goes to zero<br>faster than $(\text{distance})^2$",
@@ -528,7 +528,7 @@ def _(lk):
 def _(lk):
     # module: local extrema
     # definition: saddle point
-    lk.definition(r"A critical point that is not a local extremum is called a **saddle point**", label="def-saddle")
+    lk.definition(r"A critical point that is not a local extremum is called a **saddle point**.", label="def-saddle")
     return
 
 

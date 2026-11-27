@@ -118,7 +118,7 @@ def _(lk):
         A **multivariable function** is a rule
 
         $$
-        f : A \subseteq \mathbb{R}^n \longrightarrow B \subseteq \mathbb{R}^m
+        f : A \subseteq \mathbb{R}^n \longrightarrow B \subseteq \mathbb{R}^m,
         $$
 
         that assigns to each element $\vec{x} \in A$ a unique element $\vec{y} = f(\vec{x}) \in B$
@@ -245,14 +245,14 @@ def _(lk):
             r"Given $f : A \subseteq \mathbb{R}^n \longrightarrow B \subseteq \mathbb{R}^m$",
             r"> • &nbsp; **image** of $f$ is",
             lk.aside(
-                r"$$ \mathrm{Im}(f) = \big\{ \vec{y} \in \mathbb{R}^m \;\big|\; \exists \, \vec{x} \in A, \ f(\vec{x}) = \vec{y} \big\} \mk{{} \subseteq B} $$",
+                r"$$ \mathrm{Im}(f) = \big\{ \vec{y} \in \mathbb{R}^m \;\big|\; \exists \, \vec{x} \in A, \ f(\vec{x}) = \vec{y} \big\} \mk{{} \subseteq B}. $$",
                 r"not necessarily equal!<br>$\mathrm{Im}(f) \subseteq \mathrm{Codom}(f)$",
             ),
             r"""
             > • &nbsp; **graph** of $f$ is
 
             $$
-            \mathrm{graph}(f) = \big\{ (\vec{x}, \vec{y}) \in \mathbb{R}^n \times \mathbb{R}^m \;\big|\; \vec{x} \in A, \ \vec{y} = f(\vec{x}) \big\} \subseteq A \times B
+            \mathrm{graph}(f) = \big\{ (\vec{x}, \vec{y}) \in \mathbb{R}^n \times \mathbb{R}^m \;\big|\; \vec{x} \in A, \ \vec{y} = f(\vec{x}) \big\} \subseteq A \times B.
             $$
             """,
         ],
@@ -388,7 +388,7 @@ def _(lk):
         > • &nbsp; **level set** of $f$ with value $\vec{b}$ is
 
         $$
-        f^{-1}(\vec{b}) = \big\{ \vec{x} \in \mathbb{R}^n \;\big|\; \vec{x} \in A \text{ and } f(\vec{x}) = \vec{b} \big\}
+        f^{-1}(\vec{b}) = \big\{ \vec{x} \in \mathbb{R}^n \;\big|\; \vec{x} \in A \text{ and } f(\vec{x}) = \vec{b} \big\}.
         $$
         """,
         label="def-level-set",
@@ -446,7 +446,7 @@ def _(lk):
     lk.remark(
         [
             r"""
-            Here $f^{-1}(\vec{b})$ is NOT the value of the inverse function of $f$ ($f$ may not even have one)
+            Here $f^{-1}(\vec{b})$ is not the value of the inverse function of $f$ ($f$ may not even have one).
 
             $f^{-1}(\vec{b})$ is the set of points in the domain of $f$ which gives the value “$\vec{b}$” as an output!
 
@@ -606,7 +606,7 @@ def _(lk):
             For $p : \mathbb{R}^3 \longrightarrow \mathbb{R}$ an **affine scalar function**
 
             $$
-            p\left( \begin{bmatrix} x^1 \\ x^2 \\ x^3 \end{bmatrix} \right) = a x^1 + b x^2 + c x^3 + d
+            p\left( \begin{bmatrix} x^1 \\ x^2 \\ x^3 \end{bmatrix} \right) = a x^1 + b x^2 + c x^3 + d.
             $$
             """,
             lk.aside(
@@ -625,7 +625,7 @@ def _(lk):
             \begin{aligned}
             &a (x^1)^2 + b (x^2)^2 + c (x^3)^2\\
             &+ d \, x^1 x^2 + e \, x^2 x^3 + f \, x^3 x^1\\
-            &+ g \, x^1 + h \, x^2 + i \, x^3 + j
+            &+ g \, x^1 + h \, x^2 + i \, x^3 + j.
             \end{aligned}
             $$
 
@@ -697,7 +697,7 @@ def _(lk):
     # exercise: the map T
     lk.exercise(
         r"""
-        Let $T : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ be given by &nbsp; $\begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \longmapsto \begin{bmatrix} x^1 + x^2 \\ (x^1 + x^2)^2 \end{bmatrix}$
+        Let $T : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ be given by &nbsp; $\begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \longmapsto \begin{bmatrix} x^1 + x^2 \\ (x^1 + x^2)^2 \end{bmatrix}$.
 
         a) Sketch $\mathrm{Im}(T)$
 
@@ -717,7 +717,7 @@ def _(lk):
         Consider the surface
 
         $$
-        S = \left\{ \begin{bmatrix} x^1 \\ x^2 \\ x^3 \end{bmatrix} \in \mathbb{R}^3 \;\middle|\; (x^1)^2 + (x^2)^2 - x^3 = 1 \right\}
+        S = \left\{ \begin{bmatrix} x^1 \\ x^2 \\ x^3 \end{bmatrix} \in \mathbb{R}^3 \;\middle|\; (x^1)^2 + (x^2)^2 - x^3 = 1 \right\}.
         $$
 
         Find

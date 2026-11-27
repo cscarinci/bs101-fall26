@@ -135,7 +135,7 @@ def _(blank, lk):
     lk.prose(
         "in-class practice Q3:",
         r"> Given $\vec{u}, \vec{v}, \vec{w} \in \mathbb{R}^3$ pairwise orthogonal we can write $\vec{x} \in \mathbb{R}^3$ as",
-        r"$$ \vec{x} = a\vec{u} + b\vec{v} + c\vec{w} $$",
+        r"$$ \vec{x} = a\vec{u} + b\vec{v} + c\vec{w}, $$",
         r"> where &nbsp; $a = \dfrac{\vec{x} \cdot \vec{u}}{\lVert \vec{u} \rVert^2}, \quad b = \dfrac{\vec{x} \cdot \vec{v}}{\lVert \vec{v} \rVert^2}, \quad c = \dfrac{\vec{x} \cdot \vec{w}}{\lVert \vec{w} \rVert^2}$",
         lk.aside(
             lk.figure(_fig),
@@ -166,7 +166,7 @@ def _(lk):
         [
             r"$\mathbb{R}^n$ has a preferred orthogonal frame",
             lk.aside(
-                r"$$ \vec{e}_1 = \begin{bmatrix} 1 \\ 0 \\ 0 \\ \vdots \\ 0 \\ 0 \end{bmatrix}, \quad \vec{e}_2 = \begin{bmatrix} 0 \\ 1 \\ 0 \\ \vdots \\ 0 \\ 0 \end{bmatrix}, \quad \dots, \quad \vec{e}_n = \begin{bmatrix} 0 \\ 0 \\ 0 \\ \vdots \\ 0 \\ 1 \end{bmatrix} $$",
+                r"$$ \vec{e}_1 = \begin{bmatrix} 1 \\ 0 \\ 0 \\ \vdots \\ 0 \\ 0 \end{bmatrix}, \quad \vec{e}_2 = \begin{bmatrix} 0 \\ 1 \\ 0 \\ \vdots \\ 0 \\ 0 \end{bmatrix}, \quad \dots, \quad \vec{e}_n = \begin{bmatrix} 0 \\ 0 \\ 0 \\ \vdots \\ 0 \\ 1 \end{bmatrix}. $$",
                 r"standard basis vectors of $\mathbb{R}^n$",
             ),
         ],
@@ -263,10 +263,10 @@ def _(lk):
         [
             r"Given $m, n \in \mathbb{Z}_{>0}$, an $m \times n$ **matrix** is an array of numbers with $m$ rows and $n$ columns",
             lk.aside(
-                r"$$ A = \begin{bmatrix} A^1{}_1 & A^1{}_2 & \cdots & A^1{}_n \\ A^2{}_1 & A^2{}_2 & \cdots & A^2{}_n \\ \vdots & & & \\ A^m{}_1 & A^m{}_2 & \cdots & A^m{}_n \end{bmatrix}, \qquad \mk{A^i{}_j} \in \mathbb{R} \quad \forall \ \begin{matrix} i = 1, \dots, m \\ j = 1, \dots, n \end{matrix} $$",
+                r"$$ A = \begin{bmatrix} A^1{}_1 & A^1{}_2 & \cdots & A^1{}_n \\ A^2{}_1 & A^2{}_2 & \cdots & A^2{}_n \\ \vdots & & & \\ A^m{}_1 & A^m{}_2 & \cdots & A^m{}_n \end{bmatrix}, \qquad \mk{A^i{}_j} \in \mathbb{R} \quad \forall \ \begin{matrix} i = 1, \dots, m \\ j = 1, \dots, n \end{matrix}, $$",
                 r"(ij) component of the matrix $A$<br>superscript $i$ denotes the row<br>subscript $j$ denotes the column",
             ),
-            lk.aside(r"$$ A \in \mathrm{Mat}(\mk{m} \times \mk{n}) $$", "$m$ = rows, $n$ = columns"),
+            lk.aside(r"$$ A \in \mathrm{Mat}(\mk{m} \times \mk{n}). $$", "$m$ = rows, $n$ = columns"),
         ],
         label="def-matrix",
     )
@@ -471,7 +471,7 @@ def _(lk):
         A function $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is called **linear** if $\forall \, \vec{x}, \vec{y} \in \mathbb{R}^n$ and $\forall \, \alpha, \beta \in \mathbb{R}$
 
         $$
-        f(\alpha \vec{x} + \beta \vec{y}) = \alpha f(\vec{x}) + \beta f(\vec{y})
+        f(\alpha \vec{x} + \beta \vec{y}) = \alpha f(\vec{x}) + \beta f(\vec{y}).
         $$
         """,
         label="def-linear",
@@ -533,7 +533,7 @@ def _(lk):
                 \begin{aligned}
                 \Longrightarrow \quad f(\vec{x}) &= f(x^1 \mk{\vec{e}_1} + x^2 \mk{\vec{e}_2} + \dots + x^n \mk{\vec{e}_n}), \quad \forall \, \vec{x} \in \mathbb{R}^n\\
                 &= x^1 f(\vec{e}_1) + x^2 f(\vec{e}_2) + \dots + x^n f(\vec{e}_n)\\
-                &= A\vec{x} \quad \text{where} \quad A = \begin{bmatrix} \mk{f(\vec{e}_1)} & \mk{f(\vec{e}_2)} & \cdots & \mk{f(\vec{e}_n)} \end{bmatrix} \in \mathrm{Mat}(m \times n)
+                &= A\vec{x}, \quad \text{where} \quad A = \begin{bmatrix} \mk{f(\vec{e}_1)} & \mk{f(\vec{e}_2)} & \cdots & \mk{f(\vec{e}_n)} \end{bmatrix} \in \mathrm{Mat}(m \times n).
                 \end{aligned}
                 $$
                 """,
@@ -568,7 +568,7 @@ def _(lk):
             \begin{aligned}
             A &\in \mathrm{Mat}(m \times p) &&\leftrightsquigarrow \quad A : \mathbb{R}^p \longrightarrow \mathbb{R}^m\\
             B &\in \mathrm{Mat}(p \times n) &&\leftrightsquigarrow \quad B : \mathbb{R}^n \longrightarrow \mathbb{R}^p\\
-            AB &\in \mathrm{Mat}(m \times n) &&\leftrightsquigarrow \quad A \circ B : \mathbb{R}^n \longrightarrow \mathbb{R}^m
+            AB &\in \mathrm{Mat}(m \times n) &&\leftrightsquigarrow \quad A \circ B : \mathbb{R}^n \longrightarrow \mathbb{R}^m.
             \end{aligned}
             $$
             """,
@@ -698,7 +698,7 @@ def _(lk):
     # exercise: AB and BA
     lk.exercise(
         r"""
-        Let $A = \begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix}$, $B = \begin{bmatrix} 1 & 0 \\ 0 & 2 \end{bmatrix}$
+        Let $A = \begin{bmatrix} 1 & 1 \\ 0 & 1 \end{bmatrix}$, $B = \begin{bmatrix} 1 & 0 \\ 0 & 2 \end{bmatrix}$.
 
         Compute $AB$ and $BA$.
 
@@ -722,7 +722,7 @@ def _(lk):
         For $t \in \mathbb{R}$, consider
 
         $$
-        C_t = \begin{bmatrix} t & 1 \\ 2 & t - 1 \end{bmatrix}
+        C_t = \begin{bmatrix} t & 1 \\ 2 & t - 1 \end{bmatrix}.
         $$
 
         For which values of $t$ is $C_t$ invertible?

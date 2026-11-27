@@ -109,13 +109,13 @@ def _(lk):
         path integral of $f$ over $C$
 
         $$
-        \hphantom{\int_{\vec{C}} \vec{F} \cdot d\vec{s}}\mathllap{\int_C f \, ds} = \mathrlap{\int_a^b \underbrace{f(\gamma(t))}_{\footnotesize f} \, \underbrace{\lVert \gamma'(t) \rVert \, dt}_{\footnotesize ds}}\hphantom{\int_a^b f(\gamma(t)) \, \lVert \gamma'(t) \rVert \, dt}
+        \hphantom{\int_{\vec{C}} \vec{F} \cdot d\vec{s}}\mathllap{\int_C f \, ds} = \mathrlap{\int_a^b \underbrace{f(\gamma(t))}_{\footnotesize f} \, \underbrace{\lVert \gamma'(t) \rVert \, dt}_{\footnotesize ds}},\hphantom{\int_a^b f(\gamma(t)) \, \lVert \gamma'(t) \rVert \, dt}
         $$
 
         line integral of $\vec{F}$ over $\vec{C}$ (oriented from $\gamma(a)$ to $\gamma(b)$)
 
         $$
-        \hphantom{\int_{\vec{C}} \vec{F} \cdot d\vec{s}}\mathllap{\int_{\vec{C}} \vec{F} \cdot d\vec{s}} = \mathrlap{\int_a^b \underbrace{\vec{F}(\gamma(t))}_{\footnotesize \vec{F}} \cdot \underbrace{\gamma'(t) \, dt}_{\footnotesize d\vec{s}}}\hphantom{\int_a^b f(\gamma(t)) \, \lVert \gamma'(t) \rVert \, dt}
+        \hphantom{\int_{\vec{C}} \vec{F} \cdot d\vec{s}}\mathllap{\int_{\vec{C}} \vec{F} \cdot d\vec{s}} = \mathrlap{\int_a^b \underbrace{\vec{F}(\gamma(t))}_{\footnotesize \vec{F}} \cdot \underbrace{\gamma'(t) \, dt}_{\footnotesize d\vec{s}}}.\hphantom{\int_a^b f(\gamma(t)) \, \lVert \gamma'(t) \rVert \, dt}
         $$
 
         $\leadsto$ &nbsp; independent of parameterization: given a change of variables
@@ -125,14 +125,14 @@ def _(lk):
         $$
         \begin{aligned}
         \int_c^d f(\gamma(\varphi(\tilde{t}))) \, \lVert \gamma'(\varphi(\tilde{t})) \, \varphi'(\tilde{t}) \rVert \, d\tilde{t} &= \int_a^b f(\gamma(t)) \, \lVert \gamma'(t) \rVert \, dt\\[6pt]
-        \int_c^d \vec{F}(\gamma(\varphi(\tilde{t}))) \cdot \gamma'(\varphi(\tilde{t})) \, \varphi'(\tilde{t}) \, d\tilde{t} &= \pm \int_a^b \vec{F}(\gamma(t)) \cdot \gamma'(t) \, dt
+        \int_c^d \vec{F}(\gamma(\varphi(\tilde{t}))) \cdot \gamma'(\varphi(\tilde{t})) \, \varphi'(\tilde{t}) \, d\tilde{t} &= \pm \int_a^b \vec{F}(\gamma(t)) \cdot \gamma'(t) \, dt,
         \end{aligned}
         $$
 
         $$
         \begin{array}{lll}
         {+} & \text{if } \varphi'(\tilde{t}) > 0 & (\varphi \text{ preserves orientation})\\
-        {-} & \text{if } \varphi'(\tilde{t}) < 0 & (\varphi \text{ reverses orientation})
+        {-} & \text{if } \varphi'(\tilde{t}) < 0 & (\varphi \text{ reverses orientation}).
         \end{array}
         $$
         """,
@@ -141,7 +141,7 @@ def _(lk):
         If $\vec{F} = \vec{\nabla} f$, then
 
         $$
-        \int_{\vec{C}} \vec{F} \cdot d\vec{s} = \int_a^b \vec{F}(\gamma(t)) \cdot \gamma'(t) \, dt = \overset{\begin{array}{c}\footnotesize\text{end}\\[-2pt]\downarrow\end{array}}{f(\gamma(b))} - \overset{\begin{array}{c}\footnotesize\text{start}\\[-2pt]\downarrow\end{array}}{f(\gamma(a))}
+        \int_{\vec{C}} \vec{F} \cdot d\vec{s} = \int_a^b \vec{F}(\gamma(t)) \cdot \gamma'(t) \, dt = \overset{\begin{array}{c}\footnotesize\text{end}\\[-2pt]\downarrow\end{array}}{f(\gamma(b))} - \overset{\begin{array}{c}\footnotesize\text{start}\\[-2pt]\downarrow\end{array}}{f(\gamma(a))},
         $$
 
         only depends on the (oriented) end points of $\vec{C}$
@@ -300,14 +300,14 @@ def _(beside, bracket, lk, mo, n2, np, plane):
         $$
         \begin{aligned}
         a = a_1, \ b_1 = a_2, \ \ldots, \ b_{N-1} = a_N, \ b_N = b, &\quad b_i - a_i = \frac{b - a}{N} = \Delta x\\
-        c = c_1, \ d_1 = c_2, \ \ldots, \ d_{N-1} = c_N, \ d_N = d, &\quad d_j - c_j = \frac{d - c}{N} = \Delta y
+        c = c_1, \ d_1 = c_2, \ \ldots, \ d_{N-1} = c_N, \ d_N = d, &\quad d_j - c_j = \frac{d - c}{N} = \Delta y.
         \end{aligned}
         $$
 
         > • choose $(x_i, y_j) \in [a_i, b_i] \times [c_j, d_j]$
 
         $$
-        \iint_R f(x, y) \, dxdy = \lim_{N \to \infty} \sum_{j=1}^N \sum_{i=1}^N f(x_i, y_j) \, \Delta x \, \Delta y
+        \iint_R f(x, y) \, dxdy = \lim_{N \to \infty} \sum_{j=1}^N \sum_{i=1}^N f(x_i, y_j) \, \Delta x \, \Delta y,
         $$
 
         if limit exists for every choice $(x_i, y_j)$ and is independent of that choice!
@@ -465,7 +465,7 @@ def _(lk):
             $$
             \begin{aligned}
             \iint_R f(x, y) \, dxdy &= \int_c^d \left( \int_a^b f(x, y) \, dx \right) dy\\
-            &= \int_a^b \left( \int_c^d f(x, y) \, dy \right) dx
+            &= \int_a^b \left( \int_c^d f(x, y) \, dy \right) dx.
             \end{aligned}
             $$
             """,
@@ -486,14 +486,15 @@ def _(lk):
 
         $$
         \begin{aligned}
+        &\begin{aligned}
         \int_0^3 \left( \int_0^2 (x^2 + y) \, dx \right) dy &= \int_0^3 \left( \frac{x^3}{3} + xy \right) \Bigg|_{x=0}^{x=2} dy\\
         &= \int_0^3 \left( \frac{8}{3} + 2y \right) dy = 8 + 9 = 17\\[10pt]
         \int_0^2 \left( \int_0^3 (x^2 + y) \, dy \right) dx &= \int_0^2 \left( x^2 y + \frac{y^2}{2} \right) \Bigg|_{y=0}^{y=3} dx\\
         &= \int_0^2 \left( 3x^2 + \frac{9}{2} \right) dx = 8 + 9 = 17
+        \end{aligned}\\[6pt]
+        &\Longrightarrow\quad \iint_R f(x, y) \, dxdy = 17.
         \end{aligned}
         $$
-
-        > $\Longrightarrow$ &nbsp; $\displaystyle\iint_R f(x, y) \, dxdy = 17$
         """
     )
     return
@@ -568,30 +569,32 @@ def _(beside, bracket, lk, mo, np, plane):
     beside(_ax, (_l[-1], _t[-1]), 100, r"$x = \psi_1(y)$", lk.RED, 72, 16, gap=6)
     beside(_ax, (_r[150], _t[150]), 0, r"$x = \psi_2(y)$", lk.ORANGE, 72, 16, gap=6)
     _ax.text(5.4, 3.4, "$x$-simple region $D$", color=lk.BLUE, fontsize=13, ha="right", va="center")
-    lk.definition(
-        [
-            r"""
-            A region $D \subseteq \mathbb{R}^2$ is called **$y$-simple** if
+    lk.module(
+        lk.definition(
+            [
+                r"""
+                A region $D \subseteq \mathbb{R}^2$ is called **$y$-simple** if
 
-            $$
-            D = \left\lbrace (x, y) \in \mathbb{R}^2 \mid a \le x \le b, \ \varphi_1(x) \le y \le \varphi_2(x) \right\rbrace
-            $$
+                $$
+                D = \left\lbrace (x, y) \in \mathbb{R}^2 \mid a \le x \le b, \ \varphi_1(x) \le y \le \varphi_2(x) \right\rbrace,
+                $$
 
-            for continuous functions $\varphi_1, \varphi_2 : [a, b] \longrightarrow \mathbb{R}$
-            """,
-            lk.gap(),
-            r"""
-            Similarly, $D \subseteq \mathbb{R}^2$ is called **$x$-simple** if
+                for continuous functions $\varphi_1, \varphi_2 : [a, b] \longrightarrow \mathbb{R}$
+                """,
+                lk.gap(),
+                r"""
+                Similarly, $D \subseteq \mathbb{R}^2$ is called **$x$-simple** if
 
-            $$
-            D = \left\lbrace (x, y) \in \mathbb{R}^2 \mid c \le y \le d, \ \psi_1(y) \le x \le \psi_2(y) \right\rbrace
-            $$
+                $$
+                D = \left\lbrace (x, y) \in \mathbb{R}^2 \mid c \le y \le d, \ \psi_1(y) \le x \le \psi_2(y) \right\rbrace,
+                $$
 
-            for continuous functions $\psi_1, \psi_2 : [c, d] \longrightarrow \mathbb{R}$
-            """,
-            lk.figure(mo.hstack([_left, _right], justify="center", gap=4)),
-        ],
-        label="def-simple",
+                for continuous functions $\psi_1, \psi_2 : [c, d] \longrightarrow \mathbb{R}$
+                """,
+            ],
+            label="def-simple",
+        ),
+        lk.prose(lk.figure(mo.hstack([_left, _right], justify="center", gap=4))),
     )
     return
 
@@ -613,8 +616,8 @@ def _(lk):
         lk.aside(
             r"""
             > > $\mk{f^*(x, y)} = \begin{cases}
-            f(x, y) & \text{if } (x, y) \in D\\
-            0 & \text{if } (x, y) \notin D
+            f(x, y), & \text{if } (x, y) \in D,\\
+            0, & \text{if } (x, y) \notin D
             \end{cases}$
             """,
             "discontinuous, but<br>Fubini still works!",
@@ -630,7 +633,7 @@ def _(lk):
         Similarly, if $f : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}$ continuous over $D$ $x$-simple
 
         $$
-        \iint_D f(x, y) \, dxdy = \int_c^d \left( \int_{\psi_1(y)}^{\psi_2(y)} f(x, y) \, dx \right) dy
+        \iint_D f(x, y) \, dxdy = \int_c^d \left( \int_{\psi_1(y)}^{\psi_2(y)} f(x, y) \, dx \right) dy.
         $$
         """,
     )
@@ -724,7 +727,7 @@ def _(lk):
         If $D$ is $y$-simple or $x$-simple and $f : D \longrightarrow \mathbb{R}$ is continuous,<br>then there exists $(x_0, y_0) \in D$ such that
 
         $$
-        \iint_D f(x, y) \, dxdy = f(x_0, y_0) \underbrace{\iint_D dxdy}_{\footnotesize \text{area of } D}
+        \iint_D f(x, y) \, dxdy = f(x_0, y_0) \underbrace{\iint_D dxdy}_{\footnotesize \text{area of } D}.
         $$
         """,
         label="thm-mean-value",

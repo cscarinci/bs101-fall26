@@ -345,7 +345,7 @@ def _(lk):
             the **curl** of $\vec{F}$ is the vector field
             """,
             lk.aside(
-                r"$$\mathrm{Curl}(\vec{F})(\vec{x}) = (\vec{\nabla} \times \vec{F})(\vec{x}) = \begin{bmatrix} {\large\tfrac{\partial R}{\partial y}}(\vec{x}) - {\large\tfrac{\partial Q}{\partial z}}(\vec{x}) \\[6pt] {\large\tfrac{\partial P}{\partial z}}(\vec{x}) - {\large\tfrac{\partial R}{\partial x}}(\vec{x}) \\[6pt] {\large\tfrac{\partial Q}{\partial x}}(\vec{x}) - {\large\tfrac{\partial P}{\partial y}}(\vec{x}) \end{bmatrix} = \mk{\det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ \partial / \partial x & \partial / \partial y & \partial / \partial z \\ P(\vec{x}) & Q(\vec{x}) & R(\vec{x}) \end{bmatrix}}$$",
+                r"$$\mathrm{Curl}(\vec{F})(\vec{x}) = (\vec{\nabla} \times \vec{F})(\vec{x}) = \begin{bmatrix} {\large\tfrac{\partial R}{\partial y}}(\vec{x}) - {\large\tfrac{\partial Q}{\partial z}}(\vec{x}) \\[6pt] {\large\tfrac{\partial P}{\partial z}}(\vec{x}) - {\large\tfrac{\partial R}{\partial x}}(\vec{x}) \\[6pt] {\large\tfrac{\partial Q}{\partial x}}(\vec{x}) - {\large\tfrac{\partial P}{\partial y}}(\vec{x}) \end{bmatrix} = \mk{\det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ \partial / \partial x & \partial / \partial y & \partial / \partial z \\ P(\vec{x}) & Q(\vec{x}) & R(\vec{x}) \end{bmatrix}}.$$",
                 r"cross-product of $\vec{\nabla}$ and $\vec{F}(\vec{x})$",
             ),
         ],
@@ -508,14 +508,14 @@ def _(lk):
     # remark: scalar curl
     lk.remark(
         r"""
-        Curl is only defined for vector fields in $\mathbb{R}^3$
+        Curl is only defined for vector fields in $\mathbb{R}^3$.
 
         For $\vec{F} : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$, we can define the “scalar curl” of &nbsp; $\vec{F}(x, y) = \begin{bmatrix} P(x, y) \\ Q(x, y) \end{bmatrix}$
 
         as the scalar function $\tfrac{\partial Q}{\partial x}(x, y) - \tfrac{\partial P}{\partial y}(x, y)$ obtained from
 
         $$
-        \begin{bmatrix} \partial / \partial x \\ \partial / \partial y \\ \partial / \partial z \end{bmatrix} \times \begin{bmatrix} P(x, y) \\ Q(x, y) \\ 0 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ {\large\tfrac{\partial Q}{\partial x}}(x, y) - {\large\tfrac{\partial P}{\partial y}}(x, y) \end{bmatrix}
+        \begin{bmatrix} \partial / \partial x \\ \partial / \partial y \\ \partial / \partial z \end{bmatrix} \times \begin{bmatrix} P(x, y) \\ Q(x, y) \\ 0 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ {\large\tfrac{\partial Q}{\partial x}}(x, y) - {\large\tfrac{\partial P}{\partial y}}(x, y) \end{bmatrix}.
         $$
         """
     )

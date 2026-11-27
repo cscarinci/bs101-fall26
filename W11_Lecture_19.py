@@ -200,23 +200,25 @@ def _(below, beside, curve_sketch, lk, math, path, ta, th, velocity):
     beside(_ax, _p, below(_v), r"$\gamma(t)$", "black", 30, 16)
     beside(_ax, _q, math.degrees(math.atan2(*(_q - _p)[::-1])), r"$\gamma(t + h)$", lk.ORANGE, 48, 16)
     beside(_ax, _p + _v, math.degrees(math.atan2(_v[1], _v[0])), r"$\gamma'(t)$", lk.GREEN, 34, 16, gap=2)
-    lk.definition(
-        [
-            r"Given a differentiable path $\gamma : I \subseteq \mathbb{R} \longrightarrow \mathbb{R}^3$",
-            lk.aside(r"the **arc length** of the curve $\mk{C = \gamma([a, b])}$", r"assuming $[a, b] \subseteq I$"),
-            r"""
-            $$
-            L(C) = L(\gamma([a, b])) = \int_a^b \underbrace{\lVert \gamma'(t) \rVert}_{\footnotesize \text{speed of } \gamma \text{ at } t} \, dt
-            $$
-            """,
-            lk.gap(),
-            lk.aside(
-                r"$$\mk{\gamma'(t)} = \lim_{h \to 0} \frac{\gamma(t + h) - \gamma(t)}{h} \quad \Longrightarrow \quad \lVert \gamma(t + h) - \gamma(t) \rVert \approx \lVert \gamma'(t) \rVert \, h$$",
-                r"$\gamma'(t)$ = velocity of $\gamma$ at $t$",
-            ),
-            lk.interactive(_fig, controls=[ta, th]),
-        ],
-        label="def-arc-length",
+    lk.module(
+        lk.definition(
+            [
+                r"Given a differentiable path $\gamma : I \subseteq \mathbb{R} \longrightarrow \mathbb{R}^3$",
+                lk.aside(r"the **arc length** of the curve $\mk{C = \gamma([a, b])}$", r"assuming $[a, b] \subseteq I$"),
+                r"""
+                $$
+                L(C) = L(\gamma([a, b])) = \int_a^b \underbrace{\lVert \gamma'(t) \rVert}_{\footnotesize \text{speed of } \gamma \text{ at } t} \, dt,
+                $$
+                """,
+                lk.gap(),
+                lk.aside(
+                    r"$$\mk{\gamma'(t)} = \lim_{h \to 0} \frac{\gamma(t + h) - \gamma(t)}{h} \quad \Longrightarrow \quad \lVert \gamma(t + h) - \gamma(t) \rVert \approx \lVert \gamma'(t) \rVert \, h.$$",
+                    r"$\gamma'(t)$ = velocity of $\gamma$ at $t$",
+                ),
+            ],
+            label="def-arc-length",
+        ),
+        lk.prose(lk.interactive(_fig, controls=[ta, th])),
     )
     return
 
@@ -272,7 +274,7 @@ def _(lk):
         the **path integral** of $f$ over $C = \gamma([a, b]) \subseteq D$ (along the path $\gamma$) is
 
         $$
-        \int_C f \, ds = \int_a^b \underbrace{f(\gamma(t)) \lVert \gamma'(t) \rVert}_{\footnotesize \begin{array}{c} f \text{ calculated along } \gamma \\ \text{times the speed of } \gamma \end{array}} \, dt
+        \int_C f \, ds = \int_a^b \underbrace{f(\gamma(t)) \lVert \gamma'(t) \rVert}_{\footnotesize \begin{array}{c} f \text{ calculated along } \gamma \\ \text{times the speed of } \gamma \end{array}} \, dt.
         $$
         """,
         label="def-path-integral",
@@ -346,10 +348,11 @@ def _(lk):
         A **reparameterization** of a path $\gamma : I \subseteq \mathbb{R} \longrightarrow \mathbb{R}^3$ is another path $\sigma = \gamma \circ \varphi : \tilde{I} \subseteq \mathbb{R} \longrightarrow \mathbb{R}^3$<br>obtained by a change of variables
 
         $$
-        \varphi : \tilde{I} \subseteq \mathbb{R} \longrightarrow I \subseteq \mathbb{R}, \qquad \tilde{t} \longmapsto t = \varphi(\tilde{t}), \qquad \varphi'(\tilde{t}) \neq 0
+        \begin{aligned}
+        &\varphi : \tilde{I} \subseteq \mathbb{R} \longrightarrow I \subseteq \mathbb{R}, \qquad \tilde{t} \longmapsto t = \varphi(\tilde{t}), \qquad \varphi'(\tilde{t}) \neq 0\\[6pt]
+        &\Longrightarrow\quad \gamma(t) = \gamma(\varphi(\tilde{t})) = \sigma(\tilde{t})\ \Longrightarrow\ \mathrm{Im}(\gamma) = \mathrm{Im}(\sigma).
+        \end{aligned}
         $$
-
-        > $\Longrightarrow$ &nbsp; $\gamma(t) = \gamma(\varphi(\tilde{t})) = \sigma(\tilde{t})$ &nbsp; $\Longrightarrow$ &nbsp; $\mathrm{Im}(\gamma) = \mathrm{Im}(\sigma)$
         """,
         label="def-reparameterization",
     )
@@ -371,7 +374,7 @@ def _(lk):
         Then for any continuous function $f : D \subseteq \mathbb{R}^3 \longrightarrow \mathbb{R}$
 
         $$
-        \int_c^d f(\sigma(\tilde{t})) \lVert \sigma'(\tilde{t}) \rVert \, d\tilde{t} \ \mathrel{\underset{\mathclap{\footnotesize \begin{array}{c} \uparrow \\[-2pt] \text{substitution of} \\ \text{variables } t = \varphi(\tilde{t}) \end{array}}}{=}} \ \int_a^b f(\gamma(t)) \lVert \gamma'(t) \rVert \, dt
+        \int_c^d f(\sigma(\tilde{t})) \lVert \sigma'(\tilde{t}) \rVert \, d\tilde{t} \ \mathrel{\underset{\mathclap{\footnotesize \begin{array}{c} \uparrow \\[-2pt] \text{substitution of} \\ \text{variables } t = \varphi(\tilde{t}) \end{array}}}{=}} \ \int_a^b f(\gamma(t)) \lVert \gamma'(t) \rVert \, dt,
         $$
 
         where $[a, b] = \varphi([c, d])$.
@@ -419,17 +422,19 @@ def _(A, B, beside, curve_sketch, hits, lk, math, np, path, tl, velocity):
     lk.arrow(_ax, _p, _p + _f, lk.RED, lw=1.6)
     lk.arrow(_ax, _p, _p + _v, lk.GREEN, lw=1.6)
     _ax.plot(*_p, "o", color="black", ms=4.5, zorder=6)
-    lk.definition(
-        [
-            r"""
-            Given a differentiable path $\gamma : I \subseteq \mathbb{R} \longrightarrow \mathbb{R}^3$ and a continuous vector field $\vec{F} : D \subseteq \mathbb{R}^3 \longrightarrow \mathbb{R}^3$
-            """,
-            r"the **line integral** of $\vec{F}$ over $C = \gamma([a, b]) \subseteq D$",
-            lk.aside(r"<span class='lk-mark'>from $\gamma(a)$ to $\gamma(b)$</span> (along the path $\gamma$) is", r"orientation of $C$"),
-            lk.aside(r"$$\int_{\mk{\vec{C}}} \vec{F} \cdot d\vec{s} = \int_a^b \vec{F}(\gamma(t)) \cdot \gamma'(t) \, dt$$", "oriented curve"),
-            lk.interactive(_fig, controls=[tl]),
-        ],
-        label="def-line-integral",
+    lk.module(
+        lk.definition(
+            [
+                r"""
+                Given a differentiable path $\gamma : I \subseteq \mathbb{R} \longrightarrow \mathbb{R}^3$ and a continuous vector field $\vec{F} : D \subseteq \mathbb{R}^3 \longrightarrow \mathbb{R}^3$
+                """,
+                r"the **line integral** of $\vec{F}$ over $C = \gamma([a, b]) \subseteq D$",
+                lk.aside(r"<span class='lk-mark'>from $\gamma(a)$ to $\gamma(b)$</span> (along the path $\gamma$) is", r"orientation of $C$"),
+                lk.aside(r"$$\int_{\mk{\vec{C}}} \vec{F} \cdot d\vec{s} = \int_a^b \vec{F}(\gamma(t)) \cdot \gamma'(t) \, dt.$$", "oriented curve"),
+            ],
+            label="def-line-integral",
+        ),
+        lk.prose(lk.interactive(_fig, controls=[tl])),
     )
     return
 
@@ -549,11 +554,11 @@ def _(lk):
         Given $\gamma : I \subseteq \mathbb{R} \longrightarrow \mathbb{R}^3$, &nbsp; $\sigma = \gamma \circ \varphi : \tilde{I} \subseteq \mathbb{R} \longrightarrow \mathbb{R}^3$
 
         $$
-        \int_c^d \vec{F}(\sigma(\tilde{t})) \cdot \sigma'(\tilde{t}) \, d\tilde{t} = \pm \int_a^b \vec{F}(\gamma(t)) \cdot \gamma'(t) \, dt
+        \int_c^d \vec{F}(\sigma(\tilde{t})) \cdot \sigma'(\tilde{t}) \, d\tilde{t} = \pm \int_a^b \vec{F}(\gamma(t)) \cdot \gamma'(t) \, dt,
         $$
 
         $$
-        \text{with} \quad \begin{cases} + & \text{if } \varphi'(\tilde{t}) > 0 \\ - & \text{if } \varphi'(\tilde{t}) < 0 \end{cases} \qquad \text{where } [a, b] = \varphi([c, d])
+        \text{with} \quad \begin{cases} +, & \text{if } \varphi'(\tilde{t}) > 0, \\ -, & \text{if } \varphi'(\tilde{t}) < 0 \end{cases}, \qquad \text{where } [a, b] = \varphi([c, d]).
         $$
         """,
         label="thm-line-reparameterization",
@@ -578,7 +583,7 @@ def _(lk):
         Given $f : D \subseteq \mathbb{R}^3 \longrightarrow \mathbb{R}$ $C^1$-smooth and $\vec{C} = \gamma([a, b]) \subset D$ from $\gamma(a)$ to $\gamma(b)$, then
 
         $$
-        \int_{\vec{C}} \vec{\nabla} f \cdot d\vec{s} = f(\gamma(b)) - f(\gamma(a))
+        \int_{\vec{C}} \vec{\nabla} f \cdot d\vec{s} = f(\gamma(b)) - f(\gamma(a)).
         $$
         """,
         label="thm-gradient",
@@ -627,7 +632,7 @@ def _(lk):
         $$
         \begin{aligned}
         \Longrightarrow \quad \int_{\vec{C}} \vec{G} \cdot d\vec{s} &= g(\gamma(2\pi)) - g(\gamma(0))\\
-        &= \frac{1}{2} \left( 1 + (2\pi)^2 \right) - \frac{1}{2} (1 + 0) = \frac{(2\pi)^2}{2}
+        &= \frac{1}{2} \left( 1 + (2\pi)^2 \right) - \frac{1}{2} (1 + 0) = \frac{(2\pi)^2}{2}.
         \end{aligned}
         $$
         """
@@ -773,7 +778,7 @@ def _(lk):
         $$
         \begin{aligned}
         &\bullet \ \ \sigma(t) = \begin{bmatrix} t \\ t \\ t \end{bmatrix}, &&t \in [0, 1]\\[6pt]
-        &\bullet \ \ \rho(t) = \begin{bmatrix} \cos(t) \\ \sin(t) \\ t \end{bmatrix}, &&t \in [0, 2\pi]
+        &\bullet \ \ \rho(t) = \begin{bmatrix} \cos(t) \\ \sin(t) \\ t \end{bmatrix}, &&t \in [0, 2\pi],
         \end{aligned}
         $$
 

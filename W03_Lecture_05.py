@@ -110,22 +110,24 @@ def _(blank, lk):
     _ax.text(4.32, 1.4, "$L$", fontsize=13, ha="left", va="center")
     _ax.text(-0.1, -0.08, r"$\vec{0}$", fontsize=13, ha="right", va="top")
 
-    lk.definition(
-        [
-            r"""
-            Given $\vec{x}, \vec{v} \in \mathbb{R}^3$ with $\vec{v} \neq \vec{0}$, the **line** through $\vec{x}$ in the direction of $\vec{v}$ is the set
+    lk.module(
+        lk.definition(
+            [
+                r"""
+                Given $\vec{x}, \vec{v} \in \mathbb{R}^3$ with $\vec{v} \neq \vec{0}$, the **line** through $\vec{x}$ in the direction of $\vec{v}$ is the set
 
-            $$
-            L = \{ \gamma(t) = \vec{x} + t\vec{v} \in \mathbb{R}^3 \mid t \in \mathbb{R} \}
-            $$
-            """,
-            lk.aside(
-                r"We call $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^3$, $t \longmapsto \gamma(t) = \vec{x} + t\vec{v}$ an <span class='lk-mark'>**affine**</span> **parameterization** of the line $L$",
-                r"just a name for “linear plus constant”",
-            ),
-            lk.figure(_fig),
-        ],
-        label="def-line",
+                $$
+                L = \{ \gamma(t) = \vec{x} + t\vec{v} \in \mathbb{R}^3 \mid t \in \mathbb{R} \}.
+                $$
+                """,
+                lk.aside(
+                    r"We call $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^3$, $t \longmapsto \gamma(t) = \vec{x} + t\vec{v}$ an <span class='lk-mark'>**affine**</span> **parameterization** of the line $L$",
+                    r"just a name for “linear plus constant”",
+                ),
+            ],
+            label="def-line",
+        ),
+        lk.prose(lk.figure(_fig)),
     )
     return
 
@@ -191,7 +193,7 @@ def _(lk):
         Given a line $L$ with an affine parameterization
 
         $$
-        \gamma(t) = \vec{x} + t\vec{v}
+        \gamma(t) = \vec{x} + t\vec{v},
         $$
 
         we call $\vec{x}$ the **starting point** and $\vec{v}$ the **velocity** of $L$ with respect to the parameterization $\gamma$
@@ -207,7 +209,7 @@ def _(lk):
     # remark: one line through two points, many parameterizations
     lk.remark(
         r"""
-        There exists a unique line through $\vec{x}, \vec{y} \in \mathbb{R}^3$ iff $\vec{y} - \vec{x}$ is non-zero
+        There exists a unique line through $\vec{x}, \vec{y} \in \mathbb{R}^3$ iff $\vec{y} - \vec{x}$ is non-zero.
 
         However, parameterizations are not unique!
 
@@ -245,7 +247,7 @@ def _(lk):
         [
             r"Given $\vec{x}, \vec{u}, \vec{v} \in \mathbb{R}^3$, with $\vec{u}, \vec{v}$ not proportional, the **plane** through $\vec{x}$ in the directions of $\vec{u}$ and $\vec{v}$ is the set",
             lk.aside(
-                r"$$ P = \{ \mk{\varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v}} \mid s, t \in \mathbb{R} \} $$",
+                r"$$ P = \{ \mk{\varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v}} \mid s, t \in \mathbb{R} \}. $$",
                 r"affine parameterization of the plane<br>$\varphi : \mathbb{R}^2 \longrightarrow \mathbb{R}^3$",
             ),
         ],
@@ -304,7 +306,7 @@ def _(lk):
         There exists a unique plane through $\vec{x}, \vec{y}, \vec{z} \in \mathbb{R}^3$ iff $\vec{y} - \vec{x}$, $\vec{z} - \vec{x}$ are not proportional
 
         $$
-        P = \{ \varphi(s, t) = \vec{x} + s(\vec{y} - \vec{x}) + t(\vec{z} - \vec{x}) \mid s, t \in \mathbb{R} \}
+        P = \{ \varphi(s, t) = \vec{x} + s(\vec{y} - \vec{x}) + t(\vec{z} - \vec{x}) \mid s, t \in \mathbb{R} \}.
         $$
 
         $\leadsto$ &nbsp; different parameterizations are also possible, with different starting points and directions
@@ -320,7 +322,7 @@ def _(lk):
     lk.definition(
         [
             r"Given a plane $P = \{ \vec{x} + s\vec{u} + t\vec{v} \mid s, t \in \mathbb{R} \}$, a vector $\vec{n} \in \mathbb{R}^3$ is called **normal** to $P$ if",
-            lk.aside(r"$$ \vec{n} \cdot \vec{u} = \vec{n} \cdot \vec{v} = 0 $$", r"$\vec{n}$ is orthogonal to both directions in $P$"),
+            lk.aside(r"$$ \vec{n} \cdot \vec{u} = \vec{n} \cdot \vec{v} = 0. $$", r"$\vec{n}$ is orthogonal to both directions in $P$"),
         ],
         label="def-normal",
     )
@@ -361,29 +363,31 @@ def _(lk, np):
         height=300,
     )
     _area = r"\begin{array}{c} \scriptstyle \text{area of parallelogram} \\ \scriptstyle \text{spanned by } \vec{u} \text{ and } \vec{v} \end{array}"
-    lk.definition(
-        [
-            r"Given two vectors $\vec{u} = \begin{bmatrix} u^1 \\ u^2 \\ u^3 \end{bmatrix}, \ \vec{v} = \begin{bmatrix} v^1 \\ v^2 \\ v^3 \end{bmatrix} \in \mathbb{R}^3$, the **cross&#8209;product** of $\vec{u}$ and $\vec{v}$ is the unique vector $\vec{w} = \vec{u} \times \vec{v} \in \mathbb{R}^3$ such that",
-            lk.aside(r"$$ \vec{u} \cdot \vec{w} = 0, \quad \vec{v} \cdot \vec{w} = 0 $$", r"orthogonal to both $\vec{u}, \vec{v}$"),
-            r"""
-            $$
-            \begin{aligned}
-            \lVert \vec{w} \rVert^2 &= \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2\\[4pt]
-            &= \Big( \underbrace{\lVert \vec{u} \rVert \lVert \vec{v} \rVert \sin\big(\theta(\vec{u}, \vec{v})\big)}_{"""
-            + _area
-            + r"""} \Big)^2
-            \end{aligned}
-            $$
-            """,
-            lk.aside(
-                r"and &nbsp; $\vec{u}, \vec{v}, \vec{w}$ is <span class='lk-mark'>**right-handed**</span> (positively oriented)",
-                r"with your right hand, rotating your fingers<br>from $\vec{u}$ to $\vec{v}$ points your thumb towards $\vec{w}$",
-            ),
-            lk.figure(_fig),
-            r"algebraically: &nbsp; $\vec{u}, \vec{v}, \vec{w}$ is right-handed if",
-            r"$$ \det \begin{bmatrix} \vec{u} & \vec{v} & \vec{w} \end{bmatrix} > 0 $$",
-        ],
-        label="def-cross",
+    lk.module(
+        lk.definition(
+            [
+                r"Given two vectors $\vec{u} = \begin{bmatrix} u^1 \\ u^2 \\ u^3 \end{bmatrix}, \ \vec{v} = \begin{bmatrix} v^1 \\ v^2 \\ v^3 \end{bmatrix} \in \mathbb{R}^3$, the **cross&#8209;product** of $\vec{u}$ and $\vec{v}$ is the unique vector $\vec{w} = \vec{u} \times \vec{v} \in \mathbb{R}^3$ such that",
+                lk.aside(r"$$ \vec{u} \cdot \vec{w} = 0, \quad \vec{v} \cdot \vec{w} = 0. $$", r"orthogonal to both $\vec{u}, \vec{v}$"),
+                r"""
+                $$
+                \begin{aligned}
+                \lVert \vec{w} \rVert^2 &= \lVert \vec{u} \rVert^2 \lVert \vec{v} \rVert^2 - (\vec{u} \cdot \vec{v})^2\\[4pt]
+                &= \Big( \underbrace{\lVert \vec{u} \rVert \lVert \vec{v} \rVert \sin\big(\theta(\vec{u}, \vec{v})\big)}_{"""
+                + _area
+                + r"""} \Big)^2
+                \end{aligned}
+                $$
+                """,
+                lk.aside(
+                    r"and &nbsp; $\vec{u}, \vec{v}, \vec{w}$ is <span class='lk-mark'>**right-handed**</span> (positively oriented)",
+                    r"with your right hand, rotating your fingers<br>from $\vec{u}$ to $\vec{v}$ points your thumb towards $\vec{w}$",
+                ),
+                r"algebraically: &nbsp; $\vec{u}, \vec{v}, \vec{w}$ is right-handed if",
+                r"$$ \det \begin{bmatrix} \vec{u} & \vec{v} & \vec{w} \end{bmatrix} > 0. $$",
+            ],
+            label="def-cross",
+        ),
+        lk.prose(lk.figure(_fig)),
     )
     return
 
@@ -421,7 +425,7 @@ def _(lk, np):
             Given a parameterization
 
             $$
-            \varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v}
+            \varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v},
             $$
 
             of a plane $P$, every normal vector to $P$ is proportional to the cross-product $\vec{u} \times \vec{v}$
@@ -446,7 +450,7 @@ def _(lk):
                 \vec{u} \times \vec{v} &= \mk{\det \begin{bmatrix} \vec{e}_1 & \vec{e}_2 & \vec{e}_3 \\ u^1 & u^2 & u^3 \\ v^1 & v^2 & v^3 \end{bmatrix}}\\[6pt]
                 &= \vec{e}_1 \det \begin{bmatrix} u^2 & u^3 \\ v^2 & v^3 \end{bmatrix} - \vec{e}_2 \det \begin{bmatrix} u^1 & u^3 \\ v^1 & v^3 \end{bmatrix} + \vec{e}_3 \det \begin{bmatrix} u^1 & u^2 \\ v^1 & v^2 \end{bmatrix}\\[6pt]
                 &= \vec{e}_1 (u^2 v^3 - u^3 v^2) - \vec{e}_2 (u^1 v^3 - u^3 v^1) + \vec{e}_3 (u^1 v^2 - u^2 v^1)\\[6pt]
-                &= \begin{bmatrix} u^2 v^3 - u^3 v^2 \\ u^3 v^1 - u^1 v^3 \\ u^1 v^2 - u^2 v^1 \end{bmatrix} = \vec{w}
+                &= \begin{bmatrix} u^2 v^3 - u^3 v^2 \\ u^3 v^1 - u^1 v^3 \\ u^1 v^2 - u^2 v^1 \end{bmatrix} = \vec{w}.
                 \end{aligned}
                 $$
                 """,
@@ -590,7 +594,7 @@ def _(lk):
         The cross-product in $\mathbb{R}^3$ defines
 
         $$
-        \times : \mathbb{R}^3 \times \mathbb{R}^3 \longrightarrow \mathbb{R}^3
+        \times : \mathbb{R}^3 \times \mathbb{R}^3 \longrightarrow \mathbb{R}^3,
         $$
 
         another extension of multiplication of vectors now taking values in vectors!
@@ -634,7 +638,7 @@ def _(lk):
     # exercise: points of a line
     lk.exercise(
         r"""
-        Let $\vec{x} = \begin{bmatrix} 1 \\ 2 \\ 0 \end{bmatrix}$, $\vec{v} = \begin{bmatrix} 2 \\ -1 \\ 4 \end{bmatrix}$, $\gamma(t) = \vec{x} + t\vec{v}$
+        Let $\vec{x} = \begin{bmatrix} 1 \\ 2 \\ 0 \end{bmatrix}$, $\vec{v} = \begin{bmatrix} 2 \\ -1 \\ 4 \end{bmatrix}$, $\gamma(t) = \vec{x} + t\vec{v}$.
 
         a) compute $\gamma(0)$, $\gamma(1)$, $\gamma(2)$
 
@@ -653,7 +657,7 @@ def _(lk):
     # exercise: the normal of a plane
     lk.exercise(
         r"""
-        Let $\vec{u} = \begin{bmatrix} 1 \\ 1 \\ 0 \end{bmatrix}$, $\vec{v} = \begin{bmatrix} 0 \\ 1 \\ 1 \end{bmatrix}$, $\vec{x} = \begin{bmatrix} 1 \\ 0 \\ 2 \end{bmatrix}$, $\varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v}$
+        Let $\vec{u} = \begin{bmatrix} 1 \\ 1 \\ 0 \end{bmatrix}$, $\vec{v} = \begin{bmatrix} 0 \\ 1 \\ 1 \end{bmatrix}$, $\vec{x} = \begin{bmatrix} 1 \\ 0 \\ 2 \end{bmatrix}$, $\varphi(s, t) = \vec{x} + s\vec{u} + t\vec{v}$.
 
         a) Compute $\vec{n} = \vec{u} \times \vec{v}$
 
@@ -672,7 +676,7 @@ def _(lk):
     # exercise: a determinant
     lk.exercise(
         [
-            r"Let $A = \begin{bmatrix} 1 & 1 & 0 \\ 1 & 0 & 1 \\ 0 & 1 & 1 \end{bmatrix}$",
+            r"Let $A = \begin{bmatrix} 1 & 1 & 0 \\ 1 & 0 & 1 \\ 0 & 1 & 1 \end{bmatrix}$.",
             "a) is $A$ invertible?",
             "b) what is the volume of the parallelepiped spanned by the columns of $A$?",
             lk.aside(r"c) is $\vec{A}_1, \vec{A}_2, \vec{A}_3$ <span class='lk-mark'>right-handed</span>?", "positively oriented"),

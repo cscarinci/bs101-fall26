@@ -165,7 +165,7 @@ def _(lk):
         [
             r"Given two vectors $\vec{x} = \begin{bmatrix} x^1 \\ x^2 \\ \vdots \\ x^n \end{bmatrix}, \ \vec{y} = \begin{bmatrix} y^1 \\ y^2 \\ \vdots \\ y^n \end{bmatrix} \in \mathbb{R}^n$",
             r"we define their “**dot product**” or “**inner product**” as the real number",
-            lk.aside(r"$$ \vec{x} \cdot \vec{y} = x^1 \cdot y^1 + x^2 \cdot y^2 + \dots + x^n \cdot y^n \in \mathbb{R} $$", "sum of products of components"),
+            lk.aside(r"$$ \vec{x} \cdot \vec{y} = x^1 \cdot y^1 + x^2 \cdot y^2 + \dots + x^n \cdot y^n \in \mathbb{R}. $$", "sum of products of components"),
         ],
         label="def-dot",
     )
@@ -180,7 +180,7 @@ def _(lk):
         r"$\leadsto$ &nbsp; extends multiplication of real numbers to pairs of vectors, with scalar values",
         lk.aside(r"$$ \mk{\cdot} : \mathbb{R}^n \times \mathbb{R}^n \longrightarrow \mathbb{R} $$", "not same as for scalar-vector multiplication!"),
         r"to avoid confusion, we drop “$\cdot$” for scalar-vector multiplication and write:",
-        r"$$ \alpha \vec{x} = \alpha \begin{bmatrix} x^1 \\ \vdots \\ x^n \end{bmatrix} = \begin{bmatrix} \alpha x^1 \\ \vdots \\ \alpha x^n \end{bmatrix} $$",
+        r"$$ \alpha \vec{x} = \alpha \begin{bmatrix} x^1 \\ \vdots \\ x^n \end{bmatrix} = \begin{bmatrix} \alpha x^1 \\ \vdots \\ \alpha x^n \end{bmatrix}. $$",
     )
     return
 
@@ -220,10 +220,10 @@ def _(lk):
     lk.definition(
         [
             lk.aside(r"The **<span class='lk-mark'>norm</span>** of a vector $\vec{x}$ is", "norm = length"),
-            lk.aside(r"$$ \lVert \vec{x} \rVert := \mk{\sqrt{\vec{x} \cdot \vec{x}}} $$", r"makes sense since $\vec{x} \cdot \vec{x} \geq 0$"),
+            lk.aside(r"$$ \lVert \vec{x} \rVert := \mk{\sqrt{\vec{x} \cdot \vec{x}}}. $$", r"makes sense since $\vec{x} \cdot \vec{x} \geq 0$"),
             r"The **angle** between two vectors $\vec{x}, \vec{y}$ is",
             lk.aside(
-                r"$$ \theta(\vec{x}, \vec{y}) = \arccos\left( \mk{\frac{\vec{x} \cdot \vec{y}}{\lVert \vec{x} \rVert \lVert \vec{y} \rVert}} \right) \qquad (\text{must have } \vec{x}, \vec{y} \neq \vec{0}) $$",
+                r"$$ \theta(\vec{x}, \vec{y}) = \arccos\left( \mk{\frac{\vec{x} \cdot \vec{y}}{\lVert \vec{x} \rVert \lVert \vec{y} \rVert}} \right) \qquad (\text{must have } \vec{x}, \vec{y} \neq \vec{0}). $$",
                 r"not so clear why this makes sense…<br>$\arccos : [-1, 1] \longrightarrow [0, \pi]$",
             ),
         ],
@@ -292,7 +292,7 @@ def _(lk):
     lk.theorem(
         [
             r"For every $\vec{x}, \vec{y} \in \mathbb{R}^n$",
-            r"$$ (\vec{x} \cdot \vec{y})^2 \leq \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2 $$",
+            r"$$ (\vec{x} \cdot \vec{y})^2 \leq \lVert \vec{x} \rVert^2 \lVert \vec{y} \rVert^2, $$",
             r"with “$=$” iff $\vec{x}, \vec{y}$ are proportional.",
         ],
         title="Cauchy-Schwarz inequality",
@@ -325,7 +325,7 @@ def _(lk):
             r"assume both $\vec{x}, \vec{y} \neq \vec{0}$ and compute $\lVert t\vec{x} + \vec{y} \rVert^2$ for $t \in \mathbb{R}$",
             r"> i) &nbsp; positive definite implies",
             lk.aside(
-                r"$$ \lVert t\vec{x} + \vec{y} \rVert^2 \geq 0, \quad \text{with “$=$” iff } \mk{t\vec{x} + \vec{y} = \vec{0}} $$",
+                r"$$ \lVert t\vec{x} + \vec{y} \rVert^2 \geq 0, \quad \text{with “$=$” iff } \mk{t\vec{x} + \vec{y} = \vec{0}}, $$",
                 r"$t\vec{x} + \vec{y} = \vec{0}$: $\vec{x}, \vec{y}$ proportional",
             ),
             r"> ii) &nbsp; $\lVert t\vec{x} + \vec{y} \rVert^2 = (t\vec{x} + \vec{y}) \cdot (t\vec{x} + \vec{y})$",
@@ -373,7 +373,7 @@ def _(lk):
     lk.theorem(
         [
             r"For every $\vec{x}, \vec{y} \in \mathbb{R}^n$",
-            r"$$ \lVert \vec{x} + \vec{y} \rVert \leq \lVert \vec{x} \rVert + \lVert \vec{y} \rVert $$",
+            r"$$ \lVert \vec{x} + \vec{y} \rVert \leq \lVert \vec{x} \rVert + \lVert \vec{y} \rVert. $$",
         ],
         title="triangle inequality",
         label="thm-triangle",
@@ -426,7 +426,7 @@ def _(lk):
     lk.theorem(
         [
             r"In $\mathbb{R}^n$, we can find at most $n$ non-zero pairwise orthogonal vectors $\vec{e}_1, \vec{e}_2, \dots, \vec{e}_n$",
-            r"$$ \vec{e}_i \cdot \vec{e}_j = 0 \quad \forall\, i \neq j $$",
+            r"$$ \vec{e}_i \cdot \vec{e}_j = 0 \quad \forall\, i \neq j. $$",
         ],
         label="thm-at-most-n",
     )
@@ -598,7 +598,7 @@ def _(lk):
     # exercise: computing with two vectors
     lk.exercise(
         [
-            r"Let $\vec{x} = \begin{bmatrix} 1 \\ -2 \\ 2 \end{bmatrix}, \ \vec{y} = \begin{bmatrix} 2 \\ 1 \\ 1 \end{bmatrix}$",
+            r"Let $\vec{x} = \begin{bmatrix} 1 \\ -2 \\ 2 \end{bmatrix}, \ \vec{y} = \begin{bmatrix} 2 \\ 1 \\ 1 \end{bmatrix}$.",
             r"a) Compute $2\vec{x} - \vec{y}$",
             r"b) Compute $\vec{x} \cdot \vec{y}$, $\lVert \vec{x} \rVert$, $\lVert \vec{y} \rVert$",
             r"c) Find the angle between $\vec{x}$ and $\vec{y}$",
@@ -614,7 +614,7 @@ def _(lk):
     # exercise: orthogonal vectors
     lk.exercise(
         [
-            r"Consider $\vec{u} = \begin{bmatrix} 1 \\ 2 \\ -1 \end{bmatrix}, \ \vec{v} = \begin{bmatrix} 2 \\ a \\ 4 \end{bmatrix}$",
+            r"Consider $\vec{u} = \begin{bmatrix} 1 \\ 2 \\ -1 \end{bmatrix}, \ \vec{v} = \begin{bmatrix} 2 \\ a \\ 4 \end{bmatrix}$.",
             r"a) Find $a \in \mathbb{R}$ so that $\vec{u} \perp \vec{v}$",
             r"b) For this value of $a$, compute $\lVert \vec{u} + \vec{v} \rVert$",
             r"c) Check that $\lVert \vec{u} + \vec{v} \rVert^2 = \lVert \vec{u} \rVert^2 + \lVert \vec{v} \rVert^2$",
@@ -630,7 +630,7 @@ def _(lk):
     # exercise: an orthogonal basis of R^3
     lk.exercise(
         [
-            r"Consider $\vec{u} = \begin{bmatrix} 1 \\ 1 \\ 0 \end{bmatrix}, \ \vec{v} = \begin{bmatrix} 1 \\ -1 \\ 0 \end{bmatrix}, \ \vec{w} = \begin{bmatrix} 0 \\ 0 \\ 2 \end{bmatrix}$",
+            r"Consider $\vec{u} = \begin{bmatrix} 1 \\ 1 \\ 0 \end{bmatrix}, \ \vec{v} = \begin{bmatrix} 1 \\ -1 \\ 0 \end{bmatrix}, \ \vec{w} = \begin{bmatrix} 0 \\ 0 \\ 2 \end{bmatrix}$.",
             r"a) Show that $\vec{u}, \vec{v}, \vec{w}$ are pairwise orthogonal",
             r"b) Write $\vec{x} = \begin{bmatrix} 3 \\ 1 \\ 4 \end{bmatrix}$ in the form $\vec{x} = a\vec{u} + b\vec{v} + c\vec{w}$",
             r"c) Show that $a = \dfrac{\vec{x} \cdot \vec{u}}{\vec{u} \cdot \vec{u}}, \ b = \dfrac{\vec{x} \cdot \vec{v}}{\vec{v} \cdot \vec{v}}, \ c = \dfrac{\vec{x} \cdot \vec{w}}{\vec{w} \cdot \vec{w}}$",

@@ -83,7 +83,7 @@ def _(lk):
             {\large\tfrac{\partial f^1}{\partial x^1}}(\vec{a}) & {\large\tfrac{\partial f^1}{\partial x^2}}(\vec{a}) & \cdots & {\large\tfrac{\partial f^1}{\partial x^n}}(\vec{a})\\[6pt]
             {\large\tfrac{\partial f^2}{\partial x^1}}(\vec{a}) & {\large\tfrac{\partial f^2}{\partial x^2}}(\vec{a}) & \cdots & {\large\tfrac{\partial f^2}{\partial x^n}}(\vec{a})\\
             \vdots & \vdots & \ddots & \vdots\\
-            {\large\tfrac{\partial f^m}{\partial x^1}}(\vec{a}) & {\large\tfrac{\partial f^m}{\partial x^2}}(\vec{a}) & \cdots & {\large\tfrac{\partial f^m}{\partial x^n}}(\vec{a})
+            {\large\tfrac{\partial f^m}{\partial x^1}}(\vec{a}) & {\large\tfrac{\partial f^m}{\partial x^2}}(\vec{a}) & \cdots & {\large\tfrac{\partial f^m}{\partial x^n}}(\vec{a}).
             \end{bmatrix} \in \mathrm{Mat}(m \times n)
             $$
             """,
@@ -162,7 +162,7 @@ def _(lk):
         If $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^n$ is differentiable at $t = t_0$ and $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ is differentiable at $\vec{x} = \vec{a} = \gamma(t_0)$, then $g = f \circ \gamma : \mathbb{R} \longrightarrow \mathbb{R}$ is differentiable at $t = t_0$ with
 
         $$
-        g'(t_0) = (f \circ \gamma)'(t_0) = \underbrace{Df(\gamma(t_0))}_{\mathbb{R}^n \to \mathbb{R}} \, \underbrace{(\gamma'(t_0))}_{\mathbb{R}^n}
+        g'(t_0) = (f \circ \gamma)'(t_0) = \underbrace{Df(\gamma(t_0))}_{\mathbb{R}^n \to \mathbb{R}} \, \underbrace{(\gamma'(t_0))}_{\mathbb{R}^n}.
         $$
         """,
         label="thm-chain-path",
@@ -198,7 +198,7 @@ def _(lk):
             """,
             lk.gap(),
             r"""
-            $\therefore$ &nbsp; <span class="lk-tab" style="--lk-tab: 7.4em">$\gamma : \mathbb{R} \longrightarrow \mathbb{R}^n$</span>differentiable at $t = t_0$
+            $\therefore$ &nbsp; <span class="lk-tab" style="--lk-tab: 7.4em">$\gamma : \mathbb{R} \longrightarrow \mathbb{R}^n$</span>differentiable at $t = t_0$.
 
             <span class='lk-ghost'>$\therefore$ &nbsp; </span><span class="lk-tab" style="--lk-tab: 7.4em">$f : \mathbb{R}^n \longrightarrow \mathbb{R}$</span>differentiable at $\vec{x} = \vec{a} = \gamma(t_0)$
 
@@ -254,7 +254,7 @@ def _(lk):
         $$
         \begin{aligned}
         \Longrightarrow \quad Df(\gamma(t))(\gamma'(t)) &= \begin{bmatrix} 0 & 2\cos(t) & 2\sin(t) \end{bmatrix} \begin{bmatrix} 1 \\ -\sin(t) \\ \cos(t) \end{bmatrix}\\[4pt]
-        &= 0 \cdot 1 + 2\cos(t)(-\sin(t)) + 2\sin(t)\cos(t) = 0
+        &= 0 \cdot 1 + 2\cos(t)(-\sin(t)) + 2\sin(t)\cos(t) = 0.
         \end{aligned}
         $$
         """,
@@ -270,7 +270,7 @@ def _(lk):
     lk.corollary(
         [
             r"""
-            For $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ differentiable at $\vec{a} \in \mathbb{R}^n$, $\vec{\nabla} f(\vec{a})$ is perpendicular to level set through $\vec{a}$
+            For $f : \mathbb{R}^n \longrightarrow \mathbb{R}$ differentiable at $\vec{a} \in \mathbb{R}^n$, $\vec{\nabla} f(\vec{a})$ is perpendicular to level set through $\vec{a}$.
             """,
             lk.gap(),
             lk.aside(
@@ -326,7 +326,7 @@ def _(lk):
                 \begin{aligned}
                 &\frac{g \circ f(\vec{x}) - g \circ f(\vec{a}) - Dg(f(\vec{a})) Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert}\\[4pt]
                 &= \underbrace{\frac{g \circ f(\vec{x}) - g \circ f(\vec{a}) - Dg(f(\vec{a}))(f(\vec{x}) - f(\vec{a}))}{\lVert f(\vec{x}) - f(\vec{a}) \rVert}}_{\longrightarrow 0} \, \mk{\underbrace{\frac{\lVert f(\vec{x}) - f(\vec{a}) \rVert}{\lVert \vec{x} - \vec{a} \rVert}}_{\substack{\text{does not go}\\ \text{to } +\infty}}}\\[4pt]
-                &\qquad + Dg(f(\vec{a})) \left( \underbrace{\frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert}}_{\longrightarrow 0} \right)
+                &\qquad + Dg(f(\vec{a})) \left( \underbrace{\frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert}}_{\longrightarrow 0} \right).
                 \end{aligned}
                 $$
                 """,
@@ -357,7 +357,7 @@ def _(lk):
         $$
         \begin{aligned}
         \Longrightarrow \quad Dg(f(\vec{x})) Df(\vec{x}) &= \begin{bmatrix} 2x^1 x^2 & -1 \end{bmatrix} \begin{bmatrix} x^2 & x^1 \\ 1 & 1 \end{bmatrix}\\[4pt]
-        &= \begin{bmatrix} 2x^1 (x^2)^2 - 1 & 2(x^1)^2 x^2 - 1 \end{bmatrix}
+        &= \begin{bmatrix} 2x^1 (x^2)^2 - 1 & 2(x^1)^2 x^2 - 1 \end{bmatrix}.
         \end{aligned}
         $$
 
@@ -382,7 +382,7 @@ def _(lk):
     # exercise: chain rule for an ellipse and a spiral
     lk.exercise(
         r"""
-        Consider $\gamma(t) = \begin{bmatrix} 3\cos(t) \\ 2\sin(t) \end{bmatrix}$, $\sigma(t) = t\gamma(t) = \begin{bmatrix} 3t\cos(t) \\ 2t\sin(t) \end{bmatrix}$
+        Consider $\gamma(t) = \begin{bmatrix} 3\cos(t) \\ 2\sin(t) \end{bmatrix}$, $\sigma(t) = t\gamma(t) = \begin{bmatrix} 3t\cos(t) \\ 2t\sin(t) \end{bmatrix}$.
 
         $f\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = {\large\tfrac{(x^1)^2}{9}} + {\large\tfrac{(x^2)^2}{4}}$ and $g\left( \begin{bmatrix} y^1 \\ y^2 \end{bmatrix} \right) = \begin{bmatrix} y^1 \cos(y^2) \\ y^1 \sin(y^2) \end{bmatrix}$
 

@@ -238,7 +238,7 @@ def _(a_line, blank, cross_axes, lk, math, np, right_angle, tip_label):
             For $n = 1$, $f : \mathbb{R} \longrightarrow \mathbb{R}$ &nbsp; $\leadsto$ &nbsp; $g : \mathbb{R} \longrightarrow \mathbb{R}$
 
             $$
-            g(x) = f(a) + f'(a)(x - a)
+            g(x) = f(a) + f'(a)(x - a),
             $$
 
             is the affine function whose graph is the tangent line to the graph of $f$ at $\begin{bmatrix} a \\ f(a) \end{bmatrix}$
@@ -278,7 +278,7 @@ def _(lk):
         > the graph of the affine approximation of $f$ at $\vec{a}$ is a plane in $\mathbb{R}^3 = \mathbb{R}^2 \times \mathbb{R}$ through $\begin{bmatrix} a^1 \\ a^2 \\ f(\vec{a}) \end{bmatrix}$ with normal vector
 
         $$
-        \vec{n} = \begin{bmatrix} -{\large\tfrac{\partial f}{\partial x^1}}(\vec{a}) \\[6pt] -{\large\tfrac{\partial f}{\partial x^2}}(\vec{a}) \\[6pt] 1 \end{bmatrix}
+        \vec{n} = \begin{bmatrix} -{\large\tfrac{\partial f}{\partial x^1}}(\vec{a}) \\[6pt] -{\large\tfrac{\partial f}{\partial x^2}}(\vec{a}) \\[6pt] 1 \end{bmatrix}.
         $$
 
         $\leadsto$ &nbsp; the **tangent plane** to $\mathrm{graph}(f)$ at $\begin{bmatrix} a^1 \\ a^2 \\ f(\vec{a}) \end{bmatrix}$
@@ -462,10 +462,10 @@ def _(lk):
         > > defines an affine approximation of $f$ at $\vec{a}$ in the sense
 
         $$
-        \lim_{\vec{x} \to \vec{a}} \frac{\underbrace{f(\vec{x})}_{\mathbb{R}^m} - \underbrace{f(\vec{a})}_{\mathbb{R}^m} - \underbrace{Df(\vec{a})}_{\mathrm{Mat}(m \times n)} \underbrace{(\vec{x} - \vec{a})}_{\mathbb{R}^n}}{\lVert \vec{x} - \vec{a} \rVert} = \vec{0} \in \mathbb{R}^m
+        \lim_{\vec{x} \to \vec{a}} \frac{\underbrace{f(\vec{x})}_{\mathbb{R}^m} - \underbrace{f(\vec{a})}_{\mathbb{R}^m} - \underbrace{Df(\vec{a})}_{\mathrm{Mat}(m \times n)} \underbrace{(\vec{x} - \vec{a})}_{\mathbb{R}^n}}{\lVert \vec{x} - \vec{a} \rVert} = \vec{0} \in \mathbb{R}^m.
         $$
 
-        If $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is differentiable at $\vec{a}$, the linear transformation $Df(\vec{a}) : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is called the **derivative** of $f$ at $\vec{a}$ or the **Jacobian matrix** of $f$ at $\vec{a}$, $Df(\vec{a}) \in \mathrm{Mat}(m \times n)$
+        If $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is differentiable at $\vec{a}$, the linear transformation $Df(\vec{a}) : \mathbb{R}^n \longrightarrow \mathbb{R}^m$ is called the **derivative** of $f$ at $\vec{a}$ or the **Jacobian matrix** of $f$ at $\vec{a}$, $Df(\vec{a}) \in \mathrm{Mat}(m \times n)$.
         """,
         label="def-jacobian",
     )
@@ -482,7 +482,7 @@ def _(lk):
             lk.aside(
                 r"""
                 $$
-                \lim_{\vec{x} \to \vec{a}} \mk{\frac{\lVert f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a}) \rVert}{\lVert \vec{x} - \vec{a} \rVert}} = 0
+                \lim_{\vec{x} \to \vec{a}} \mk{\frac{\lVert f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a}) \rVert}{\lVert \vec{x} - \vec{a} \rVert}} = 0.
                 $$
                 """,
                 r"scalar valued function on $\mathbb{R}^n$",

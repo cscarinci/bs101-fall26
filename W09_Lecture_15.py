@@ -202,13 +202,13 @@ def _(lk):
         > • &nbsp; a **global maximum** of $f$ if
 
         $$
-        f(\vec{x}) \leqslant f(\vec{a}) \qquad \forall \, \vec{x} \in D
+        f(\vec{x}) \leqslant f(\vec{a}) \qquad \forall \, \vec{x} \in D.
         $$
 
         > • &nbsp; a **global minimum** of $f$ if
 
         $$
-        f(\vec{x}) \geqslant f(\vec{a}) \qquad \forall \, \vec{x} \in D
+        f(\vec{x}) \geqslant f(\vec{a}) \qquad \forall \, \vec{x} \in D.
         $$
         """,
         label="def-global",
@@ -529,7 +529,7 @@ def _(BOX, Figure, cross_axes, lk, np):
     _panels[0].plot(_a + 0.16 * np.cos(_t), _c + 0.16 * np.sin(_t), color=lk.RED, lw=1.0, zorder=2)
     lk.module(
         lk.definition(
-            r"A set $D \subseteq \mathbb{R}^2$ is called **closed** if it contains all of its boundary &nbsp; $\mathrm{Bd}(D) \subset D$",
+            r"A set $D \subseteq \mathbb{R}^2$ is called **closed** if it contains all of its boundary &nbsp; $\mathrm{Bd}(D) \subset D$.",
             label="def-closed",
         ),
         lk.example(

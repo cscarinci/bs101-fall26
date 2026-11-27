@@ -214,33 +214,35 @@ def _(beside, blob, lk, math, plane, walker):
         _cx, _cy = _x[_k] + 0.36 * _ty, _y[_k] - 0.36 * _tx
         walker(_ax, (_cx, _cy), h=0.56)
         lk.arrow(_ax, (_cx + 0.3 * _tx, _cy + 0.3 * _ty), (_cx + 0.95 * _tx, _cy + 0.95 * _ty), "black", lw=1.2)
-    lk.definition(
-        [
-            r"""
-            Given $D\subseteq\mathbb{R}^2$ a simple region, let $C=\mathrm{Bd}(D)$ denote its boundary points.
-            """,
-            lk.aside(
-                r"We denote by $\vec{C}$ the curve $C$ with the <span class='lk-mark'>counter-clockwise orientation</span>.",
-                r"walking around $\vec{C}$,<br>$D$ is always on the left.",
-            ),
-            lk.figure(_fig),
-            lk.aside(
-                r"We denote by $\vec{C}^{\,op}$ the curve $C$ with the opposite orientation (<span class='lk-mark'>clockwise</span>)",
-                r"$D$ is always on the right",
-            ),
-            lk.gap(),
-            r"""
-            We also call
+    lk.module(
+        lk.definition(
+            [
+                r"""
+                Given $D\subseteq\mathbb{R}^2$ a simple region, let $C=\mathrm{Bd}(D)$ denote its boundary points.
+                """,
+                lk.aside(
+                    r"We denote by $\vec{C}$ the curve $C$ with the <span class='lk-mark'>counter-clockwise orientation</span>.",
+                    r"walking around $\vec{C}$,<br>$D$ is always on the left.",
+                ),
+                lk.aside(
+                    r"We denote by $\vec{C}^{\,op}$ the curve $C$ with the opposite orientation (<span class='lk-mark'>clockwise</span>)",
+                    r"$D$ is always on the right",
+                ),
+                lk.gap(),
+                r"""
+                We also call
 
-            $$
-            \begin{aligned}
-            \text{counter-clockwise orientation}&=\textbf{positive orientation}\\
-            \text{clockwise orientation}&=\textbf{negative orientation}
-            \end{aligned}
-            $$
-            """,
-        ],
-        label="def-orientation",
+                $$
+                \begin{aligned}
+                \text{counter-clockwise orientation}&=\textbf{positive orientation}\\
+                \text{clockwise orientation}&=\textbf{negative orientation}.
+                \end{aligned}
+                $$
+                """,
+            ],
+            label="def-orientation",
+        ),
+        lk.prose(lk.figure(_fig)),
     )
     return
 
@@ -262,7 +264,7 @@ def _(lk):
                 r"""
                 $$
                 \underbrace{\int_{\vec{C}}\vec{F}\cdot d\vec{s}}_{\footnotesize\begin{matrix}\text{line integral}\\\text{over the boundary}\end{matrix}}
-                =\underbrace{\iint_D\left(\frac{\partial Q}{\partial x}(x,y)-\frac{\partial P}{\partial y}(x,y)\right)dxdy}_{\footnotesize\begin{matrix}\text{double integral of}\\\text{some derivative of }\vec{F}\end{matrix}}
+                =\underbrace{\iint_D\left(\frac{\partial Q}{\partial x}(x,y)-\frac{\partial P}{\partial y}(x,y)\right)dxdy}_{\footnotesize\begin{matrix}\text{double integral of}\\\text{some derivative of }\vec{F}\end{matrix}}.
                 $$
                 """,
                 r"some derivative of $\vec{F}$ = scalar curl!",
@@ -479,7 +481,7 @@ def _(beside, lk, np, plane):
                 \iint_D1\,dxdy&=\ ?\\
                 &=\int_{-a}^a\left(\int_{-b\sqrt{1-x^2/a^2}}^{b\sqrt{1-x^2/a^2}}1\,dy\right)dx\\
                 &=\int_{-a}^a2b\sqrt{1-x^2/a^2}\,dx=\ \dots\ \text{trig. substitution}\\
-                &=\iint_D\bigg(\underbrace{\frac{\partial Q}{\partial x}(x,y)-\frac{\partial P}{\partial y}(x,y)}_{\footnotesize=1\text{ for some }\vec{F}=\left[\begin{smallmatrix}P\\Q\end{smallmatrix}\right]}\bigg)dxdy
+                &=\iint_D\bigg(\underbrace{\frac{\partial Q}{\partial x}(x,y)-\frac{\partial P}{\partial y}(x,y)}_{\footnotesize=1\text{ for some }\vec{F}=\left[\begin{smallmatrix}P\\Q\end{smallmatrix}\right]}\bigg)dxdy.
                 \end{aligned}
                 $$
                 """,
@@ -532,13 +534,13 @@ def _(lk):
         Given a vector field $\vec{F}(x,y)=\begin{bmatrix} P(x,y) \\ Q(x,y) \end{bmatrix}$, &nbsp; $C^1$-smooth over the whole plane $\mathbb{R}^2$ and with zero scalar curl
 
         $$
-        \frac{\partial Q}{\partial x}(x,y)-\frac{\partial P}{\partial y}(x,y)=0
+        \frac{\partial Q}{\partial x}(x,y)-\frac{\partial P}{\partial y}(x,y)=0,
         $$
 
         then $\vec{F}(x,y)$ is a conservative vector field with potential function
 
         $$
-        f(x,y)=\int_0^xP(t,0)\,dt+\int_0^yQ(x,t)\,dt
+        f(x,y)=\int_0^xP(t,0)\,dt+\int_0^yQ(x,t)\,dt.
         $$
         """,
         label="cor-potential",
@@ -567,7 +569,7 @@ def _(along, beside, lk, np, plane):
     beside(_ax, (_x / 2, _y), 90, r"$\vec{C}_2$", lk.ORANGE, 16, 18, gap=6)
     lk.proof(
         [
-            r"Consider a rectangle $R=[0,x]\times[0,y]$",
+            r"Consider a rectangle $R=[0,x]\times[0,y]$.",
             lk.figure(_fig),
             lk.aside(
                 r"""
@@ -663,7 +665,7 @@ def _(lk):
         b) compute line integral of
 
         $$
-        \vec{F}(x,y)=\begin{bmatrix} y^2 \\ 3xy \end{bmatrix}\quad\text{over }\mathrm{Bd}(D)
+        \vec{F}(x,y)=\begin{bmatrix} y^2 \\ 3xy \end{bmatrix}\quad\text{over }\mathrm{Bd}(D).
         $$
 
         c) compute $\displaystyle\iint_D\left(\frac{\partial Q}{\partial x}-\frac{\partial P}{\partial y}\right)dxdy$ with Fubini's theorem
@@ -682,7 +684,7 @@ def _(lk):
         Let
 
         $$
-        \vec{G}(x,y)=\begin{bmatrix} e^y \\ xe^y+2y \end{bmatrix}
+        \vec{G}(x,y)=\begin{bmatrix} e^y \\ xe^y+2y \end{bmatrix}.
         $$
 
         a) check that the scalar curl is zero

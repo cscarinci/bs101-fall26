@@ -225,7 +225,7 @@ def _(lk):
         Given $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$ and $g : \mathbb{R}^2 \longrightarrow \mathbb{R}$, $\vec{a} \in g^{-1}(c)$ is a **global maximum of $f$ restricted to $g^{-1}(c)$** if
 
         $$
-        f(\vec{a}) \geqslant f(\vec{x}) \qquad \forall \, \vec{x} \in g^{-1}(c)
+        f(\vec{a}) \geqslant f(\vec{x}) \qquad \forall \, \vec{x} \in g^{-1}(c).
         $$
         """,
         label="def-restricted-max",
@@ -245,7 +245,7 @@ def _(lk):
             If $\vec{a}$ is a global maximum of $f$ restricted to $g^{-1}(c)$ with $\vec{\nabla} g(\vec{a}) \neq \vec{0}$, then
             """,
             lk.aside(
-                r"$$ \text{there exists } \lambda \in \mathbb{R} \text{ such that } \vec{\nabla} f(\vec{a}) = \lambda \vec{\nabla} g(\vec{a}) $$",
+                r"$$ \text{there exists } \lambda \in \mathbb{R} \text{ such that } \vec{\nabla} f(\vec{a}) = \lambda \vec{\nabla} g(\vec{a}). $$",
                 r"$\vec{\nabla} f(\vec{a})$ is proportional to $\vec{\nabla} g(\vec{a})$",
             ),
         ],
@@ -475,7 +475,7 @@ def _(lk):
                 \begin{cases} \vec{\nabla} f(\vec{x}) = \lambda \vec{\nabla} g(\vec{x}) \\[4pt] g(\vec{x}) = 0 \end{cases} \quad & \Longleftrightarrow \quad \begin{cases} x^2 = 2 \lambda x^1 \\ x^1 - 2 = -\lambda \\ (x^1)^2 - x^2 = 0 \end{cases}\\[14pt]
                 & \Longleftrightarrow \quad \lambda = 2, \ x^1 = 0, \ x^2 = 0\\[4pt]
                 & \phantom{\Longleftrightarrow} \quad \text{or } \lambda = {\large\tfrac{2}{3}}, \ \underbrace{x^1 = {\large\tfrac{4}{3}}, \ x^2 = {\large\tfrac{16}{9}}}_{\footnotesize \text{not on } \mathrm{Bd}(D)}\\[24pt]
-                \begin{cases} \vec{\nabla} f(\vec{x}) = \lambda \vec{\nabla} h(\vec{x}) \\[4pt] h(\vec{x}) = 1 \end{cases} \quad & \Longleftrightarrow \quad \begin{cases} x^2 = 0 \\ x^1 - 2 = \lambda \\ x^2 = 1 \end{cases}
+                \begin{cases} \vec{\nabla} f(\vec{x}) = \lambda \vec{\nabla} h(\vec{x}) \\[4pt] h(\vec{x}) = 1 \end{cases} \quad & \Longleftrightarrow \quad \begin{cases} x^2 = 0 \\ x^1 - 2 = \lambda \\ x^2 = 1 \end{cases}.
                 \end{aligned}
                 $$
                 """,
@@ -507,7 +507,7 @@ def _(lk):
         a) find all solutions of
 
         $$
-        \begin{cases} \vec{\nabla} f(\vec{x}) = \lambda \vec{\nabla} g(\vec{x}) \\ g(\vec{x}) = 20 \end{cases}
+        \begin{cases} \vec{\nabla} f(\vec{x}) = \lambda \vec{\nabla} g(\vec{x}) \\ g(\vec{x}) = 20. \end{cases}
         $$
 
         b) find the global max / min of $f$ restricted to $g^{-1}(20)$.

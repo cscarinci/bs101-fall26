@@ -161,7 +161,7 @@ def _(lk):
         Given a $2 \times 2$ matrix $A = \begin{bmatrix} A^1{}_1 & A^1{}_2 \\ A^2{}_1 & A^2{}_2 \end{bmatrix} = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \in \mathrm{Mat}(2 \times 2)$, the **determinant** of $A$ is the real number
 
         $$
-        \det A = A^1{}_1 A^2{}_2 - A^1{}_2 A^2{}_1 = ad - bc
+        \det A = A^1{}_1 A^2{}_2 - A^1{}_2 A^2{}_1 = ad - bc.
         $$
         """,
         label="def-det2",
@@ -194,7 +194,7 @@ def _(lk):
         For $A \in \mathrm{Mat}(2 \times 2)$ &nbsp; $\leadsto$ &nbsp; $A : \mathbb{R}^2 \longrightarrow \mathbb{R}^2$ linear
 
         $$
-        \lvert \det A \rvert = \text{area of parallelogram spanned by the columns of } A
+        \lvert \det A \rvert = \text{area of parallelogram spanned by the columns of } A.
         $$
         """,
         label="thm-det-area",
@@ -278,16 +278,16 @@ def _(lk):
             Given a $3 \times 3$ matrix
 
             $$
-            A = \begin{bmatrix} A^1{}_1 & A^1{}_2 & A^1{}_3 \\ A^2{}_1 & A^2{}_2 & A^2{}_3 \\ A^3{}_1 & A^3{}_2 & A^3{}_3 \end{bmatrix} = \begin{bmatrix} a & b & c \\ d & e & f \\ g & h & i \end{bmatrix} \in \mathrm{Mat}(3 \times 3)
+            A = \begin{bmatrix} A^1{}_1 & A^1{}_2 & A^1{}_3 \\ A^2{}_1 & A^2{}_2 & A^2{}_3 \\ A^3{}_1 & A^3{}_2 & A^3{}_3 \end{bmatrix} = \begin{bmatrix} a & b & c \\ d & e & f \\ g & h & i \end{bmatrix} \in \mathrm{Mat}(3 \times 3),
             $$
 
             the **determinant** of $A$ is the real number
             """,
             lk.aside(
-                r"$$ \det A = a \det \begin{bmatrix} e & f \\ h & i \end{bmatrix} \mathbin{\mk{-}} b \det \begin{bmatrix} d & f \\ g & i \end{bmatrix} + c \det \begin{bmatrix} d & e \\ g & h \end{bmatrix} $$",
+                r"$$ \det A = a \det \begin{bmatrix} e & f \\ h & i \end{bmatrix} \mathbin{\mk{-}} b \det \begin{bmatrix} d & f \\ g & i \end{bmatrix} + c \det \begin{bmatrix} d & e \\ g & h \end{bmatrix}, $$",
                 "note the negative sign!!!",
             ),
-            r"$$ \begin{bmatrix} a & - & - \\ | & e & f \\ | & h & i \end{bmatrix} \qquad \begin{bmatrix} - & b & - \\ d & | & f \\ g & | & i \end{bmatrix} \qquad \begin{bmatrix} - & - & c \\ d & e & | \\ g & h & | \end{bmatrix} $$",
+            r"$$ \begin{bmatrix} a & - & - \\ | & e & f \\ | & h & i \end{bmatrix} \qquad \begin{bmatrix} - & b & - \\ d & | & f \\ g & | & i \end{bmatrix} \qquad \begin{bmatrix} - & - & c \\ d & e & | \\ g & h & | \end{bmatrix}. $$",
         ],
         label="def-det3",
     )
@@ -303,7 +303,7 @@ def _(lk):
         For $A \in \mathrm{Mat}(3 \times 3)$ &nbsp; $\leadsto$ &nbsp; $A : \mathbb{R}^3 \longrightarrow \mathbb{R}^3$ linear
 
         $$
-        \lvert \det A \rvert = \text{volume of the parallelepiped spanned by the columns of } A
+        \lvert \det A \rvert = \text{volume of the parallelepiped spanned by the columns of } A.
         $$
         """,
         label="thm-det-volume",
@@ -499,7 +499,7 @@ def _(lk):
     lk.theorem(
         [
             lk.aside(
-                r"For every $n \in \mathbb{Z}_{>0}$, $A \in \mathrm{Mat}(n \times n)$ admits an inverse iff $\det A \neq 0$",
+                r"For every $n \in \mathbb{Z}_{>0}$, $A \in \mathrm{Mat}(n \times n)$ admits an inverse iff $\det A \neq 0$.",
                 r"$A \in \mathrm{Mat}(n \times n) \ \leftrightsquigarrow \ A : \mathbb{R}^n \longrightarrow \mathbb{R}^n$ linear",
             ),
         ],

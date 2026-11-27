@@ -236,7 +236,7 @@ def _(lk):
         A **vector field** in $\mathbb{R}^2$ is a map
 
         $$
-        \vec{F} : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}^2, \qquad \vec{x} = \begin{bmatrix} x \\ y \end{bmatrix} \longmapsto \vec{F}(\vec{x}) = \begin{bmatrix} P(\vec{x}) \\ Q(\vec{x}) \end{bmatrix}
+        \vec{F} : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}^2, \qquad \vec{x} = \begin{bmatrix} x \\ y \end{bmatrix} \longmapsto \vec{F}(\vec{x}) = \begin{bmatrix} P(\vec{x}) \\ Q(\vec{x}) \end{bmatrix}.
         $$
 
         > $\leadsto$ &nbsp; $P : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}$ and $Q : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}$ are called the **components** of $\vec{F}$
@@ -335,14 +335,14 @@ def _(fig_radial, fig_unit_rot, lk):
     lk.example(
         [
             r"""
-            $\vec{G}(\vec{x}) = \begin{cases} \dfrac{1}{\lVert \vec{x} \rVert} \vec{F}(\vec{x}), & \vec{x} \neq \vec{0}\\[8pt] \vec{0}, & \vec{x} = \vec{0} \end{cases}$
+            $\vec{G}(\vec{x}) = \begin{cases} \dfrac{1}{\lVert \vec{x} \rVert} \vec{F}(\vec{x}), & \vec{x} \neq \vec{0},\\[8pt] \vec{0}, & \vec{x} = \vec{0} \end{cases}$
 
-            > $\Longrightarrow$ &nbsp; $\lVert \vec{G}(\vec{x}) \rVert^2 = \begin{cases} \dfrac{1}{\lVert \vec{x} \rVert^2} \lVert \vec{F}(\vec{x}) \rVert^2 = 1, & \vec{x} \neq \vec{0}\\[8pt] 0, & \vec{x} = \vec{0} \end{cases}$
+            > $\Longrightarrow$ &nbsp; $\lVert \vec{G}(\vec{x}) \rVert^2 = \begin{cases} \dfrac{1}{\lVert \vec{x} \rVert^2} \lVert \vec{F}(\vec{x}) \rVert^2 = 1, & \vec{x} \neq \vec{0},\\[8pt] 0, & \vec{x} = \vec{0} \end{cases}$
             """,
             lk.figure(fig_unit_rot),
             lk.gap(),
             r"""
-            $\vec{H}(\vec{x}) = \begin{bmatrix} x \\ y \end{bmatrix} = \vec{x}$ &emsp;&emsp; $\vec{I}(\vec{x}) = \begin{cases} \dfrac{\vec{x}}{\lVert \vec{x} \rVert}, & \vec{x} \neq \vec{0}\\[8pt] \vec{0}, & \vec{x} = \vec{0} \end{cases}$
+            $\vec{H}(\vec{x}) = \begin{bmatrix} x \\ y \end{bmatrix} = \vec{x}$ &emsp;&emsp; $\vec{I}(\vec{x}) = \begin{cases} \dfrac{\vec{x}}{\lVert \vec{x} \rVert}, & \vec{x} \neq \vec{0},\\[8pt] \vec{0}, & \vec{x} = \vec{0} \end{cases}$
             """,
             lk.figure(fig_radial),
         ],
@@ -381,18 +381,20 @@ def _(K, farrow, label, lk, lt, mo, np, plane, vfield):
     farrow(_ax, _g, (_g[0] + _k * _F(*_g)[0], _g[1] + _k * _F(*_g)[1]), lk.BLUE, lw=2.0, zorder=6)
     _ax.plot(*_g, "o", color=lk.BLUE, ms=3.3, zorder=7)
     _ax.annotate(r"$\gamma(t)$", _g, textcoords="offset points", xytext=(-4, 9), ha="right", va="bottom", fontsize=12, zorder=8, bbox={"boxstyle": "round,pad=0.1", "facecolor": "none", "edgecolor": "none"})
-    lk.definition(
-        [
-            r"""
-            Given a vector field $\vec{F} : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}^2$, a path $\gamma : (-\varepsilon, \varepsilon) \subseteq \mathbb{R} \longrightarrow D \subseteq \mathbb{R}^2$<br>is called a **flow line** of the vector field $\vec{F}$ if
-            """,
-            lk.aside(
-                r"$$\gamma'(t) = \vec{F}(\gamma(t)) \qquad \forall t \in (-\varepsilon, \varepsilon)$$",
-                r"at every $t$, the velocity of $\gamma$<br>agrees with $\vec{F}$ at $\gamma(t)$",
-            ),
-            lk.interactive(_fig, controls=[lt]),
-        ],
-        label="def-flow-line",
+    lk.module(
+        lk.definition(
+            [
+                r"""
+                Given a vector field $\vec{F} : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}^2$, a path $\gamma : (-\varepsilon, \varepsilon) \subseteq \mathbb{R} \longrightarrow D \subseteq \mathbb{R}^2$<br>is called a **flow line** of the vector field $\vec{F}$ if
+                """,
+                lk.aside(
+                    r"$$\gamma'(t) = \vec{F}(\gamma(t)) \qquad \forall t \in (-\varepsilon, \varepsilon).$$",
+                    r"at every $t$, the velocity of $\gamma$<br>agrees with $\vec{F}$ at $\gamma(t)$",
+                ),
+            ],
+            label="def-flow-line",
+        ),
+        lk.prose(lk.interactive(_fig, controls=[lt])),
     )
     return
 
@@ -519,7 +521,7 @@ def _(lk):
             $$
             \begin{aligned}
             \mathrm{div}(\vec{F})(\vec{x}) &= \vec{\nabla} \cdot \vec{F}(\vec{x})\\
-            &= \underbrace{\frac{\partial P}{\partial x\vphantom{y}}}_{\mathllap{\footnotesize \begin{array}{c} \text{partial derivative of 1st component} \\ \text{with respect to 1st variable} \end{array}\kern-1.2em}}(\vec{x}) + \underbrace{\frac{\partial Q}{\partial y}}_{\mathrlap{\kern-1.2em \footnotesize \begin{array}{c} \text{partial derivative of 2nd component} \\ \text{with respect to 2nd variable} \end{array}}}(\vec{x}) = \mathrm{tr}\big( D\vec{F}(\vec{x}) \big)
+            &= \underbrace{\frac{\partial P}{\partial x\vphantom{y}}}_{\mathllap{\footnotesize \begin{array}{c} \text{partial derivative of 1st component} \\ \text{with respect to 1st variable} \end{array}\kern-1.2em}}(\vec{x}) + \underbrace{\frac{\partial Q}{\partial y}}_{\mathrlap{\kern-1.2em \footnotesize \begin{array}{c} \text{partial derivative of 2nd component} \\ \text{with respect to 2nd variable} \end{array}}}(\vec{x}) = \mathrm{tr}\big( D\vec{F}(\vec{x}) \big).
             \end{aligned}
             $$
             """,

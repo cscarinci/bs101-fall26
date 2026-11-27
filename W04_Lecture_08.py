@@ -205,17 +205,19 @@ def _(blank, lk, np):
     _ax.text((_a[0] + _r[0]) / 2 - 0.02, (_a[1] + _r[1]) / 2 - 0.06, r"$\delta$", color=lk.GREY, fontsize=13, ha="right", va="top")
     _ax.text(_a[0] + _d * np.cos(2.3) - 0.05, _a[1] + _d * np.sin(2.3) + 0.05, r"$B(\vec{a}, \delta)$", color=lk.BLUE, fontsize=13, ha="right", va="bottom")
 
-    lk.definition(
-        [
-            r"Given $\vec{a} \in \mathbb{R}^n$ and $\delta > 0$",
-            lk.aside(
-                r"$$ B(\vec{a}, \delta) = \big\{ \vec{x} \in \mathbb{R}^n \;\big|\; \mk{\lVert \vec{x} - \vec{a} \rVert < \delta} \big\} $$",
-                r"distance of $\vec{x}$ from $\vec{a}$<br>is smaller than $\delta$",
-            ),
-            r"is the **open ball** in $\mathbb{R}^n$ centered at $\vec{a}$ with radius $\delta$.",
-            lk.figure(_fig),
-        ],
-        label="def-open-ball",
+    lk.module(
+        lk.definition(
+            [
+                r"Given $\vec{a} \in \mathbb{R}^n$ and $\delta > 0$",
+                lk.aside(
+                    r"$$ B(\vec{a}, \delta) = \big\{ \vec{x} \in \mathbb{R}^n \;\big|\; \mk{\lVert \vec{x} - \vec{a} \rVert < \delta} \big\}, $$",
+                    r"distance of $\vec{x}$ from $\vec{a}$<br>is smaller than $\delta$",
+                ),
+                r"is the **open ball** in $\mathbb{R}^n$ centered at $\vec{a}$ with radius $\delta$.",
+            ],
+            label="def-open-ball",
+        ),
+        lk.prose(lk.figure(_fig)),
     )
     return
 
@@ -229,7 +231,7 @@ def _(lk):
             r"""
             The “boundary” is not included!
 
-            > Only “interior” points are part of $B(\vec{a}, \delta)$
+            > Only “interior” points are part of $B(\vec{a}, \delta)$.
 
             > $\leadsto$ &nbsp; $S(\vec{a}, \delta) = \big\{ \vec{x} \in \mathbb{R}^n \;\big|\; \lVert \vec{x} - \vec{a} \rVert = \delta \big\}$ &nbsp; (**sphere** centered at $\vec{a}$ with radius $\delta$)
             """,
@@ -250,7 +252,7 @@ def _(lk):
         [
             r"Given $f : \mathbb{R}^n \longrightarrow \mathbb{R}^m$, $\vec{a} \in \mathbb{R}^n$, $\vec{b} \in \mathbb{R}^m$, we say",
             lk.aside(
-                r"$$ \lim_{\vec{x} \to \vec{a}} f(\vec{x}) \mk{{} = \vec{b}} $$",
+                r"$$ \lim_{\vec{x} \to \vec{a}} f(\vec{x}) \mk{{} = \vec{b}}, $$",
                 r"the limit of $f(\vec{x})$ as $\vec{x}$ approaches $\vec{a}$<br>exists and is equal to $\vec{b}$",
             ),
             r"""
@@ -376,7 +378,7 @@ def _(Figure, cross_axes, eps, lk, np):
     lk.example(
         [
             r"""
-            $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$, &nbsp; $f(\vec{x}) = \begin{cases} 2 \, \dfrac{(x^1)^2}{\lVert \vec{x} \rVert}, & \vec{x} \neq \vec{0}\\[10pt] 5, & \vec{x} = \vec{0} \end{cases}$
+            $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$, &nbsp; $f(\vec{x}) = \begin{cases} 2 \, \dfrac{(x^1)^2}{\lVert \vec{x} \rVert}, & \vec{x} \neq \vec{0},\\[10pt] 5, & \vec{x} = \vec{0} \end{cases}$
 
             Claim: &nbsp; $\displaystyle\lim_{\vec{x} \to \vec{0}} f(\vec{x}) = 0$
             """,
@@ -403,7 +405,7 @@ def _(lk):
             lk.aside(
                 r"""
                 $$
-                \underbrace{0 < \lVert \vec{x} - \vec{0} \rVert < \delta}_{\begin{array}{c} \scriptstyle \text{whenever } \vec{x} \text{ is} \\ \scriptstyle \delta\text{-close to } \vec{a} = \vec{0} \end{array}} \qquad \underbrace{\Longrightarrow}_{\begin{array}{c} \scriptstyle \text{we} \\ \scriptstyle \text{guarantee} \end{array}} \qquad \underbrace{\lvert f(\vec{x}) - 0 \rvert < \varepsilon = 1}_{\begin{array}{c} \scriptstyle f(\vec{x}) \text{ is } \mk{1\text{-close}} \\ \scriptstyle \text{to } b = 0 \end{array}}\rule[-2.4em]{0pt}{0pt}
+                \underbrace{0 < \lVert \vec{x} - \vec{0} \rVert < \delta}_{\begin{array}{c} \scriptstyle \text{whenever } \vec{x} \text{ is} \\ \scriptstyle \delta\text{-close to } \vec{a} = \vec{0} \end{array}} \qquad \underbrace{\Longrightarrow}_{\begin{array}{c} \scriptstyle \text{we} \\ \scriptstyle \text{guarantee} \end{array}} \qquad \underbrace{\lvert f(\vec{x}) - 0 \rvert < \varepsilon = 1}_{\begin{array}{c} \scriptstyle f(\vec{x}) \text{ is } \mk{1\text{-close}} \\ \scriptstyle \text{to } b = 0 \end{array}}\rule[-2.4em]{0pt}{0pt}.
                 $$
                 """,
                 "1-close: as close as we want it",
@@ -412,10 +414,11 @@ def _(lk):
             For $\vec{x} \neq \vec{0}$
 
             $$
-            \lvert f(\vec{x}) - 0 \rvert = \frac{2 (x^1)^2}{\lVert \vec{x} \rVert} \leq \frac{2 (x^1)^2}{\lVert \vec{x} \rVert} + \frac{2 (x^2)^2}{\lVert \vec{x} \rVert} = 2 \, \frac{\lVert \vec{x} \rVert^2}{\lVert \vec{x} \rVert} = 2 \lVert \vec{x} \rVert
+            \begin{aligned}
+            &\lvert f(\vec{x}) - 0 \rvert = \frac{2 (x^1)^2}{\lVert \vec{x} \rVert} \leq \frac{2 (x^1)^2}{\lVert \vec{x} \rVert} + \frac{2 (x^2)^2}{\lVert \vec{x} \rVert} = 2 \, \frac{\lVert \vec{x} \rVert^2}{\lVert \vec{x} \rVert} = 2 \lVert \vec{x} \rVert\\[6pt]
+            &\Longrightarrow\quad \lvert f(\vec{x}) - 0 \rvert \leq 2 \lVert \vec{x} \rVert = 2 \lVert \vec{x} - \vec{0} \rVert.
+            \end{aligned}
             $$
-
-            > $\Longrightarrow$ &nbsp; $\lvert f(\vec{x}) - 0 \rvert \leq 2 \lVert \vec{x} \rVert = 2 \lVert \vec{x} - \vec{0} \rVert$
 
             > $\Longrightarrow$ &nbsp; making $0 < \lVert \vec{x} - \vec{0} \rVert < 1/2 = \delta$ &nbsp; (for $\varepsilon = 1$) guarantees $\lvert f(\vec{x}) - 0 \rvert < 1$
             """,
@@ -498,10 +501,11 @@ def _(blank, blob, lk, np):
             > $\Longrightarrow$ &nbsp; for any $\delta_2 < \delta_1$
 
             $$
-            f\big( B(\vec{a}, \delta_2) - \{\vec{a}\} \big) \not\subset B(\vec{b}_2, \varepsilon)
+            \begin{aligned}
+            &f\big( B(\vec{a}, \delta_2) - \{\vec{a}\} \big) \not\subset B(\vec{b}_2, \varepsilon)\\[6pt]
+            &\Longrightarrow\quad \lim_{\vec{x} \to \vec{a}} f(\vec{x}) \neq \vec{b}_2.
+            \end{aligned}
             $$
-
-            > $\Longrightarrow$ &nbsp; $\displaystyle\lim_{\vec{x} \to \vec{a}} f(\vec{x}) \neq \vec{b}_2$
             """,
         ]
     )
@@ -570,7 +574,7 @@ def _(lk):
                 r"> > > $0 < \lVert t\vec{e}_1 - \vec{0} \rVert \mk{{} < \delta}$ &nbsp; $\Longrightarrow$ &nbsp; $\lVert f(t\vec{e}_1) - 1 \rVert = 0 < \varepsilon$",
                 r"for every $\delta > 0$!<br>since $f(t\vec{e}_1) = 1$ is constant!",
             ),
-            r"> > $\therefore$ &nbsp; $\displaystyle\lim_{\substack{\vec{x} \to \vec{0} \\ \vec{x} = t\vec{e}_1}} f(\vec{x}) = 1$",
+            r"> > $\therefore$ &nbsp; $\displaystyle\lim_{\substack{\vec{x} \to \vec{0} \\ \vec{x} = t\vec{e}_1}} f(\vec{x}) = 1$.",
             lk.gap(),
             r"""
             > 2\. &nbsp; along $\vec{x} = s\vec{e}_2 = \begin{bmatrix} 0 \\ s \end{bmatrix}$ for $s \neq 0$

@@ -256,7 +256,7 @@ def _(AXES, dome, lk, np, plane):
             A **parameterized surface** in $\mathbb{R}^3$ is a function
 
             $$
-            \Phi : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}^3, \qquad (s, t) \longmapsto \begin{bmatrix} x(s, t) \\ y(s, t) \\ z(s, t) \end{bmatrix}
+            \Phi : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}^3, \qquad (s, t) \longmapsto \begin{bmatrix} x(s, t) \\ y(s, t) \\ z(s, t) \end{bmatrix}.
             $$
 
             $S=\mathrm{Im}(\Phi)=\Phi(D)\subset\mathbb{R}^3$ is a surface in $\mathbb{R}^3$
@@ -628,7 +628,7 @@ def _(lk):
         $\Phi(s, t) \in S$ is called a **regular point** for $\Phi$ if
 
         $$
-        \Phi_s(s, t) \times \Phi_t(s, t) \neq \vec{0}
+        \Phi_s(s, t) \times \Phi_t(s, t) \neq \vec{0}.
         $$
         """,
         label="def-regular",
@@ -820,13 +820,13 @@ def _(lk):
             The **surface integral** of $f : \mathbb{R}^3 \longrightarrow \mathbb{R}$ over $S$ is
 
             $$
-            \iint_S f \, dA = \iint_D f(\Phi(s, t)) \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt
+            \iint_S f \, dA = \iint_D f(\Phi(s, t)) \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt.
             $$
 
             The **flux** of $\vec{F} : \mathbb{R}^3 \longrightarrow \mathbb{R}^3$ across $\vec{S}$ is
             """,
             lk.aside(
-                r"$$\iint_{\mk{\vec{S}}} \vec{F} \cdot d\vec{A} = \iint_D \vec{F}(\Phi(s, t)) \cdot \big( \Phi_s(s, t) \times \Phi_t(s, t) \big) \, dsdt$$",
+                r"$$\iint_{\mk{\vec{S}}} \vec{F} \cdot d\vec{A} = \iint_D \vec{F}(\Phi(s, t)) \cdot \big( \Phi_s(s, t) \times \Phi_t(s, t) \big) \, dsdt.$$",
                 r"$\vec{S}$ oriented surface (next time!)",
             ),
         ],
@@ -852,7 +852,7 @@ def _(lk):
             \begin{aligned}
             \iint_S f \, dA &= \iint_{[0, \pi] \times [0, 2\pi]} 1 \, \lVert \overbrace{\Phi_s(s, t) \times \Phi_t(s, t)}^{\mathclap{\footnotesize 2\sin(s) \, \Phi(s, t)}} \rVert \, dsdt \\
             &= \int_0^{2\pi} \left( \int_0^{\pi} 1 \, \lvert 4\sin(s) \rvert \, ds \right) dt = \int_0^{2\pi} \big( -4\cos(s) \big) \Big|_{s=0}^{s=\pi} \, dt \\
-            &= 2\pi \big( 4 - (-4) \big) = \mk{16\pi}
+            &= 2\pi \big( 4 - (-4) \big) = \mk{16\pi},
             \end{aligned}
             $$
             """,
@@ -864,7 +864,7 @@ def _(lk):
             \begin{aligned}
             \iint_{\vec{S}} \vec{F} \cdot d\vec{A} &= \iint_{[0, \pi] \times [0, 2\pi]} \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix} \cdot \left( 2\sin(s) \begin{bmatrix} 2\sin(s)\cos(t) \\ 2\sin(s)\sin(t) \\ 2\cos(s) \end{bmatrix} \right) dsdt \\
             &= \int_0^{\pi} \int_0^{2\pi} 4(\sin(s))^2 \cos(t) \, dt \, ds \\
-            &= \int_0^{\pi} 4(\sin(s))^2 \big( \sin(t) \big) \Big|_{t=0}^{t=2\pi} \, ds = 0
+            &= \int_0^{\pi} 4(\sin(s))^2 \big( \sin(t) \big) \Big|_{t=0}^{t=2\pi} \, ds = 0.
             \end{aligned}
             $$
             """,
@@ -915,7 +915,7 @@ def _(lk):
         b) calculate the flux of
 
         $$
-        \vec{F}(x, y, z) = \begin{bmatrix} -y \\ x \\ z \end{bmatrix}
+        \vec{F}(x, y, z) = \begin{bmatrix} -y \\ x \\ z \end{bmatrix}.
         $$
         """,
         label="ex-cone-integrals",

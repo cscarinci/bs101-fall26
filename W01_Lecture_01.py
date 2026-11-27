@@ -212,7 +212,7 @@ def _(lk):
                 r"For each $n \in \mk{\mathbb{Z}_{>0}} = \{1, 2, 3, \dots\}$, we define the **Cartesian $n$-space** $\mathbb{R}^n$ as the set of all <span class='lk-mark'>ordered lists of $n$ real numbers</span>",
                 r"$\mathbb{Z}_{>0}$ = positive integers<br>ordered lists = $n$-tuples of real numbers",
             ),
-            r"$$ \mathbb{R}^n = \left\{\, \vec{x} = (x^1, x^2, \dots, x^n) \;\middle|\; x^i \in \mathbb{R}, \ \forall\, i = 1, 2, \dots, n \,\right\} $$",
+            r"$$ \mathbb{R}^n = \left\{\, \vec{x} = (x^1, x^2, \dots, x^n) \;\middle|\; x^i \in \mathbb{R}, \ \forall\, i = 1, 2, \dots, n \,\right\}. $$",
         ],
         label="def-cartesian",
     )
@@ -270,7 +270,7 @@ def _(lk):
         lk.aside(r"we will denote this arrow by an <span class='lk-mark'>**$n$-vector**</span>", r"= an $n \times 1$ array<br>= column matrix size $n$"),
         r"""
         $$
-        \vec{x} = \begin{bmatrix} x^1 \\ \vdots \\ x^n \end{bmatrix} \in \mathrm{Mat}(\overset{\substack{\mathclap{n \text{ rows}} \\ \downarrow \\ \rule{0pt}{2pt}}}{n} \times \underset{\substack{\rule{0pt}{4pt} \\ \uparrow \\ \mathclap{1 \text{ column}}}}{1})
+        \vec{x} = \begin{bmatrix} x^1 \\ \vdots \\ x^n \end{bmatrix} \in \mathrm{Mat}(\overset{\substack{\mathclap{n \text{ rows}} \\ \downarrow \\ \rule{0pt}{2pt}}}{n} \times \underset{\substack{\rule{0pt}{4pt} \\ \uparrow \\ \mathclap{1 \text{ column}}}}{1}).
         $$
         """,
         r"$\leadsto$ &nbsp; in this course there is no fundamental difference between “points in space” and “arrows from the origin”",

@@ -124,7 +124,7 @@ def _(lk):
         $$
         \begin{aligned}
         \gamma : A \subseteq \mathbb{R} &\longrightarrow \mathbb{R}^m \\
-        t &\longmapsto \gamma(t) = \begin{bmatrix} \gamma^1(t) \\ \gamma^2(t) \\ \vdots \\ \gamma^m(t) \end{bmatrix}
+        t &\longmapsto \gamma(t) = \begin{bmatrix} \gamma^1(t) \\ \gamma^2(t) \\ \vdots \\ \gamma^m(t) \end{bmatrix}.
         \end{aligned}
         $$
         """,
@@ -157,7 +157,7 @@ def _(lk):
             $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^2$ an affine parameterization of a line
 
             $$
-            \gamma(t) = \vec{x} + t\vec{v} = \begin{bmatrix} x^1 + t v^1 \\ x^2 + t v^2 \end{bmatrix} = \begin{bmatrix} \gamma^1(t) \\ \gamma^2(t) \end{bmatrix}
+            \gamma(t) = \vec{x} + t\vec{v} = \begin{bmatrix} x^1 + t v^1 \\ x^2 + t v^2 \end{bmatrix} = \begin{bmatrix} \gamma^1(t) \\ \gamma^2(t) \end{bmatrix}.
             $$
             """,
             lk.aside(
@@ -330,7 +330,7 @@ def _(lk):
         [
             r"Given $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^m$, $a \in \mathbb{R}$ and $\vec{b} \in \mathbb{R}^m$, we say",
             lk.aside(
-                r"$$ \lim_{t \to a} \gamma(t) \mk{{} = \vec{b}} $$",
+                r"$$ \lim_{t \to a} \gamma(t) \mk{{} = \vec{b}}, $$",
                 r"the limit of $\gamma$ as $t$ approaches $a$<br>is equal to $\vec{b}$",
             ),
             r"if we can make",
@@ -381,7 +381,7 @@ def _(lk):
         Limit of paths can be calculated componentwise
 
         $$
-        \lim_{t \to a} \gamma(t) = \vec{b} \quad \Longleftrightarrow \quad \lim_{t \to a} \gamma^i(t) = b^i \quad \forall \, i = 1, 2, \ldots, m
+        \lim_{t \to a} \gamma(t) = \vec{b} \quad \Longleftrightarrow \quad \lim_{t \to a} \gamma^i(t) = b^i \quad \forall \, i = 1, 2, \ldots, m.
         $$
         """,
         label="thm-limit-components",
@@ -427,7 +427,7 @@ def _(lk):
         A path $\gamma$ is **continuous** at $t = a$ if
 
         $$
-        \lim_{t \to a} \gamma(t) = \gamma(a)
+        \lim_{t \to a} \gamma(t) = \gamma(a).
         $$
 
         > $\gamma$ is continuous in $(a_1, a_2) \subset \mathbb{R}$ if it is continuous at every $t \in (a_1, a_2)$
@@ -446,7 +446,7 @@ def _(lk):
         A path is continuous iff all of its components are continuous
 
         $$
-        \lim_{t \to a} \gamma(t) = \gamma(a) \quad \Longleftrightarrow \quad \lim_{t \to a} \gamma^i(t) = \gamma^i(a) \quad \forall \, i = 1, 2, \ldots, m
+        \lim_{t \to a} \gamma(t) = \gamma(a) \quad \Longleftrightarrow \quad \lim_{t \to a} \gamma^i(t) = \gamma^i(a) \quad \forall \, i = 1, 2, \ldots, m.
         $$
         """,
         label="thm-continuous-components",
@@ -507,7 +507,7 @@ def _(lk):
     lk.definition(
         [
             r"A path $\gamma : \mathbb{R} \longrightarrow \mathbb{R}^m$ is **differentiable** at $t = a$ if the following limit exists",
-            r"$$ \lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a} $$",
+            r"$$ \lim_{t \to a} \frac{\gamma(t) - \gamma(a)}{t - a}. $$",
             r"> $\leadsto$ &nbsp; we call it the **derivative** of $\gamma$ at $t = a$ and denote it $\gamma'(a)$",
         ],
         label="def-derivative",
@@ -580,7 +580,7 @@ def _(lk):
         Derivatives of paths can be computed componentwise
 
         $$
-        \gamma'(a) = \vec{v} \quad \Longleftrightarrow \quad \frac{d}{dt} \gamma^i(t) \Big|_{t = a} = v^i \quad \forall \, i = 1, 2, \ldots, m
+        \gamma'(a) = \vec{v} \quad \Longleftrightarrow \quad \frac{d}{dt} \gamma^i(t) \Big|_{t = a} = v^i \quad \forall \, i = 1, 2, \ldots, m.
         $$
         """,
         label="thm-derivative-components",
@@ -665,7 +665,7 @@ def _(lk):
     # exercise: limit and continuity of (t, sin(t)/t)
     lk.exercise(
         r"""
-        Let $\gamma(t) = \begin{cases} \begin{bmatrix} t \\ \dfrac{\sin(t)}{t} \end{bmatrix}, & t \neq 0 \\[14pt] \begin{bmatrix} a \\ b \end{bmatrix}, & t = 0 \end{cases}$
+        Let $\gamma(t) = \begin{cases} \begin{bmatrix} t \\ \dfrac{\sin(t)}{t} \end{bmatrix}, & t \neq 0 \\[14pt] \begin{bmatrix} a \\ b \end{bmatrix}, & t = 0 \end{cases}$.
 
         a) find $\displaystyle\lim_{t \to 0} \gamma(t)$
 

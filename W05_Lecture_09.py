@@ -184,7 +184,7 @@ def _(lk):
             "How do we generalize to scalar functions on $\\mathbb{R}^2$?",
             lk.aside(
                 r"> $\leadsto$ &nbsp; could try $\displaystyle\lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a})}{\mk{\vec{x} - \vec{a}}}$",
-                r"makes NO sense! we cannot divide<br>by $\vec{x} - \vec{a} \in \mathbb{R}^2$!",
+                r"makes no sense! we cannot divide<br>by $\vec{x} - \vec{a} \in \mathbb{R}^2$!",
             ),
             lk.aside(
                 r"> $\leadsto$ &nbsp; could try instead $\displaystyle\lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a})}{\mk{\lVert \vec{x} - \vec{a} \rVert}}$",
@@ -268,40 +268,42 @@ def _(blank, lk):
     for _y, _name in ((2.2, r"$f(\vec{a} + t\vec{e}_1)$"), (1.3, r"$f(\vec{a})$"), (0.5, r"$f(\vec{a} + s\vec{e}_2)$")):
         _ax.text(6.75, _y, _name, fontsize=13, ha="left", va="center")
 
-    lk.definition(
-        [
-            r"""
-            Given a function $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$, the **partial derivative** of $f$ at $\vec{x} = \vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix}$ in the direction of $\vec{e}_1 = \begin{bmatrix} 1 \\ 0 \end{bmatrix}$ is
+    lk.module(
+        lk.definition(
+            [
+                r"""
+                Given a function $f : \mathbb{R}^2 \longrightarrow \mathbb{R}$, the **partial derivative** of $f$ at $\vec{x} = \vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix}$ in the direction of $\vec{e}_1 = \begin{bmatrix} 1 \\ 0 \end{bmatrix}$ is
 
-            $$
-            \frac{\partial f}{\partial x^1}(\vec{a}) = \lim_{t \to 0} \frac{f(\vec{a} + t\vec{e}_1) - f(\vec{a})}{t}
-            $$
+                $$
+                \frac{\partial f}{\partial x^1}(\vec{a}) = \lim_{t \to 0} \frac{f(\vec{a} + t\vec{e}_1) - f(\vec{a})}{t},
+                $$
 
-            provided that the limit exists.
-            """,
-            lk.aside(
-                r"> $\leadsto$ &nbsp; $\dfrac{\partial f}{\partial x^1}(\vec{a}) = \mk{\dfrac{d}{dt}} f(\vec{a} + t\vec{e}_1) \Big|_{t=0}$",
-                r"real single variable<br>differentiation at $t = 0$",
-            ),
-            lk.aside(
-                r"> > $\leadsto$ &nbsp; $\mk{t \longmapsto f(\vec{a} + t\vec{e}_1)}$",
-                "real single variable<br>real valued function!",
-            ),
-            lk.gap(),
-            r"""
-            Similarly, the partial derivative of $f$ at $\vec{x} = \vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix}$ in the direction of $\vec{e}_2 = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$ is
+                provided that the limit exists.
+                """,
+                lk.aside(
+                    r"> $\leadsto$ &nbsp; $\dfrac{\partial f}{\partial x^1}(\vec{a}) = \mk{\dfrac{d}{dt}} f(\vec{a} + t\vec{e}_1) \Big|_{t=0}$",
+                    r"real single variable<br>differentiation at $t = 0$",
+                ),
+                lk.aside(
+                    r"> > $\leadsto$ &nbsp; $\mk{t \longmapsto f(\vec{a} + t\vec{e}_1)}$",
+                    "real single variable<br>real valued function!",
+                ),
+                lk.gap(),
+                r"""
+                Similarly, the partial derivative of $f$ at $\vec{x} = \vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix}$ in the direction of $\vec{e}_2 = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$ is
 
-            $$
-            \frac{\partial f}{\partial x^2}(\vec{a}) = \lim_{s \to 0} \frac{f(\vec{a} + s\vec{e}_2) - f(\vec{a})}{s}
-            $$
+                $$
+                \frac{\partial f}{\partial x^2}(\vec{a}) = \lim_{s \to 0} \frac{f(\vec{a} + s\vec{e}_2) - f(\vec{a})}{s},
+                $$
 
-            provided that the limit exists.
+                provided that the limit exists.
 
-            > $\leadsto$ &nbsp; $\dfrac{\partial f}{\partial x^2}(\vec{a}) = \dfrac{d}{ds} f(\vec{a} + s\vec{e}_2) \Big|_{s=0}$
-            """,
-            lk.figure(_fig),
-        ],
-        label="def-partial",
+                > $\leadsto$ &nbsp; $\dfrac{\partial f}{\partial x^2}(\vec{a}) = \dfrac{d}{ds} f(\vec{a} + s\vec{e}_2) \Big|_{s=0}$
+                """,
+            ],
+            label="def-partial",
+        ),
+        lk.prose(lk.figure(_fig)),
     )
     return
 
@@ -381,7 +383,7 @@ def _(lk):
         $$
         \begin{aligned}
         Df(\vec{a})(\vec{v}) &= \lim_{t \to 0} \frac{f(\vec{a} + t\vec{v}) - f(\vec{a})}{t}\\[4pt]
-        &= \frac{d}{dt} f(\vec{a} + t\vec{v}) \Big|_{t=0}
+        &= \frac{d}{dt} f(\vec{a} + t\vec{v}) \Big|_{t=0},
         \end{aligned}
         $$
 
@@ -443,7 +445,7 @@ def _(lk):
                 \begin{aligned}
                 Df(\vec{a})(\vec{v}) &= Df(\vec{a})(v^1 \vec{e}_1 + v^2 \vec{e}_2)\\[4pt]
                 &= v^1 Df(\vec{a})(\vec{e}_1) + v^2 Df(\vec{a})(\vec{e}_2)\\[4pt]
-                &= v^1 \frac{\partial f}{\partial x^1}(\vec{a}) + v^2 \frac{\partial f}{\partial x^2}(\vec{a})
+                &= v^1 \frac{\partial f}{\partial x^1}(\vec{a}) + v^2 \frac{\partial f}{\partial x^2}(\vec{a}),
                 \end{aligned}
                 $$
                 """,
@@ -454,10 +456,10 @@ def _(lk):
             lk.aside(
                 r"""
                 $$
-                \lim_{\mk{\vec{x} \to \vec{a}}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0
+                \lim_{\mk{\vec{x} \to \vec{a}}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0.
                 $$
                 """,
-                "now NOT a limit over real numbers!<br>(stronger than just existence +<br>linearity of directional derivatives!)",
+                "now not a limit over real numbers!<br>(stronger than just existence +<br>linearity of directional derivatives!)",
             ),
             lk.aside(
                 r"> > $\Longrightarrow$ &nbsp; $f(\vec{x}) \approx f(\vec{a}) + \mk{Df(\vec{a})(\vec{x} - \vec{a})}$ for $\vec{x} \approx \vec{a}$",
@@ -496,12 +498,13 @@ def _(lk):
 
             $$
             \begin{aligned}
+            &\begin{aligned}
             &\frac{f\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) - f\left( \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \right) - Df(\vec{a})\left( \begin{bmatrix} x^1 - a^1 \\ x^2 - a^2 \end{bmatrix} \right)}{\lVert \vec{x} - \vec{a} \rVert}\\[6pt]
             &\qquad = \frac{x^1 - a^1 - (x^1 - a^1)}{\lVert \vec{x} - \vec{a} \rVert} = 0 \quad \forall \, \vec{x} \in \mathbb{R}^2
+            \end{aligned}\\[6pt]
+            &\Longrightarrow\quad \lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0.
             \end{aligned}
             $$
-
-            > $\Longrightarrow$ &nbsp; $\displaystyle\lim_{\vec{x} \to \vec{a}} \frac{f(\vec{x}) - f(\vec{a}) - Df(\vec{a})(\vec{x} - \vec{a})}{\lVert \vec{x} - \vec{a} \rVert} = 0$
 
             > $\Longrightarrow$ &nbsp; $f\left( \begin{bmatrix} x^1 \\ x^2 \end{bmatrix} \right) = x^1$ is differentiable at $\vec{a} = \begin{bmatrix} a^1 \\ a^2 \end{bmatrix} \in \mathbb{R}^2$
             """,

@@ -67,7 +67,7 @@ def _(lk):
         lk.aside(
             r"""
             $$
-            \Longrightarrow \quad f(\vec{x}) = \underbrace{f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) + \frac{1}{2} (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})}_{\text{good quadratic approximation}} + \mk{o\big( \lVert \vec{x} - \vec{a} \rVert^2 \big)}
+            \Longrightarrow \quad f(\vec{x}) = \underbrace{f(\vec{a}) + Df(\vec{a})(\vec{x} - \vec{a}) + \frac{1}{2} (\vec{x} - \vec{a}) \cdot Hf(\vec{a})(\vec{x} - \vec{a})}_{\text{good quadratic approximation}} + \mk{o\big( \lVert \vec{x} - \vec{a} \rVert^2 \big)},
             $$
             """,
             r"error goes to zero<br>faster than $\lVert \vec{x} - \vec{a} \rVert^2$",
@@ -78,7 +78,7 @@ def _(lk):
             $$
             \begin{aligned}
             Df(\vec{a}) &= \begin{bmatrix} {\large\tfrac{\partial f}{\partial x^1}}(\vec{a}) & \cdots & {\large\tfrac{\partial f}{\partial x^n}}(\vec{a}) \end{bmatrix} \in \mathrm{Mat}(1 \times n)\\[8pt]
-            Hf(\vec{a}) &= \begin{bmatrix} {\large\tfrac{\partial^2 f}{\partial x^1 \partial x^1}}(\vec{a}) & \cdots & {\large\tfrac{\partial^2 f}{\partial x^1 \partial x^n}}(\vec{a})\\ \vdots & \ddots & \vdots\\ {\large\tfrac{\partial^2 f}{\partial x^n \partial x^1}}(\vec{a}) & \cdots & {\large\tfrac{\partial^2 f}{\partial x^n \partial x^n}}(\vec{a}) \end{bmatrix} \in \mathrm{Mat}(n \times n)
+            Hf(\vec{a}) &= \begin{bmatrix} {\large\tfrac{\partial^2 f}{\partial x^1 \partial x^1}}(\vec{a}) & \cdots & {\large\tfrac{\partial^2 f}{\partial x^1 \partial x^n}}(\vec{a})\\ \vdots & \ddots & \vdots\\ {\large\tfrac{\partial^2 f}{\partial x^n \partial x^1}}(\vec{a}) & \cdots & {\large\tfrac{\partial^2 f}{\partial x^n \partial x^n}}(\vec{a}) \end{bmatrix} \in \mathrm{Mat}(n \times n).
             \end{aligned}
             $$
             """,
@@ -132,14 +132,14 @@ def _(lk):
             > • &nbsp; a **local maximum** of $f$ if there is some open ball $B(\vec{a}, \delta)$ centered at $\vec{a}$ such that
             """,
             lk.aside(
-                r"$$ \mk{f(\vec{x}) \leq f(\vec{a})} \quad \forall \, \vec{x} \in B(\vec{a}, \delta) $$",
+                r"$$ \mk{f(\vec{x}) \leq f(\vec{a})} \quad \forall \, \vec{x} \in B(\vec{a}, \delta). $$",
                 r"the value of $f$ at $\vec{a}$ is the<br>largest value nearby $\vec{x} = \vec{a}$",
             ),
             r"""
             > • &nbsp; a **local minimum** of $f$ if there is some open ball $B(\vec{a}, \delta)$ centered at $\vec{a}$ such that
 
             $$
-            f(\vec{x}) \geq f(\vec{a}) \quad \forall \, \vec{x} \in B(\vec{a}, \delta)
+            f(\vec{x}) \geq f(\vec{a}) \quad \forall \, \vec{x} \in B(\vec{a}, \delta).
             $$
             """,
         ],
@@ -241,9 +241,9 @@ def _(Figure, cross_axes, lk, np):
     lk.proof(
         [
             r"""
-            Let's assume $\vec{a}$ is a local maximum of $f$
+            Let's assume $\vec{a}$ is a local maximum of $f$.
 
-            Consider $g : \mathbb{R} \longrightarrow \mathbb{R}$, &nbsp; $t \longmapsto g(t) = f(\vec{a} + t\vec{e}_1)$
+            Consider $g : \mathbb{R} \longrightarrow \mathbb{R}$, &nbsp; $t \longmapsto g(t) = f(\vec{a} + t\vec{e}_1)$.
 
             Since $\vec{x} = \vec{a}$ is local maximum of $f$, $t = 0$ is local maximum of $g$
 
@@ -253,7 +253,7 @@ def _(Figure, cross_axes, lk, np):
             """,
             lk.figure(lk.frame("L14-max", lk.H3D, width=520)),
             r"""
-            Since $f$ is differentiable at $\vec{x} = \vec{a}$, $g$ is differentiable at $t = 0$
+            Since $f$ is differentiable at $\vec{x} = \vec{a}$, $g$ is differentiable at $t = 0$.
 
             > $$
             > g'(0) = \lim_{t \to 0} \frac{g(t) - g(0)}{t} = \lim_{t \to 0} \frac{f(\vec{a} + t\vec{e}_1) - f(\vec{a})}{t} = \frac{\partial f}{\partial x^1}(\vec{a})
@@ -282,7 +282,7 @@ def _(lk):
     # module: local extrema
     # definition: critical point
     lk.definition(
-        r"A point $\vec{a} \in \mathbb{R}^n$ such that $\vec{\nabla} f(\vec{a}) = \vec{0}$ is called a **critical point** of $f$",
+        r"A point $\vec{a} \in \mathbb{R}^n$ such that $\vec{\nabla} f(\vec{a}) = \vec{0}$ is called a **critical point** of $f$.",
         label="def-critical",
     )
     return
@@ -309,7 +309,7 @@ def _(lk):
     # module: local extrema
     # definition: saddle point
     lk.definition(
-        r"A critical point of $f$ that is not a local extremum is called a **saddle point**",
+        r"A critical point of $f$ that is not a local extremum is called a **saddle point**.",
         label="def-saddle",
     )
     return

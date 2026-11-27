@@ -161,14 +161,14 @@ def _(lk, np, plane):
         Given $f : \mathbb{R}^3 \longrightarrow \mathbb{R}$
 
         $$
-        \iint\limits_{S = \Phi(D)} f \, dA = \iint_D \underbrace{f(\Phi(s, t)) \, \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert}_{\mathclap{\rule{0pt}{1.3em} \footnotesize \begin{gathered} \text{2-variable scalar valued function over } D \subseteq \mathbb{R}^2 \\ \leadsto \ \text{iterated integrals} \end{gathered}}} \, dsdt \mathllap{\overbrace{\phantom{\lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt}}^{\rule[-0.5em]{0pt}{0.5em} dA}}
+        \iint\limits_{S = \Phi(D)} f \, dA = \iint_D \underbrace{f(\Phi(s, t)) \, \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert}_{\mathclap{\rule{0pt}{1.3em} \footnotesize \begin{gathered} \text{2-variable scalar valued function over } D \subseteq \mathbb{R}^2 \\ \leadsto \ \text{iterated integrals} \end{gathered}}} \, dsdt \mathllap{\overbrace{\phantom{\lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt}}^{\rule[-0.5em]{0pt}{0.5em} dA}},
         $$
         """,
         lk.aside(
-            r"$$\mk{dA} = \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt$$",
+            r"$$\mk{dA} = \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt,$$",
             r"infinitesimal area element of $S$ at $\Phi(s, t)$",
         ),
-        r"$$\leadsto \quad \iint_S dA = \text{area of } S$$",
+        r"$$\leadsto \quad \iint_S dA = \text{area of } S.$$",
         lk.aside(
             r"Similar to &nbsp; $\mk{ds} = \lVert \gamma'(t) \rVert \, dt$",
             r"infinitesimal arc-length element of $C$ at $\gamma(t)$",
@@ -531,10 +531,10 @@ def _(lk, np):
     lk.prose(
         r"Similarly, for a surface $S \subset \mathbb{R}^3$ with a parameterization $\Phi : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}^3$",
         # the f-lines and the F-lines share their columns (=, ⇝), so they line up
-        lk.aside(r"$$\hphantom{\iint_{\vec{S}} \vec{F} \cdot d\vec{A}}\mathllap{\iint_S f \, dA} = \mathrlap{\iint_D f(\Phi(s, t)) \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt}\hphantom{\iint_D \vec{F}(\Phi(s, t)) \cdot \big( \Phi_s(s, t) \times \Phi_t(s, t) \big) \, dsdt}$$", ""),
-        lk.aside(r"$$\leadsto \quad \mathrlap{dA = \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt}\hphantom{dA = \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt}$$", ""),
-        lk.aside(r"$$\hphantom{\iint_{\vec{S}} \vec{F} \cdot d\vec{A}}\mathllap{\iint_{\mk{\vec{S}}} \vec{F} \cdot d\vec{A}} = \mathrlap{\iint_D \vec{F}(\Phi(s, t)) \cdot \big( \Phi_s(s, t) \times \Phi_t(s, t) \big) \, dsdt}\hphantom{\iint_D \vec{F}(\Phi(s, t)) \cdot \big( \Phi_s(s, t) \times \Phi_t(s, t) \big) \, dsdt}$$", r"$\vec{S}$ oriented"),
-        lk.aside(r"$$\leadsto \quad \mathrlap{\mk{d\vec{A}} = \Phi_s(s, t) \times \Phi_t(s, t) \, dsdt}\hphantom{dA = \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt}$$", "infinitesimal surface element<br>(oriented area element)"),
+        lk.aside(r"$$\hphantom{\iint_{\vec{S}} \vec{F} \cdot d\vec{A}}\mathllap{\iint_S f \, dA} = \mathrlap{\iint_D f(\Phi(s, t)) \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt},\hphantom{\iint_D \vec{F}(\Phi(s, t)) \cdot \big( \Phi_s(s, t) \times \Phi_t(s, t) \big) \, dsdt}$$", ""),
+        lk.aside(r"$$\leadsto \quad \mathrlap{dA = \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt},\hphantom{dA = \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt}$$", ""),
+        lk.aside(r"$$\hphantom{\iint_{\vec{S}} \vec{F} \cdot d\vec{A}}\mathllap{\iint_{\mk{\vec{S}}} \vec{F} \cdot d\vec{A}} = \mathrlap{\iint_D \vec{F}(\Phi(s, t)) \cdot \big( \Phi_s(s, t) \times \Phi_t(s, t) \big) \, dsdt},\hphantom{\iint_D \vec{F}(\Phi(s, t)) \cdot \big( \Phi_s(s, t) \times \Phi_t(s, t) \big) \, dsdt}$$", r"$\vec{S}$ oriented"),
+        lk.aside(r"$$\leadsto \quad \mathrlap{\mk{d\vec{A}} = \Phi_s(s, t) \times \Phi_t(s, t) \, dsdt}.\hphantom{dA = \lVert \Phi_s(s, t) \times \Phi_t(s, t) \rVert \, dsdt}$$", "infinitesimal surface element<br>(oriented area element)"),
         _figure,
     )
     return
@@ -639,7 +639,7 @@ def _(lk):
         Given an oriented surface $\vec{S}$, and a parameterization $\Phi : D \subseteq \mathbb{R}^2 \longrightarrow \mathbb{R}^3$ such that $\Phi_s(s, t) \times \Phi_t(s, t)$ agrees with the orientation, the **flux** of $\vec{F} : \mathbb{R}^3 \longrightarrow \mathbb{R}^3$ across $\vec{S}$ is
 
         $$
-        \iint_{\vec{S}} \vec{F} \cdot d\vec{A} = \iint_D \vec{F}(\Phi(s, t)) \cdot \big( \Phi_s(s, t) \times \Phi_t(s, t) \big) \, dsdt
+        \iint_{\vec{S}} \vec{F} \cdot d\vec{A} = \iint_D \vec{F}(\Phi(s, t)) \cdot \big( \Phi_s(s, t) \times \Phi_t(s, t) \big) \, dsdt.
         $$
         """,
         label="def-flux",
