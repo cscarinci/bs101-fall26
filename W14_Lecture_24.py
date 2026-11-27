@@ -273,7 +273,7 @@ def _(along, beside, blob, drawing, heads, lk, np, walker3d):
     # module: boundary of a surface
     # definition: boundary of an oriented surface
     # left: the region D with its boundary C = Bd(D) (red, counter-clockwise); right: the dome S = Phi(D) (blue) with its
-    # normal vectors (green) and its boundary Bd(S) = Phi(C) (red), with two walking figures standing up on it
+    # normal vectors (green) and its boundary Bd(S) = Phi(C) (red), with two walking figures standing along the normal
     _x, _y = blob(0.0, 0.0, a=1.3, b=0.8)
     _fd, _ad = drawing((-1.9, 1.9), (-1.9, 1.5), 2.4)
     _ad.fill(_x, _y, color=lk.LIGHT, lw=0, zorder=0)
@@ -293,9 +293,9 @@ def _(along, beside, blob, drawing, heads, lk, np, walker3d):
         _g = np.array([_p[0] / 1.5**2, _p[1] / 1.5**2, _p[2] / 1.6**2])
         _n.append((_p, _p + 0.55 * _g / np.linalg.norm(_g), lk.GREEN, 1.3))
     _walk = []
-    for _i in (70, 150):
+    for _i in (133, 350):
         _t = np.array([_bx[_i + 1] - _bx[_i - 1], _by[_i + 1] - _by[_i - 1], 0.0])
-        _walk += walker3d((_bx[_i], _by[_i], 0.0), (0, 0, 1), _t, h=0.5)
+        _walk += walker3d((_bx[_i], _by[_i], 0.0), np.cross(_t, (0, 0, 1)), _t, h=0.6)
     _fs = lk.turntable(
         30,
         18,
@@ -466,8 +466,8 @@ def _(beside, heads, lk, np, plane, walker3d):
     # module: boundary of a surface
     # example: upper hemisphere
     # top: the disk D with its boundary circle C (red); the hemisphere S = Phi(D) (blue) with its boundary circle (red).
-    # bottom: the hemisphere with the "out" orientation (normals, green, pointing out; boundary counter-clockwise, walking
-    # figures standing up) and with the "in" orientation (normals pointing in; boundary clockwise, figures upside down).
+    # bottom: the hemisphere with the "out" orientation (normals, green, pointing out; boundary counter-clockwise) and with
+    # the "in" orientation (normals pointing in; boundary clockwise), each with walking figures standing along the normal.
     # R is drawn as 2
     _fd, _ad = drawing((-3.4, 4.6), (-3.2, 3.0), 3.4)
     lk.arrow(_ad, (-2.7, 0), (2.9, 0), "black", lw=0.9)
@@ -501,10 +501,10 @@ def _(beside, heads, lk, np, plane, walker3d):
     def _panel(sign, caption):
         c = _circ if sign > 0 else tuple(v[::-1] for v in _circ)
         walk = []
-        for i in (25, 125):
+        for i in (67, 167):
             p = np.array([2 * np.cos(_a[i]), 2 * np.sin(_a[i]), 0.0])
             tang = sign * np.array([-np.sin(_a[i]), np.cos(_a[i]), 0.0])
-            walk += walker3d(p + 0.12 * p, (0, 0, sign), tang, h=0.55)
+            walk += walker3d(p, np.cross(tang, (0, 0, 1)), tang, h=0.7)
         return lk.panel(
             1.0,
             surfaces=[_hemi],
@@ -518,7 +518,7 @@ def _(beside, heads, lk, np, plane, walker3d):
     _fo = lk.turntable(
         30,
         18,
-        "the upper hemisphere with the out orientation, its boundary counter-clockwise with walking figures standing up, and with the in orientation, its boundary clockwise with walking figures upside down",
+        "the upper hemisphere with the out orientation, its boundary counter-clockwise, and with the in orientation, its boundary clockwise, each with walking figures standing along the normal",
         [_panel(1, r"\text{“out”}"), _panel(-1, r"\text{“in”}")],
         height=lk.H3D,
         cols=2,

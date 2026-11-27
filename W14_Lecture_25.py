@@ -125,7 +125,7 @@ def _(heads, lk, np, walker3d):
     # module: recap
     # recap
     # an oriented dome S (blue) with its normal vectors (green) pointing in, and its boundary curve C = Bd(S) (red), run
-    # clockwise seen from above, with a walking figure standing upside down on it
+    # clockwise seen from above, with a walking figure standing along the normal
     _a = np.linspace(0, 2 * np.pi, 400)
     _bx, _by = 1.6 * np.cos(_a) * (1 + 0.08 * np.cos(3 * _a)), 1.2 * np.sin(_a) * (1 + 0.08 * np.cos(3 * _a))
     _r, _k = np.meshgrid(np.linspace(0, 1, 16), np.arange(400), indexing="ij")
@@ -136,12 +136,13 @@ def _(heads, lk, np, walker3d):
         _p = np.array([_rr * _bx[_kk], _rr * _by[_kk], 1.5 * np.sqrt(1 - _rr**2)])
         _g = np.array([_p[0] / 1.6**2, _p[1] / 1.2**2, _p[2] / 1.5**2])
         _n.append((_p, _p - 0.5 * _g / np.linalg.norm(_g), lk.GREEN, 1.3))
-    _i = 40
-    _walk = walker3d((_bx[_i] * 1.08, _by[_i] * 1.08, 0.0), (0, 0, -1), (np.sin(_a[_i]), -np.cos(_a[_i]), 0.0), h=0.5)
+    _i = 333
+    _ahead = np.array([_bx[_i - 1] - _bx[_i + 1], _by[_i - 1] - _by[_i + 1], 0.0])
+    _walk = walker3d((_bx[_i], _by[_i], 0.0), np.cross(_ahead, (0, 0, 1)), _ahead, h=0.6)
     _fig = lk.turntable(
         30,
         18,
-        "a dome S with its normal vectors pointing in, and its boundary curve C run clockwise seen from above, with a walking figure upside down on it",
+        "a dome S with its normal vectors pointing in, and its boundary curve C run clockwise seen from above, with a walking figure standing along the normal",
         [
             lk.panel(
                 1.0,
