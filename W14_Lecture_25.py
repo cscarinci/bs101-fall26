@@ -138,10 +138,10 @@ def _(heads, lk, np, walker3d):
         _n.append((_p, _p - 0.5 * _g / np.linalg.norm(_g), lk.GREEN, 1.3))
     _i = 333
     _ahead = np.array([_bx[_i - 1] - _bx[_i + 1], _by[_i - 1] - _by[_i + 1], 0.0])
-    _walk = walker3d((_bx[_i], _by[_i], 0.0), np.cross(_ahead, (0, 0, 1)), _ahead, h=0.6)
+    _walk = walker3d((_bx[_i], _by[_i], 0.0), np.cross(_ahead, (0, 0, 1)), (0, 0, 1), h=0.6)
     _fig = lk.turntable(
         30,
-        18,
+        26,
         "a dome S with its normal vectors pointing in, and its boundary curve C run clockwise seen from above, with a walking figure standing along the normal",
         [
             lk.panel(

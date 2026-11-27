@@ -295,10 +295,10 @@ def _(along, beside, blob, drawing, heads, lk, np, walker3d):
     _walk = []
     for _i in (133, 350):
         _t = np.array([_bx[_i + 1] - _bx[_i - 1], _by[_i + 1] - _by[_i - 1], 0.0])
-        _walk += walker3d((_bx[_i], _by[_i], 0.0), np.cross(_t, (0, 0, 1)), _t, h=0.6)
+        _walk += walker3d((_bx[_i], _by[_i], 0.0), np.cross(_t, (0, 0, 1)), (0, 0, 1), h=0.6)
     _fs = lk.turntable(
         30,
-        18,
+        26,
         "the dome S, the image of D, with its normal vectors and its boundary Bd(S), the image of C, with two walking figures on it",
         [
             lk.panel(
@@ -504,7 +504,7 @@ def _(beside, heads, lk, np, plane, walker3d):
         for i in (67, 167):
             p = np.array([2 * np.cos(_a[i]), 2 * np.sin(_a[i]), 0.0])
             tang = sign * np.array([-np.sin(_a[i]), np.cos(_a[i]), 0.0])
-            walk += walker3d(p, np.cross(tang, (0, 0, 1)), tang, h=0.7)
+            walk += walker3d(p, np.cross(tang, (0, 0, 1)), (0, 0, 1), h=0.7)
         return lk.panel(
             1.0,
             surfaces=[_hemi],
@@ -517,7 +517,7 @@ def _(beside, heads, lk, np, plane, walker3d):
 
     _fo = lk.turntable(
         30,
-        18,
+        26,
         "the upper hemisphere with the out orientation, its boundary counter-clockwise, and with the in orientation, its boundary clockwise, each with walking figures standing along the normal",
         [_panel(1, r"\text{“out”}"), _panel(-1, r"\text{“in”}")],
         height=lk.H3D,
